@@ -3,7 +3,7 @@
 // Can be used for more than one window, just construct many
 // instances of it and give each different name.
 
-import { app, BrowserWindow, screen } from "electron";
+import { app, BrowserWindow, screen, Menu } from "electron";
 import jetpack from "fs-jetpack";
 
 export default (name, options, zip) => {
@@ -17,9 +17,11 @@ export default (name, options, zip) => {
   let win;
 
   const restore = () => {
+    const appMenu = Menu.getApplicationMenu();
     let restoredState = {};
     try {
       restoredState = userDataDir.read(stateStoreFile, "json");
+      appMenu.getMenuItemById("status-bar").checked = restoredState.status;
     } catch (err) {
       // For some reason json can't be read (might be corrupted).
       // No worries, we have defaults.
@@ -28,13 +30,15 @@ export default (name, options, zip) => {
   };
 
   const getCurrentPosition = () => {
+    const appMenu = Menu.getApplicationMenu();
     const position = win.getPosition();
     const size = win.getSize();
     return {
       x: position[0],
       y: position[1],
       width: size[0],
-      height: size[1]
+      height: size[1],
+      status: appMenu.getMenuItemById("status-bar").checked
     };
   };
 
@@ -68,7 +72,7 @@ export default (name, options, zip) => {
   };
 
   const saveState = () => {
-    if (!win.isMinimized() && !win.isMaximized()) {
+    if (!win.isMinimized() && !win.isMaximized() && !win.isFullScreen()) {
       Object.assign(state, getCurrentPosition());
     }
     userDataDir.write(stateStoreFile, state, { atomic: true });

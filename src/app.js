@@ -11,6 +11,7 @@ import path from  "path";
 import Mousetrap  from "mousetrap";
 import { remote, ipcRenderer } from "electron";
 
+const appMenu = remote.Menu.getApplicationMenu();
 const customTitlebar = require('custom-electron-titlebar');
 const titleBarConfig = {
     backgroundColor: customTitlebar.Color.fromHex('#3C3C3C'),    
@@ -120,6 +121,11 @@ if (fileSelector) {
         var buf = new Buffer(data, 'base64');
         fs.writeFileSync(file, buf);
     });    
+    ipcRenderer.on('toggleStatusBar', function (event) {
+        var enable = status.style.visibility!=="visible";
+        appMenu.getMenuItemById("status-bar").checked = enable;
+        resizeWindow();
+    });
     ipcRenderer.on('copyScreenshot', function (event) {
         copyScreenshot();
     });
@@ -516,16 +522,27 @@ function keyUpHandler(event) {
 }
 
 Mousetrap.bind(['command+c', 'ctrl+c'], function() {
-    console.log('command c or control c');
     copyScreenshot();
     return false;
 });
 
+// Copy Screenshot to the Clipboard
 function copyScreenshot() {
     display.toBlob(function(blob) { 
         const item = new ClipboardItem({ "image/png": blob });
         navigator.clipboard.write([item]); 
     });
+}
+
+// Status Bar visibility
+function showStatusBar(visible) {
+    if (visible) {
+        display.style.bottom = "20px";
+        status.style.visibility = "visible";       
+    } else {
+        display.style.bottom = "0px";
+        status.style.visibility = "hidden";
+    }
 }
 
 // Channel icons Visibility
@@ -548,32 +565,40 @@ function clientException(msg, msgbox = false) {
 // Canvas Resizing with Window
 window.onload = window.onresize = function()
 {
+    resizeWindow();
+}
+
+function resizeWindow() {
     if (remote.getCurrentWindow().isFullScreen()) {
         if (titleBar) {
             titleBar.dispose();
             titleBar = undefined;
         };
+        showStatusBar(false);
         screenSize.width = window.innerWidth;
         screenSize.height = parseInt(screenSize.width * 9 / 16);
         if (screenSize.height > window.innerHeight) {
             screenSize.height = window.innerHeight;
             screenSize.width = parseInt(screenSize.height * 16/9);
         }
-        display.style.bottom = "0px";
-        status.style.visibility = "hidden";
     } else {
+        var ratio = 0.97;
+        var offset = 13;
         if (titleBar == undefined) {
             titleBar = new customTitlebar.Titlebar(titleBarConfig);
         }
-        var ratio = 0.97;
+        if (appMenu.getMenuItemById("status-bar").checked) {
+            showStatusBar(true);
+            offset = 30;
+        } else {
+            showStatusBar(false);
+        }
         screenSize.width = window.innerWidth * ratio;
         screenSize.height = parseInt(screenSize.width * 9 / 16);
-        if (screenSize.height > (window.innerHeight * ratio) - 30) {
-            screenSize.height = (window.innerHeight * ratio) - 30;
+        if (screenSize.height > (window.innerHeight * ratio) - offset) {
+            screenSize.height = (window.innerHeight * ratio) - offset;
             screenSize.width = parseInt(screenSize.height * 16/9);
         }
-        display.style.bottom = "20px";
-        status.style.visibility = "visible";
     }
     display.width = screenSize.width;
     display.style.width = screenSize.width;

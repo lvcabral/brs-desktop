@@ -1,4 +1,4 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow, Menu } from "electron";
 
 export const viewMenuTemplate = {
   label: "&View",
@@ -13,24 +13,47 @@ export const viewMenuTemplate = {
     },
     { type: 'separator' },
     {
-      label: "Light Mode",
+      id: "theme-purple",
+      label: "Purple Theme",
       type: "checkbox",
       checked: false,
       enabled: false
     },
     {
-      label: "Dark Mode",
+      id: "theme-light",
+      label: "Light Theme",
+      type: "checkbox",
+      checked: false,
+      enabled: false
+    },
+    {
+      id: "theme-dark",
+      label: "Dark Theme",
       type: "checkbox",
       checked: true,
       enabled: false
     },
     { type: 'separator' },
     {
-      label: "Developer Tools",
+      id: "dev-tools",
+      label: "Toggle Developer Tools",
+      checked: false,
       accelerator: "CmdOrCtrl+Shift+I",
       click: () => {
-        BrowserWindow.getFocusedWindow().toggleDevTools();
+        var window = BrowserWindow.getFocusedWindow();
+        window.toggleDevTools();
       }
-    }
+    },
+    {
+      id: "status-bar",
+      label: "Status Bar",
+      type: "checkbox",
+      checked: true,
+      enabled: true,
+      click: () => {
+        var window = BrowserWindow.getFocusedWindow();
+        window.webContents.send('toggleStatusBar');
+      }
+    },
   ]
 };
