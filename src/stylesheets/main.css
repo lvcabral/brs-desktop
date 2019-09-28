@@ -1,0 +1,26 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Istok Web', Helvetica, Arial, FreeSans, sans-serif;
+  color: #8E8E8E;
+  background-color:  #1E1E1E;
+}
+
+a {
+	color: #3e5763;
+}
+
+#display {
+  position: absolute;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+	margin:auto;
+}
