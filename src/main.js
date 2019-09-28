@@ -36,11 +36,11 @@ app.on("ready", () => {
 
   const mainWindow = createWindow("main", {
     width: 1280,
-    height: 720,
+    height: 770,
   }, opts[1]);
   
   mainWindow.setBackgroundColor('#1E1E1E');
-  mainWindow.setMinimumSize(900, 580);
+  mainWindow.setMinimumSize(900, 550);
   mainWindow.loadURL(
     url.format({
       pathname: path.join(__dirname, "index.html"),
