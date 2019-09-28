@@ -4,12 +4,19 @@ export const viewMenuTemplate = {
   label: "&View",
   submenu: [
     {
-      label: "Toggle Full Screen",
+      label: "Full Screen",
       accelerator: "F11",
       click: () => {
         var window = BrowserWindow.getFocusedWindow();
         window.setFullScreen(!window.isFullScreen());
       }
+    },
+    { type: 'separator' },
+    {
+      label: "Light Mode",
+      type: "checkbox",
+      checked: false,
+      enabled: false
     },
     {
       label: "Dark Mode",
@@ -17,9 +24,9 @@ export const viewMenuTemplate = {
       checked: true,
       enabled: false
     },
-    { type: 'separator' },    
+    { type: 'separator' },
     {
-      label: "Toggle Developer Tools",
+      label: "Developer Tools",
       accelerator: "CmdOrCtrl+Shift+I",
       click: () => {
         BrowserWindow.getFocusedWindow().toggleDevTools();

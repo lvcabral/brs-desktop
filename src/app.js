@@ -116,7 +116,12 @@ if (fileSelector) {
             loadFile(fileName, new Blob([fs.readFileSync(file[0])], {type: "text/plain"}));
         }
     });    
-
+    ipcRenderer.on('saveScreenshot', function (event, file) {
+        var img = display.toDataURL('image/png');
+        var data = img.replace(/^data:image\/\w+;base64,/, "");
+        var buf = new Buffer(data, 'base64');
+        fs.writeFileSync(file, buf);
+    });    
     ipcRenderer.on('copyScreenshot', function (event) {
         copyScreenshot();
     });
