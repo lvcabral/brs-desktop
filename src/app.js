@@ -15,7 +15,7 @@ import { remote, ipcRenderer } from "electron";
 
 const customTitlebar = require('custom-electron-titlebar');
 const titleBarConfig = {
-    backgroundColor: customTitlebar.Color.fromHex('#3C3C3C'),
+    backgroundColor: customTitlebar.Color.fromHex('#3C3C3C'),    
     icon: "./images/icon64x64.png",
     shadow: true
 };
@@ -32,6 +32,14 @@ var channelInfo = document.getElementById("channelInfo");
 var channel1 = document.getElementById("channel1");
 var channel2 = document.getElementById("channel2");
 var channel3 = document.getElementById("channel3");
+// Status Bar Objects
+var status = document.getElementById("status");
+var statusFile = document.getElementById("statusFile");
+var statusVersion = document.getElementById("statusVersion");
+var statusSep1 = document.getElementById("statusSep1");
+var statusDisplay = document.getElementById("statusDisplay");
+var statusSep2 = document.getElementById("statusSep2");
+var statusResolution = document.getElementById("statusResolution");
 // Buffer Objects
 var bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
 var bufferCtx = bufferCanvas.getContext("2d");
@@ -70,6 +78,10 @@ const deviceData = {
     defaultFont: "Asap", // Options: "Asap", "Roboto" or "Open Sans"
 };
 
+if (status) {
+    statusDisplay.innerText = `Display Mode: ${deviceData.displayMode}`;
+}
+
 // Load Registry
 const storage = window.localStorage;
 for (let index = 0; index < storage.length; index++) {
@@ -96,6 +108,7 @@ if (fileSelector) {
     };
 } else if (ipcRenderer) {
     ipcRenderer.on('fileSelected', function (event,file) {
+        statusFile.innerText = file[0];
         var fileName = path.parse(file[0]).base;
         if (fileName.split(".").pop() === "zip") { 
             loadFile(fileName, fs.readFileSync(file[0]));
@@ -243,25 +256,25 @@ function openChannelZip(f) {
                         } else if (titleBar) {
                             var title = manifestMap.get("title");
                             if (title) {
-                                channelData += title
-                            }
-                            var majorVersion = manifestMap.get("major_version");
-                            if (majorVersion) {
-                                channelData += " - v" + majorVersion;
-                            }
-                            var minorVersion = manifestMap.get("minor_version");
-                            if (minorVersion) {
-                                channelData += "." + minorVersion;
-                            }
-                            var buildVersion = manifestMap.get("build_version");
-                            if (buildVersion) {
-                                channelData += "." + buildVersion;
-                            }
-                            if (channelData !== "") {
-                                titleBar.updateTitle(defaultTitle + " - " + channelData);
+                                titleBar.updateTitle(defaultTitle + " - " + title);
                             } else {
                                 titleBar.updateTitle(defaultTitle);
                             }
+                            var channelVersion = ""                           
+                            var majorVersion = manifestMap.get("major_version");
+                            if (majorVersion) {
+                                channelVersion += "v" + majorVersion;
+                            }
+                            var minorVersion = manifestMap.get("minor_version");
+                            if (minorVersion) {
+                                channelVersion += "." + minorVersion;
+                            }
+                            var buildVersion = manifestMap.get("build_version");
+                            if (buildVersion) {
+                                channelVersion += "." + buildVersion;
+                            }                            
+                            statusSep1.innerText = "●";
+                            statusVersion.innerText = channelVersion;
                         }
                     },
                     function error(e) {
@@ -391,6 +404,8 @@ function receiveMessage(event) {
         bufferCanvas.width = buffer.width;
         bufferCanvas.height = buffer.height;
         bufferCtx.putImageData(buffer, 0, 0);
+        statusResolution.innerText = `Resolution: ${buffer.width}x${buffer.height}`;
+        statusSep2.innerText = "●";
         ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
     } else if (event.data instanceof Map) {
         deviceData.registry = event.data;
@@ -412,6 +427,11 @@ function closeChannel() {
         fileButton.style.visibility = "visible";
     } else if (titleBar) {
         titleBar.updateTitle(defaultTitle);
+        statusFile.innerText = "";
+        statusSep1.innerText = "";
+        statusVersion.innerText = "";
+        statusSep2.innerText = "";
+        statusResolution.innerText = "";
     }
     channelIcons("visible");
     brsWorker.terminate();
@@ -536,6 +556,8 @@ window.onload = window.onresize = function()
             screenSize.height = window.innerHeight;
             screenSize.width = parseInt(screenSize.height * 16/9);
         }
+        display.style.bottom = "0px";
+        status.style.visibility = "hidden";
     } else {
         if (titleBar == undefined) {
             titleBar = new customTitlebar.Titlebar(titleBarConfig);
@@ -547,6 +569,8 @@ window.onload = window.onresize = function()
             screenSize.height = (window.innerHeight * ratio) - 30;
             screenSize.width = parseInt(screenSize.height * 16/9);
         }
+        display.style.bottom = "20px";
+        status.style.visibility = "visible";
     }
     display.width = screenSize.width;
     display.style.width = screenSize.width;

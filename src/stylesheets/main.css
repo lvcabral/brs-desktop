@@ -2,12 +2,14 @@ html,
 body {
   width: 100%;
   height: 100%;
-  margin: 0;
   padding: 0;
+  margin: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Istok Web', Helvetica, Arial, FreeSans, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
   color: #8E8E8E;
   background-color:  #1E1E1E;
 }
@@ -16,10 +18,29 @@ a {
 	color: #3e5763;
 }
 
+.statusbar {
+  overflow: hidden;
+  background-color: #007ACC;
+  position: fixed;
+  bottom: 0;
+  height: 20px;
+  width: 100%;
+}
+
+.statusbar span {
+  float: left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 1px 4px;
+  text-decoration: none;
+  font-size: 12px;
+}
+
 #display {
   position: absolute;
   top:0;
-  bottom: 0;
+  bottom: 20px;
   left: 0;
   right: 0;
 	margin:auto;
