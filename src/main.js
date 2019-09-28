@@ -6,10 +6,10 @@
 import path from "path";
 import url from "url";
 import { app, Menu } from "electron";
-import { fileMenuTemplate } from "./menu/file_menu_template";
-import { editMenuTemplate } from "./menu/edit_menu_template";
-import { viewMenuTemplate } from "./menu/view_menu_template";
-import { helpMenuTemplate } from "./menu/help_menu_template";
+import { fileMenuTemplate } from "./menu/fileMenuTemplate";
+import { editMenuTemplate } from "./menu/editMenuTemplate";
+import { viewMenuTemplate } from "./menu/viewMenuTemplate";
+import { helpMenuTemplate } from "./menu/helpMenuTemplate";
 import createWindow from "./helpers/window";
 
 // Special module holding environment variables which you declared

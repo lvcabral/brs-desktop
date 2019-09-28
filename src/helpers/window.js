@@ -80,7 +80,7 @@ export default (name, options, zip) => {
     webPreferences: {
       nodeIntegration: true
     },
-    icon: __dirname + '/images/icon64x64.png', 
+    icon: __dirname + '/images/icon512x512.png', 
     frame: false,
     show: false
   }));

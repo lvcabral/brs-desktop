@@ -7,7 +7,7 @@
   "author": "Marcelo Lv Cabral",
   "copyright": "© 2019, Marcelo Lv Cabral",
   "homepage": "https://lvcabral.com/brs/",
-  "main": "app/background.js",
+  "main": "app/main.js",
   "build": {
     "appId": "com.lvcabral.brs-emu.app",
     "files": [
