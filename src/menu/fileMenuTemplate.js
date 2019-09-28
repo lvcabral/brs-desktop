@@ -7,7 +7,7 @@ export const fileMenuTemplate = {
       label: "Open Channel Package...",
       accelerator: "CmdOrCtrl+O",
       click: () => {
-        const dialog = require('./dialog');
+        const dialog = require('../helpers/dialog');
         dialog.openChannelPackage();
       }
     },
@@ -15,7 +15,7 @@ export const fileMenuTemplate = {
       label: "Open Source File...",
       accelerator: "CmdOrCtrl+Shift+O",
       click: () => {
-        const dialog = require('./dialog');
+        const dialog = require('../helpers/dialog');
         dialog.openBrightScriptFile();
       }
     },
@@ -23,7 +23,7 @@ export const fileMenuTemplate = {
       label: "Save Screenshot...",
       accelerator: "CmdOrCtrl+S",
       click: () => {
-        const dialog = require('./dialog');
+        const dialog = require('../helpers/dialog');
         dialog.saveScreenshot();
       }
     },
