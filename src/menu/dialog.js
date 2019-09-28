@@ -1,4 +1,4 @@
-module.exports = { openChannelPackage, openBrightScriptFile };
+module.exports = { openChannelPackage, openBrightScriptFile, saveScreenshot };
 
 const electron = require('electron');
 
@@ -42,6 +42,26 @@ function openBrightScriptFile () {
             return;
         }
         window.webContents.send('fileSelected', result.filePaths);
+    }).catch(err => {
+        console.log(err);
+    });
+}
+
+function saveScreenshot () {
+    const opts = {
+      title: 'Save the Screenshot as',
+      filters: [
+          { name: 'PNG Image', extensions: ['png'] },
+          { name: 'All Files', extensions: ['*'] }
+      ],
+    }
+    var window = electron.BrowserWindow.getFocusedWindow();
+    electron.dialog.showSaveDialog(window, opts).then(result => {
+        if (result.canceled) {
+            console.log("cancelled");
+            return;
+        }
+        window.webContents.send('saveScreenshot', result.filePath);
     }).catch(err => {
         console.log(err);
     });

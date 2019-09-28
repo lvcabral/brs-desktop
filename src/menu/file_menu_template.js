@@ -24,7 +24,7 @@ export const fileMenuTemplate = {
       accelerator: "CmdOrCtrl+S",
       click: () => {
         const dialog = require('./dialog');
-        //dialog.saveScreeshotAs();
+        dialog.saveScreenshot();
       }
     },
     { type: 'separator' },    
