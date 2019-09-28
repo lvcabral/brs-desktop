@@ -38,10 +38,7 @@ export const fileMenuTemplate = {
     { type: 'separator' },    
     {
       label: "Exit",
-      accelerator: "CmdOrCtrl+Q",
-      click: () => {
-        app.quit();
-      }
+      role: "quit",
     }
   ]
 };

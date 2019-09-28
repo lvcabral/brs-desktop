@@ -5,45 +5,33 @@ export const viewMenuTemplate = {
   submenu: [
     {
       label: "Full Screen",
-      accelerator: "F11",
-      click: () => {
-        var window = BrowserWindow.getFocusedWindow();
-        window.setFullScreen(!window.isFullScreen());
-      }
+      role: "togglefullscreen",
+    },
+    {
+      label: "Developer Tools",
+      accelerator: "CmdOrCtrl+Shift+I",
+      role: "toggleDevTools",
     },
     { type: 'separator' },
     {
       id: "theme-purple",
       label: "Purple Theme",
-      type: "checkbox",
+      type: "radio",
       checked: false,
-      enabled: false
     },
     {
       id: "theme-light",
       label: "Light Theme",
-      type: "checkbox",
+      type: "radio",
       checked: false,
-      enabled: false
     },
     {
       id: "theme-dark",
       label: "Dark Theme",
-      type: "checkbox",
+      type: "radio",
       checked: true,
-      enabled: false
     },
     { type: 'separator' },
-    {
-      id: "dev-tools",
-      label: "Toggle Developer Tools",
-      checked: false,
-      accelerator: "CmdOrCtrl+Shift+I",
-      click: () => {
-        var window = BrowserWindow.getFocusedWindow();
-        window.toggleDevTools();
-      }
-    },
     {
       id: "status-bar",
       label: "Status Bar",
