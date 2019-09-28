@@ -6,8 +6,6 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import "./stylesheets/main.css";
-import "./helpers/context_menu.js";
-import "./helpers/external_links.js";
 import fs from "fs";
 import path from  "path";
 import Mousetrap  from "mousetrap";
@@ -16,7 +14,7 @@ import { remote, ipcRenderer } from "electron";
 const customTitlebar = require('custom-electron-titlebar');
 const titleBarConfig = {
     backgroundColor: customTitlebar.Color.fromHex('#3C3C3C'),    
-    icon: "./images/icon64x64.png",
+    icon: "./images/icon512x512.png",
     shadow: true
 };
 var titleBar = new customTitlebar.Titlebar(titleBarConfig);
