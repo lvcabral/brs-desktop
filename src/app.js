@@ -12,13 +12,20 @@ import Mousetrap  from "mousetrap";
 import { remote, ipcRenderer } from "electron";
 
 const appMenu = remote.Menu.getApplicationMenu();
+const userTheme = window.localStorage.getItem("userTheme");
+if (userTheme) {
+    appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+}
 const customTitlebar = require('custom-electron-titlebar');
+var titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
+var titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
 const titleBarConfig = {
-    backgroundColor: customTitlebar.Color.fromHex('#3C3C3C'),    
+    backgroundColor: customTitlebar.Color.fromHex(titleBgColor),
     icon: "./images/icon512x512.png",
     shadow: true
 };
 var titleBar = new customTitlebar.Titlebar(titleBarConfig);
+titleBar.titlebar.style.color = titleColor;
 var defaultTitle = document.title;
 // Emulator code
 import JSZip from "jszip";
@@ -93,7 +100,7 @@ for (let index = 0; index < storage.length; index++) {
 // File selector
 var fileSelector = document.getElementById("file");
 
-if (fileSelector) {
+if (fileSelector) { // Browser 
     fileButton.onclick = function() {
         fileSelector.click();
     }
@@ -105,7 +112,7 @@ if (fileSelector) {
     fileSelector.onchange = function() {
         loadFile(this.files[0].name, this.files[0]);
     };
-} else if (ipcRenderer) {
+} else if (ipcRenderer) { // Electron
     ipcRenderer.on('fileSelected', function (event,file) {
         statusFile.innerText = file[0];
         var fileName = path.parse(file[0]).base;
@@ -120,6 +127,14 @@ if (fileSelector) {
         var data = img.replace(/^data:image\/\w+;base64,/, "");
         var buf = new Buffer(data, 'base64');
         fs.writeFileSync(file, buf);
+    });    
+    ipcRenderer.on('setTheme', function (event, theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
+        titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
+        titleBar.updateBackground(customTitlebar.Color.fromHex(titleBgColor));
+        titleBar.titlebar.style.color = titleColor;
+        window.localStorage.setItem("userTheme", theme);
     });    
     ipcRenderer.on('toggleStatusBar', function (event) {
         var enable = status.style.visibility!=="visible";
@@ -561,7 +576,10 @@ function clientException(msg, msgbox = false) {
         window.alert(msg);
     }
 }
-
+// Fix text color after focus change
+titleBar.onBlur = titleBar.onFocus = function() {
+    titleBar.titlebar.style.color = titleColor;
+}
 // Canvas Resizing with Window
 window.onload = window.onresize = function()
 {

@@ -1,3 +1,35 @@
+/* Color Themes */
+[data-theme^="purple"],
+[data-theme] [data-theme^="purple"] {
+  --main-color: #DAC7EA;
+  --background-color: #251135;
+  --link-color: #AA46F7;
+  --title-color: #DAC7EA;
+  --title-background-color: #3D1B56;
+  --status-color: #f2f2f2;
+  --status-background-color: #662D91;
+}
+[data-theme^="light"],
+[data-theme] [data-theme^="light"] {
+  --main-color: #000000;
+  --background-color: #ffffff;
+  --link-color: #0000ff;
+  --title-color: #333333;
+  --title-background-color: #dddddd;
+  --status-color: #f2f2f2;
+  --status-background-color: #007acc;
+}
+[data-theme^="dark"],
+[data-theme] [data-theme^="dark"] {
+  --main-color: #d4d4d4;
+  --background-color: #1E1E1E;
+  --link-color: #3e5763;
+  --title-color: #cccccc;
+  --title-background-color: #252526;
+  --status-color: #f2f2f2;
+  --status-background-color: #007ACC;
+}
+/* Style Definitions */
 html,
 body {
   width: 100%;
@@ -7,36 +39,31 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-    "Droid Sans", "Helvetica Neue", sans-serif;
-  color: #8E8E8E;
-  background-color:  #1E1E1E;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", 
+            "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: var(--main-color);
+  background-color: var(--background-color);
 }
-
 a {
-	color: #3e5763;
+	color: var(--link-color);
 }
-
 .statusbar {
   overflow: hidden;
-  background-color: #007ACC;
+  background-color: var(--status-background-color);
   position: fixed;
   bottom: 0;
   height: 20px;
   width: 100%;
 }
-
 .statusbar span {
   float: left;
   display: block;
-  color: #f2f2f2;
+  color: var(--status-color);
   text-align: center;
   padding: 1px 4px;
   text-decoration: none;
   font-size: 12px;
 }
-
 #display {
   position: absolute;
   top:0;
