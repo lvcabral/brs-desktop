@@ -58,7 +58,6 @@ function saveScreenshot () {
     var window = electron.BrowserWindow.getFocusedWindow();
     electron.dialog.showSaveDialog(window, opts).then(result => {
         if (result.canceled) {
-            console.log("cancelled");
             return;
         }
         window.webContents.send('saveScreenshot', result.filePath);

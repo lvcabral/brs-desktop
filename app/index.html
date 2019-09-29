@@ -3,6 +3,14 @@
 <head>
   <meta charset="utf-8">
   <title>BrightScript 2D API Emulator</title>
+  <script>
+    window.__setTheme = () => {
+      let userTheme = localStorage.getItem("userTheme");
+      let defaultTheme = 'purple';
+      document.documentElement.setAttribute('data-theme', userTheme || defaultTheme);
+    }
+    __setTheme();
+  </script>
 </head>
 <body>
   <canvas id="display"></canvas>   
