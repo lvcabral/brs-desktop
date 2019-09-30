@@ -1,11 +1,9 @@
-module.exports = { openChannelPackage, openBrightScriptFile, saveScreenshot };
-
-const electron = require('electron');
+import { dialog, BrowserWindow } from "electron";
 
 /*
  * Show open dialog to open a .zip or .brs file.
  */
-function openChannelPackage () {
+export function openChannelPackage () {
     const opts = {
       title: 'Select a Channel package file.',
       filters: [
@@ -14,8 +12,8 @@ function openChannelPackage () {
       ],
       properties: ['openFile']
     }
-    var window = electron.BrowserWindow.getFocusedWindow();
-    electron.dialog.showOpenDialog(window, opts).then(result => {
+    var window = BrowserWindow.getFocusedWindow();
+    dialog.showOpenDialog(window, opts).then(result => {
         if (result.canceled) {
             console.log("cancelled");
             return;
@@ -26,7 +24,7 @@ function openChannelPackage () {
     });
 }
 
-function openBrightScriptFile () {
+export function openBrightScriptFile () {
     const opts = {
       title: 'Select a BrightScript source file.',
       filters: [
@@ -35,8 +33,8 @@ function openBrightScriptFile () {
       ],
       properties: ['openFile']
     }
-    var window = electron.BrowserWindow.getFocusedWindow();
-    electron.dialog.showOpenDialog(window, opts).then(result => {
+    var window = BrowserWindow.getFocusedWindow();
+    dialog.showOpenDialog(window, opts).then(result => {
         if (result.canceled) {
             console.log("cancelled");
             return;
@@ -47,7 +45,7 @@ function openBrightScriptFile () {
     });
 }
 
-function saveScreenshot () {
+export function saveScreenshot () {
     const opts = {
       title: 'Save the Screenshot as',
       filters: [
@@ -55,8 +53,8 @@ function saveScreenshot () {
           { name: 'All Files', extensions: ['*'] }
       ],
     }
-    var window = electron.BrowserWindow.getFocusedWindow();
-    electron.dialog.showSaveDialog(window, opts).then(result => {
+    var window = BrowserWindow.getFocusedWindow();
+    dialog.showSaveDialog(window, opts).then(result => {
         if (result.canceled) {
             return;
         }

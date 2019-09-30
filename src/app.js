@@ -7,8 +7,9 @@
  *--------------------------------------------------------------------------------------------*/
 import "./stylesheets/main.css";
 import fs from "fs";
-import path from  "path";
-import Mousetrap  from "mousetrap";
+import path from "path";
+import Mousetrap from "mousetrap";
+import * as customTitlebar from "custom-electron-titlebar";
 import { remote, ipcRenderer } from "electron";
 
 // App menu and theme configuration
@@ -17,7 +18,6 @@ const userTheme = window.localStorage.getItem("userTheme");
 if (userTheme) {
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
 }
-const customTitlebar = require('custom-electron-titlebar');
 var titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
 var titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
 const titleBarConfig = {
@@ -559,6 +559,7 @@ function keyUpHandler(event) {
 }
 
 Mousetrap.bind(['command+c', 'ctrl+c'], function() {
+    console.log("copied screenshot!");
     copyScreenshot();
     return false;
 });
