@@ -5,6 +5,7 @@
 
 import path from "path";
 import url from "url";
+import minimist from "minimist";
 import { app, Menu } from "electron";
 import { fileMenuTemplate } from "./menu/fileMenuTemplate";
 import { editMenuTemplate } from "./menu/editMenuTemplate";
@@ -16,7 +17,7 @@ import createWindow from "./helpers/window";
 // in config/env_xxx.json file.
 import env from "env";
 
-var argv = require('minimist')(process.argv.slice(1), {
+var argv = minimist(process.argv.slice(1), {
   string: ['o'],
   alias: {f: 'fullscreen', d: 'devtools' }
 });

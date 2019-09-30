@@ -1,4 +1,5 @@
-import { app, BrowserWindow } from "electron";
+import { BrowserWindow } from "electron";
+import * as dialog from "../helpers/dialog";
 
 export const fileMenuTemplate = {
   label: "&File",
@@ -7,7 +8,6 @@ export const fileMenuTemplate = {
       label: "Open Channel Package...",
       accelerator: "CmdOrCtrl+O",
       click: () => {
-        const dialog = require('../helpers/dialog');
         dialog.openChannelPackage();
       }
     },
@@ -15,7 +15,6 @@ export const fileMenuTemplate = {
       label: "Open Source File...",
       accelerator: "CmdOrCtrl+Shift+O",
       click: () => {
-        const dialog = require('../helpers/dialog');
         dialog.openBrightScriptFile();
       }
     },
@@ -23,7 +22,6 @@ export const fileMenuTemplate = {
       label: "Save Screenshot...",
       accelerator: "CmdOrCtrl+S",
       click: () => {
-        const dialog = require('../helpers/dialog');
         dialog.saveScreenshot();
       }
     },

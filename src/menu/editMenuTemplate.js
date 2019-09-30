@@ -1,5 +1,5 @@
 
-const electron = require('electron');
+import { BrowserWindow } from "electron";
 
 export const editMenuTemplate = {
   label: "&Edit",
@@ -8,7 +8,7 @@ export const editMenuTemplate = {
       label: "Copy Screenshot", 
       accelerator: "CmdOrCtrl+C", 
       click: () => {
-        var window = electron.BrowserWindow.getFocusedWindow();
+        var window = BrowserWindow.getFocusedWindow();
         window.webContents.send('copyScreenshot');
       }
     },
