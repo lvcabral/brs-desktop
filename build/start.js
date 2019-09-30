@@ -10,11 +10,12 @@ let param = "";
 const watching = compiler.watch({}, (err, stats) => {
   if (!err && !stats.hasErrors() && !electronStarted) {
     electronStarted = true;
-    if (process.argv.length > 2) {
-      param = process.argv[2];
-    }
     childProcess
-      .spawn(electron, [".", param], { stdio: "inherit" })
+      .spawn(electron, ["."].concat(process.argv.slice(1),
+                // ['-o C:\\Projects\\Roku\\Lode-Runner-Roku\\out\\roku-deploy.zip', 
+                // '-d', '--fullscreen' ] 
+                ),
+       { stdio: "inherit" })
       .on("close", () => {
         watching.close();
       });

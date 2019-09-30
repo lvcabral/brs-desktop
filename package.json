@@ -1,6 +1,6 @@
 {
   "name": "brs-emu-app",
-  "productName": "BrighScript 2D API Emulator",
+  "productName": "BrightScript 2D API Emulator",
   "description": "Desktop Emulator for Roku 2D API",
   "version": "0.5.0",
   "private": true,
@@ -10,6 +10,8 @@
   "main": "app/main.js",
   "build": {
     "appId": "com.lvcabral.brs-emu.app",
+    "productName": "brsEmuApp",
+    "artifactName": "brsEmuApp-${version}-setup.${ext}", 
     "files": [
       "app/**/*",
       "node_modules/**/*",
@@ -29,6 +31,7 @@
     "test": "npm run unit && npm run e2e",
     "start": "node build/start.js",
     "dist": "webpack --config=build/webpack.app.config.js --env=production && electron-builder",
+    "dist-win-linux": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -wl",
     "release": "npm test && webpack --config=build/webpack.app.config.js --env=production && electron-builder"
   },
   "dependencies": {
@@ -36,6 +39,7 @@
     "electron-about-window": "^1.13.1",
     "fs-jetpack": "^2.1.0",
     "jszip": "^3.2.2",
+    "minimist": "^1.2.0",
     "mousetrap": "^1.6.3"
   },
   "devDependencies": {
