@@ -113,13 +113,33 @@ if (fileSelector) { // Browser
         loadFile(this.files[0].name, this.files[0]);
     };
 } else if (ipcRenderer) { // Electron
-    ipcRenderer.on('fileSelected', function (event,file) {
-        statusFile.innerText = file[0];
-        var fileName = path.parse(file[0]).base;
-        if (fileName.split(".").pop() === "zip") { 
-            loadFile(fileName, fs.readFileSync(file[0]));
+    ipcRenderer.on('fileSelected', function (event, file) {
+        var filePath;
+        if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
+            filePath = file[0];
         } else {
-            loadFile(fileName, new Blob([fs.readFileSync(file[0])], {type: "text/plain"}));
+            console.log("Invalid file:", file[0]);
+            return;
+        }
+        statusFile.innerText = filePath;
+        var fileName = path.parse(filePath).base;
+        var fileExt = path.parse(filePath).ext.toLowerCase();
+        if ( fileExt === ".zip") {
+            try {
+                loadFile(fileName, fs.readFileSync(filePath));                
+            } catch (error) {
+                document.alert("Error opening Channel Package! Check console for details.");
+                console.error(`Error opening ${fileName}:`, error.message);
+            }
+        } else if (fileExt === ".brs") {
+            try {
+                loadFile(fileName, new Blob([fs.readFileSync(filePath)], {type: "text/plain"}));                
+            } catch (error) {
+                document.alert("Error opening BrightScript file! Check console for details.");
+                console.error(`Error opening ${fileName}:`, error.message);             
+            }
+        } else {
+            console.log("File format not supported: ", fileExt);
         }
     });    
     ipcRenderer.on('saveScreenshot', function (event, file) {
@@ -308,7 +328,7 @@ function openChannelZip(f) {
                     }
                 );
             } else {
-                clientException("Invalid Roku package: missing manifest.", true);
+                clientException("Invalid Channel Package: missing manifest.", true);
                 running = false;
                 return;
             }

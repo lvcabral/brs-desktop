@@ -17,7 +17,7 @@ export const viewMenuTemplate = {
       id: "theme-purple",
       label: "Purple Theme",
       type: "radio",
-      checked: false,
+      checked: true,
       click: () => {
         var window = BrowserWindow.getFocusedWindow();
         window.webContents.send('setTheme', "purple");
@@ -37,7 +37,7 @@ export const viewMenuTemplate = {
       id: "theme-dark",
       label: "Dark Theme",
       type: "radio",
-      checked: true,
+      checked: false,
       click: () => {
         var window = BrowserWindow.getFocusedWindow();
         window.webContents.send('setTheme', "dark");

@@ -6,7 +6,7 @@
 import { app, BrowserWindow, screen, Menu } from "electron";
 import jetpack from "fs-jetpack";
 
-export default (name, options, zip) => {
+export default (name, options, argv) => {
   const userDataDir = jetpack.cwd(app.getPath("userData"));
   const stateStoreFile = `window-state-${name}.json`;
   const defaultSize = {
@@ -79,8 +79,13 @@ export default (name, options, zip) => {
   };
 
   state = ensureVisibleOnSomeDisplay(restore());
+  var full = {};
 
-  win = new BrowserWindow(Object.assign({}, options, state, {
+  if (argv.fullscreen) {
+    full = {fullscreen: true};
+  }
+
+  win = new BrowserWindow(Object.assign(full, options, state, {
     webPreferences: {
       nodeIntegration: true
     },
@@ -90,11 +95,10 @@ export default (name, options, zip) => {
   }));
 
   win.on('ready-to-show', function() { 
-    if (zip && zip !== "") {
-      console.log(zip);
-      win.webContents.send('fileSelected', [zip]);
+    if (argv && argv.o) {
+      win.webContents.send('fileSelected', [argv.o.trim()]);
     }
-    win.show(); 
+    win.show();
     win.focus(); 
   });
 

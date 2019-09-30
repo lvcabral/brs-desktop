@@ -16,7 +16,10 @@ import createWindow from "./helpers/window";
 // in config/env_xxx.json file.
 import env from "env";
 
-const opts = process.argv.slice(1);
+var argv = require('minimist')(process.argv.slice(1), {
+  string: ['o'],
+  alias: {f: 'fullscreen', d: 'devtools' }
+});
 
 const setApplicationMenu = () => {
   const menus = [fileMenuTemplate, editMenuTemplate, viewMenuTemplate, helpMenuTemplate];
@@ -33,11 +36,11 @@ if (env.name !== "production") {
 
 app.on("ready", () => {
   setApplicationMenu();
-
+  
   const mainWindow = createWindow("main", {
     width: 1280,
     height: 770,
-  }, opts[1]);
+  }, argv);
   
   mainWindow.setBackgroundColor('#1E1E1E');
   mainWindow.setMinimumSize(900, 550);
@@ -49,7 +52,7 @@ app.on("ready", () => {
     })
   );
 
-  if (env.name === "development") {
+  if (env.name === "development" || argv.devtools) {
     mainWindow.openDevTools();
   }
 });
