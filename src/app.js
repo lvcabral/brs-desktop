@@ -11,6 +11,7 @@ import path from  "path";
 import Mousetrap  from "mousetrap";
 import { remote, ipcRenderer } from "electron";
 
+// App menu and theme configuration
 const appMenu = remote.Menu.getApplicationMenu();
 const userTheme = window.localStorage.getItem("userTheme");
 if (userTheme) {
@@ -262,7 +263,7 @@ function openChannelZip(f) {
                                         );
                                         buffer = ctx.getImageData(0, 0, screenSize.width, screenSize.height)
                                         bufferCanvas.width = buffer.width;
-                                        bufferCanvas.height = buffer.width;
+                                        bufferCanvas.height = buffer.height;
                                         bufferCtx.putImageData(buffer, 0, 0);                                
                                     });
                                 });
