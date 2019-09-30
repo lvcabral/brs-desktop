@@ -152,7 +152,8 @@ if (fileSelector) { // Browser
         document.documentElement.setAttribute('data-theme', theme);
         titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
         titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
-        titleBar.updateBackground(customTitlebar.Color.fromHex(titleBgColor));
+        titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor)
+        titleBar.updateBackground(titleBarConfig.backgroundColor);
         titleBar.titlebar.style.color = titleColor;
         window.localStorage.setItem("userTheme", theme);
     });    
