@@ -5,6 +5,9 @@ This project was created to build a _multiplatform desktop application_ for the 
 
 This application was tested on Windows, macOS and Linux.
 
+![Screen Themes](/../master/docs/images/screeshot-themes.png?raw=true)
+
+
 ## Command Line Options
 
 Here are **optional** arguments you can use when starting the emulator at the command line:
