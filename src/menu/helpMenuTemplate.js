@@ -9,10 +9,15 @@ export const helpMenuTemplate = {
         label: "Documentation", 
         accelerator: "F1", 
         click: () => {
-          shell.openExternalSync("https://github.com/lvcabral/brs-emu/blob/master/README.md");
+          shell.openExternalSync("https://github.com/lvcabral/brs-emu-app/blob/master/README.md");
         }
       },
-      { label: "Control Keyboard Reference", accelerator: "CmdOrCtrl+F1"},
+      { label: "Control Keyboard Reference", 
+        accelerator: "CmdOrCtrl+F1",
+        click: () => {
+          shell.openExternalSync("https://github.com/lvcabral/brs-emu-app/blob/master/docs/control-reference.md");
+        }
+      },
       { type: "separator" },
       { 
         label: "Release Notes",
@@ -23,7 +28,7 @@ export const helpMenuTemplate = {
       { 
         label: "View License",
         click: () => {
-          shell.openExternalSync("https://github.com/lvcabral/brs-emu/blob/master/LICENSE");
+          shell.openExternalSync("https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE");
         }
       },
       { type: "separator" },
@@ -33,8 +38,8 @@ export const helpMenuTemplate = {
         label: "About", 
         click: () => {
           const window = BrowserWindow.getFocusedWindow();
-          var x = window.getPosition()[0] + Math.abs(window.getSize()[0]-350)/2;
-          var y = window.getPosition()[1] + Math.abs(window.getSize()[1]-650)/2;
+          var x = Math.round(window.getPosition()[0] + Math.abs(window.getSize()[0]-350)/2);
+          var y = Math.round(window.getPosition()[1] + window.getSize()[1]/4);
           openAboutWindow({
             icon_path: path.join(__dirname, 'images/icon512x512.png'),
             copyright: 'Copyright © 2019 Marcelo Lv Cabral',
@@ -43,14 +48,12 @@ export const helpMenuTemplate = {
               x: x,
               y: y,
               width: 350,
-              height: 550,
+              height: 580,
               opacity: 0.9,
               resizable: false,
               modal: true
             }
           });
-          // about.setMenuBarVisibility(false);
-          // about.setPosition(x,y);
         }
       }
     ]
