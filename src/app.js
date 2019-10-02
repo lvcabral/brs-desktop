@@ -13,6 +13,7 @@ import * as customTitlebar from "custom-electron-titlebar";
 import { remote, ipcRenderer } from "electron";
 
 // App menu and theme configuration
+const mainWindow = remote.getCurrentWindow();
 const appMenu = remote.Menu.getApplicationMenu();
 const userTheme = window.localStorage.getItem("userTheme");
 if (userTheme) {
@@ -610,7 +611,7 @@ window.onload = window.onresize = function()
 }
 
 function resizeWindow() {
-    if (remote.getCurrentWindow().isFullScreen()) {
+    if (mainWindow.isFullScreen()) {
         if (titleBar) {
             titleBar.dispose();
             titleBar = undefined;
