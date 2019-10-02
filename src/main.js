@@ -6,7 +6,7 @@
 import path from "path";
 import url from "url";
 import minimist from "minimist";
-import { app, Menu } from "electron";
+import { app, screen, Menu } from "electron";
 import { fileMenuTemplate } from "./menu/fileMenuTemplate";
 import { editMenuTemplate } from "./menu/editMenuTemplate";
 import { viewMenuTemplate } from "./menu/viewMenuTemplate";
@@ -44,7 +44,9 @@ app.on("ready", () => {
   }, argv);
   
   mainWindow.setBackgroundColor('#1E1E1E');
-  mainWindow.setMinimumSize(900, 550);
+  let winBounds = mainWindow.getBounds();
+  let display = screen.getDisplayNearestPoint({x: winBounds.x, y: winBounds.y});
+  mainWindow.setMinimumSize(Math.min(900, display.size.width), Math.min(550, display.size.height));
   mainWindow.loadURL(
     url.format({
       pathname: path.join(__dirname, "index.html"),

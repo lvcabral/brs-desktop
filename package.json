@@ -32,6 +32,7 @@
     "start": "node build/start.js",
     "dist": "webpack --config=build/webpack.app.config.js --env=production && electron-builder",
     "dist-win-linux": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -wl",
+    "dist-arm": "electron-packager . brsEmuApp --out=./dist --platform=linux --arch=armv7l --overwrite",
     "release": "npm test && webpack --config=build/webpack.app.config.js --env=production && electron-builder"
   },
   "dependencies": {

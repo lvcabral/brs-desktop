@@ -38,22 +38,25 @@ export const helpMenuTemplate = {
         label: "About", 
         click: () => {
           const window = BrowserWindow.getFocusedWindow();
-          var x = Math.round(window.getPosition()[0] + Math.abs(window.getSize()[0]-350)/2);
-          var y = Math.round(window.getPosition()[1] + window.getSize()[1]/4);
-          openAboutWindow({
+          var w = 350;
+          var h = 450;
+          var x = Math.round(window.getPosition()[0] + Math.abs(window.getSize()[0]-w)/2);
+          var y = Math.round(window.getPosition()[1] + Math.abs(window.getSize()[1]-h+25)/2);
+          const about = openAboutWindow({
             icon_path: path.join(__dirname, 'images/icon512x512.png'),
             copyright: 'Copyright © 2019 Marcelo Lv Cabral',
             win_options: {
               parent: window,
               x: x,
               y: y,
-              width: 350,
-              height: 580,
+              width: w,
+              height: h,
               opacity: 0.9,
-              resizable: false,
               modal: true
             }
           });
+          about.setMenuBarVisibility(false);
+          about.setResizable(false);
         }
       }
     ]
