@@ -38,12 +38,15 @@ if (env.name !== "production") {
 app.on("ready", () => {
   setApplicationMenu();
   
+  global.sharedObject = {
+    backgroundColor: '#251135'
+  }  
   const mainWindow = createWindow("main", {
     width: 1280,
     height: 770,
+    backgroundColor: global.sharedObject.backgroundColor
   }, argv);
   
-  mainWindow.setBackgroundColor('#1E1E1E');
   let winBounds = mainWindow.getBounds();
   let display = screen.getDisplayNearestPoint({x: winBounds.x, y: winBounds.y});
   mainWindow.setMinimumSize(Math.min(900, display.size.width), Math.min(550, display.size.height));
