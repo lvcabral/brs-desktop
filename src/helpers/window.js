@@ -29,7 +29,7 @@ export default (name, options, argv) => {
     return Object.assign({}, defaultSize, restoredState);
   };
 
-  const getCurrentPosition = () => {
+  const getWindowState = () => {
     const appMenu = Menu.getApplicationMenu();
     const position = win.getPosition();
     const size = win.getSize();
@@ -38,6 +38,7 @@ export default (name, options, argv) => {
       y: position[1],
       width: size[0],
       height: size[1],
+      backgroundColor: global.sharedObject.backgroundColor,
       status: appMenu.getMenuItemById("status-bar").checked
     };
   };
@@ -73,7 +74,7 @@ export default (name, options, argv) => {
 
   const saveState = () => {
     if (!win.isMinimized() && !win.isMaximized() && !win.isFullScreen()) {
-      Object.assign(state, getCurrentPosition());
+      Object.assign(state, getWindowState());
     }
     userDataDir.write(stateStoreFile, state, { atomic: true });
   };

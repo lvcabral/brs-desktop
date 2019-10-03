@@ -19,6 +19,7 @@ const userTheme = window.localStorage.getItem("userTheme");
 if (userTheme) {
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
 }
+remote.getGlobal('sharedObject').backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim();
 var titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
 var titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
 const titleBarConfig = {
@@ -152,6 +153,8 @@ if (fileSelector) { // Browser
     });    
     ipcRenderer.on('setTheme', function (event, theme) {
         document.documentElement.setAttribute('data-theme', theme);
+        remote.getGlobal('sharedObject').backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim();
+        mainWindow.setBackgroundColor(remote.getGlobal('sharedObject').backgroundColor);
         titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
         titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
         titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor)
@@ -166,6 +169,9 @@ if (fileSelector) { // Browser
     });
     ipcRenderer.on('copyScreenshot', function (event) {
         copyScreenshot();
+    });
+    ipcRenderer.on('console', function (event, text) {
+        console.log(text);
     });
 }
 
