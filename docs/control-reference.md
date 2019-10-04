@@ -15,4 +15,6 @@ The emulator supports by default the following mapping of the desktop keyboard t
 | A               |     A       |  A game buttom. Check channel instructions for custom usage.              |
 | Z               |     B       |  B game buttom. Check channel instructions for custom usage.              |
 
-![Remote Control Mapping](/../master/docs/images/control-reference.png?raw=true)
+<p align="center">
+<img src="/../master/docs/images/control-reference.png?raw=true"/>
+</p>
