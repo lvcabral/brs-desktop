@@ -23,8 +23,14 @@ brsEmuApp [-o <filePath>] [-f | --fullscreen] [-d | --devtools]
 |**-f** or **--fullscreen** | Opens the emulator in **full screen mode** (press F11 to restore).|
 |**-d** or **--devtools**   | Opens the **developer tools** when starting the emulator.         |
 
-## License Information
+## Author Links
+- My website is [https://lvcabral.com](https://lvcabral.com)
+- My twitter is [@lvcabral](https://twitter.com/lvcabral)
+- My podcast is [PODebug Podcast](http://podebug.com)
+- Check my other [GitHub repositories ](https://github.com/lvcabral)
+
+## License
 
 Copyright © 2019 Marcelo Lv Cabral. All rights reserved.
 
-Licensed under [MIT](https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE) License.
+Licensed under [MIT](LICENSE) License.
