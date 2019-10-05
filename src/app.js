@@ -436,7 +436,7 @@ function runChannel() {
     channelIcons("hidden");
     display.style.opacity = 1;
     display.focus();
-    brsWorker = new Worker("brsEmu.min.js");
+    brsWorker = new Worker("lib/brsEmu.min.js");
     brsWorker.addEventListener("message", receiveMessage);
     var payload = {
         device: deviceData,
