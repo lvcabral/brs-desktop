@@ -3,13 +3,19 @@
 This project was created to build a _multiplatform desktop application_ for the **BrightScript 2D API emulator**, please follow the link below to visit the emulator repository and read about the project features (and limitations):
 - http://github.com/lvcabral/brs-emu
 
-This application was tested on Windows, macOS and Linux.
+The binaries of this application are released together with the emulator library at:
+- https://github.com/lvcabral/brs-emu/releases
 
-## Color Themes
+## Documentation
+
+### Color Themes
 ![Screen Themes](/../master/docs/images/screeshot-themes.png?raw=true)
 
+### Remote Control Emulation
 
-## Command Line Options
+* [Control Keyboard Reference](https://github.com/lvcabral/brs-emu-app/blob/master/docs/control-reference.md)
+
+### Command Line Options
 
 Here are **optional** arguments you can use when starting the emulator at the command line:
 
