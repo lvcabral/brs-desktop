@@ -14,14 +14,14 @@ This application was tested on Windows, macOS and Linux.
 Here are **optional** arguments you can use when starting the emulator at the command line:
 
 ```
-brsEmuApp [-o <filePath>] [-f | --fullscreen] [-d | --devtools]
+brsEmuApp [[-o] <filePath>] [-f | --fullscreen] [-d | --devtools]
 ```
 
-|Argument                    |Description                                                        |
-|----------------------------|-------------------------------------------------------------------|
-|**-o** `<filePath>`         | Opens  a `.zip` or `.brs` when starting the emulator.             |
-|**-f** or **--fullscreen** | Opens the emulator in **full screen mode** (press F11 to restore).|
-|**-d** or **--devtools**   | Opens the **developer tools** when starting the emulator.         |
+|Argument                           |Description                                                        |
+|-----------------------------------|-------------------------------------------------------------------|
+|**-o** `<filePath>` or `<filePath>`| Opens  a `.zip` or `.brs` when starting the emulator.             |
+|**-f** or **--fullscreen**        | Opens the emulator in **full screen mode** (press F11 to restore).|
+|**-d** or **--devtools**          | Opens the **developer tools** when starting the emulator.         |
 
 ## Author Links
 - My website is [https://lvcabral.com](https://lvcabral.com)

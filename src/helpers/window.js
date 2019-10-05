@@ -98,6 +98,17 @@ export default (name, options, argv) => {
   win.on('ready-to-show', function() { 
     if (argv && argv.o) {
       win.webContents.send('fileSelected', [argv.o.trim()]);
+    } else {
+      try {
+        let index = argv._.length-1;
+        if (index) {
+          if (jetpack.exists(argv._[index])) {
+            win.webContents.send('fileSelected', [argv._[index]]);
+          }
+        }          
+      } catch (error) {
+        console.error("Invalid parameters!", error);
+      }
     }
     win.show();
     win.focus(); 
