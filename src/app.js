@@ -615,6 +615,10 @@ window.onload = window.onresize = function()
 {
     resizeWindow();
 }
+display.ondblclick = function() {
+    const toggle = !mainWindow.isFullScreen();
+    mainWindow.setFullScreen(toggle);
+}
 
 function resizeWindow() {
     if (mainWindow.isFullScreen()) {
