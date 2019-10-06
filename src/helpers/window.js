@@ -116,5 +116,9 @@ export default (name, options, argv) => {
 
   win.on("close", saveState);
 
+  if (process.platform === "darwin") {
+    win.setMaximizable(true);
+    win.setWindowButtonVisibility(true);
+  }
   return win;
 };
