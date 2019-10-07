@@ -5,13 +5,15 @@ const isMacOS = (process.platform === "darwin");
 export const fileMenuTemplate = {
   label: "&File",
   submenu: [
-    { role: "about",visible: isMacOS},
+    { role: "about", visible: isMacOS},
     { 
       label: "Check for Updates...", 
       visible: isMacOS,
       enabled: false
     },
-    { type: "separator", visible: isMacOS },
+    { type: isMacOS ? "separator" : "normal", // Custom toolbar won't hide this separator
+       label: "",
+       visible: isMacOS },
     {
       label: "Open Channel Package...",
       accelerator: "CmdOrCtrl+O",
