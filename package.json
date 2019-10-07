@@ -2,16 +2,20 @@
   "name": "brs-emu-app",
   "productName": "BrightScript 2D API Emulator",
   "description": "Desktop Emulator for Roku 2D API",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "author": "Marcelo Lv Cabral",
   "copyright": "© 2019, Marcelo Lv Cabral",
   "homepage": "https://lvcabral.com/brs/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lvcabral/brs-emu-app"
+  },
   "main": "app/main.js",
   "build": {
     "appId": "com.lvcabral.brs-emu.app",
-    "productName": "brsEmuApp",
-    "artifactName": "brsEmuApp-${version}-setup.${ext}", 
+    "productName": "BrightScript Emulator",
+    "artifactName": "brsEmuApp-${version}-${platform}.${ext}",
     "files": [
       "app/**/*",
       "node_modules/**/*",
@@ -19,6 +23,15 @@
     ],
     "directories": {
       "buildResources": "resources"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "brsEmuApp-${version}-windows.${ext}"
+    },
+    "mac": {
+      "artifactName": "brsEmuApp-${version}-macOS.${ext}",
+      "category": "public.app-category.developer-tools"
     },
     "publish": null
   },
@@ -30,8 +43,8 @@
     "e2e": "mocha temp/e2e.js --require source-map-support/register",
     "test": "npm run unit && npm run e2e",
     "start": "node build/start.js",
-    "dist": "webpack --config=build/webpack.app.config.js --env=production && electron-builder",
-    "dist-win-linux": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -wl",
+    "dist": "webpack --config=build/webpack.app.config.js --env=production && electron-builder --x64 --ia32",
+    "dist-win-linux": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -wl --x64 --ia32",
     "dist-arm": "electron-packager . brsEmuApp --out=./dist --platform=linux --arch=armv7l --overwrite",
     "release": "npm test && webpack --config=build/webpack.app.config.js --env=production && electron-builder"
   },
@@ -52,6 +65,7 @@
     "electron": "^6.0.10",
     "electron-builder": "^21.1.5",
     "electron-mocha": "^8.1.1",
+    "electron-packager": "^14.0.6",
     "friendly-errors-webpack-plugin": "^1.7.0",
     "mocha": "^6.2.0",
     "source-map-support": "^0.5.6",
