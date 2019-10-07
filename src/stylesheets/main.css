@@ -54,6 +54,7 @@ a {
   bottom: 0;
   height: 20px;
   width: 100%;
+  -webkit-user-select:none;
 }
 .statusbar span {
   float: left;
