@@ -1,6 +1,7 @@
 import path from "path";
 import { BrowserWindow, shell } from "electron";
 import openAboutWindow from 'electron-about-window';
+const isMacOS = (process.platform === "darwin");
 
 export const helpMenuTemplate = {
     label: "&Help",
@@ -31,11 +32,12 @@ export const helpMenuTemplate = {
           shell.openExternalSync("https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE");
         }
       },
-      { type: "separator" },
-      { label: "Check for Updates...", enabled: false},
-      { type: "separator" },
+      { type: "separator", visible: !isMacOS},
+      { label: "Check for Updates...", visible: !isMacOS, enabled: false},
+      { type: "separator", visible: !isMacOS},
       { 
         label: "About", 
+        visible: !isMacOS,
         click: () => {
           const window = BrowserWindow.getFocusedWindow();
           var w = 350;
