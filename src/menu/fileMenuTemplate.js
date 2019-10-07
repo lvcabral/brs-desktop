@@ -1,9 +1,17 @@
 import { BrowserWindow } from "electron";
 import * as dialog from "../helpers/dialog";
+const isMacOS = (process.platform === "darwin");
 
 export const fileMenuTemplate = {
   label: "&File",
   submenu: [
+    { role: "about",visible: isMacOS},
+    { 
+      label: "Check for Updates...", 
+      visible: isMacOS,
+      enabled: false
+    },
+    { type: "separator", visible: isMacOS },
     {
       label: "Open Channel Package...",
       accelerator: "CmdOrCtrl+O",
@@ -35,7 +43,6 @@ export const fileMenuTemplate = {
     },
     { type: 'separator' },    
     {
-      label: "Exit",
       role: "quit",
     }
   ]
