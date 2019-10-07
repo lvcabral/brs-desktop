@@ -610,22 +610,23 @@ function clientException(msg, msgbox = false) {
 titleBar.onBlur = titleBar.onFocus = function() {
     titleBar.titlebar.style.color = titleColor;
 }
+
+// Toggle Full Screen when Double Click
+display.ondblclick = function() {    
+    const toggle = !mainWindow.isFullScreen();
+    mainWindow.setFullScreen(toggle);
+}
+
 // Canvas Resizing with Window
 window.onload = window.onresize = function()
 {
     resizeWindow();
 }
-display.ondblclick = function() {
-    const toggle = !mainWindow.isFullScreen();
-    mainWindow.setFullScreen(toggle);
-}
 
 function resizeWindow() {
     if (mainWindow.isFullScreen()) {
-        if (titleBar) {
-            titleBar.dispose();
-            titleBar = undefined;
-        };
+        titleBar.titlebar.style.display = "none";
+        titleBar.container.style.top = "0px";
         showStatusBar(false);
         screenSize.width = window.innerWidth;
         screenSize.height = parseInt(screenSize.width * 9 / 16);
@@ -636,9 +637,8 @@ function resizeWindow() {
     } else {
         var ratio = 0.97;
         var offset = 13;
-        if (titleBar == undefined) {
-            titleBar = new customTitlebar.Titlebar(titleBarConfig);
-        }
+        titleBar.titlebar.style.display = "";
+        titleBar.container.style.top = "30px";
         if (appMenu.getMenuItemById("status-bar").checked) {
             showStatusBar(true);
             offset = 30;
