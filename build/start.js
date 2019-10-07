@@ -11,9 +11,9 @@ const watching = compiler.watch({}, (err, stats) => {
   if (!err && !stats.hasErrors() && !electronStarted) {
     electronStarted = true;
     childProcess
-      .spawn(electron, ["."].concat(process.argv.slice(1),
-                // ['-o C:\\Projects\\Roku\\Lode-Runner-Roku\\out\\roku-deploy.zip', 
-                // '-d', '--fullscreen' ] 
+      .spawn(electron, ["."].concat(process.argv.slice(2),
+                //  ['-o C:\\Projects\\Roku\\Lode-Runner-Roku\\out\\roku-deploy.zip', 
+                //  '-d', '--fullscreen' ] 
                 ),
        { stdio: "inherit" })
       .on("close", () => {
