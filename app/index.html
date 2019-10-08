@@ -11,18 +11,23 @@
     }
     __setTheme();
   </script>
+  <link href="./css/all.min.css" rel="stylesheet"> 
 </head>
 <body>
-  <canvas id="display"></canvas>   
+  <canvas id="display"></canvas>
   <div id="status" class="statusbar">
     <span style="float:left"></span>
+    <span id="statusIconFile" style="float:left"></span>
     <span id="statusFile" style="float:left"></span>
-    <span id="statusSep1" style="float:left"></span>
+    <span style="float:left"></span>
+    <span id="statusIconVersion" style="float:left"></span>
     <span id="statusVersion" style="float:left"></span>
     <span style="float:right"></span>
     <span id="statusDisplay" style="float:right"></span>
-    <span id="statusSep2" style="float:right"></span>
+    <span style="float:right"><i class="fa fa-desktop"></i></span>
+    <span style="float:right"></span>
     <span id="statusResolution" style="float:right"></span>
+    <span id="statusIconRes" style="float:right"></span>
   </div>
 <script src="app.js"></script>
 </body>
