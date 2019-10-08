@@ -1,8 +1,10 @@
-// This is main process of Electron, started as first thing when your
-// app starts. It runs through entire life of your application.
-// It doesn't have any windows which you can see on screen, but we can open
-// window from here.
-
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import path from "path";
 import url from "url";
 import minimist from "minimist";
@@ -28,8 +30,6 @@ const setApplicationMenu = () => {
 };
 
 // Save userData in separate folders for each environment.
-// Thanks to this you can use production and development versions of the app
-// on same machine like those are two separate apps.
 if (env.name !== "production") {
   const userDataPath = app.getPath("userData");
   app.setPath("userData", `${userDataPath} (${env.name})`);

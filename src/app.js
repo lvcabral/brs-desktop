@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu)
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
  *  Copyright (c) 2019 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -35,19 +35,14 @@ import JSZip from "jszip";
 var display = document.getElementById("display");
 var screenSize = { width: 854, height: 480 };
 var ctx = display.getContext("2d", { alpha: false });
-// Browser Objects
-var fileButton = document.getElementById("fileButton");
-var channelInfo = document.getElementById("channelInfo");
-var channel1 = document.getElementById("channel1");
-var channel2 = document.getElementById("channel2");
-var channel3 = document.getElementById("channel3");
 // Status Bar Objects
 var status = document.getElementById("status");
+var statusIconFile = document.getElementById("statusIconFile");
 var statusFile = document.getElementById("statusFile");
+var statusIconVersion = document.getElementById("statusIconVersion");
 var statusVersion = document.getElementById("statusVersion");
-var statusSep1 = document.getElementById("statusSep1");
 var statusDisplay = document.getElementById("statusDisplay");
-var statusSep2 = document.getElementById("statusSep2");
+var statusIconRes = document.getElementById("statusIconRes");
 var statusResolution = document.getElementById("statusResolution");
 // Buffer Objects
 var bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
@@ -83,12 +78,13 @@ const deviceData = {
     timeZone: "US/Arizona",
     locale: "en_US",
     clockFormat: "12h",
-    displayMode: "720p", // Only this mode is supported for now
-    defaultFont: "Asap", // Options: "Asap", "Roboto" or "Open Sans"
+    displayMode: "720p", // Only HD (720p) mode is supported for now
+    defaultFont: "Asap", // Desktop app only has Asap to reduce the package size
 };
 
 if (status) {
-    statusDisplay.innerText = `Display Mode: ${deviceData.displayMode}`;
+    let ui = deviceData.displayMode == "720p" ? "HD" : deviceData.displayMode == "1080p" ? "FHD" : "SD";
+    statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
 }
 
 // Load Registry
@@ -100,22 +96,8 @@ for (let index = 0; index < storage.length; index++) {
     }
 }
 
-// File selector
-var fileSelector = document.getElementById("file");
-
-if (fileSelector) { // Browser 
-    fileButton.onclick = function() {
-        fileSelector.click();
-    }
-
-    fileSelector.onclick = function() {
-        this.value = null;
-    };
-
-    fileSelector.onchange = function() {
-        loadFile(this.files[0].name, this.files[0]);
-    };
-} else if (ipcRenderer) { // Electron
+// Open File
+if (ipcRenderer) {
     ipcRenderer.on('fileSelected', function (event, file) {
         var filePath;
         if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
@@ -128,6 +110,7 @@ if (fileSelector) { // Browser
         var fileName = path.parse(filePath).base;
         var fileExt = path.parse(filePath).ext.toLowerCase();
         if ( fileExt === ".zip") {
+            statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
             try {
                 loadFile(fileName, fs.readFileSync(filePath));                
             } catch (error) {
@@ -135,6 +118,7 @@ if (fileSelector) { // Browser
                 console.error(`Error opening ${fileName}:`, error.message);
             }
         } else if (fileExt === ".brs") {
+            statusIconFile.innerHTML = "<i class='far fa-file'></i>";
             try {
                 loadFile(fileName, new Blob([fs.readFileSync(filePath)], {type: "text/plain"}));                
             } catch (error) {
@@ -203,31 +187,6 @@ function loadFile(fileName, fileData) {
     display.focus();
 }
 
-// Download Zip
-function loadZip(zip) {
-    if (running) {
-        return;
-    }
-    running = true;
-    display.style.opacity = 0;
-    channelIcons("visible");
-    fileSelector.value = null;
-    source = [];
-    if (brsWorker != undefined) {
-        brsWorker.terminate();
-    }
-    fetch(zip).then(function(response) {
-        if (response.status === 200 || response.status === 0) {
-            console.log("Loading " + zip + "...");
-            openChannelZip(response.blob());
-            display.focus();
-        } else {
-            running = false;
-            return Promise.reject(new Error(response.statusText));
-        }
-    });
-}
-
 // Uncompress Zip and execute
 function openChannelZip(f) {
     JSZip.loadAsync(f).then(
@@ -259,7 +218,6 @@ function openChannelZip(f) {
                             if (splashFile) {
                                 splashFile.async("blob").then(blob => {
                                     createImageBitmap(blob).then(imgData => {
-                                        channelIcons("hidden");
                                         display.style.opacity = 1;
                                         ctx.drawImage(
                                             imgData,
@@ -276,44 +234,14 @@ function openChannelZip(f) {
                                 });
                             }
                         }
-                        if (fileButton) {
-                            fileButton.style.visibility = "hidden";
-                        }
-                        var channelData = "";
-                        if (channelInfo) {
-                            var title = manifestMap.get("title");
-                            if (title) {
-                                channelData += title + "<br/>";
-                            } else {
-                                channelData += "<br/>";
-                            }
-                            var subtitle = manifestMap.get("subtitle");
-                            if (subtitle) {
-                                channelData += subtitle + "<br/>";
-                            } else {
-                                channelData += "<br/>";
-                            }
-                            var majorVersion = manifestMap.get("major_version");
-                            if (majorVersion) {
-                                channelData += "v" + majorVersion;
-                            }
-                            var minorVersion = manifestMap.get("minor_version");
-                            if (minorVersion) {
-                                channelData += "." + minorVersion;
-                            }
-                            var buildVersion = manifestMap.get("build_version");
-                            if (buildVersion) {
-                                channelData += "." + buildVersion;
-                            }
-                            channelInfo.innerHTML = channelData;    
-                        } else if (titleBar) {
+                        if (titleBar) {
                             var title = manifestMap.get("title");
                             if (title) {
                                 titleBar.updateTitle(defaultTitle + " - " + title);
                             } else {
                                 titleBar.updateTitle(defaultTitle);
                             }
-                            var channelVersion = ""                           
+                            var channelVersion = ""
                             var majorVersion = manifestMap.get("major_version");
                             if (majorVersion) {
                                 channelVersion += "v" + majorVersion;
@@ -326,7 +254,7 @@ function openChannelZip(f) {
                             if (buildVersion) {
                                 channelVersion += "." + buildVersion;
                             }                            
-                            statusSep1.innerText = "●";
+                            statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
                             statusVersion.innerText = channelVersion;
                         }
                     },
@@ -433,7 +361,6 @@ function openChannelZip(f) {
 
 // Execute Emulator Web Worker
 function runChannel() {
-    channelIcons("hidden");
     display.style.opacity = 1;
     display.focus();
     brsWorker = new Worker("lib/brsEmu.min.js");
@@ -457,8 +384,8 @@ function receiveMessage(event) {
         bufferCanvas.width = buffer.width;
         bufferCanvas.height = buffer.height;
         bufferCtx.putImageData(buffer, 0, 0);
-        statusResolution.innerText = `Resolution: ${buffer.width}x${buffer.height}`;
-        statusSep2.innerText = "●";
+        statusResolution.innerText = `${buffer.width}x${buffer.height}`;
+        statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
         ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
     } else if (event.data instanceof Map) {
         deviceData.registry = event.data;
@@ -474,19 +401,15 @@ function receiveMessage(event) {
 function closeChannel() {
     ctx.fillStyle = "rgba(0, 0, 0, 1)";
     ctx.fillRect(0, 0, display.width, display.height);
-    if (fileSelector) {
-        channelInfo.innerHTML = "<br><br><br>";
-        fileSelector.value = null;
-        fileButton.style.visibility = "visible";
-    } else if (titleBar) {
+    if (titleBar) {
         titleBar.updateTitle(defaultTitle);
+        statusIconFile.innerText = "";
         statusFile.innerText = "";
-        statusSep1.innerText = "";
+        statusIconVersion.innerText = "";
         statusVersion.innerText = "";
-        statusSep2.innerText = "";
+        statusIconRes.innerText = "";
         statusResolution.innerText = "";
     }
-    channelIcons("visible");
     brsWorker.terminate();
     sharedArray[0] = 0;
     running = false;
@@ -587,15 +510,6 @@ function showStatusBar(visible) {
     } else {
         display.style.bottom = "0px";
         status.style.visibility = "hidden";
-    }
-}
-
-// Channel icons Visibility
-function channelIcons(visibility) {
-    if (channel3) {
-        channel1.style.visibility = visibility;
-        channel2.style.visibility = visibility;
-        channel3.style.visibility = visibility;
     }
 }
 
