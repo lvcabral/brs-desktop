@@ -2,9 +2,13 @@
   "name": "brs-emu-app",
   "productName": "BrightScript 2D API Emulator",
   "description": "Desktop Emulator for Roku 2D API",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": true,
-  "author": "Marcelo Lv Cabral",
+  "author": {
+    "name": "Marcelo Lv Cabral",
+    "email": "marcelo@lvcabral.com",
+    "url": "https://lvcabral.com/"
+  },
   "copyright": "© 2019, Marcelo Lv Cabral",
   "homepage": "https://lvcabral.com/brs/",
   "repository": {
@@ -15,14 +19,15 @@
   "build": {
     "appId": "com.lvcabral.brs-emu.app",
     "productName": "BrightScript Emulator",
-    "artifactName": "brsEmuApp-${version}-${platform}.${ext}",
+    "artifactName": "brsEmuApp-${version}-${platform}-${arch}.${ext}",
     "files": [
       "app/**/*",
       "node_modules/**/*",
       "package.json"
     ],
     "directories": {
-      "buildResources": "resources"
+      "buildResources": "resources",
+      "output": "dist/${version}"      
     },
     "nsis": {
       "oneClick": false,
@@ -43,9 +48,12 @@
     "e2e": "mocha temp/e2e.js --require source-map-support/register",
     "test": "npm run unit && npm run e2e",
     "start": "node build/start.js",
-    "dist": "webpack --config=build/webpack.app.config.js --env=production && electron-builder --x64 --ia32",
-    "dist-win-linux": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -wl --x64 --ia32",
-    "dist-arm": "electron-packager . brsEmuApp --out=./dist --platform=linux --arch=armv7l --overwrite",
+    "dist": "webpack --config=build/webpack.app.config.js --env=production && electron-builder",
+    "dist-win": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -w --x64 --ia32",
+    "dist-linux32": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -l --ia32",
+    "dist-linux64": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -l --x64",
+    "dist-deb64": "webpack --config=build/webpack.app.config.js --env=production && electron-builder --linux deb --x64",
+    "dist-arm": "webpack --config=build/webpack.app.config.js --env=production && electron-packager . brsEmuApp --out=./dist --platform=linux --arch=armv7l --overwrite",
     "release": "npm test && webpack --config=build/webpack.app.config.js --env=production && electron-builder"
   },
   "dependencies": {
