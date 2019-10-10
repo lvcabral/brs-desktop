@@ -78,7 +78,7 @@ const deviceData = {
     timeZone: "US/Arizona",
     locale: "en_US",
     clockFormat: "12h",
-    displayMode: "720p", // Only HD (720p) mode is supported for now
+    displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     defaultFont: "Asap", // Desktop app only has Asap to reduce the package size
 };
 
@@ -97,67 +97,65 @@ for (let index = 0; index < storage.length; index++) {
 }
 
 // Open File
-if (ipcRenderer) {
-    ipcRenderer.on('fileSelected', function (event, file) {
-        var filePath;
-        if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
-            filePath = file[0];
-        } else {
-            console.log("Invalid file:", file[0]);
-            return;
+ipcRenderer.on('fileSelected', function (event, file) {
+    var filePath;
+    if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
+        filePath = file[0];
+    } else {
+        console.log("Invalid file:", file[0]);
+        return;
+    }
+    statusFile.innerText = filePath;
+    var fileName = path.parse(filePath).base;
+    var fileExt = path.parse(filePath).ext.toLowerCase();
+    if ( fileExt === ".zip") {
+        statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
+        try {
+            loadFile(fileName, fs.readFileSync(filePath));                
+        } catch (error) {
+            document.alert("Error opening Channel Package! Check console for details.");
+            console.error(`Error opening ${fileName}:`, error.message);
         }
-        statusFile.innerText = filePath;
-        var fileName = path.parse(filePath).base;
-        var fileExt = path.parse(filePath).ext.toLowerCase();
-        if ( fileExt === ".zip") {
-            statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
-            try {
-                loadFile(fileName, fs.readFileSync(filePath));                
-            } catch (error) {
-                document.alert("Error opening Channel Package! Check console for details.");
-                console.error(`Error opening ${fileName}:`, error.message);
-            }
-        } else if (fileExt === ".brs") {
-            statusIconFile.innerHTML = "<i class='far fa-file'></i>";
-            try {
-                loadFile(fileName, new Blob([fs.readFileSync(filePath)], {type: "text/plain"}));                
-            } catch (error) {
-                document.alert("Error opening BrightScript file! Check console for details.");
-                console.error(`Error opening ${fileName}:`, error.message);             
-            }
-        } else {
-            console.log("File format not supported: ", fileExt);
+    } else if (fileExt === ".brs") {
+        statusIconFile.innerHTML = "<i class='far fa-file'></i>";
+        try {
+            loadFile(fileName, new Blob([fs.readFileSync(filePath)], {type: "text/plain"}));                
+        } catch (error) {
+            document.alert("Error opening BrightScript file! Check console for details.");
+            console.error(`Error opening ${fileName}:`, error.message);             
         }
-    });    
-    ipcRenderer.on('saveScreenshot', function (event, file) {
-        var img = display.toDataURL('image/png');
-        var data = img.replace(/^data:image\/\w+;base64,/, "");
-        var buf = new Buffer(data, 'base64');
-        fs.writeFileSync(file, buf);
-    });    
-    ipcRenderer.on('setTheme', function (event, theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        remote.getGlobal('sharedObject').backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim();
-        mainWindow.setBackgroundColor(remote.getGlobal('sharedObject').backgroundColor);
-        titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
-        titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
-        titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor)
-        titleBar.updateBackground(titleBarConfig.backgroundColor);
-        titleBar.titlebar.style.color = titleColor;
-        window.localStorage.setItem("userTheme", theme);
-    });    
-    ipcRenderer.on('toggleStatusBar', function (event) {
-        var enable = status.style.visibility!=="visible";
-        appMenu.getMenuItemById("status-bar").checked = enable;
-        resizeWindow();
-    });
-    ipcRenderer.on('copyScreenshot', function (event) {
-        copyScreenshot();
-    });
-    ipcRenderer.on('console', function (event, text) {
-        console.log(text);
-    });
-}
+    } else {
+        console.log("File format not supported: ", fileExt);
+    }
+});    
+ipcRenderer.on('saveScreenshot', function (event, file) {
+    var img = display.toDataURL('image/png');
+    var data = img.replace(/^data:image\/\w+;base64,/, "");
+    var buf = new Buffer(data, 'base64');
+    fs.writeFileSync(file, buf);
+});    
+ipcRenderer.on('setTheme', function (event, theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    remote.getGlobal('sharedObject').backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim();
+    mainWindow.setBackgroundColor(remote.getGlobal('sharedObject').backgroundColor);
+    titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
+    titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
+    titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor)
+    titleBar.updateBackground(titleBarConfig.backgroundColor);
+    titleBar.titlebar.style.color = titleColor;
+    window.localStorage.setItem("userTheme", theme);
+});    
+ipcRenderer.on('toggleStatusBar', function (event) {
+    var enable = status.style.visibility!=="visible";
+    appMenu.getMenuItemById("status-bar").checked = enable;
+    resizeWindow();
+});
+ipcRenderer.on('copyScreenshot', function (event) {
+    copyScreenshot();
+});
+ipcRenderer.on('console', function (event, text) {
+    console.log(text);
+});
 
 function loadFile(fileName, fileData) {
     var reader = new FileReader();
@@ -204,12 +202,24 @@ function openChannelZip(f) {
                         if (splashMinTime && !isNaN(splashMinTime)) {
                             splashTimeout = parseInt(splashMinTime);
                         }
-                        var splash = manifestMap.get("splash_screen_hd");
-                        if (!splash) {
-                            splash = manifestMap.get("splash_screen_fhd");
+
+                        var splash;
+                        if (deviceData.displayMode == "480p") {
+                            splash = manifestMap.get("splash_screen_sd");
                             if (!splash) {
-                                splash = manifestMap.get("splash_screen_shd");
-                            }
+                                splash = manifestMap.get("splash_screen_hd");
+                                if (!splash) {
+                                    splash = manifestMap.get("splash_screen_fhd");
+                                }
+                            }    
+                        } else {
+                            splash = manifestMap.get("splash_screen_hd");
+                            if (!splash) {
+                                splash = manifestMap.get("splash_screen_fhd");
+                                if (!splash) {
+                                    splash = manifestMap.get("splash_screen_sd");
+                                }
+                            }    
                         }
                         ctx.fillStyle = "rgba(0, 0, 0, 1)";
                         ctx.fillRect(0, 0, display.width, display.height);
@@ -538,15 +548,16 @@ window.onload = window.onresize = function()
 }
 
 function resizeWindow() {
+    let aspect = deviceData.displayMode == "480p" ? 4/3 : 16/9;
     if (mainWindow.isFullScreen()) {
         titleBar.titlebar.style.display = "none";
         titleBar.container.style.top = "0px";
         showStatusBar(false);
         screenSize.width = window.innerWidth;
-        screenSize.height = parseInt(screenSize.width * 9 / 16);
+        screenSize.height = parseInt(screenSize.width / aspect);
         if (screenSize.height > window.innerHeight) {
             screenSize.height = window.innerHeight;
-            screenSize.width = parseInt(screenSize.height * 16/9);
+            screenSize.width = parseInt(screenSize.height * aspect);
         }
     } else {
         var ratio = 0.97;
@@ -560,10 +571,10 @@ function resizeWindow() {
             showStatusBar(false);
         }
         screenSize.width = window.innerWidth * ratio;
-        screenSize.height = parseInt(screenSize.width * 9 / 16);
+        screenSize.height = parseInt(screenSize.width / aspect );
         if (screenSize.height > (window.innerHeight * ratio) - offset) {
             screenSize.height = (window.innerHeight * ratio) - offset;
-            screenSize.width = parseInt(screenSize.height * 16/9);
+            screenSize.width = parseInt(screenSize.height * aspect);
         }
     }
     display.width = screenSize.width;
