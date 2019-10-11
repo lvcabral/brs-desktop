@@ -28,19 +28,12 @@ export const fileMenuTemplate = {
         dialog.openBrightScriptFile();
       }
     },
+    { type: 'separator' },    
     {
       label: "Save Screenshot...",
       accelerator: "CmdOrCtrl+S",
       click: () => {
         dialog.saveScreenshot();
-      }
-    },
-    { type: 'separator' },    
-    {
-      label: "Reset Emulator",
-      accelerator: "CmdOrCtrl+Shift+R",
-      click: () => {
-        BrowserWindow.getFocusedWindow().webContents.reloadIgnoringCache();
       }
     },
     { type: 'separator' },    
