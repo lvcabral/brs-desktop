@@ -68,12 +68,12 @@ document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
 // Device Data
-const developerId = "UniqueDeveloperId";
+const developerId = "emulator-dev-id"; // Unique id to segregate registry among channels
 const deviceData = {
     developerId: developerId,
     registry: new Map(),
     deviceModel: "8000X",
-    clientId: "6c5bf3a5-b2a5-4918-824d-7691d5c85364",
+    clientId: "6c5bf3a5-b2a5-4918-824d-7691d5c85364", // Unique identifier of the device
     countryCode: "US",
     timeZone: "US/Arizona",
     locale: "en_US",
@@ -81,10 +81,12 @@ const deviceData = {
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     defaultFont: "Asap", // Desktop app only has Asap to reduce the package size
 };
-
-if (status) {
-    let ui = deviceData.displayMode == "720p" ? "HD" : deviceData.displayMode == "1080p" ? "FHD" : "SD";
-    statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
+const displayMode = window.localStorage.getItem("displayMode");
+if (displayMode && displayMode !== deviceData.displayMode) {
+    changeDisplayMode(displayMode);
+    appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
+} else {
+    updateDisplayOnStatus()
 }
 
 // Load Registry
@@ -95,8 +97,47 @@ for (let index = 0; index < storage.length; index++) {
         deviceData.registry.set(key, storage.getItem(key));
     }
 }
+// Events from background thread
+ipcRenderer.on('saveScreenshot', function (event, file) {
+    var img = display.toDataURL('image/png');
+    var data = img.replace(/^data:image\/\w+;base64,/, "");
+    var buf = new Buffer(data, 'base64');
+    fs.writeFileSync(file, buf);
+});
 
-// Open File
+ipcRenderer.on('copyScreenshot', function (event) {
+    copyScreenshot();
+});
+
+ipcRenderer.on('setTheme', function (event, theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    remote.getGlobal('sharedObject').backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim();
+    mainWindow.setBackgroundColor(remote.getGlobal('sharedObject').backgroundColor);
+    titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
+    titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
+    titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor)
+    titleBar.updateBackground(titleBarConfig.backgroundColor);
+    titleBar.titlebar.style.color = titleColor;
+    window.localStorage.setItem("userTheme", theme);
+});
+
+ipcRenderer.on('setDevice', function (event, mode) {
+    if (mode !== deviceData.displayMode) {
+        changeDisplayMode(mode);
+        window.localStorage.setItem("displayMode", mode);
+    }
+});
+
+ipcRenderer.on('toggleStatusBar', function (event) {
+    var enable = status.style.visibility!=="visible";
+    appMenu.getMenuItemById("status-bar").checked = enable;
+    resizeWindow();
+});
+
+ipcRenderer.on('console', function (event, text) {
+    console.log(text);
+});
+
 ipcRenderer.on('fileSelected', function (event, file) {
     var filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
@@ -128,35 +169,7 @@ ipcRenderer.on('fileSelected', function (event, file) {
         console.log("File format not supported: ", fileExt);
     }
 });    
-ipcRenderer.on('saveScreenshot', function (event, file) {
-    var img = display.toDataURL('image/png');
-    var data = img.replace(/^data:image\/\w+;base64,/, "");
-    var buf = new Buffer(data, 'base64');
-    fs.writeFileSync(file, buf);
-});    
-ipcRenderer.on('setTheme', function (event, theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    remote.getGlobal('sharedObject').backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim();
-    mainWindow.setBackgroundColor(remote.getGlobal('sharedObject').backgroundColor);
-    titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
-    titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
-    titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor)
-    titleBar.updateBackground(titleBarConfig.backgroundColor);
-    titleBar.titlebar.style.color = titleColor;
-    window.localStorage.setItem("userTheme", theme);
-});    
-ipcRenderer.on('toggleStatusBar', function (event) {
-    var enable = status.style.visibility!=="visible";
-    appMenu.getMenuItemById("status-bar").checked = enable;
-    resizeWindow();
-});
-ipcRenderer.on('copyScreenshot', function (event) {
-    copyScreenshot();
-});
-ipcRenderer.on('console', function (event, text) {
-    console.log(text);
-});
-
+// Open File
 function loadFile(fileName, fileData) {
     var reader = new FileReader();
     reader.onload = function(progressEvent) {
@@ -583,5 +596,19 @@ function resizeWindow() {
     display.style.height = screenSize.height;
     if (running) {
         ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
+    }    
+}
+
+function changeDisplayMode(mode) {
+    deviceData.displayMode = mode;
+    deviceData.deviceModel = mode == "720p" ? "8000X" : mode == "1080p" ? "4620X" : "2720X";
+    updateDisplayOnStatus()
+    resizeWindow()
+}
+
+function updateDisplayOnStatus() {
+    if (status) {
+        let ui = deviceData.displayMode == "720p" ? "HD" : deviceData.displayMode == "1080p" ? "FHD" : "SD";
+        statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
     }    
 }

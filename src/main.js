@@ -7,17 +7,15 @@
  *--------------------------------------------------------------------------------------------*/
 import path from "path";
 import url from "url";
+import env from "env";
 import minimist from "minimist";
 import { app, screen, Menu } from "electron";
+import createWindow from "./helpers/window";
 import { fileMenuTemplate } from "./menu/fileMenuTemplate";
 import { editMenuTemplate } from "./menu/editMenuTemplate";
+import { deviceMenuTemplate } from "./menu/deviceMenuTemplate";
 import { viewMenuTemplate } from "./menu/viewMenuTemplate";
 import { helpMenuTemplate } from "./menu/helpMenuTemplate";
-import createWindow from "./helpers/window";
-
-// Special module holding environment variables which you declared
-// in config/env_xxx.json file.
-import env from "env";
 
 var argv = minimist(process.argv.slice(1), {
   string: ['o'],
@@ -25,7 +23,7 @@ var argv = minimist(process.argv.slice(1), {
 });
 
 const setApplicationMenu = () => {
-  const menus = [fileMenuTemplate, editMenuTemplate, viewMenuTemplate, helpMenuTemplate];
+  const menus = [fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate];
   Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
 };
 
