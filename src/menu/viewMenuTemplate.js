@@ -8,6 +8,15 @@ export const viewMenuTemplate = {
       role: "togglefullscreen",
     },
     {
+      id: "view-console",
+      label: "Console",
+      accelerator: "CmdOrCtrl+Shift+C",
+      click: () => {
+        var window = BrowserWindow.getFocusedWindow();
+        window.webContents.send('toggleConsole');
+      }
+    },
+    {
       label: "Developer Tools",
       accelerator: "CmdOrCtrl+Shift+I",
       role: "toggleDevTools",

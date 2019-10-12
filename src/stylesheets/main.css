@@ -73,3 +73,8 @@ a {
   right: 0;
 	margin:auto;
 }
+
+.console-panel, .console-input, .console-message {
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 12px !important;
+}

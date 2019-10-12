@@ -27,7 +27,7 @@
     ],
     "directories": {
       "buildResources": "resources",
-      "output": "dist/${version}"      
+      "output": "dist/${version}"
     },
     "nsis": {
       "oneClick": false,

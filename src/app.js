@@ -11,6 +11,7 @@ import path from "path";
 import Mousetrap from "mousetrap";
 import * as customTitlebar from "custom-electron-titlebar";
 import { remote, ipcRenderer } from "electron";
+import oConsole from "./console";
 
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
@@ -20,43 +21,44 @@ if (userTheme) {
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
 }
 remote.getGlobal('sharedObject').backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim();
-var titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
-var titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
+let titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
+let titleBgColor = getComputedStyle(document.documentElement).getPropertyValue('--title-background-color').trim();
 const titleBarConfig = {
     backgroundColor: customTitlebar.Color.fromHex(titleBgColor),
     icon: "./images/icon512x512.png",
     shadow: true
 };
-var titleBar = new customTitlebar.Titlebar(titleBarConfig);
+const titleBar = new customTitlebar.Titlebar(titleBarConfig);
 titleBar.titlebar.style.color = titleColor;
-var defaultTitle = document.title;
+const defaultTitle = document.title;
 // Emulator code
 import JSZip from "jszip";
-var display = document.getElementById("display");
-var screenSize = { width: 854, height: 480 };
-var ctx = display.getContext("2d", { alpha: false });
+const display = document.getElementById("display");
+const screenSize = { width: 854, height: 480 };
+const ctx = display.getContext("2d", { alpha: false });
+let consoleInput;
 // Status Bar Objects
-var status = document.getElementById("status");
-var statusIconFile = document.getElementById("statusIconFile");
-var statusFile = document.getElementById("statusFile");
-var statusIconVersion = document.getElementById("statusIconVersion");
-var statusVersion = document.getElementById("statusVersion");
-var statusDisplay = document.getElementById("statusDisplay");
-var statusIconRes = document.getElementById("statusIconRes");
-var statusResolution = document.getElementById("statusResolution");
+const status = document.getElementById("status");
+const statusIconFile = document.getElementById("statusIconFile");
+const statusFile = document.getElementById("statusFile");
+const statusIconVersion = document.getElementById("statusIconVersion");
+const statusVersion = document.getElementById("statusVersion");
+const statusDisplay = document.getElementById("statusDisplay");
+const statusIconRes = document.getElementById("statusIconRes");
+const statusResolution = document.getElementById("statusResolution");
 // Buffer Objects
-var bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
-var bufferCtx = bufferCanvas.getContext("2d");
-var buffer = new ImageData(screenSize.width, screenSize.height);
+let buffer = new ImageData(screenSize.width, screenSize.height);
+const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
+const bufferCtx = bufferCanvas.getContext("2d");
 // Channel Data
-var splashTimeout = 1600;
-var source = [];
-var paths = [];
-var txts = [];
-var imgs = [];
-var fonts = [];
-var brsWorker;
-var running = false;
+let splashTimeout = 1600;
+let source = [];
+let paths = [];
+let txts = [];
+let imgs = [];
+let fonts = [];
+let brsWorker;
+let running = false;
 
 // Control buffer
 const length = 10;
@@ -99,10 +101,9 @@ for (let index = 0; index < storage.length; index++) {
 }
 // Events from background thread
 ipcRenderer.on('saveScreenshot', function (event, file) {
-    var img = display.toDataURL('image/png');
-    var data = img.replace(/^data:image\/\w+;base64,/, "");
-    var buf = new Buffer(data, 'base64');
-    fs.writeFileSync(file, buf);
+    const img = display.toDataURL('image/png');
+    const data = img.replace(/^data:image\/\w+;base64,/, "");
+    fs.writeFileSync(file, new Buffer(data, 'base64'));
 });
 
 ipcRenderer.on('copyScreenshot', function (event) {
@@ -129,8 +130,20 @@ ipcRenderer.on('setDevice', function (event, mode) {
 });
 
 ipcRenderer.on('toggleStatusBar', function (event) {
-    var enable = status.style.visibility!=="visible";
+    const enable = status.style.visibility!=="visible";
     appMenu.getMenuItemById("status-bar").checked = enable;
+    resizeWindow();
+});
+
+ipcRenderer.on('toggleConsole', function (event) {
+    if (oConsole.isShown()) {
+        oConsole.hide();
+        oConsole.disable();
+    } else {
+        oConsole.enable(false);
+        oConsole.show();
+        consoleInput = document.querySelector("[onscreenconsole-id='input']");
+    }
     resizeWindow();
 });
 
@@ -139,7 +152,7 @@ ipcRenderer.on('console', function (event, text) {
 });
 
 ipcRenderer.on('fileSelected', function (event, file) {
-    var filePath;
+    let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
         filePath = file[0];
     } else {
@@ -147,8 +160,8 @@ ipcRenderer.on('fileSelected', function (event, file) {
         return;
     }
     statusFile.innerText = filePath;
-    var fileName = path.parse(filePath).base;
-    var fileExt = path.parse(filePath).ext.toLowerCase();
+    const fileName = path.parse(filePath).base;
+    const fileExt = path.parse(filePath).ext.toLowerCase();
     if ( fileExt === ".zip") {
         statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
         try {
@@ -171,7 +184,7 @@ ipcRenderer.on('fileSelected', function (event, file) {
 });    
 // Open File
 function loadFile(fileName, fileData) {
-    var reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = function(progressEvent) {
         paths = [];
         imgs = [];
@@ -202,21 +215,20 @@ function loadFile(fileName, fileData) {
 function openChannelZip(f) {
     JSZip.loadAsync(f).then(
         function(zip) {
-            var manifest = zip.file("manifest");
+            const manifest = zip.file("manifest");
             if (manifest) {
                 manifest.async("string").then(
                     function success(content) {
-                        var manifestMap = new Map();
+                        const manifestMap = new Map();
                         content.match(/[^\r\n]+/g).map(function(ln) {
-                            var line = ln.split("=");
+                            const line = ln.split("=");
                             manifestMap.set(line[0].toLowerCase(), line[1]);
                         });
-                        var splashMinTime = manifestMap.get("splash_min_time");
+                        const splashMinTime = manifestMap.get("splash_min_time");
                         if (splashMinTime && !isNaN(splashMinTime)) {
                             splashTimeout = parseInt(splashMinTime);
                         }
-
-                        var splash;
+                        let splash;
                         if (deviceData.displayMode == "480p") {
                             splash = manifestMap.get("splash_screen_sd");
                             if (!splash) {
@@ -237,7 +249,7 @@ function openChannelZip(f) {
                         ctx.fillStyle = "rgba(0, 0, 0, 1)";
                         ctx.fillRect(0, 0, display.width, display.height);
                         if (splash && splash.substr(0, 5) === "pkg:/") {
-                            var splashFile = zip.file(splash.substr(5));
+                            const splashFile = zip.file(splash.substr(5));
                             if (splashFile) {
                                 splashFile.async("blob").then(blob => {
                                     createImageBitmap(blob).then(imgData => {
@@ -258,22 +270,22 @@ function openChannelZip(f) {
                             }
                         }
                         if (titleBar) {
-                            var title = manifestMap.get("title");
+                            const title = manifestMap.get("title");
                             if (title) {
                                 titleBar.updateTitle(defaultTitle + " - " + title);
                             } else {
                                 titleBar.updateTitle(defaultTitle);
                             }
-                            var channelVersion = ""
-                            var majorVersion = manifestMap.get("major_version");
+                            let channelVersion = ""
+                            const majorVersion = manifestMap.get("major_version");
                             if (majorVersion) {
                                 channelVersion += "v" + majorVersion;
                             }
-                            var minorVersion = manifestMap.get("minor_version");
+                            const minorVersion = manifestMap.get("minor_version");
                             if (minorVersion) {
                                 channelVersion += "." + minorVersion;
                             }
-                            var buildVersion = manifestMap.get("build_version");
+                            const buildVersion = manifestMap.get("build_version");
                             if (buildVersion) {
                                 channelVersion += "." + buildVersion;
                             }                            
@@ -292,14 +304,14 @@ function openChannelZip(f) {
                 running = false;
                 return;
             }
-            var assetPaths = [];
-            var assetsEvents = [];
-            var bmpId = 0;
-            var txtId = 0;
-            var srcId = 0;
-            var fntId = 0;
+            const assetPaths = [];
+            const assetsEvents = [];
+            let bmpId = 0;
+            let txtId = 0;
+            let srcId = 0;
+            let fntId = 0;
             zip.forEach(function(relativePath, zipEntry) {
-                var lcasePath = relativePath.toLowerCase();
+                const lcasePath = relativePath.toLowerCase();
                 if (
                     !zipEntry.dir &&
                     lcasePath.substr(0, 6) === "source" &&
@@ -343,8 +355,8 @@ function openChannelZip(f) {
                     txts = [];
                     imgs = [];
                     fonts = [];
-                    var bmpEvents = [];
-                    for (var index = 0; index < assets.length; index++) {
+                    const bmpEvents = [];
+                    for (let index = 0; index < assets.length; index++) {
                         paths.push(assetPaths[index]);
                         if (assetPaths[index].type === "image") {
                             bmpEvents.push(createImageBitmap(assets[index]));
@@ -388,7 +400,7 @@ function runChannel() {
     display.focus();
     brsWorker = new Worker("lib/brsEmu.min.js");
     brsWorker.addEventListener("message", receiveMessage);
-    var payload = {
+    const payload = {
         device: deviceData,
         paths: paths,
         brs: source,
@@ -440,6 +452,9 @@ function closeChannel() {
 
 // Remote control emulator
 function keyDownHandler(event) {
+     if (consoleInput === document.activeElement) {
+         return;
+     }
     if (event.keyCode == 8) {
         sharedArray[0] = 0; // BUTTON_BACK_PRESSED
     } else if (event.keyCode == 13) {
@@ -482,6 +497,9 @@ function keyDownHandler(event) {
 }
 
 function keyUpHandler(event) {
+    if (consoleInput === document.activeElement) {
+        return;
+    }
     if (event.keyCode == 8) {
         sharedArray[0] = 100; // BUTTON_BACK_RELEASED
     } else if (event.keyCode == 13) {
@@ -562,33 +580,32 @@ window.onload = window.onresize = function()
 
 function resizeWindow() {
     let aspect = deviceData.displayMode == "480p" ? 4/3 : 16/9;
+    let ratio;
+    let offset;
     if (mainWindow.isFullScreen()) {
+        ratio = 1;
+        offset = oConsole.isShown() ? 255 : 0;
         titleBar.titlebar.style.display = "none";
         titleBar.container.style.top = "0px";
         showStatusBar(false);
-        screenSize.width = window.innerWidth;
-        screenSize.height = parseInt(screenSize.width / aspect);
-        if (screenSize.height > window.innerHeight) {
-            screenSize.height = window.innerHeight;
-            screenSize.width = parseInt(screenSize.height * aspect);
-        }
     } else {
-        var ratio = 0.97;
-        var offset = 13;
+        ratio = 0.97;
         titleBar.titlebar.style.display = "";
         titleBar.container.style.top = "30px";
         if (appMenu.getMenuItemById("status-bar").checked) {
             showStatusBar(true);
-            offset = 30;
+            offset = oConsole.isShown() ? 255 : 30;
         } else {
             showStatusBar(false);
+            offset = oConsole.isShown() ? 255 : offset;
         }
-        screenSize.width = window.innerWidth * ratio;
-        screenSize.height = parseInt(screenSize.width / aspect );
-        if (screenSize.height > (window.innerHeight * ratio) - offset) {
-            screenSize.height = (window.innerHeight * ratio) - offset;
-            screenSize.width = parseInt(screenSize.height * aspect);
-        }
+        display.style.bottom = `${offset-10}px`;
+    }
+    screenSize.width = window.innerWidth * ratio;
+    screenSize.height = parseInt(screenSize.width / aspect );
+    if (screenSize.height > (window.innerHeight * ratio) - offset) {
+        screenSize.height = (window.innerHeight * ratio) - offset;
+        screenSize.width = parseInt(screenSize.height * aspect);
     }
     display.width = screenSize.width;
     display.style.width = screenSize.width;
@@ -608,7 +625,8 @@ function changeDisplayMode(mode) {
 
 function updateDisplayOnStatus() {
     if (status) {
-        let ui = deviceData.displayMode == "720p" ? "HD" : deviceData.displayMode == "1080p" ? "FHD" : "SD";
-        statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
+        const mode = deviceData.displayMode;
+        const ui = mode == "720p" ? "HD" : mode == "1080p" ? "FHD" : "SD";
+        statusDisplay.innerText = `${ui} (${mode})`;
     }    
 }

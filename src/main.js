@@ -17,9 +17,10 @@ import { deviceMenuTemplate } from "./menu/deviceMenuTemplate";
 import { viewMenuTemplate } from "./menu/viewMenuTemplate";
 import { helpMenuTemplate } from "./menu/helpMenuTemplate";
 
-var argv = minimist(process.argv.slice(1), {
+const argv = minimist(process.argv.slice(1), {
   string: ['o'],
-  alias: {f: 'fullscreen', d: 'devtools' }
+  alias: { f: 'fullscreen', c: "console", d: 'devtools' },
+  default: { console: env.name === "development" }
 });
 
 const setApplicationMenu = () => {
@@ -54,11 +55,14 @@ app.on("ready", () => {
       protocol: "file:",
       slashes: true
     })
-  );
-
-  if (env.name === "development" || argv.devtools) {
-    mainWindow.openDevTools();
-  }
+  ).then (function() {
+    if (argv.devtools) {
+      mainWindow.openDevTools();
+    }  
+    if (argv.console) {
+      mainWindow.webContents.send('toggleConsole');  
+    }  
+  });
 });
 
 app.on("window-all-closed", () => {
