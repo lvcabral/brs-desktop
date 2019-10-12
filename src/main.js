@@ -18,53 +18,53 @@ import { viewMenuTemplate } from "./menu/viewMenuTemplate";
 import { helpMenuTemplate } from "./menu/helpMenuTemplate";
 
 var argv = minimist(process.argv.slice(1), {
-  string: ["o"],
-  alias: { f: "fullscreen", d: "devtools" }
+    string: [ "o" ],
+    alias: { f: "fullscreen", d: "devtools" }
 });
 
 const setApplicationMenu = () => {
-  const menus = [fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate];
-  Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
+    const menus = [ fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate ];
+    Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
 };
 
 // Save userData in separate folders for each environment.
 if (env.name !== "production") {
-  const userDataPath = app.getPath("userData");
-  app.setPath("userData", `${userDataPath} (${env.name})`);
+    const userDataPath = app.getPath("userData");
+    app.setPath("userData", `${userDataPath} (${env.name})`);
 }
 
 app.on("ready", () => {
-  setApplicationMenu();
+    setApplicationMenu();
 
-  global.sharedObject = {
-    backgroundColor: "#251135"
-  };
-  const mainWindow = createWindow(
-    "main",
-    {
-      width: 1280,
-      height: 770,
-      backgroundColor: global.sharedObject.backgroundColor
-    },
-    argv
-  );
+    global.sharedObject = {
+        backgroundColor: "#251135"
+    };
+    const mainWindow = createWindow(
+        "main",
+        {
+            width: 1280,
+            height: 770,
+            backgroundColor: global.sharedObject.backgroundColor
+        },
+        argv
+    );
 
-  let winBounds = mainWindow.getBounds();
-  let display = screen.getDisplayNearestPoint({ x: winBounds.x, y: winBounds.y });
-  mainWindow.setMinimumSize(Math.min(900, display.size.width), Math.min(550, display.size.height));
-  mainWindow.loadURL(
-    url.format({
-      pathname: path.join(__dirname, "index.html"),
-      protocol: "file:",
-      slashes: true
-    })
-  );
+    let winBounds = mainWindow.getBounds();
+    let display = screen.getDisplayNearestPoint({ x: winBounds.x, y: winBounds.y });
+    mainWindow.setMinimumSize(Math.min(900, display.size.width), Math.min(550, display.size.height));
+    mainWindow.loadURL(
+        url.format({
+            pathname: path.join(__dirname, "index.html"),
+            protocol: "file:",
+            slashes: true
+        })
+    );
 
-  if (env.name === "development" || argv.devtools) {
-    mainWindow.openDevTools();
-  }
+    if (env.name === "development" || argv.devtools) {
+        mainWindow.openDevTools();
+    }
 });
 
 app.on("window-all-closed", () => {
-  app.quit();
+    app.quit();
 });
