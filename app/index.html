@@ -1,34 +1,34 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>BrightScript 2D API Emulator</title>
-  <script>
-    window.__setTheme = () => {
-      let userTheme = localStorage.getItem("userTheme");
-      let defaultTheme = 'purple';
-      document.documentElement.setAttribute('data-theme', userTheme || defaultTheme);
-    }
-    __setTheme();
-  </script>
-  <link href="./css/all.min.css" rel="stylesheet"> 
+    <meta charset="utf-8">
+    <title>BrightScript 2D API Emulator</title>
+    <script>
+        window.__setTheme = () => {
+            let userTheme = localStorage.getItem("userTheme");
+            let defaultTheme = 'purple';
+            document.documentElement.setAttribute('data-theme', userTheme || defaultTheme);
+        }
+        __setTheme();
+    </script>
+    <link href="./css/all.min.css" rel="stylesheet"> 
 </head>
 <body>
-  <canvas id="display"></canvas>
-  <div id="status" class="statusbar">
-    <span style="float:left"></span>
-    <span id="statusIconFile" style="float:left"></span>
-    <span id="statusFile" style="float:left"></span>
-    <span style="float:left"></span>
-    <span id="statusIconVersion" style="float:left"></span>
-    <span id="statusVersion" style="float:left"></span>
-    <span style="float:right"></span>
-    <span id="statusDisplay" style="float:right"></span>
-    <span style="float:right"><i class="fa fa-desktop"></i></span>
-    <span style="float:right"></span>
-    <span id="statusResolution" style="float:right"></span>
-    <span id="statusIconRes" style="float:right"></span>
-  </div>
-<script src="app.js"></script>
+    <canvas id="display"></canvas>
+    <div id="status" class="statusbar">
+        <span style="float:left"></span>
+        <span id="statusIconFile" style="float:left"></span>
+        <span id="statusFile" style="float:left"></span>
+        <span style="float:left"></span>
+        <span id="statusIconVersion" style="float:left"></span>
+        <span id="statusVersion" style="float:left"></span>
+        <span style="float:right"></span>
+        <span id="statusDisplay" style="float:right"></span>
+        <span style="float:right"><i class="fa fa-desktop"></i></span>
+        <span style="float:right"></span>
+        <span id="statusResolution" style="float:right"></span>
+        <span id="statusIconRes" style="float:right"></span>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>
