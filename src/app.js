@@ -11,7 +11,7 @@ import path from "path";
 import Mousetrap from "mousetrap";
 import * as customTitlebar from "custom-electron-titlebar";
 import { remote, ipcRenderer } from "electron";
-
+import JSZip from "jszip";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
 const appMenu = remote.Menu.getApplicationMenu();
@@ -32,11 +32,6 @@ const titleBarConfig = {
 const titleBar = new customTitlebar.Titlebar(titleBarConfig);
 titleBar.titlebar.style.color = titleColor;
 const defaultTitle = document.title;
-// Emulator Display
-import JSZip from "jszip";
-const display = document.getElementById("display");
-const screenSize = { width: 854, height: 480 };
-const ctx = display.getContext("2d", { alpha: false });
 // Status Bar Objects
 const status = document.getElementById("status");
 const statusIconFile = document.getElementById("statusIconFile");
@@ -46,10 +41,6 @@ const statusVersion = document.getElementById("statusVersion");
 const statusDisplay = document.getElementById("statusDisplay");
 const statusIconRes = document.getElementById("statusIconRes");
 const statusResolution = document.getElementById("statusResolution");
-// Buffer Objects
-const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
-const bufferCtx = bufferCanvas.getContext("2d");
-let buffer = new ImageData(screenSize.width, screenSize.height);
 // Channel Data
 let splashTimeout = 1600;
 let source = [];
@@ -59,16 +50,13 @@ let imgs = [];
 let fonts = [];
 let brsWorker;
 let running = false;
-
 // Control buffer
 const length = 10;
 const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length);
 const sharedArray = new Int32Array(sharedBuffer);
-
 // Keyboard handlers
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-
 // Device Data
 const developerId = "emulator-dev-id"; // Unique id to segregate registry among channels
 const deviceData = {
@@ -83,14 +71,32 @@ const deviceData = {
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     defaultFont: "Asap" // Desktop app only has Asap to reduce the package size
 };
-const displayMode = window.localStorage.getItem("displayMode");
-if (displayMode && displayMode !== deviceData.displayMode) {
+// Emulator Display
+const display = document.getElementById("display");
+const ctx = display.getContext("2d", { alpha: false });
+const screenSize = { width: 1280, height: 720 };
+const displayMode = window.localStorage.getItem("displayMode") || "720p";
+if (displayMode === "1080p") {
+    screenSize.width = 1920;
+    screenSize.height = 1080;
+} else if (displayMode === "480p") {
+    screenSize.width = 720;
+    screenSize.height = 480;
+}
+let aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
+if (displayMode !== deviceData.displayMode) {
     changeDisplayMode(displayMode);
     appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
 } else {
     updateDisplayOnStatus();
 }
-
+// Buffer Objects
+const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
+const bufferCtx = bufferCanvas.getContext("2d");
+let buffer = new ImageData(screenSize.width, screenSize.height);
+// Overscan Mode
+let overscanMode = window.localStorage.getItem("overscanMode") || "disabled" ;
+appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
 // Load Registry
 const storage = window.localStorage;
 for (let index = 0; index < storage.length; index++) {
@@ -105,11 +111,9 @@ ipcRenderer.on("saveScreenshot", function(event, file) {
     const data = img.replace(/^data:image\/\w+;base64,/, "");
     fs.writeFileSync(file, new Buffer(data, "base64"));
 });
-
 ipcRenderer.on("copyScreenshot", function(event) {
     copyScreenshot();
 });
-
 ipcRenderer.on("setTheme", function(event, theme) {
     document.documentElement.setAttribute("data-theme", theme);
     remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
@@ -123,24 +127,25 @@ ipcRenderer.on("setTheme", function(event, theme) {
     titleBar.titlebar.style.color = titleColor;
     window.localStorage.setItem("userTheme", theme);
 });
-
-ipcRenderer.on("setDevice", function(event, mode) {
+ipcRenderer.on("setDisplay", function(event, mode) {
     if (mode !== deviceData.displayMode) {
         changeDisplayMode(mode);
         window.localStorage.setItem("displayMode", mode);
     }
 });
-
+ipcRenderer.on("setOverscan", function(event, mode) {
+    overscanMode = mode;
+    window.localStorage.setItem("overscanMode", mode);
+    redrawDisplay();
+});
 ipcRenderer.on("toggleStatusBar", function(event) {
     const enable = status.style.visibility !== "visible";
     appMenu.getMenuItemById("status-bar").checked = enable;
-    resizeWindow();
+    redrawDisplay();
 });
-
 ipcRenderer.on("console", function(event, text) {
     console.log(text);
 });
-
 ipcRenderer.on("fileSelected", function(event, file) {
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
@@ -200,7 +205,6 @@ function loadFile(fileName, fileData) {
     }
     display.focus();
 }
-
 // Uncompress Zip and execute
 function openChannelZip(f) {
     JSZip.loadAsync(f).then(
@@ -387,7 +391,6 @@ function openChannelZip(f) {
         }
     );
 }
-
 // Execute Emulator Web Worker
 function runChannel() {
     display.style.opacity = 1;
@@ -405,17 +408,18 @@ function runChannel() {
     brsWorker.postMessage(sharedBuffer);
     brsWorker.postMessage(payload, imgs);
 }
-
 // Receive Screen and Registry data from Web Worker
 function receiveMessage(event) {
     if (event.data instanceof ImageData) {
         buffer = event.data;
-        bufferCanvas.width = buffer.width;
-        bufferCanvas.height = buffer.height;
+        if (bufferCanvas.width !== buffer.width ||  bufferCanvas.height !== buffer.height) {
+            statusResolution.innerText = `${buffer.width}x${buffer.height}`;
+            statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
+            bufferCanvas.width = buffer.width;
+            bufferCanvas.height = buffer.height;    
+        }
         bufferCtx.putImageData(buffer, 0, 0);
-        statusResolution.innerText = `${buffer.width}x${buffer.height}`;
-        statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
-        ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
+        drawBufferImage();
     } else if (event.data instanceof Map) {
         deviceData.registry = event.data;
         deviceData.registry.forEach(function(value, key) {
@@ -425,7 +429,6 @@ function receiveMessage(event) {
         closeChannel();
     }
 }
-
 // Restore emulator menu and terminate Worker
 function closeChannel() {
     ctx.fillStyle = "rgba(0, 0, 0, 1)";
@@ -443,7 +446,6 @@ function closeChannel() {
     sharedArray[0] = 0;
     running = false;
 }
-
 // Remote control emulator
 function keyDownHandler(event) {
     if (event.keyCode == 8) {
@@ -486,7 +488,6 @@ function keyDownHandler(event) {
     }
     // TODO: Send TimeSinceLastKeypress()
 }
-
 function keyUpHandler(event) {
     if (event.keyCode == 8) {
         sharedArray[0] = 100; // BUTTON_BACK_RELEASED
@@ -516,13 +517,11 @@ function keyUpHandler(event) {
         sharedArray[0] = 118; // BUTTON_B_RELEASED
     }
 }
-
 Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
     console.log("copied screenshot!");
     copyScreenshot();
     return false;
 });
-
 // Copy Screenshot to the Clipboard
 function copyScreenshot() {
     display.toBlob(function(blob) {
@@ -530,7 +529,6 @@ function copyScreenshot() {
         navigator.clipboard.write([ item ]);
     });
 }
-
 // Status Bar visibility
 function showStatusBar(visible) {
     if (visible) {
@@ -541,7 +539,6 @@ function showStatusBar(visible) {
         status.style.visibility = "hidden";
     }
 }
-
 // Exception Handler
 function clientException(msg, msgbox = false) {
     console.error(msg);
@@ -553,29 +550,26 @@ function clientException(msg, msgbox = false) {
 titleBar.onBlur = titleBar.onFocus = function() {
     titleBar.titlebar.style.color = titleColor;
 };
-
 // Toggle Full Screen when Double Click
 display.ondblclick = function() {
     const toggle = !mainWindow.isFullScreen();
     mainWindow.setFullScreen(toggle);
 };
-
-// Canvas Resizing with Window
+// Window Resize Event
 window.onload = window.onresize = function() {
-    resizeWindow();
+    redrawDisplay();
 };
-
-function resizeWindow() {
-    let aspect = deviceData.displayMode == "480p" ? 4 / 3 : 16 / 9;
+// Redraw Display Canvas
+function redrawDisplay() {
     if (mainWindow.isFullScreen()) {
         titleBar.titlebar.style.display = "none";
         titleBar.container.style.top = "0px";
         showStatusBar(false);
         screenSize.width = window.innerWidth;
-        screenSize.height = parseInt(screenSize.width / aspect);
+        screenSize.height = parseInt(screenSize.width / aspectRatio);
         if (screenSize.height > window.innerHeight) {
             screenSize.height = window.innerHeight;
-            screenSize.width = parseInt(screenSize.height * aspect);
+            screenSize.width = parseInt(screenSize.height * aspectRatio);
         }
     } else {
         const ratio = 0.97;
@@ -589,10 +583,10 @@ function resizeWindow() {
             showStatusBar(false);
         }
         screenSize.width = window.innerWidth * ratio;
-        screenSize.height = parseInt(screenSize.width / aspect);
+        screenSize.height = parseInt(screenSize.width / aspectRatio);
         if (screenSize.height > window.innerHeight * ratio - offset) {
             screenSize.height = window.innerHeight * ratio - offset;
-            screenSize.width = parseInt(screenSize.height * aspect);
+            screenSize.width = parseInt(screenSize.height * aspectRatio);
         }
     }
     display.width = screenSize.width;
@@ -600,17 +594,44 @@ function resizeWindow() {
     display.height = screenSize.height;
     display.style.height = screenSize.height;
     if (running) {
-        ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
+        drawBufferImage();
     }
 }
-
+// Draw Buffer Image to the Display Canvas
+function drawBufferImage() {
+    let overscan = 0.04;
+    if (overscanMode === "enabled") {
+        let x = Math.round(bufferCanvas.width * overscan);
+        let y = Math.round(bufferCanvas.height * overscan);
+        let w = bufferCanvas.width - (x * 2);
+        let h = bufferCanvas.height - (y * 2);
+        ctx.drawImage(bufferCanvas, x, y, w, h, 0, 0, screenSize.width, screenSize.height);
+    } else {
+        ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
+    }
+    if (overscanMode === "guide-lines") {
+        let x = Math.round(screenSize.width * overscan);
+        let y = Math.round(screenSize.height * overscan);
+        let w = screenSize.width - (x * 2);
+        let h = screenSize.height - (y * 2);
+        ctx.strokeStyle = "#D0D0D0FF";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([1, 2]);
+        ctx.strokeRect(x, y, w, h);            
+    }
+}
+// Change Display Mode
 function changeDisplayMode(mode) {
+    if (running) {
+        closeChannel();
+    }
     deviceData.displayMode = mode;
     deviceData.deviceModel = mode == "720p" ? "8000X" : mode == "1080p" ? "4620X" : "2720X";
+    aspectRatio = deviceData.displayMode === "480p" ? 4 / 3 : 16 / 9;
     updateDisplayOnStatus();
-    resizeWindow();
+    redrawDisplay();
 }
-
+// Update Display Mode on Status Bar
 function updateDisplayOnStatus() {
     if (status) {
         let ui = deviceData.displayMode == "720p" ? "HD" : deviceData.displayMode == "1080p" ? "FHD" : "SD";
