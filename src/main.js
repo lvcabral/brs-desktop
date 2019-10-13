@@ -17,7 +17,7 @@ import { deviceMenuTemplate } from "./menu/deviceMenuTemplate";
 import { viewMenuTemplate } from "./menu/viewMenuTemplate";
 import { helpMenuTemplate } from "./menu/helpMenuTemplate";
 
-var argv = minimist(process.argv.slice(1), {
+const argv = minimist(process.argv.slice(1), {
     string: [ "o" ],
     alias: { f: "fullscreen", d: "devtools" }
 });
