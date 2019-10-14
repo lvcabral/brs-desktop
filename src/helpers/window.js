@@ -80,7 +80,7 @@ export default (name, options, argv) => {
     };
 
     state = ensureVisibleOnSomeDisplay(restore());
-    var full = {};
+    let full = {};
 
     if (argv.fullscreen) {
         full = { fullscreen: true };

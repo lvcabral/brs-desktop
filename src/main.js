@@ -11,6 +11,7 @@ import env from "env";
 import minimist from "minimist";
 import { app, screen, Menu } from "electron";
 import createWindow from "./helpers/window";
+import { restoreRecentFiles } from "./helpers/recent"
 import { fileMenuTemplate } from "./menu/fileMenuTemplate";
 import { editMenuTemplate } from "./menu/editMenuTemplate";
 import { deviceMenuTemplate } from "./menu/deviceMenuTemplate";
@@ -25,6 +26,7 @@ const argv = minimist(process.argv.slice(1), {
 const setApplicationMenu = () => {
     const menus = [ fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate ];
     Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
+    restoreRecentFiles();
 };
 
 // Save userData in separate folders for each environment.
