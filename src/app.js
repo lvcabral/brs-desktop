@@ -154,24 +154,23 @@ ipcRenderer.on("fileSelected", function(event, file) {
         console.log("Invalid file:", file[0]);
         return;
     }
-    statusFile.innerText = filePath;
     const fileName = path.parse(filePath).base;
     const fileExt = path.parse(filePath).ext.toLowerCase();
     if (fileExt === ".zip") {
-        statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
         try {
             loadFile(fileName, fs.readFileSync(filePath));
+            statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
+            statusFile.innerText = filePath;
         } catch (error) {
-            document.alert("Error opening Channel Package! Check console for details.");
-            console.error(`Error opening ${fileName}:`, error.message);
+            clientException(`Error opening ${fileName}:${error.message}`);
         }
     } else if (fileExt === ".brs") {
-        statusIconFile.innerHTML = "<i class='far fa-file'></i>";
         try {
             loadFile(fileName, new Blob([ fs.readFileSync(filePath) ], { type: "text/plain" }));
+            statusIconFile.innerHTML = "<i class='far fa-file'></i>";
+            statusFile.innerText = filePath;
         } catch (error) {
-            document.alert("Error opening BrightScript file! Check console for details.");
-            console.error(`Error opening ${fileName}:`, error.message);
+            clientException(`Error opening ${fileName}:${error.message}`);
         }
     } else {
         console.log("File format not supported: ", fileExt);
@@ -192,8 +191,8 @@ function loadFile(fileName, fileData) {
         runChannel();
     };
     source = [];
-    if (brsWorker != undefined) {
-        brsWorker.terminate();
+    if (running || brsWorker != undefined) {
+        closeChannel();
     }
     if (fileName.split(".").pop() === "zip") {
         console.log("Loading " + fileName + "...");
@@ -283,13 +282,13 @@ function openChannelZip(f) {
                         }
                     },
                     function error(e) {
-                        clientException("Error uncompressing manifest:" + e.message, true);
+                        clientException("Error uncompressing manifest:" + e.message);
                         running = false;
                         return;
                     }
                 );
             } else {
-                clientException("Invalid Channel Package: missing manifest.", true);
+                clientException("Invalid Channel Package: missing manifest.");
                 running = false;
                 return;
             }
@@ -540,11 +539,9 @@ function showStatusBar(visible) {
     }
 }
 // Exception Handler
-function clientException(msg, msgbox = false) {
+function clientException(msg) {
+    // TODO: Add icon on status bar to notify error
     console.error(msg);
-    if (msgbox) {
-        window.alert(msg);
-    }
 }
 // Fix text color after focus change
 titleBar.onBlur = titleBar.onFocus = function() {
