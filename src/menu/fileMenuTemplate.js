@@ -1,5 +1,5 @@
 import * as dialog from "../helpers/dialog";
-import { getRecentPackage, clearRecentFiles, addRecentSource } from "../helpers/recent"
+import { getRecentPackage, clearRecentFiles, addRecentPackage } from "../helpers/recent"
 const isMacOS = process.platform === "darwin";
 
 export const fileMenuTemplate = {
@@ -38,8 +38,9 @@ export const fileMenuTemplate = {
                     id: "zip-0", 
                     label:"", 
                     visible: false,
-                    click: (event, window) => {
+                    click (event, window) {
                         window.webContents.send("fileSelected", [getRecentPackage(0)]);
+                        window.blur();
                         window.focus();
                     }
                 },
@@ -49,7 +50,9 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (event, window) => {
                         window.webContents.send("fileSelected", [getRecentPackage(1)]);
-                        addRecentSource(getRecentPackage(1));
+                        addRecentPackage(getRecentPackage(1));
+                        window.blur();
+                        window.focus();
                     }
                 },
                 { 
@@ -58,7 +61,9 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (event, window) => {
                         window.webContents.send("fileSelected", [getRecentPackage(2)]);
-                        addRecentSource(getRecentPackage(2));
+                        addRecentPackage(getRecentPackage(2));
+                        window.blur();
+                        window.focus();
                     }
                 },
                 { 
@@ -67,7 +72,9 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (event, window) => {
                         window.webContents.send("fileSelected", [getRecentPackage(3)]);
-                        addRecentSource(getRecentPackage(3));
+                        addRecentPackage(getRecentPackage(3));
+                        window.blur();
+                        window.focus();
                     }
                 },
                 { 
@@ -76,7 +83,9 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (event, window) => {
                         window.webContents.send("fileSelected", [getRecentPackage(4)]);
-                        addRecentSource(getRecentPackage(4));
+                        addRecentPackage(getRecentPackage(4));
+                        window.blur();
+                        window.focus();
                     }
                 },
                 { 
@@ -85,7 +94,9 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (event, window) => {
                         window.webContents.send("fileSelected", [getRecentPackage(5)]);
-                        addRecentSource(getRecentPackage(5));
+                        addRecentPackage(getRecentPackage(5));
+                        window.blur();
+                        window.focus();
                     }
                 },
                 { 
@@ -94,7 +105,9 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (event, window) => {
                         window.webContents.send("fileSelected", [getRecentPackage(6)]);
-                        addRecentSource(getRecentPackage(6));
+                        addRecentPackage(getRecentPackage(6));
+                        window.blur();
+                        window.focus();
                     }
                 },
                 {
@@ -120,8 +133,10 @@ export const fileMenuTemplate = {
                     id: "file-clear",
                     label: "Clear Recently Opened",
                     enabled: false,
-                    click: () => {
+                    click: (event, window) => {
                         clearRecentFiles();
+                        window.blur();
+                        window.focus();
                     }
                 }
             ]
