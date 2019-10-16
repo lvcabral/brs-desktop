@@ -12,7 +12,7 @@ export const fileMenuTemplate = {
             enabled: false
         },
         {
-            type: isMacOS ? "separator" : "normal", // Custom toolbar won't hide this separator
+            type: isMacOS ? "separator" : "normal", // Electron won't hide separator
             label: "",
             visible: isMacOS
         },
