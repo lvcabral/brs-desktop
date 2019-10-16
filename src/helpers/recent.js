@@ -5,15 +5,20 @@ const maxFiles = 7;
 const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
 let recentFiles;
+let recentMenu;
+let menuTemplate;
 
-export function restoreRecentFiles() {
+export function restoreRecentFiles(menus) {
+    menuTemplate = menus;
+    recentMenu = menus[0].submenu[5].submenu; //TODO: Remove the magic number usage
+    console.log(recentMenu);
     let recentFilesDefault = {zip:[], brs:[]};
     try {
         recentFiles = userDataDir.read(recentFilesJson, "json");
     } catch (err) {
         console.error("error reading recent files json");
     }
-    recentFiles = recentFiles || recentFilesDefault;    
+    recentFiles = recentFiles || recentFilesDefault;
     rebuildRecentMenu();
 }
 export function getRecentPackage(index) {
@@ -51,10 +56,10 @@ export function clearRecentFiles() {
 }
 
 function rebuildRecentMenu() {
-    const appMenu = app.getApplicationMenu();
-    const recentMenu = appMenu.getMenuItemById("file-open-recent");
+    // const appMenu = app.getApplicationMenu();
+    // const recentMenu = appMenu.getMenuItemById("file-open-recent");
     for (let index = 0; index < maxFiles; index++) {
-        let fileMenu = recentMenu.submenu.getMenuItemById(`zip-${index}`);
+        let fileMenu = recentMenu[`zip-${index}`];
         if (index < recentFiles.zip.length) {
             fileMenu.label = recentFiles.zip[index];
             fileMenu.visible = true;
@@ -63,12 +68,13 @@ function rebuildRecentMenu() {
         }           
     }
     if (recentFiles.zip.length > 0) {
-        recentMenu.submenu.getMenuItemById("file-clear").enabled = true;
-        recentMenu.submenu.getMenuItemById("zip-empty").visible = false;
+        recentMenu["file-clear"].enabled = true;
+        recentMenu["zip-empty"].visible = false;
     } else {
-        recentMenu.submenu.getMenuItemById("file-clear").enabled = false;
-        recentMenu.submenu.getMenuItemById("zip-empty").visible = true;
+        recentMenu["file-clear"].enabled = false;
+        recentMenu["zip-empty"].visible = true;
     }
+    Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 }
 
 function saveRecentFiles() {

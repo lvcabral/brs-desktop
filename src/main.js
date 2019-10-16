@@ -25,8 +25,9 @@ const argv = minimist(process.argv.slice(1), {
 
 const setApplicationMenu = () => {
     const menus = [ fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate ];
-    Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
-    restoreRecentFiles();
+    restoreRecentFiles(menus);
+    const mainMenu = Menu.buildFromTemplate(menus);
+    Menu.setApplicationMenu(mainMenu);
 };
 
 // Save userData in separate folders for each environment.
