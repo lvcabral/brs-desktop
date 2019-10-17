@@ -14,11 +14,8 @@ import { remote, ipcRenderer } from "electron";
 import JSZip from "jszip";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
-const appMenu = remote.Menu.getApplicationMenu();
-const userTheme = window.localStorage.getItem("userTheme");
-if (userTheme) {
-    appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
-}
+let appMenu = remote.Menu.getApplicationMenu();
+let userTheme = window.localStorage.getItem("userTheme") || "purple";
 remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
     .getPropertyValue("--background-color")
     .trim();
@@ -75,7 +72,7 @@ const deviceData = {
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
 const screenSize = { width: 1280, height: 720 };
-const displayMode = window.localStorage.getItem("displayMode") || "720p";
+let displayMode = window.localStorage.getItem("displayMode") || "720p";
 if (displayMode === "1080p") {
     screenSize.width = 1920;
     screenSize.height = 1080;
@@ -86,7 +83,6 @@ if (displayMode === "1080p") {
 let aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
 if (displayMode !== deviceData.displayMode) {
     changeDisplayMode(displayMode);
-    appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
 } else {
     updateDisplayOnStatus();
 }
@@ -96,7 +92,8 @@ const bufferCtx = bufferCanvas.getContext("2d");
 let buffer = new ImageData(screenSize.width, screenSize.height);
 // Overscan Mode
 let overscanMode = window.localStorage.getItem("overscanMode") || "disabled" ;
-appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
+// Setup Menu
+setupMenuSwitches()
 // Load Registry
 const storage = window.localStorage;
 for (let index = 0; index < storage.length; index++) {
@@ -106,6 +103,10 @@ for (let index = 0; index < storage.length; index++) {
     }
 }
 // Events from background thread
+ipcRenderer.on("updateMenu", function(event) {
+    console.log("menu updated!");
+    setupMenuSwitches();
+});
 ipcRenderer.on("saveScreenshot", function(event, file) {
     const img = display.toDataURL("image/png");
     const data = img.replace(/^data:image\/\w+;base64,/, "");
@@ -115,6 +116,7 @@ ipcRenderer.on("copyScreenshot", function(event) {
     copyScreenshot();
 });
 ipcRenderer.on("setTheme", function(event, theme) {
+    userTheme = theme;
     document.documentElement.setAttribute("data-theme", theme);
     remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
         .getPropertyValue("--background-color")
@@ -129,6 +131,7 @@ ipcRenderer.on("setTheme", function(event, theme) {
 });
 ipcRenderer.on("setDisplay", function(event, mode) {
     if (mode !== deviceData.displayMode) {
+        displayMode = mode;
         changeDisplayMode(mode);
         window.localStorage.setItem("displayMode", mode);
     }
@@ -634,4 +637,12 @@ function updateDisplayOnStatus() {
         let ui = deviceData.displayMode == "720p" ? "HD" : deviceData.displayMode == "1080p" ? "FHD" : "SD";
         statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
     }
+}
+
+function setupMenuSwitches() {
+    appMenu = remote.Menu.getApplicationMenu();
+    appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+    appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
+    appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
+    appMenu.getMenuItemById("status-bar").checked = (status.style.visibility === "visible");
 }
