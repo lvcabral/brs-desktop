@@ -28,6 +28,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click (event, window) {
                         window.webContents.send("fileSelected", [getRecentPackage(0)]);
+                        addRecentPackage(getRecentPackage(0));
                         window.blur();
                         window.focus();
                     }
@@ -142,6 +143,7 @@ export const fileMenuTemplate = {
             id: "close-channel",
             label: "Close Channel",
             accelerator: "CmdOrCtrl+W",
+            enabled: false,
             click: (event, window) => {
                 window.webContents.send("closeChannel");
             }
