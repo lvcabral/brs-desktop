@@ -139,6 +139,15 @@ export const fileMenuTemplate = {
         },
         { type: "separator" },
         {
+            id: "close-channel",
+            label: "Close Channel",
+            accelerator: "CmdOrCtrl+W",
+            click: (event, window) => {
+                window.webContents.send("closeChannel");
+            }
+        },
+        { type: "separator" },
+        {
             role: "quit"
         }
     ]
