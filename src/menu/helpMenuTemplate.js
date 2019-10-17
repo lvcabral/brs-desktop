@@ -33,13 +33,14 @@ export const helpMenuTemplate = {
                 shell.openExternalSync("https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE");
             }
         },
-        { type: "separator", visible: !isMacOS },
-        { label: "Check for Updates...", visible: !isMacOS, enabled: false },
+        { type: "separator" },
+        { label: "Check for Updates...", enabled: false },
         { type: "separator", visible: !isMacOS },
         {
             label: "About",
             visible: !isMacOS,
             click: () => {
+                console.log("about click");
                 const window = BrowserWindow.getFocusedWindow();
                 var w = 350;
                 var h = 450;

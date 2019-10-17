@@ -11,21 +11,12 @@ import env from "env";
 import minimist from "minimist";
 import { app, screen, Menu } from "electron";
 import createWindow from "./helpers/window";
-import { fileMenuTemplate } from "./menu/fileMenuTemplate";
-import { editMenuTemplate } from "./menu/editMenuTemplate";
-import { deviceMenuTemplate } from "./menu/deviceMenuTemplate";
-import { viewMenuTemplate } from "./menu/viewMenuTemplate";
-import { helpMenuTemplate } from "./menu/helpMenuTemplate";
+import { createMenu } from "./menu/menuService"
 
 const argv = minimist(process.argv.slice(1), {
     string: [ "o" ],
     alias: { f: "fullscreen", d: "devtools" }
 });
-
-const setApplicationMenu = () => {
-    const menus = [ fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate ];
-    Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
-};
 
 // Save userData in separate folders for each environment.
 if (env.name !== "production") {
@@ -34,7 +25,7 @@ if (env.name !== "production") {
 }
 
 app.on("ready", () => {
-    setApplicationMenu();
+    createMenu();
 
     global.sharedObject = {
         backgroundColor: "#251135"

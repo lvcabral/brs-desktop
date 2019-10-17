@@ -1,5 +1,3 @@
-import { BrowserWindow, Menu } from "electron";
-
 export const deviceMenuTemplate = {
     label: "&Device",
     submenu: [
@@ -8,8 +6,7 @@ export const deviceMenuTemplate = {
             label: "Display Mode: SD 480p (4:3)",
             type: "radio",
             checked: false,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("setDisplay", "480p");
             }
         },
@@ -18,8 +15,7 @@ export const deviceMenuTemplate = {
             label: "Display Mode: HD 720p (16:9)",
             type: "radio",
             checked: true,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("setDisplay", "720p");
             }
         },
@@ -28,8 +24,7 @@ export const deviceMenuTemplate = {
             label: "Display Mode: FHD 1080p (16:9)",
             type: "radio",
             checked: false,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("setDisplay", "1080p");
             }
         },
@@ -39,8 +34,7 @@ export const deviceMenuTemplate = {
             label: "TV Overscan: Disabled",
             type: "radio",
             checked: true,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("setOverscan", "disabled");
             }
         },
@@ -49,8 +43,7 @@ export const deviceMenuTemplate = {
             label: "TV Overscan: Guide Lines",
             type: "radio",
             checked: false,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("setOverscan", "guide-lines");
             }
         },
@@ -59,8 +52,7 @@ export const deviceMenuTemplate = {
             label: "TV Overscan: Enabled",
             type: "radio",
             checked: false,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("setOverscan", "enabled");
             }
         },
@@ -68,8 +60,8 @@ export const deviceMenuTemplate = {
         {
             label: "Reset Device",
             accelerator: "CmdOrCtrl+Shift+R",
-            click: () => {
-                BrowserWindow.getFocusedWindow().webContents.reloadIgnoringCache();
+            click: (event, window) => {
+                window.webContents.reloadIgnoringCache();
             }
         }
     ]

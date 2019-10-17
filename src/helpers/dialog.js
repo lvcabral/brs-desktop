@@ -1,4 +1,5 @@
 import { dialog, BrowserWindow } from "electron";
+import {addRecentPackage, addRecentSource } from "../menu/menuService";
 
 /*
  * Show open dialog to open a .zip or .brs file.
@@ -9,7 +10,7 @@ export function openChannelPackage() {
         filters: [ { name: "Channel Packages", extensions: [ "zip" ] }, { name: "All Files", extensions: [ "*" ] } ],
         properties: [ "openFile" ]
     };
-    var window = BrowserWindow.getFocusedWindow();
+    const window = BrowserWindow.getFocusedWindow();
     dialog
         .showOpenDialog(window, opts)
         .then((result) => {
@@ -18,6 +19,7 @@ export function openChannelPackage() {
                 return;
             }
             window.webContents.send("fileSelected", result.filePaths);
+            addRecentPackage(result.filePaths[0]);
         })
         .catch((err) => {
             console.log(err);
@@ -30,7 +32,7 @@ export function openBrightScriptFile() {
         filters: [ { name: "BrightScript source files", extensions: [ "brs" ] }, { name: "All Files", extensions: [ "*" ] } ],
         properties: [ "openFile" ]
     };
-    var window = BrowserWindow.getFocusedWindow();
+    const window = BrowserWindow.getFocusedWindow();
     dialog
         .showOpenDialog(window, opts)
         .then((result) => {
@@ -39,6 +41,7 @@ export function openBrightScriptFile() {
                 return;
             }
             window.webContents.send("fileSelected", result.filePaths);
+            addRecentSource(result.filePaths[0]);
         })
         .catch((err) => {
             console.log(err);
@@ -50,7 +53,7 @@ export function saveScreenshot() {
         title: "Save the Screenshot as",
         filters: [ { name: "PNG Image", extensions: [ "png" ] }, { name: "All Files", extensions: [ "*" ] } ]
     };
-    var window = BrowserWindow.getFocusedWindow();
+    const window = BrowserWindow.getFocusedWindow();
     dialog
         .showSaveDialog(window, opts)
         .then((result) => {
