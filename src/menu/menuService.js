@@ -10,6 +10,8 @@ const isMacOS = process.platform === "darwin";
 const maxFiles = 7;
 const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
+let fileMenuIndex = 0;
+let recentMenuIndex = 2;
 let recentFiles;
 let recentMenu;
 let menuTemplate;
@@ -20,6 +22,7 @@ export function createMenu() {
         const fileMenu = menuTemplate[0].submenu;
         fileMenu.splice(fileMenu.length-2, 2);
         menuTemplate.unshift({role: "appMenu"});
+        fileMenuIndex = 1;
     }
     restoreRecentFiles();
     rebuildRecentMenu(true);
@@ -79,8 +82,7 @@ function saveRecentFiles() {
 
 function rebuildRecentMenu(template = false) {
     if (isMacOS || template) {
-        //TODO: Remove the magic numbers usage
-        recentMenu = menuTemplate[1].submenu[2].submenu; 
+        recentMenu = menuTemplate[fileMenuIndex].submenu[recentMenuIndex].submenu; 
         for (let index = 0; index < maxFiles; index++) {
             let fileMenu = recentMenu[index];
             if (index < recentFiles.zip.length) {

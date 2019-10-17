@@ -103,8 +103,12 @@ for (let index = 0; index < storage.length; index++) {
     }
 }
 // Events from background thread
+ipcRenderer.on("closeChannel", function(event) {
+    if (running) {
+        closeChannel();
+    }
+});
 ipcRenderer.on("updateMenu", function(event) {
-    console.log("menu updated!");
     setupMenuSwitches();
 });
 ipcRenderer.on("saveScreenshot", function(event, file) {
@@ -205,6 +209,7 @@ function loadFile(fileName, fileData) {
         running = true;
         reader.readAsText(fileData);
     }
+    appMenu.getMenuItemById("close-channel").enabled = running;
     display.focus();
 }
 // Uncompress Zip and execute
@@ -446,7 +451,9 @@ function closeChannel() {
     }
     brsWorker.terminate();
     sharedArray[0] = 0;
+    bufferCanvas.width = 1;
     running = false;
+    appMenu.getMenuItemById("close-channel").enabled = false;
 }
 // Remote control emulator
 function keyDownHandler(event) {
@@ -638,9 +645,10 @@ function updateDisplayOnStatus() {
         statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
     }
 }
-
+// Configure Menu Options
 function setupMenuSwitches() {
     appMenu = remote.Menu.getApplicationMenu();
+    appMenu.getMenuItemById("close-channel").enabled = running;
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
     appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
