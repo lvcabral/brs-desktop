@@ -25,7 +25,7 @@ export function createMenu() {
         fileMenuIndex = 1;
     }
     restoreRecentFiles();
-    rebuildRecentMenu(true);
+    rebuildMenu(true);
 }
 
 export function getRecentPackage(index) {
@@ -34,32 +34,28 @@ export function getRecentPackage(index) {
 
 export function addRecentPackage(filePath) {
     let idx = recentFiles.zip.indexOf(filePath);
-    if (idx === 0) {
-        return;
-    } else if (idx > 0) {
+    if (idx >= 0) {
         recentFiles.zip.splice(idx, 1);
     }
     recentFiles.zip.unshift(filePath);
     saveRecentFiles();
-    rebuildRecentMenu();
+    rebuildMenu();
 }
 
 export function addRecentSource(filePath) {
     let idx = recentFiles.brs.indexOf(filePath);
-    if (idx === 0) {
-        return;
-    } else if (idx > 0) {
+    if (idx >= 0) {
         recentFiles.brs.splice(idx, 1);
     }
     recentFiles.brs.unshift(filePath);
     saveRecentFiles();
-    rebuildRecentMenu();
+    rebuildMenu();
 }
 
 export function clearRecentFiles() {
     recentFiles = {zip:[], brs:[]};
     saveRecentFiles();
-    rebuildRecentMenu();
+    rebuildMenu();
 }
 
 function restoreRecentFiles() {
@@ -80,7 +76,7 @@ function saveRecentFiles() {
     }
 }
 
-function rebuildRecentMenu(template = false) {
+function rebuildMenu(template = false) {
     if (isMacOS || template) {
         recentMenu = menuTemplate[fileMenuIndex].submenu[recentMenuIndex].submenu; 
         for (let index = 0; index < maxFiles; index++) {
@@ -100,7 +96,7 @@ function rebuildRecentMenu(template = false) {
             recentMenu[maxFiles].visible = true;
         }
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
-        let window = BrowserWindow.getFocusedWindow();
+        let window = BrowserWindow.fromId(1);
         if (isMacOS && window) {
             window.webContents.send("updateMenu");
         }
