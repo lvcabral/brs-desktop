@@ -1,5 +1,5 @@
 import * as dialog from "../helpers/dialog";
-import { getRecentPackage, clearRecentFiles, addRecentPackage } from "../helpers/recent"
+import { getRecentPackage, clearRecentFiles, addRecentPackage } from "./menuService"
 const isMacOS = process.platform === "darwin";
 
 export const fileMenuTemplate = {

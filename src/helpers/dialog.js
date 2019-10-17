@@ -1,5 +1,5 @@
 import { dialog, BrowserWindow } from "electron";
-import {addRecentPackage, addRecentSource } from "./recent";
+import {addRecentPackage, addRecentSource } from "../menu/menuService";
 
 /*
  * Show open dialog to open a .zip or .brs file.
