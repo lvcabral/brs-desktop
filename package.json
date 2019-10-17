@@ -20,7 +20,11 @@
         "appId": "com.lvcabral.brs-emu.app",
         "productName": "BrightScript Emulator",
         "artifactName": "brsEmuApp-${version}-${platform}-${arch}.${ext}",
-        "files": [ "app/**/*", "node_modules/**/*", "package.json" ],
+        "files": [
+            "app/**/*",
+            "node_modules/**/*",
+            "package.json"
+        ],
         "directories": {
             "buildResources": "resources",
             "output": "dist/${version}"
@@ -53,7 +57,7 @@
         "release": "npm test && webpack --config=build/webpack.app.config.js --env=production && electron-builder"
     },
     "dependencies": {
-        "custom-electron-titlebar": "^3.1.0",
+        "custom-electron-titlebar": "github:lvcabral/custom-electron-titlebar",
         "electron-about-window": "^1.13.1",
         "fs-jetpack": "^2.1.0",
         "jszip": "^3.2.2",

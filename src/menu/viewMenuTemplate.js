@@ -1,5 +1,3 @@
-import { BrowserWindow } from "electron";
-
 export const viewMenuTemplate = {
     label: "&View",
     submenu: [
@@ -18,8 +16,7 @@ export const viewMenuTemplate = {
             label: "Purple Theme",
             type: "radio",
             checked: true,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("setTheme", "purple");
             }
         },
@@ -28,8 +25,7 @@ export const viewMenuTemplate = {
             label: "Light Theme",
             type: "radio",
             checked: false,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("setTheme", "light");
             }
         },
@@ -38,8 +34,7 @@ export const viewMenuTemplate = {
             label: "Dark Theme",
             type: "radio",
             checked: false,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("setTheme", "dark");
             }
         },
@@ -50,8 +45,7 @@ export const viewMenuTemplate = {
             type: "checkbox",
             checked: true,
             enabled: true,
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("toggleStatusBar");
             }
         }

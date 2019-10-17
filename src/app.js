@@ -14,11 +14,8 @@ import { remote, ipcRenderer } from "electron";
 import JSZip from "jszip";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
-const appMenu = remote.Menu.getApplicationMenu();
-const userTheme = window.localStorage.getItem("userTheme");
-if (userTheme) {
-    appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
-}
+let appMenu = remote.Menu.getApplicationMenu();
+let userTheme = window.localStorage.getItem("userTheme") || "purple";
 remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
     .getPropertyValue("--background-color")
     .trim();
@@ -75,7 +72,7 @@ const deviceData = {
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
 const screenSize = { width: 1280, height: 720 };
-const displayMode = window.localStorage.getItem("displayMode") || "720p";
+let displayMode = window.localStorage.getItem("displayMode") || "720p";
 if (displayMode === "1080p") {
     screenSize.width = 1920;
     screenSize.height = 1080;
@@ -86,7 +83,6 @@ if (displayMode === "1080p") {
 let aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
 if (displayMode !== deviceData.displayMode) {
     changeDisplayMode(displayMode);
-    appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
 } else {
     updateDisplayOnStatus();
 }
@@ -95,8 +91,9 @@ const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
 const bufferCtx = bufferCanvas.getContext("2d");
 let buffer = new ImageData(screenSize.width, screenSize.height);
 // Overscan Mode
-let overscanMode = window.localStorage.getItem("overscanMode") || "disabled" ;
-appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
+let overscanMode = window.localStorage.getItem("overscanMode") || "disabled";
+// Setup Menu
+setupMenuSwitches();
 // Load Registry
 const storage = window.localStorage;
 for (let index = 0; index < storage.length; index++) {
@@ -106,6 +103,14 @@ for (let index = 0; index < storage.length; index++) {
     }
 }
 // Events from background thread
+ipcRenderer.on("closeChannel", function(event) {
+    if (running) {
+        closeChannel();
+    }
+});
+ipcRenderer.on("updateMenu", function(event) {
+    setupMenuSwitches();
+});
 ipcRenderer.on("saveScreenshot", function(event, file) {
     const img = display.toDataURL("image/png");
     const data = img.replace(/^data:image\/\w+;base64,/, "");
@@ -115,6 +120,7 @@ ipcRenderer.on("copyScreenshot", function(event) {
     copyScreenshot();
 });
 ipcRenderer.on("setTheme", function(event, theme) {
+    userTheme = theme;
     document.documentElement.setAttribute("data-theme", theme);
     remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
         .getPropertyValue("--background-color")
@@ -129,6 +135,7 @@ ipcRenderer.on("setTheme", function(event, theme) {
 });
 ipcRenderer.on("setDisplay", function(event, mode) {
     if (mode !== deviceData.displayMode) {
+        displayMode = mode;
         changeDisplayMode(mode);
         window.localStorage.setItem("displayMode", mode);
     }
@@ -202,6 +209,7 @@ function loadFile(fileName, fileData) {
         running = true;
         reader.readAsText(fileData);
     }
+    appMenu.getMenuItemById("close-channel").enabled = running;
     display.focus();
 }
 // Uncompress Zip and execute
@@ -411,11 +419,11 @@ function runChannel() {
 function receiveMessage(event) {
     if (event.data instanceof ImageData) {
         buffer = event.data;
-        if (bufferCanvas.width !== buffer.width ||  bufferCanvas.height !== buffer.height) {
+        if (bufferCanvas.width !== buffer.width || bufferCanvas.height !== buffer.height) {
             statusResolution.innerText = `${buffer.width}x${buffer.height}`;
             statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
             bufferCanvas.width = buffer.width;
-            bufferCanvas.height = buffer.height;    
+            bufferCanvas.height = buffer.height;
         }
         bufferCtx.putImageData(buffer, 0, 0);
         drawBufferImage();
@@ -443,7 +451,9 @@ function closeChannel() {
     }
     brsWorker.terminate();
     sharedArray[0] = 0;
+    bufferCanvas.width = 1;
     running = false;
+    appMenu.getMenuItemById("close-channel").enabled = false;
 }
 // Remote control emulator
 function keyDownHandler(event) {
@@ -600,8 +610,8 @@ function drawBufferImage() {
     if (overscanMode === "enabled") {
         let x = Math.round(bufferCanvas.width * overscan);
         let y = Math.round(bufferCanvas.height * overscan);
-        let w = bufferCanvas.width - (x * 2);
-        let h = bufferCanvas.height - (y * 2);
+        let w = bufferCanvas.width - x * 2;
+        let h = bufferCanvas.height - y * 2;
         ctx.drawImage(bufferCanvas, x, y, w, h, 0, 0, screenSize.width, screenSize.height);
     } else {
         ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
@@ -609,12 +619,12 @@ function drawBufferImage() {
     if (overscanMode === "guide-lines") {
         let x = Math.round(screenSize.width * overscan);
         let y = Math.round(screenSize.height * overscan);
-        let w = screenSize.width - (x * 2);
-        let h = screenSize.height - (y * 2);
+        let w = screenSize.width - x * 2;
+        let h = screenSize.height - y * 2;
         ctx.strokeStyle = "#D0D0D0FF";
         ctx.lineWidth = 2;
-        ctx.setLineDash([1, 2]);
-        ctx.strokeRect(x, y, w, h);            
+        ctx.setLineDash([ 1, 2 ]);
+        ctx.strokeRect(x, y, w, h);
     }
 }
 // Change Display Mode
@@ -634,4 +644,13 @@ function updateDisplayOnStatus() {
         let ui = deviceData.displayMode == "720p" ? "HD" : deviceData.displayMode == "1080p" ? "FHD" : "SD";
         statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
     }
+}
+// Configure Menu Options
+function setupMenuSwitches() {
+    appMenu = remote.Menu.getApplicationMenu();
+    appMenu.getMenuItemById("close-channel").enabled = running;
+    appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+    appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
+    appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
+    appMenu.getMenuItemById("status-bar").checked = status.style.visibility === "visible";
 }

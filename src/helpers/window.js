@@ -4,6 +4,7 @@
 // instances of it and give each different name.
 
 import { app, BrowserWindow, screen, Menu } from "electron";
+import path from "path";
 import jetpack from "fs-jetpack";
 
 export default (name, options, argv) => {
@@ -80,7 +81,7 @@ export default (name, options, argv) => {
     };
 
     state = ensureVisibleOnSomeDisplay(restore());
-    var full = {};
+    let full = {};
 
     if (argv.fullscreen) {
         full = { fullscreen: true };
@@ -98,19 +99,32 @@ export default (name, options, argv) => {
     );
 
     win.on("ready-to-show", function() {
+        let openFile;
         if (argv && argv.o) {
-            win.webContents.send("fileSelected", [ argv.o.trim() ]);
+            openFile = argv.o.trim();
         } else {
             try {
                 let index = argv._.length - 1;
                 if (index) {
                     if (jetpack.exists(argv._[index])) {
-                        win.webContents.send("fileSelected", [ argv._[index] ]);
+                        openFile = argv._[index];
                     }
                 }
             } catch (error) {
                 console.error("Invalid parameters!", error);
             }
+        }
+        if (openFile) {
+            const fileExt = path.parse(openFile).ext.toLowerCase();
+            if (fileExt === ".zip") {
+                win.webContents.send("fileSelected", [ openFile ]);
+                addRecentPackage(openFile);
+            } else if (fileExt === ".brs") {
+                win.webContents.send("fileSelected", [ openFile ]);
+                addRecentSource(openFile);
+            } else {
+                console.log("File format not supported: ", fileExt);
+            }        
         }
         win.show();
         win.focus();

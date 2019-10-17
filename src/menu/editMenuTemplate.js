@@ -1,13 +1,10 @@
-import { BrowserWindow } from "electron";
-
 export const editMenuTemplate = {
     label: "&Edit",
     submenu: [
         {
             label: "Copy Screenshot",
             accelerator: "CmdOrCtrl+C",
-            click: () => {
-                var window = BrowserWindow.getFocusedWindow();
+            click: (event, window) => {
                 window.webContents.send("copyScreenshot");
             }
         },
