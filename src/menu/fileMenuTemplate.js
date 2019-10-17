@@ -1,5 +1,5 @@
 import * as dialog from "../helpers/dialog";
-import { getRecentPackage, clearRecentFiles, addRecentPackage } from "./menuService"
+import { getRecentPackage, clearRecentFiles, addRecentPackage, addRecentSource, getRecentSource } from "./menuService";
 
 export const fileMenuTemplate = {
     label: "&File",
@@ -22,81 +22,60 @@ export const fileMenuTemplate = {
             id: "file-open-recent",
             label: "Open Recent",
             submenu: [
-                { 
-                    id: "zip-0", 
-                    label:"", 
+                {
+                    id: "zip-0",
+                    label: "",
                     visible: false,
-                    click (event, window) {
-                        window.webContents.send("fileSelected", [getRecentPackage(0)]);
-                        addRecentPackage(getRecentPackage(0));
-                        window.blur();
-                        window.focus();
+                    click: (event, window) => {
+                        packageClick(window, 0);
                     }
                 },
-                { 
+                {
                     id: "zip-1",
-                    label:"", 
+                    label: "",
                     visible: false,
                     click: (event, window) => {
-                        window.webContents.send("fileSelected", [getRecentPackage(1)]);
-                        addRecentPackage(getRecentPackage(1));
-                        window.blur();
-                        window.focus();
+                        packageClick(window, 1);
                     }
                 },
-                { 
+                {
                     id: "zip-2",
-                    label:"", 
+                    label: "",
                     visible: false,
                     click: (event, window) => {
-                        window.webContents.send("fileSelected", [getRecentPackage(2)]);
-                        addRecentPackage(getRecentPackage(2));
-                        window.blur();
-                        window.focus();
+                        packageClick(window, 2);
                     }
                 },
-                { 
+                {
                     id: "zip-3",
-                    label:"", 
+                    label: "",
                     visible: false,
                     click: (event, window) => {
-                        window.webContents.send("fileSelected", [getRecentPackage(3)]);
-                        addRecentPackage(getRecentPackage(3));
-                        window.blur();
-                        window.focus();
+                        packageClick(window, 3);
                     }
                 },
-                { 
+                {
                     id: "zip-4",
-                    label:"", 
+                    label: "",
                     visible: false,
                     click: (event, window) => {
-                        window.webContents.send("fileSelected", [getRecentPackage(4)]);
-                        addRecentPackage(getRecentPackage(4));
-                        window.blur();
-                        window.focus();
+                        packageClick(window, 4);
                     }
                 },
-                { 
+                {
                     id: "zip-5",
-                    label:"", 
+                    label: "",
                     visible: false,
                     click: (event, window) => {
-                        window.webContents.send("fileSelected", [getRecentPackage(5)]);
-                        addRecentPackage(getRecentPackage(5));
-                        window.blur();
-                        window.focus();
+                        packageClick(window, 5);
                     }
                 },
-                { 
+                {
                     id: "zip-6",
-                    label:"", 
+                    label: "",
                     visible: false,
                     click: (event, window) => {
-                        window.webContents.send("fileSelected", [getRecentPackage(6)]);
-                        addRecentPackage(getRecentPackage(6));
-                        window.blur();
-                        window.focus();
+                        packageClick(window, 6);
                     }
                 },
                 {
@@ -105,13 +84,62 @@ export const fileMenuTemplate = {
                     enabled: false
                 },
                 { type: "separator" },
-                { id: "brs-0", label:"", visible: false},
-                { id: "brs-1", label:"", visible: false},
-                { id: "brs-2", label:"", visible: false},
-                { id: "brs-3", label:"", visible: false},
-                { id: "brs-4", label:"", visible: false},
-                { id: "brs-5", label:"", visible: false},
-                { id: "brs-6", label:"", visible: false},
+                {
+                    id: "brs-0",
+                    label: "",
+                    visible: false,
+                    click: (event, window) => {
+                        sourceClick(window, 0);
+                    }
+                },
+                {
+                    id: "brs-1",
+                    label: "",
+                    visible: false,
+                    click: (event, window) => {
+                        sourceClick(window, 1);
+                    }
+                },
+                {
+                    id: "brs-2",
+                    label: "",
+                    visible: false,
+                    click: (event, window) => {
+                        sourceClick(window, 2);
+                    }
+                },
+                {
+                    id: "brs-3",
+                    label: "",
+                    visible: false,
+                    click: (event, window) => {
+                        sourceClick(window, 3);
+                    }
+                },
+                {
+                    id: "brs-4",
+                    label: "",
+                    visible: false,
+                    click: (event, window) => {
+                        sourceClick(window, 4);
+                    }
+                },
+                {
+                    id: "brs-5",
+                    label: "",
+                    visible: false,
+                    click: (event, window) => {
+                        sourceClick(window, 5);
+                    }
+                },
+                {
+                    id: "brs-6",
+                    label: "",
+                    visible: false,
+                    click: (event, window) => {
+                        sourceClick(window, 6);
+                    }
+                },
                 {
                     id: "brs-empty",
                     label: "No Source .brs File Recently Opened",
@@ -154,3 +182,17 @@ export const fileMenuTemplate = {
         }
     ]
 };
+
+function packageClick(window, id) {
+    window.webContents.send("fileSelected", [ getRecentPackage(id) ]);
+    addRecentPackage(getRecentPackage(id));
+    window.blur();
+    window.focus();
+}
+
+function sourceClick(window, id) {
+    window.webContents.send("fileSelected", [ getRecentSource(id) ]);
+    addRecentSource(getRecentSource(id));
+    window.blur();
+    window.focus();
+}

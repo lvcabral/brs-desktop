@@ -91,9 +91,9 @@ const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
 const bufferCtx = bufferCanvas.getContext("2d");
 let buffer = new ImageData(screenSize.width, screenSize.height);
 // Overscan Mode
-let overscanMode = window.localStorage.getItem("overscanMode") || "disabled" ;
+let overscanMode = window.localStorage.getItem("overscanMode") || "disabled";
 // Setup Menu
-setupMenuSwitches()
+setupMenuSwitches();
 // Load Registry
 const storage = window.localStorage;
 for (let index = 0; index < storage.length; index++) {
@@ -419,11 +419,11 @@ function runChannel() {
 function receiveMessage(event) {
     if (event.data instanceof ImageData) {
         buffer = event.data;
-        if (bufferCanvas.width !== buffer.width ||  bufferCanvas.height !== buffer.height) {
+        if (bufferCanvas.width !== buffer.width || bufferCanvas.height !== buffer.height) {
             statusResolution.innerText = `${buffer.width}x${buffer.height}`;
             statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
             bufferCanvas.width = buffer.width;
-            bufferCanvas.height = buffer.height;    
+            bufferCanvas.height = buffer.height;
         }
         bufferCtx.putImageData(buffer, 0, 0);
         drawBufferImage();
@@ -610,8 +610,8 @@ function drawBufferImage() {
     if (overscanMode === "enabled") {
         let x = Math.round(bufferCanvas.width * overscan);
         let y = Math.round(bufferCanvas.height * overscan);
-        let w = bufferCanvas.width - (x * 2);
-        let h = bufferCanvas.height - (y * 2);
+        let w = bufferCanvas.width - x * 2;
+        let h = bufferCanvas.height - y * 2;
         ctx.drawImage(bufferCanvas, x, y, w, h, 0, 0, screenSize.width, screenSize.height);
     } else {
         ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
@@ -619,12 +619,12 @@ function drawBufferImage() {
     if (overscanMode === "guide-lines") {
         let x = Math.round(screenSize.width * overscan);
         let y = Math.round(screenSize.height * overscan);
-        let w = screenSize.width - (x * 2);
-        let h = screenSize.height - (y * 2);
+        let w = screenSize.width - x * 2;
+        let h = screenSize.height - y * 2;
         ctx.strokeStyle = "#D0D0D0FF";
         ctx.lineWidth = 2;
-        ctx.setLineDash([1, 2]);
-        ctx.strokeRect(x, y, w, h);            
+        ctx.setLineDash([ 1, 2 ]);
+        ctx.strokeRect(x, y, w, h);
     }
 }
 // Change Display Mode
@@ -652,5 +652,5 @@ function setupMenuSwitches() {
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
     appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
-    appMenu.getMenuItemById("status-bar").checked = (status.style.visibility === "visible");
+    appMenu.getMenuItemById("status-bar").checked = status.style.visibility === "visible";
 }
