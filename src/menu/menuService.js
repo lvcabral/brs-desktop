@@ -16,10 +16,13 @@ let menuTemplate;
 
 export function createMenu() {
     menuTemplate = [ fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate ];
-    if(!isMacOS) {
-        Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+    if(isMacOS) {
+        const fileMenu = menuTemplate[0].submenu;
+        fileMenu.splice(fileMenu.length-2, 2);
+        menuTemplate.unshift({role: "appMenu"});
     }
     restoreRecentFiles();
+    rebuildRecentMenu(true);
 }
 
 export function getRecentPackage(index) {
@@ -64,7 +67,6 @@ function restoreRecentFiles() {
         console.error("error reading recent files json");
     }
     recentFiles = recentFiles || recentFilesDefault;
-    rebuildRecentMenu(false);
 }
 
 function saveRecentFiles() {
@@ -75,10 +77,10 @@ function saveRecentFiles() {
     }
 }
 
-function rebuildRecentMenu(update = true) {
-    if (isMacOS) {
+function rebuildRecentMenu(template = false) {
+    if (isMacOS || template) {
         //TODO: Remove the magic numbers usage
-        recentMenu = menuTemplate[0].submenu[5].submenu; 
+        recentMenu = menuTemplate[1].submenu[2].submenu; 
         for (let index = 0; index < maxFiles; index++) {
             let fileMenu = recentMenu[index];
             if (index < recentFiles.zip.length) {
@@ -95,7 +97,11 @@ function rebuildRecentMenu(update = true) {
             recentMenu[recentMenu.length-1].enabled = false;
             recentMenu[maxFiles].visible = true;
         }
-        Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate))
+        Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+        let window = BrowserWindow.getFocusedWindow();
+        if (isMacOS && window) {
+            window.webContents.send("updateMenu");
+        }
     }
     else {
         const appMenu = app.getApplicationMenu();

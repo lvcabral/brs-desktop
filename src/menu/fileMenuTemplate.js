@@ -1,21 +1,9 @@
 import * as dialog from "../helpers/dialog";
 import { getRecentPackage, clearRecentFiles, addRecentPackage } from "./menuService"
-const isMacOS = process.platform === "darwin";
 
 export const fileMenuTemplate = {
     label: "&File",
     submenu: [
-        { role: "about", visible: isMacOS },
-        {
-            label: "Check for Updates...",
-            visible: isMacOS,
-            enabled: false
-        },
-        {
-            type: isMacOS ? "separator" : "normal", // Electron won't hide separator
-            label: "",
-            visible: isMacOS
-        },
         {
             label: "Open Channel Package...",
             accelerator: "CmdOrCtrl+O",
