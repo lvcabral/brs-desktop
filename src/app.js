@@ -30,7 +30,7 @@ const titleBar = new customTitlebar.Titlebar(titleBarConfig);
 titleBar.titlebar.style.color = titleColor;
 const defaultTitle = document.title;
 // Status Bar Objects
-const status = document.getElementById("status");
+const statusBar = document.getElementById("status");
 const statusIconFile = document.getElementById("statusIconFile");
 const statusFile = document.getElementById("statusFile");
 const statusIconVersion = document.getElementById("statusIconVersion");
@@ -109,7 +109,7 @@ ipcRenderer.on("closeChannel", function(event) {
     }
 });
 ipcRenderer.on("updateMenu", function(event) {
-    setupMenuSwitches();
+    setupMenuSwitches(true);
 });
 ipcRenderer.on("saveScreenshot", function(event, file) {
     const img = display.toDataURL("image/png");
@@ -146,7 +146,7 @@ ipcRenderer.on("setOverscan", function(event, mode) {
     redrawDisplay();
 });
 ipcRenderer.on("toggleStatusBar", function(event) {
-    const enable = status.style.visibility !== "visible";
+    const enable = statusBar.style.visibility !== "visible";
     appMenu.getMenuItemById("status-bar").checked = enable;
     redrawDisplay();
 });
@@ -542,10 +542,10 @@ function copyScreenshot() {
 function showStatusBar(visible) {
     if (visible) {
         display.style.bottom = "20px";
-        status.style.visibility = "visible";
+        statusBar.style.visibility = "visible";
     } else {
         display.style.bottom = "0px";
-        status.style.visibility = "hidden";
+        statusBar.style.visibility = "hidden";
     }
 }
 // Exception Handler
@@ -640,17 +640,19 @@ function changeDisplayMode(mode) {
 }
 // Update Display Mode on Status Bar
 function updateDisplayOnStatus() {
-    if (status) {
+    if (statusBar) {
         let ui = deviceData.displayMode == "720p" ? "HD" : deviceData.displayMode == "1080p" ? "FHD" : "SD";
         statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
     }
 }
 // Configure Menu Options
-function setupMenuSwitches() {
+function setupMenuSwitches(status = false) {
     appMenu = remote.Menu.getApplicationMenu();
     appMenu.getMenuItemById("close-channel").enabled = running;
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
     appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
-    appMenu.getMenuItemById("status-bar").checked = status.style.visibility === "visible";
+    if (status) {
+        appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
+    }
 }
