@@ -60,7 +60,8 @@ const deviceData = {
     locale: "en_US",
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
-    defaultFont: "Asap" // Desktop app only has Asap to reduce the package size
+    defaultFont: "Asap", // Desktop app only has Asap to reduce the package size
+    maxSimulStreams: 2
 };
 // Emulator Display
 const display = document.getElementById("display");
@@ -497,7 +498,6 @@ function receiveMessage(event) {
         if (wav && soundsIdx.has(wav.toLowerCase())) {
             const soundId = soundsIdx.get(wav.toLowerCase());
             const sound = soundsDat[soundId];
-            console.log("trigger:", sound);
             const volume = parseInt(event.data.split(",")[2]) / 100;
             const index = parseInt(event.data.split(",")[3]);
             if (volume && !isNaN(volume)) {
