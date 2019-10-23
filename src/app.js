@@ -97,6 +97,8 @@ let soundsDat = new Array();
 let wavStreams = new Array(deviceData.maxSimulStreams);
 let playList = new Array();
 let playIndex = 0;
+let playLoop = false;
+let playNext = -1;
 resetSounds();
 // Shared buffer (Keys and Sounds)
 const dataType = { KEY: 0, MOD: 1, SND: 2, IDX: 3, WAV: 4 };
@@ -171,7 +173,7 @@ ipcRenderer.on("fileSelected", function(event, file) {
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
         filePath = file[0];
     } else {
-        console.log("Invalid file:", file[0]);
+        clientException(`Invalid file: ${file[0]}`);
         return;
     }
     const fileName = path.parse(filePath).base;
@@ -193,7 +195,7 @@ ipcRenderer.on("fileSelected", function(event, file) {
             clientException(`Error opening ${fileName}:${error.message}`);
         }
     } else {
-        console.log("File format not supported: ", fileExt);
+        clientException(`File format not supported: ${fileExt}`);
     }
 });
 // Open File
@@ -205,7 +207,7 @@ function loadFile(fileName, fileData) {
         txts = [];
         fonts = [];
         source.push(this.result);
-        paths.push({ url: "source/" + fileName, id: 0, type: "source" });
+        paths.push({ url: `source/${fileName}`, id: 0, type: "source" });
         ctx.fillStyle = "rgba(0, 0, 0, 1)";
         ctx.fillRect(0, 0, display.width, display.height);
         runChannel();
@@ -215,7 +217,7 @@ function loadFile(fileName, fileData) {
         closeChannel();
     }
     if (fileName.split(".").pop() === "zip") {
-        console.log("Loading " + fileName + "...");
+        console.log(`Loading ${fileName}...`);
         running = true;
         openChannelZip(fileData);
     } else {
@@ -303,7 +305,7 @@ function openChannelZip(f) {
                         }
                     },
                     function error(e) {
-                        clientException("Error uncompressing manifest:" + e.message);
+                        clientException(`Error uncompressing manifest: ${e.message}`);
                         running = false;
                         return;
                     }
@@ -347,7 +349,16 @@ function openChannelZip(f) {
                     fntId++;
                 } else if (
                     !zipEntry.dir &&
-                    (ext === "wav" || ext === "mp3" || ext === "m4a" || ext === "flac")
+                    (ext === "wav" ||
+                        ext === "mp2" ||
+                        ext === "mp3" ||
+                        ext === "mp4" ||
+                        ext === "m4a" ||
+                        ext === "aac" ||
+                        ext === "ogg" ||
+                        ext === "oga" ||
+                        ext === "ac3" ||
+                        ext === "flac")
                 ) {
                     assetPaths.push({ url: relativePath, id: audId, type: "audio", format: ext });
                     assetsEvents.push(zipEntry.async("blob"));
@@ -378,6 +389,17 @@ function openChannelZip(f) {
                                 new Howl({
                                     src: [window.URL.createObjectURL(assets[index])],
                                     format: assetPaths[index].format,
+                                    preload: assetPaths[index].format === "wav",
+                                    onloaderror: function(id, message) {
+                                        clientException(
+                                            `Error loading ${assetPaths[index].url}: ${message}`
+                                        );
+                                    },
+                                    onplayerror: function(id, message) {
+                                        clientException(
+                                            `Error playing ${assetPaths[index].url}: ${message}`
+                                        );
+                                    },
                                 })
                             );
                         } else if (assetPaths[index].type === "text") {
@@ -394,17 +416,17 @@ function openChannelZip(f) {
                             }, splashTimeout);
                         },
                         function error(e) {
-                            clientException("Error converting image " + e.message);
+                            clientException(`Error converting image: ${e.message}`);
                         }
                     );
                 },
                 function error(e) {
-                    clientException("Error uncompressing file " + e.message);
+                    clientException(`Error uncompressing file ${e.message}`);
                 }
             );
         },
         function(e) {
-            clientException("Error reading " + f.name + ": " + e.message, true);
+            clientException(`Error reading ${f.name}: ${e.message}`, true);
             running = false;
         }
     );
@@ -449,6 +471,7 @@ function receiveMessage(event) {
         }
         playList = event.data;
         playIndex = 0;
+        playNext = -1;
     } else if (event.data === "play") {
         playSound();
     } else if (event.data === "stop") {
@@ -460,7 +483,7 @@ function receiveMessage(event) {
             sound.pause();
             sharedArray[dataType.SND] = audioEvent.PAUSED;
         } else {
-            console.log("Can't find audio data:", audio);
+            clientException(`Can't find audio data: ${audio}`);
         }
     } else if (event.data === "resume") {
         const audio = playList[playIndex];
@@ -469,20 +492,25 @@ function receiveMessage(event) {
             sound.play();
             sharedArray[dataType.SND] = audioEvent.RESUMED;
         } else {
-            console.log("Can't find audio data:", audio);
+            clientException(`Can't find audio data: ${audio}`);
         }
     } else if (event.data.substr(0, 4) === "loop") {
-        const audio = playList[playIndex];
         const loop = event.data.split(",")[1];
         if (loop) {
-            if (audio && soundsIdx.has(audio.toLowerCase())) {
-                const sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
-                sound.loop(loop === "true"); // TODO: Handle playlist scenario
-            } else {
-                console.log("Can't find audio data:", audio);
+            playLoop = loop === "true";
+        } else {
+            clientException(`Missing loop parameter: ${event.data}`);
+        }
+    } else if (event.data.substr(0, 4) === "next") {
+        const newIndex = event.data.split(",")[1];
+        if (newIndex && !isNaN(parseInt(newIndex))) {
+            playNext = parseInt(newIndex);
+            if (playNext >= playList.length) {
+                playNext = -1;
+                clientException(`Next index out of range: ${newIndex}`);
             }
         } else {
-            console.log("Invalid seek position:", event.data);
+            clientException(`Invalid index: ${event.data}`);
         }
     } else if (event.data.substr(0, 4) === "seek") {
         const audio = playList[playIndex];
@@ -492,10 +520,10 @@ function receiveMessage(event) {
                 const sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
                 sound.seek(parseInt(position));
             } else {
-                console.log("Can't find audio data:", audio);
+                clientException(`Can't find audio data: ${audio}`);
             }
         } else {
-            console.log("Invalid seek position:", event.data);
+            clientException(`Invalid seek position: ${event.data}`);
         }
     } else if (event.data.substr(0, 7) === "trigger") {
         const wav = event.data.split(",")[1];
@@ -532,7 +560,7 @@ function receiveMessage(event) {
             }
             sound.stop();
         } else {
-            console.log("Can't find wav sound:", wav);
+            clientException(`Can't find wav sound: ${wav}`);
         }
     } else if (event.data == "end") {
         closeChannel();
@@ -544,24 +572,37 @@ function playSound() {
     if (audio && soundsIdx.has(audio.toLowerCase())) {
         const sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
         sound.seek(0);
-        sound.on("end", nextSound);
-        sound.play();
+        sound.once("end", nextSound);
+        if (sound.state() === "unloaded") {
+            sound.once("load", function() {
+                sound.play();
+            });
+            sound.load();
+        } else {
+            sound.play();
+        }
         sharedArray[dataType.IDX] = playIndex;
         sharedArray[dataType.SND] = audioEvent.SELECTED;
     } else {
-        console.log("Can't find audio data:", audio);
+        clientException(`Can't find audio data: ${audio}`);
     }
 }
 
 function nextSound() {
-    playIndex++;
+    if (playNext >= 0 && playNext < playList.length) {
+        playIndex = playNext;
+    } else {
+        playIndex++;
+    }
+    playNext = -1;
     if (playIndex < playList.length) {
         playSound();
-    } else {
-        // TODO: Handle playlist loop
-        sharedArray[dataType.SND] = audioEvent.FULL;
-        // TODO: Check what actually happens to playIndex if loop is disabled
+    } else if (playLoop) {
         playIndex = 0;
+        playSound();
+    } else {
+        playIndex = 0;
+        sharedArray[dataType.SND] = audioEvent.FULL;
     }
 }
 
@@ -572,7 +613,7 @@ function stopSound() {
         sound.stop();
         sharedArray[dataType.SND] = audioEvent.PARTIAL;
     } else {
-        console.log("Can't find audio data:", audio);
+        clientException(`Can't find audio data: ${audio}`);
     }
 }
 
@@ -595,6 +636,8 @@ function resetSounds() {
     soundsDat.push(new Howl({ src: ["./audio/deadend.wav"] }));
     playList = new Array();
     playIndex = 0;
+    playLoop = false;
+    playNext = -1;
 }
 // Restore emulator menu and terminate Worker
 function closeChannel() {
@@ -690,7 +733,6 @@ function keyUpHandler(event) {
     }
 }
 Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
-    console.log("copied screenshot!");
     copyScreenshot();
     return false;
 });
@@ -712,8 +754,8 @@ function showStatusBar(visible) {
     }
 }
 // Exception Handler
-function clientException(msg) {
-    // TODO: Add icon on status bar to notify error
+function clientException(msg, popup = false) {
+    // TODO: Add icon on status bar to notify error and handle popup
     console.error(msg);
 }
 // Fix text color after focus change
