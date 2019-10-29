@@ -20,13 +20,14 @@ The binaries of this application are released together with the emulator library
 Here are **optional** arguments you can use when starting the emulator at the command line:
 
 ```
-"BrightScript Emulator" [[-o] <filePath>] [-f | --fullscreen] [-d | --devtools]
+"BrightScript Emulator" [[-o] <filePath>] [-f | --fullscreen] [-e | -ecp] [-d | --devtools]
 ```
 
 |Argument                           |Description                                                                  |
 |-----------------------------------|-----------------------------------------------------------------------------|
 |**-o** `<filePath>` or `<filePath>`| Opens  a `.zip` or `.brs` when starting the emulator.                       |
 |**-f** or **--fullscreen**        | Opens the emulator in **full screen mode** (double-click screen to restore).|
+|**-e** or **--ecp**               | Enables [ECP and SSDP servers](https://developer.roku.com/en-ca/docs/developer-program/debugging/external-control-api.md) to allow remote control and detection.|
 |**-d** or **--devtools**          | Opens the **developer tools** when starting the emulator.                   |
 
 ## Author Links

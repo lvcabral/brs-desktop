@@ -118,6 +118,26 @@ for (let index = 0; index < storage.length; index++) {
     }
 }
 // Events from background thread
+ipcRenderer.on("postKeyDown", function(event, key) {
+    if (running) {
+        handleKey(key, 0);
+    }
+});
+ipcRenderer.on("postKeyUp", function(event, key) {
+    if (running) {
+        handleKey(key, 100);
+    }
+});
+ipcRenderer.on("postKeyPress", function(event, key) {
+    if (running) {
+        setTimeout(function() {
+            handleKey(key, 100);
+        }, 300);
+        handleKey(key, 0);
+    }
+});
+
+
 ipcRenderer.on("closeChannel", function(event) {
     if (running) {
         closeChannel();
@@ -737,6 +757,40 @@ Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
     copyScreenshot();
     return false;
 });
+
+function handleKey(key, mod) {
+    if (key == "Back") {
+        sharedArray[dataType.KEY] = 0 + mod; // BUTTON_BACK
+    } else if (key == "Select") {
+        sharedArray[dataType.KEY] = 6 + mod; // BUTTON_SELECT
+    } else if (key == "Left") {
+        sharedArray[dataType.KEY] = 4 + mod; // BUTTON_LEFT
+    } else if (key == "Right") {
+        sharedArray[dataType.KEY] = 5 + mod; // BUTTON_RIGHT
+    } else if (key == "Up") {
+        sharedArray[dataType.KEY] = 2 + mod; // BUTTON_UP
+    } else if (key == "Down") {
+        sharedArray[dataType.KEY] = 3 + mod; // BUTTON_DOWN
+    } else if (key == "InstantReplay") {
+        sharedArray[dataType.KEY] = 7 + mod; // BUTTON_INSTANT_REPLAY
+    } else if (key == "Info") {
+        sharedArray[dataType.KEY] = 10 + mod; // BUTTON_INFO
+    } else if (key == "Rev") {
+        sharedArray[dataType.KEY] = 8 + mod; // BUTTON_REWIND
+    } else if (key == "Play") {
+        sharedArray[dataType.KEY] = 13 + mod; // BUTTON_PLAY
+    } else if (key == "Fwd") {
+        sharedArray[dataType.KEY] = 9 + mod; // BUTTON_FAST_FORWARD
+    } else if (key == "A") {
+        sharedArray[dataType.KEY] = 17 + mod; // BUTTON_A
+    } else if (key == "B") {
+        sharedArray[dataType.KEY] = 18 + mod; // BUTTON_B
+    } else if (key == "Home") {
+        if (brsWorker != undefined) {        // HOME BUTTON (ESC)
+            closeChannel();
+        }
+    }
+}
 // Copy Screenshot to the Clipboard
 function copyScreenshot() {
     display.toBlob(function(blob) {

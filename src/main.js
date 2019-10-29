@@ -11,11 +11,12 @@ import env from "env";
 import minimist from "minimist";
 import { app, screen, Menu } from "electron";
 import createWindow from "./helpers/window";
+import { enableECP } from "./helpers/ecp"
 import { createMenu } from "./menu/menuService"
 
 const argv = minimist(process.argv.slice(1), {
     string: [ "o" ],
-    alias: { f: "fullscreen", d: "devtools" }
+    alias: { d: "devtools", e: "ecp", f: "fullscreen" }
 });
 
 // Save userData in separate folders for each environment.
@@ -53,6 +54,10 @@ app.on("ready", () => {
 
     if (env.name === "development" || argv.devtools) {
         mainWindow.openDevTools();
+    }
+
+    if (argv.ecp) {
+        enableECP(mainWindow);
     }
 });
 

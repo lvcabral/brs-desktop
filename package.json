@@ -63,7 +63,9 @@
         "howler": "^2.1.2",
         "jszip": "^3.2.2",
         "minimist": "^1.2.0",
-        "mousetrap": "^1.6.3"
+        "mousetrap": "^1.6.3",
+        "node-ssdp": "^4.0.0",
+        "restana": "^3.3.3"
     },
     "devDependencies": {
         "@babel/core": "^7.5.5",

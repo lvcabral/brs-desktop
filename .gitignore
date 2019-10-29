@@ -3,9 +3,9 @@ node_modules
 .DS_Store
 Thumbs.db
 *.log
-
 /dist
 /temp
+/out
 
 # ignore everything in 'app' folder what had been generated from 'src' folder
 /app/app.js
