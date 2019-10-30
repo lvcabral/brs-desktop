@@ -1,5 +1,5 @@
 import * as dialog from "../helpers/dialog";
-import { getRecentPackage, clearRecentFiles, addRecentPackage, addRecentSource, getRecentSource } from "./menuService";
+import { getRecentPackage, clearRecentFiles, getRecentSource } from "./menuService";
 
 export const fileMenuTemplate = {
     label: "&File",
@@ -185,14 +185,12 @@ export const fileMenuTemplate = {
 
 function packageClick(window, id) {
     window.webContents.send("fileSelected", [ getRecentPackage(id) ]);
-    addRecentPackage(getRecentPackage(id));
     window.blur();
     window.focus();
 }
 
 function sourceClick(window, id) {
     window.webContents.send("fileSelected", [ getRecentSource(id) ]);
-    addRecentSource(getRecentSource(id));
     window.blur();
     window.focus();
 }

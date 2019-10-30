@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu, ipcMain } from "electron";
 import { fileMenuTemplate } from "./fileMenuTemplate";
 import { editMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
@@ -14,7 +14,7 @@ let fileMenuIndex = 0;
 let recentMenuIndex = 2;
 let recentFiles;
 let menuTemplate;
-
+// External Functions
 export function createMenu() {
     menuTemplate = [ fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate ];
     if (isMacOS) {
@@ -31,28 +31,9 @@ export function getRecentPackage(index) {
     return recentFiles.zip[index];
 }
 
-export function addRecentPackage(filePath) {
-    let idx = recentFiles.zip.indexOf(filePath);
-    if (idx >= 0) {
-        recentFiles.zip.splice(idx, 1);
-    }
-    recentFiles.zip.unshift(filePath);
-    saveRecentFiles();
-    rebuildMenu();
-}
 
 export function getRecentSource(index) {
     return recentFiles.brs[index];
-}
-
-export function addRecentSource(filePath) {
-    let idx = recentFiles.brs.indexOf(filePath);
-    if (idx >= 0) {
-        recentFiles.brs.splice(idx, 1);
-    }
-    recentFiles.brs.unshift(filePath);
-    saveRecentFiles();
-    rebuildMenu();
 }
 
 export function clearRecentFiles() {
@@ -61,6 +42,29 @@ export function clearRecentFiles() {
     rebuildMenu();
 }
 
+// Events
+ipcMain.on("addRecentPackage", (event, filePath) => {
+    console.log("event->", filePath);
+    let idx = recentFiles.zip.indexOf(filePath);
+    if (idx >= 0) {
+        recentFiles.zip.splice(idx, 1);
+    }
+    recentFiles.zip.unshift(filePath);
+    saveRecentFiles();
+    rebuildMenu();
+});
+
+ipcMain.on("addRecentSource" , (event, filePath) => {
+    let idx = recentFiles.brs.indexOf(filePath);
+    if (idx >= 0) {
+        recentFiles.brs.splice(idx, 1);
+    }
+    recentFiles.brs.unshift(filePath);
+    saveRecentFiles();
+    rebuildMenu();
+});
+
+// Internal functions
 function restoreRecentFiles() {
     let recentFilesDefault = { zip: [], brs: [] };
     try {

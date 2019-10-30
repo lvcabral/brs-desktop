@@ -118,10 +118,8 @@ export default (name, options, argv) => {
             const fileExt = path.parse(openFile).ext.toLowerCase();
             if (fileExt === ".zip") {
                 win.webContents.send("fileSelected", [ openFile ]);
-                addRecentPackage(openFile);
             } else if (fileExt === ".brs") {
                 win.webContents.send("fileSelected", [ openFile ]);
-                addRecentSource(openFile);
             } else {
                 console.log("File format not supported: ", fileExt);
             }        

@@ -1,5 +1,4 @@
 import { dialog, BrowserWindow } from "electron";
-import {addRecentPackage, addRecentSource } from "../menu/menuService";
 
 /*
  * Show open dialog to open a .zip or .brs file.
@@ -19,7 +18,6 @@ export function openChannelPackage() {
                 return;
             }
             window.webContents.send("fileSelected", result.filePaths);
-            addRecentPackage(result.filePaths[0]);
         })
         .catch((err) => {
             console.log(err);
@@ -41,7 +39,6 @@ export function openBrightScriptFile() {
                 return;
             }
             window.webContents.send("fileSelected", result.filePaths);
-            addRecentSource(result.filePaths[0]);
         })
         .catch((err) => {
             console.log(err);

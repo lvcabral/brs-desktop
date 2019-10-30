@@ -15,6 +15,7 @@ import { Howl } from "howler";
 import JSZip from "jszip";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
+let currentFile = "";
 let appMenu = remote.Menu.getApplicationMenu();
 let userTheme = window.localStorage.getItem("userTheme") || "purple";
 remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
@@ -124,8 +125,6 @@ ipcRenderer.on("postKeyPress", function(event, key) {
         handleKey(key, 0);
     }
 });
-
-
 ipcRenderer.on("closeChannel", function(event) {
     if (running) {
         closeChannel();
@@ -188,17 +187,13 @@ ipcRenderer.on("fileSelected", function(event, file) {
     const fileExt = path.parse(filePath).ext.toLowerCase();
     if (fileExt === ".zip") {
         try {
-            loadFile(fileName, fs.readFileSync(filePath));
-            statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
-            statusFile.innerText = filePath;
+            loadFile(filePath, fs.readFileSync(filePath));
         } catch (error) {
             clientException(`Error opening ${fileName}:${error.message}`);
         }
     } else if (fileExt === ".brs") {
         try {
-            loadFile(fileName, new Blob([ fs.readFileSync(filePath) ], { type: "text/plain" }));
-            statusIconFile.innerHTML = "<i class='far fa-file'></i>";
-            statusFile.innerText = filePath;
+            loadFile(filePath, new Blob([ fs.readFileSync(filePath) ], { type: "text/plain" }));
         } catch (error) {
             clientException(`Error opening ${fileName}:${error.message}`);
         }
@@ -207,7 +202,9 @@ ipcRenderer.on("fileSelected", function(event, file) {
     }
 });
 // Open File
-function loadFile(fileName, fileData) {
+function loadFile(filePath, fileData) {
+    const fileName = path.parse(filePath).base;
+    const fileExt = path.parse(filePath).ext.toLowerCase();
     const reader = new FileReader();
     reader.onload = function(progressEvent) {
         paths = [];
@@ -218,22 +215,24 @@ function loadFile(fileName, fileData) {
         paths.push({ url: `source/${fileName}`, id: 0, type: "source" });
         ctx.fillStyle = "rgba(0, 0, 0, 1)";
         ctx.fillRect(0, 0, display.width, display.height);
+        statusIconFile.innerHTML = "<i class='far fa-file'></i>";
+        statusFile.innerText = currentFile;
+        ipcRenderer.send("addRecentSource", currentFile);
         runChannel();
     };
     source = [];
     if (running || brsWorker != undefined) {
         closeChannel();
     }
-    if (fileName.split(".").pop() === "zip") {
-        console.log(`Loading ${fileName}...`);
+    currentFile = filePath;
+    console.log(`Loading ${fileName}...`);
+    if (fileExt === ".zip") {
         running = true;
         openChannelZip(fileData);
     } else {
         running = true;
         reader.readAsText(fileData);
-    }
-    appMenu.getMenuItemById("close-channel").enabled = running;
-    display.focus();
+    }   
 }
 // Uncompress Zip and execute
 function openChannelZip(f) {
@@ -288,6 +287,8 @@ function openChannelZip(f) {
                                 });
                             }
                         }
+                        statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
+                        statusFile.innerText = currentFile;
                         if (titleBar) {
                             const title = manifestMap.get("title");
                             if (title) {
@@ -422,6 +423,7 @@ function openChannelZip(f) {
                             });
                             setTimeout(function() {
                                 runChannel();
+                                ipcRenderer.send("addRecentPackage", currentFile);
                             }, splashTimeout);
                         },
                         function error(e) {
@@ -442,6 +444,7 @@ function openChannelZip(f) {
 }
 // Execute Emulator Web Worker
 function runChannel() {
+    appMenu.getMenuItemById("close-channel").enabled = true;
     display.style.opacity = 1;
     display.focus();
     brsWorker = new Worker("lib/brsEmu.min.js");
@@ -669,6 +672,7 @@ function closeChannel() {
     bufferCanvas.width = 1;
     running = false;
     appMenu.getMenuItemById("close-channel").enabled = false;
+    currentFile = "";
 }
 // Remote control emulator
 function keyDownHandler(event) {
