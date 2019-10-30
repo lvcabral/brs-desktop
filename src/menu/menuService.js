@@ -27,10 +27,13 @@ export function createMenu() {
     rebuildMenu(true);
 }
 
+export function getPackages() {
+    return recentFiles.zip;
+}
+
 export function getRecentPackage(index) {
     return recentFiles.zip[index];
 }
-
 
 export function getRecentSource(index) {
     return recentFiles.brs[index];
