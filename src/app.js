@@ -49,20 +49,8 @@ let fonts = [];
 let brsWorker;
 let running = false;
 // Device Data
-const developerId = "emulator-dev-id"; // Unique id to segregate registry among channels
-const deviceData = {
-    developerId: developerId,
-    registry: new Map(),
-    deviceModel: "8000X",
-    clientId: "6c5bf3a5-b2a5-4918-824d-7691d5c85364", // Unique identifier of the device
-    countryCode: "US",
-    timeZone: "US/Arizona",
-    locale: "en_US",
-    clockFormat: "12h",
-    displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
-    defaultFont: "Asap", // Desktop app only has Asap to reduce the package size
-    maxSimulStreams: 2
-};
+const deviceData = remote.getGlobal("sharedObject").deviceInfo;
+Object.assign(deviceData, {registry: new Map()});
 // Emulator Display
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
@@ -113,7 +101,7 @@ document.addEventListener("keyup", keyUpHandler, false);
 const storage = window.localStorage;
 for (let index = 0; index < storage.length; index++) {
     const key = storage.key(index);
-    if (key.substr(0, developerId.length) === developerId) {
+    if (key.substr(0, deviceData.developerId.length) === deviceData.developerId) {
         deviceData.registry.set(key, storage.getItem(key));
     }
 }

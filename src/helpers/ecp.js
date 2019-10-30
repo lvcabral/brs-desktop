@@ -1,14 +1,14 @@
-import { BrowserWindow } from "electron";
 import { Server as SSDP } from "node-ssdp";
 import xmlbuilder from "xmlbuilder";
 
 const ECPPORT = 8060;
 const SSDPPORT = 1900;
 let window;
+let device;
 
-export function enableECP(mainWindow) {
+export function enableECP(mainWindow, deviceInfo) {
     window = mainWindow;
-
+    device = deviceInfo;
     // Create ECP Server
     const restana = require("restana")({
         ignoreTrailingSlash: true
@@ -44,10 +44,26 @@ export function enableECP(mainWindow) {
 }
 
 function getDeviceInfo(req, res) {
+    const mac = getMacAddress();
     let xml = xmlbuilder.create("device-info");
-    xml.ele("device-id",{},"BRSEMUAPP070");
-    xml.ele("default-device-name",{},"BrightScript Emulator - BRSEMUAPP070");
-    xml.ele("model-number",{},"8000X");
+    xml.ele("udn", {}, "404d7944-8d29-45e3-8ef3-873eaa9f7769");
+    xml.ele("serial-number", {}, device.serialNumber);
+    xml.ele("device-id", {}, device.serialNumber);
+    xml.ele("friendly-device-name", {}, device.friendlyName);
+    xml.ele("default-device-name", {}, `${device.friendlyName} - ${device.serialNumber}`);
+    xml.ele("user-device-name", {}, device.friendlyName);
+    xml.ele("model-number", {}, device.deviceModel);
+    xml.ele("model-region", {}, "US");
+    xml.ele("is-tv", {}, false);
+    xml.ele("is-stick", {}, false);
+    xml.ele("wifi-mac", {}, mac);
+    xml.ele("ethernet-mac", {}, mac);
+    xml.ele("locale", {}, device.locale);
+    xml.ele("time-zone", {}, device.timeZone);
+    xml.ele("clock-format", {}, device.clockFormat);
+    xml.ele("uptime", {}, Math.round(process.uptime()));
+    xml.ele("developer-enabled", {}, true);
+    xml.ele("keyed-developer-id", {}, device.developerId);
     res.send(xml.end({ pretty: true }));
 }
 
@@ -61,4 +77,24 @@ function postKeyUp(req, res) {
 
 function postKeyPress(req, res) {
     window.webContents.send("postKeyPress", req.params.key);
+}
+
+function getMacAddress() {
+    const os = require('os');
+    const ifaces = os.networkInterfaces();
+    let mac = "";
+    Object.keys(ifaces).forEach(function (ifname) {   
+        if (mac !== "" ) {
+            return;
+        }
+        ifaces[ifname].forEach(function (iface) {
+        if ('IPv4' !== iface.family || iface.internal !== false) {
+          // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+          return;
+        }
+        mac = iface.mac;
+        return;
+      });
+    });
+    return mac;
 }
