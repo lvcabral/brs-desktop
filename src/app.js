@@ -109,20 +109,20 @@ for (let index = 0; index < storage.length; index++) {
 // Events from background thread
 ipcRenderer.on("postKeyDown", function(event, key) {
     if (running) {
-        handleKey(key, 0);
+        handleKey(key.toLowerCase(), 0);
     }
 });
 ipcRenderer.on("postKeyUp", function(event, key) {
     if (running) {
-        handleKey(key, 100);
+        handleKey(key.toLowerCase(), 100);
     }
 });
 ipcRenderer.on("postKeyPress", function(event, key) {
     if (running) {
         setTimeout(function() {
-            handleKey(key, 100);
+            handleKey(key.toLowerCase(), 100);
         }, 300);
-        handleKey(key, 0);
+        handleKey(key.toLowerCase(), 0);
     }
 });
 ipcRenderer.on("closeChannel", function(event) {
@@ -176,6 +176,7 @@ ipcRenderer.on("console", function(event, text) {
     console.log(text);
 });
 ipcRenderer.on("fileSelected", function(event, file) {
+    // TODO: Handle multiple events
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
         filePath = file[0];
@@ -221,16 +222,11 @@ function loadFile(filePath, fileData) {
         runChannel();
     };
     source = [];
-    if (running || brsWorker != undefined) {
-        closeChannel();
-    }
     currentFile = filePath;
     console.log(`Loading ${fileName}...`);
     if (fileExt === ".zip") {
-        running = true;
         openChannelZip(fileData);
     } else {
-        running = true;
         reader.readAsText(fileData);
     }   
 }
@@ -447,6 +443,15 @@ function runChannel() {
     appMenu.getMenuItemById("close-channel").enabled = true;
     display.style.opacity = 1;
     display.focus();
+    if (running || brsWorker != undefined) {
+        brsWorker.terminate();
+        sharedArray[dataType.KEY] = 0;
+        sharedArray[dataType.SND] = -1;
+        sharedArray[dataType.IDX] = -1;
+        resetSounds();
+        bufferCanvas.width = 1;
+    }
+    running = true;
     brsWorker = new Worker("lib/brsEmu.min.js");
     brsWorker.addEventListener("message", receiveMessage);
     const payload = {
@@ -751,33 +756,33 @@ Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
 });
 
 function handleKey(key, mod) {
-    if (key == "Back") {
+    if (key == "back") {
         sharedArray[dataType.KEY] = 0 + mod; // BUTTON_BACK
-    } else if (key == "Select") {
+    } else if (key == "select") {
         sharedArray[dataType.KEY] = 6 + mod; // BUTTON_SELECT
-    } else if (key == "Left") {
+    } else if (key == "left") {
         sharedArray[dataType.KEY] = 4 + mod; // BUTTON_LEFT
-    } else if (key == "Right") {
+    } else if (key == "right") {
         sharedArray[dataType.KEY] = 5 + mod; // BUTTON_RIGHT
-    } else if (key == "Up") {
+    } else if (key == "up") {
         sharedArray[dataType.KEY] = 2 + mod; // BUTTON_UP
-    } else if (key == "Down") {
+    } else if (key == "down") {
         sharedArray[dataType.KEY] = 3 + mod; // BUTTON_DOWN
-    } else if (key == "InstantReplay") {
+    } else if (key == "instantreplay") {
         sharedArray[dataType.KEY] = 7 + mod; // BUTTON_INSTANT_REPLAY
-    } else if (key == "Info") {
+    } else if (key == "info") {
         sharedArray[dataType.KEY] = 10 + mod; // BUTTON_INFO
-    } else if (key == "Rev") {
+    } else if (key == "rev") {
         sharedArray[dataType.KEY] = 8 + mod; // BUTTON_REWIND
-    } else if (key == "Play") {
+    } else if (key == "play") {
         sharedArray[dataType.KEY] = 13 + mod; // BUTTON_PLAY
-    } else if (key == "Fwd") {
+    } else if (key == "fwd") {
         sharedArray[dataType.KEY] = 9 + mod; // BUTTON_FAST_FORWARD
-    } else if (key == "A") {
+    } else if (key == "a") {
         sharedArray[dataType.KEY] = 17 + mod; // BUTTON_A
-    } else if (key == "B") {
+    } else if (key == "b") {
         sharedArray[dataType.KEY] = 18 + mod; // BUTTON_B
-    } else if (key == "Home") {
+    } else if (key == "home") {
         if (brsWorker != undefined) {        // HOME BUTTON (ESC)
             closeChannel();
         }
