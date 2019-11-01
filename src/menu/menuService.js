@@ -5,6 +5,7 @@ import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
 import jetpack from "fs-jetpack";
+import "../helpers/hash";
 
 const isMacOS = process.platform === "darwin";
 const maxFiles = 7;
@@ -27,6 +28,10 @@ export function createMenu() {
     rebuildMenu(true);
 }
 
+export function getChannelIds() {
+    return recentFiles.ids;
+}
+
 export function getPackages() {
     return recentFiles.zip;
 }
@@ -35,24 +40,41 @@ export function getRecentPackage(index) {
     return recentFiles.zip[index];
 }
 
+export function getRecentId(index) {
+    return recentFiles.ids[index];
+}
+
+export function getRecentName(index) {
+    return recentFiles.names[index];
+}
+
+export function getRecentVersion(index) {
+    return recentFiles.versions[index];
+}
+
 export function getRecentSource(index) {
     return recentFiles.brs[index];
 }
 
 export function clearRecentFiles() {
-    recentFiles = { zip: [], brs: [] };
+    recentFiles = { ids: [], zip: [], names:[], versions:[], brs: [] };
     saveRecentFiles();
     rebuildMenu();
 }
 
 // Events
-ipcMain.on("addRecentPackage", (event, filePath) => {
-    console.log("event->", filePath);
-    let idx = recentFiles.zip.indexOf(filePath);
+ipcMain.on("addRecentPackage", (event, currentChannel) => {
+    let idx = recentFiles.ids.indexOf(currentChannel.id);
     if (idx >= 0) {
+        recentFiles.ids.splice(idx, 1);
         recentFiles.zip.splice(idx, 1);
+        recentFiles.names.splice(idx, 1);
+        recentFiles.versions.splice(idx, 1);
     }
-    recentFiles.zip.unshift(filePath);
+    recentFiles.ids.unshift(currentChannel.id);
+    recentFiles.zip.unshift(currentChannel.file);
+    recentFiles.names.unshift(currentChannel.title);
+    recentFiles.versions.unshift(currentChannel.version);
     saveRecentFiles();
     rebuildMenu();
 });
@@ -69,13 +91,27 @@ ipcMain.on("addRecentSource" , (event, filePath) => {
 
 // Internal functions
 function restoreRecentFiles() {
-    let recentFilesDefault = { zip: [], brs: [] };
+    let recentFilesDefault = { ids: [], zip: [], names: [], versions: [], brs: [] };
     try {
         recentFiles = userDataDir.read(recentFilesJson, "json");
     } catch (err) {
         console.error("error reading recent files json");
     }
     recentFiles = recentFiles || recentFilesDefault;
+    if (!recentFiles.ids) {
+        Object.assign(recentFiles, {ids: new Array(recentFiles.zip.length)});
+        recentFiles.zip.forEach( (value, index) => {
+            recentFiles.ids[index] = value.hashCode();
+        });
+    }
+    if (!recentFiles.names) {
+        const names = new Array(recentFiles.zip.length).fill("No Title");
+        Object.assign(recentFiles, {names: names});
+    }
+    if (!recentFiles.versions) {
+        const versions = new Array(recentFiles.zip.length).fill("v0.0.0");
+        Object.assign(recentFiles, {versions: versions});
+    }
 }
 
 function saveRecentFiles() {

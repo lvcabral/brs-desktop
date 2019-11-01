@@ -6,6 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import "./stylesheets/main.css";
+import "./helpers/hash";
 import fs from "fs";
 import path from "path";
 import Mousetrap from "mousetrap";
@@ -15,7 +16,7 @@ import { Howl } from "howler";
 import JSZip from "jszip";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
-let currentFile = "";
+const currentChannel = {id: "", file: "", title: "", version: ""};
 let appMenu = remote.Menu.getApplicationMenu();
 let userTheme = window.localStorage.getItem("userTheme") || "purple";
 remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
@@ -217,12 +218,21 @@ function loadFile(filePath, fileData) {
         ctx.fillStyle = "rgba(0, 0, 0, 1)";
         ctx.fillRect(0, 0, display.width, display.height);
         statusIconFile.innerHTML = "<i class='far fa-file'></i>";
-        statusFile.innerText = currentFile;
-        ipcRenderer.send("addRecentSource", currentFile);
+        statusFile.innerText = currentChannel.file;
+        ipcRenderer.send("addRecentSource", currentChannel.file);
         runChannel();
     };
     source = [];
-    currentFile = filePath;
+    currentChannel.id = filePath.hashCode();
+    currentChannel.file = filePath;
+    if (brsWorker != undefined) {
+        brsWorker.terminate();
+        sharedArray[dataType.KEY] = 0;
+        sharedArray[dataType.SND] = -1;
+        sharedArray[dataType.IDX] = -1;
+        resetSounds();
+        bufferCanvas.width = 1;
+    }
     console.log(`Loading ${fileName}...`);
     if (fileExt === ".zip") {
         openChannelZip(fileData);
@@ -283,30 +293,52 @@ function openChannelZip(f) {
                                 });
                             }
                         }
+                        let icon;
+                        icon = manifestMap.get("mm_icon_focus_hd");
+                        if (!icon) {
+                            icon = manifestMap.get("mm_icon_focus_fhd");
+                            if (!icon) {
+                                icon = manifestMap.get("mm_icon_focus_sd");
+                            }
+                        }
+                        if (icon && icon.substr(0, 5) === "pkg:/") {
+                            const iconFile = zip.file(icon.substr(5));
+                            if (iconFile) {
+                                iconFile.async("nodebuffer").then((content) => {
+                                    const iconPath = path.join(
+                                        remote.app.getPath("userData"), 
+                                        currentChannel.id + ".png"
+                                    );
+                                    fs.writeFileSync(iconPath, content);
+                                });
+                            }
+                        }
                         statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
-                        statusFile.innerText = currentFile;
+                        statusFile.innerText = currentChannel.file;
                         if (titleBar) {
                             const title = manifestMap.get("title");
                             if (title) {
                                 titleBar.updateTitle(defaultTitle + " - " + title);
+                                currentChannel.title = title;
                             } else {
                                 titleBar.updateTitle(defaultTitle);
+                                currentChannel.title = "No Title";
                             }
-                            let channelVersion = "";
+                            currentChannel.version = "";
                             const majorVersion = manifestMap.get("major_version");
                             if (majorVersion) {
-                                channelVersion += "v" + majorVersion;
+                                currentChannel.version += "v" + majorVersion;
                             }
                             const minorVersion = manifestMap.get("minor_version");
                             if (minorVersion) {
-                                channelVersion += "." + minorVersion;
+                                currentChannel.version += "." + minorVersion;
                             }
                             const buildVersion = manifestMap.get("build_version");
                             if (buildVersion) {
-                                channelVersion += "." + buildVersion;
+                                currentChannel.version += "." + buildVersion;
                             }
                             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
-                            statusVersion.innerText = channelVersion;
+                            statusVersion.innerText = currentChannel.version;
                         }
                     },
                     function error(e) {
@@ -419,7 +451,7 @@ function openChannelZip(f) {
                             });
                             setTimeout(function() {
                                 runChannel();
-                                ipcRenderer.send("addRecentPackage", currentFile);
+                                ipcRenderer.send("addRecentPackage", currentChannel);
                             }, splashTimeout);
                         },
                         function error(e) {
@@ -448,7 +480,6 @@ function runChannel() {
         sharedArray[dataType.KEY] = 0;
         sharedArray[dataType.SND] = -1;
         sharedArray[dataType.IDX] = -1;
-        resetSounds();
         bufferCanvas.width = 1;
     }
     running = true;
@@ -677,7 +708,10 @@ function closeChannel() {
     bufferCanvas.width = 1;
     running = false;
     appMenu.getMenuItemById("close-channel").enabled = false;
-    currentFile = "";
+    currentChannel.id = "";
+    currentChannel.file = "";
+    currentChannel.title = "";
+    currentChannel.version = "";
 }
 // Remote control emulator
 function keyDownHandler(event) {

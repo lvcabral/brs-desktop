@@ -10,9 +10,9 @@ import url from "url";
 import env from "env";
 import minimist from "minimist";
 import { app, screen } from "electron";
-import createWindow from "./helpers/window";
-import { enableECP } from "./helpers/ecp"
+import { enableECP } from "./api/ecp"
 import { createMenu } from "./menu/menuService"
+import createWindow from "./helpers/window";
 
 // Emulator Device Information Object
 const deviceInfo = {
