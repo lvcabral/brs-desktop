@@ -5796,6 +5796,10 @@ tar@^4:
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
 
+"telnet@git+https://github.com/TooTallNate/node-telnet.git#780340617e1f223de384cdfcb7cecf0a1a6f1159":
+  version "0.0.1"
+  resolved "git+https://github.com/TooTallNate/node-telnet.git#780340617e1f223de384cdfcb7cecf0a1a6f1159"
+
 temp-file@^3.3.4:
   version "3.3.4"
   resolved "https://registry.yarnpkg.com/temp-file/-/temp-file-3.3.4.tgz#73af868cd7cb7400a44e4bb03e653b2280ce2878"

@@ -65,7 +65,8 @@
         "minimist": "^1.2.0",
         "mousetrap": "^1.6.3",
         "node-ssdp": "^4.0.0",
-        "restana": "^3.3.3"
+        "restana": "^3.3.3",
+        "telnet": "git+https://github.com/TooTallNate/node-telnet.git#780340617e1f223de384cdfcb7cecf0a1a6f1159"
     },
     "devDependencies": {
         "@babel/core": "^7.5.5",

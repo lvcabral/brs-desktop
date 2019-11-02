@@ -10,7 +10,8 @@ import url from "url";
 import env from "env";
 import minimist from "minimist";
 import { app, screen, ipcMain } from "electron";
-import { initECP, enableECP, isECPEnabled } from "./api/ecp"
+import { initECP, enableECP } from "./api/ecp"
+import { enableInstaller } from "./api/installer";
 import { createMenu } from "./menu/menuService"
 import createWindow from "./helpers/window";
 
@@ -34,7 +35,7 @@ const deviceInfo = {
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
     string: [ "o" ],
-    alias: { d: "devtools", e: "ecp", f: "fullscreen" }
+    alias: { d: "devtools", e: "ecp", f: "fullscreen", i: "installer" }
 });
 
 // Save userData in separate folders for each environment.
@@ -75,6 +76,9 @@ app.on("ready", () => {
         if (argv.ecp) {
             enableECP();
             mainWindow.webContents.send("toggleECP", true);
+        }
+        if (argv.installer) {
+            enableInstaller();
         }
         if (env.name === "development" || argv.devtools) {
             mainWindow.openDevTools();
