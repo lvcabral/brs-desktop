@@ -1,3 +1,5 @@
+import { isECPEnabled, enableECP, disableECP } from "../api/ecp";
+
 export const deviceMenuTemplate = {
     label: "&Device",
     submenu: [
@@ -57,6 +59,21 @@ export const deviceMenuTemplate = {
             }
         },
         { type: "separator" },
+        {
+            id: "ecp-api",
+            label: "ECP Server (port 8060)",
+            type: "checkbox",
+            checked: true,
+            click: (event, window) => {
+                if (isECPEnabled) {
+                    disableECP();
+                    window.webContents.send("toggleECP", false);
+                } else {
+                    enableECP();
+                    window.webContents.send("toggleECP", true);
+                }
+            }
+        },
         {
             label: "Reset Device",
             accelerator: "CmdOrCtrl+Shift+R",

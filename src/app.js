@@ -16,9 +16,10 @@ import { Howl } from "howler";
 import JSZip from "jszip";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
+const storage = window.localStorage;
 const currentChannel = {id: "", file: "", title: "", version: ""};
 let appMenu = remote.Menu.getApplicationMenu();
-let userTheme = window.localStorage.getItem("userTheme") || "purple";
+let userTheme = storage.getItem("userTheme") || "purple";
 remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
     .getPropertyValue("--background-color")
     .trim();
@@ -39,8 +40,14 @@ const statusFile = document.getElementById("statusFile");
 const statusIconVersion = document.getElementById("statusIconVersion");
 const statusVersion = document.getElementById("statusVersion");
 const statusDisplay = document.getElementById("statusDisplay");
+const statusSepRes = document.getElementById("statusSepRes");
 const statusIconRes = document.getElementById("statusIconRes");
 const statusResolution = document.getElementById("statusResolution");
+const statusIconECP = document.getElementById("statusIconECP");
+const statusECP = document.getElementById("statusECP");
+statusResolution.style.display = "none";
+statusIconRes.style.display = "none";
+statusSepRes.style.display = "none";
 // Channel Data
 let splashTimeout = 1600;
 let source = [];
@@ -53,11 +60,15 @@ let running = false;
 // Device Data
 const deviceData = remote.getGlobal("sharedObject").deviceInfo;
 Object.assign(deviceData, {registry: new Map()});
+// ECP Server 
+let ECPEnabled = storage.getItem("ECPEnabled") || "false";
+ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
+updateECPOnStatus()
 // Emulator Display
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
 const screenSize = { width: 1280, height: 720 };
-let displayMode = window.localStorage.getItem("displayMode") || "720p";
+let displayMode = storage.getItem("displayMode") || "720p";
 if (displayMode === "1080p") {
     screenSize.width = 1920;
     screenSize.height = 1080;
@@ -76,7 +87,7 @@ const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
 const bufferCtx = bufferCanvas.getContext("2d");
 let buffer = new ImageData(screenSize.width, screenSize.height);
 // Overscan Mode
-let overscanMode = window.localStorage.getItem("overscanMode") || "disabled";
+let overscanMode = storage.getItem("overscanMode") || "disabled";
 // Setup Menu
 setupMenuSwitches();
 // Sound Objects
@@ -100,7 +111,6 @@ const sharedArray = new Int32Array(sharedBuffer);
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 // Load Registry
-const storage = window.localStorage;
 for (let index = 0; index < storage.length; index++) {
     const key = storage.key(index);
     if (key.substr(0, deviceData.developerId.length) === deviceData.developerId) {
@@ -154,24 +164,30 @@ ipcRenderer.on("setTheme", function(event, theme) {
     titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor);
     titleBar.updateBackground(titleBarConfig.backgroundColor);
     titleBar.titlebar.style.color = titleColor;
-    window.localStorage.setItem("userTheme", theme);
+    storage.setItem("userTheme", theme);
 });
 ipcRenderer.on("setDisplay", function(event, mode) {
     if (mode !== deviceData.displayMode) {
         displayMode = mode;
         changeDisplayMode(mode);
-        window.localStorage.setItem("displayMode", mode);
+        storage.setItem("displayMode", mode);
     }
 });
 ipcRenderer.on("setOverscan", function(event, mode) {
     overscanMode = mode;
-    window.localStorage.setItem("overscanMode", mode);
+    storage.setItem("overscanMode", mode);
     redrawDisplay();
 });
 ipcRenderer.on("toggleStatusBar", function(event) {
     const enable = statusBar.style.visibility !== "visible";
     appMenu.getMenuItemById("status-bar").checked = enable;
     redrawDisplay();
+});
+ipcRenderer.on("toggleECP", function(event, enable) {
+    appMenu.getMenuItemById("ecp-api").checked = enable;
+    ECPEnabled = enable ? "true" : "false";
+    storage.setItem("ECPEnabled", ECPEnabled);
+    updateECPOnStatus();
 });
 ipcRenderer.on("console", function(event, text) {
     console.log(text);
@@ -503,6 +519,9 @@ function receiveMessage(event) {
         if (bufferCanvas.width !== buffer.width || bufferCanvas.height !== buffer.height) {
             statusResolution.innerText = `${buffer.width}x${buffer.height}`;
             statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
+            statusResolution.style.display = "";
+            statusIconRes.style.display = "";
+            statusSepRes.style.display = "";
             bufferCanvas.width = buffer.width;
             bufferCanvas.height = buffer.height;
         }
@@ -697,9 +716,10 @@ function closeChannel() {
         statusFile.innerText = "";
         statusIconVersion.innerText = "";
         statusVersion.innerText = "";
-        statusIconRes.innerText = "";
-        statusResolution.innerText = "";
-    }
+        statusResolution.style.display = "none";
+        statusIconRes.style.display = "none";
+        statusSepRes.style.display = "none";
+}
     brsWorker.terminate();
     sharedArray[dataType.KEY] = 0;
     sharedArray[dataType.SND] = -1;
@@ -924,7 +944,7 @@ function changeDisplayMode(mode) {
         closeChannel();
     }
     deviceData.displayMode = mode;
-    deviceData.deviceModel = mode == "720p" ? "8000X" : mode == "1080p" ? "4620X" : "2720X";
+    deviceData.deviceModel = mode == "720p" ? "4200X" : mode == "1080p" ? "4640X" : "2720X";
     aspectRatio = deviceData.displayMode === "480p" ? 4 / 3 : 16 / 9;
     updateDisplayOnStatus();
     redrawDisplay();
@@ -936,6 +956,16 @@ function updateDisplayOnStatus() {
         statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
     }
 }
+// Update ECP Server icon on Status Bar
+function updateECPOnStatus() {
+    if (ECPEnabled === "true") {
+        statusECP.innerText = "ECP";
+        statusIconECP.innerHTML = "<i class='fa fa-server'></i>";
+    } else {
+        statusECP.innerText = "";
+        statusIconECP.innerHTML = "";
+    }
+}
 // Configure Menu Options
 function setupMenuSwitches(status = false) {
     appMenu = remote.Menu.getApplicationMenu();
@@ -943,6 +973,7 @@ function setupMenuSwitches(status = false) {
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
     appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
+    appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
     if (status) {
         appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
     }

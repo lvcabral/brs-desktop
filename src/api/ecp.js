@@ -17,65 +17,86 @@ const SSDPPORT = 1900;
 const UDN = "404d7944-8d29-45e3-8ef3-873eaa9f7770";
 let window;
 let device;
+let ecp;
+let ssdp;
 
-export function enableECP(mainWindow, deviceInfo) {
+export let isECPEnabled = false;
+export function initECP(mainWindow, deviceInfo) {
     window = mainWindow;
-    device = deviceInfo;
+    device = deviceInfo;    
+}
+export function enableECP() {
+    if (isECPEnabled) {
+        return; // already started do nothing
+    }
     // Create ECP Server
-    const restana = require("restana")({
+    ecp = require("restana")({
         ignoreTrailingSlash: true
     });
-    restana.get("/", getDeviceRoot);
-    restana.get("/device-image.png", getDeviceImage);
-    restana.get("/ecp_SCPD.xml", getScpdXML)
-    restana.get("/dial_SCPD.xml", getScpdXML)
-    restana.get("/ecp-session", getScpdXML)
-    restana.get("/query/device-info", getDeviceInfo);
-    restana.get("//query/device-info", getDeviceInfo);
-    restana.get("/query/apps", getApps);
-    restana.get("/query/active-app", getActiveApp);
-    restana.get("/query/icon/:appID", getAppIcon);
-    restana.post("/launch/:appID", postLaunchApp);
-    restana.post("/keypress/:key", postKeyPress);
-    restana.post("/keydown/:key", postKeyDown);
-    restana.post("/keyup/:key", postKeyUp);
-    restana.start(ECPPORT)
+    ecp.get("/", getDeviceRoot);
+    ecp.get("/device-image.png", getDeviceImage);
+    ecp.get("/ecp_SCPD.xml", getScpdXML)
+    ecp.get("/dial_SCPD.xml", getScpdXML)
+    ecp.get("/ecp-session", getScpdXML)
+    ecp.get("/query/device-info", getDeviceInfo);
+    ecp.get("//query/device-info", getDeviceInfo);
+    ecp.get("/query/apps", getApps);
+    ecp.get("/query/active-app", getActiveApp);
+    ecp.get("/query/icon/:appID", getAppIcon);
+    ecp.post("/launch/:appID", postLaunchApp);
+    ecp.post("/keypress/:key", postKeyPress);
+    ecp.post("/keydown/:key", postKeyDown);
+    ecp.post("/keyup/:key", postKeyUp);
+    ecp.start(ECPPORT)
     .catch(e => {
         console.error("Failed to start ECP server:", e);
     })
     .then((server)=>{
         console.log(`ECP server started listening port ${server.address().port}`);
-    });
-    // Create SSDP Server
-    const ssdp = new SSDP({
-        location: {
-            port: ECPPORT,
-            path: "/",            
-        },
-        adInterval: 120000,
-        ttl: 3600,
-        udn: `uuid:roku:ecp:${deviceInfo.serialNumber}`,
-        ssdpSig: "Roku UPnP/1.0 Roku/9.1.0",
-        ssdpPort: SSDPPORT,
-        suppressRootDeviceAdvertisements: true,
-        headers: {"device-group.roku.com": "46F5CCE2472F2B14D77"},
-        customLogger(text, ...args) {
-            if (text.substr(0,13) === "Sending a 200") {
-                console.log(text, ...args);
+        // Create SSDP Server
+        ssdp = new SSDP({
+            location: {
+                port: ECPPORT,
+                path: "/",            
+            },
+            adInterval: 120000,
+            ttl: 3600,
+            udn: `uuid:roku:ecp:${device.serialNumber}`,
+            ssdpSig: "Roku UPnP/1.0 Roku/9.1.0",
+            ssdpPort: SSDPPORT,
+            suppressRootDeviceAdvertisements: true,
+            headers: {"device-group.roku.com": "46F5CCE2472F2B14D77"},
+            customLogger(text, ...args) {
+                if (text.substr(0,13) === "Sending a 200") {
+                    console.log(text, ...args);
+                }
             }
-        }
-    });
-    ssdp.addUSN("roku:ecp");
-    ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${deviceInfo.serialNumber}`;
-    // Start server on all interfaces
-    ssdp.start()
-    .catch(e => {
-        console.error("Failed to start SSDP server:", e);
-    })
-    .then(() => {
-        console.log(`SSDP Server started listening port ${SSDPPORT}`);
+        });
+        ssdp.addUSN("roku:ecp");
+        ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
+        // Start server on all interfaces
+        ssdp.start()
+        .catch(e => {
+            console.error("Failed to start SSDP server:", e);
+        })
+        .then(() => {
+            console.log(`SSDP Server started listening port ${SSDPPORT}`);
+            isECPEnabled = true;
+        });
     });
 }
+
+export function disableECP() {
+    if (ecp) {
+        ecp.close();
+    }
+    if (ssdp) {
+        ssdp.stop();
+    }
+    isECPEnabled = false;
+    console.log("ECP and SSDP Servers disabled.");
+}
+
 // REST API Methods
 function getDeviceRoot(req, res) {
     console.log("Requested root xml");
@@ -89,8 +110,8 @@ function getDeviceRoot(req, res) {
     xmlDevice.ele("manufacturer", {}, "Roku");
     xmlDevice.ele("manufacturerURL", {}, "http://www.roku.com/");
     xmlDevice.ele("modelDescription", {}, app.getName());
-    xmlDevice.ele("modelName", {}, "Roku 3");
-    xmlDevice.ele("modelNumber", {}, "4200X");
+    xmlDevice.ele("modelName", {}, getModelName(device.deviceModel));
+    xmlDevice.ele("modelNumber", {}, device.deviceModel);
     xmlDevice.ele("modelURL", {}, "http://www.lvcabral.com/brs/");
     xmlDevice.ele("serialNumber", {}, device.serialNumber);
     xmlDevice.ele("UDN", {}, `uuid:${UDN}`);
@@ -120,8 +141,8 @@ function getDeviceInfo(req, res) {
     xml.ele("device-id", {}, device.serialNumber);
     xml.ele("advertising-id", {}, device.RIDA);
     xml.ele("vendor-name", {}, "Roku");
-    xml.ele("model-name", {}, "Roku 3");
-    xml.ele("model-number", {}, "4200X");
+    xml.ele("model-name", {}, getModelName(device.deviceModel));
+    xml.ele("model-number", {}, device.deviceModel);
     xml.ele("model-region", {}, "US");
     xml.ele("is-tv", {}, false);
     xml.ele("is-stick", {}, false);
@@ -130,7 +151,7 @@ function getDeviceInfo(req, res) {
     xml.ele("network-type", {}, "wifi");
     xml.ele("network-name", {}, "Local");
     xml.ele("friendly-device-name", {}, device.friendlyName);
-    xml.ele("friendly-model-name", {}, "Roku 3");
+    xml.ele("friendly-model-name", {}, getModelName(device.deviceModel));
     xml.ele("default-device-name", {}, `${device.friendlyName} - ${device.serialNumber}`);
     xml.ele("user-device-name", {}, device.friendlyName);
     xml.ele("build-number", {}, "049.20E04131A");
@@ -263,6 +284,10 @@ function postKeyPress(req, res) {
 }
 
 // Helper Functions
+function getModelName(model) {
+    return `Roku ${model === "4640X" ? "Ultra" : model === "4200X" ? "3" : "2"}`;
+}
+
 function getMacAddress() {
     const os = require('os');
     const ifaces = os.networkInterfaces();

@@ -9,8 +9,8 @@ import path from "path";
 import url from "url";
 import env from "env";
 import minimist from "minimist";
-import { app, screen } from "electron";
-import { enableECP } from "./api/ecp"
+import { app, screen, ipcMain } from "electron";
+import { initECP, enableECP, isECPEnabled } from "./api/ecp"
 import { createMenu } from "./menu/menuService"
 import createWindow from "./helpers/window";
 
@@ -19,7 +19,7 @@ const deviceInfo = {
     developerId: "emulator-dev-id", // Unique id to segregate registry among channels
     friendlyName: "BrightScript Emulator",
     serialNumber: "BRSEMUAPP070",
-    deviceModel: "8000X",   // Can change according to the display mode in the front-end
+    deviceModel: "4200X",   // Can change according to the display mode in the front-end
     clientId: "6c5bf3a5-b2a5-4918-824d-7691d5c85364", // Unique identifier of the device
     RIDA: "f51ac698-bc60-4409-aae3-8fc3abc025c4", // Unique identifier for advertisement tracking
     countryCode: "US",
@@ -70,15 +70,23 @@ app.on("ready", () => {
             protocol: "file:",
             slashes: true
         })
-    );
-    // Open DevTools
-    if (env.name === "development" || argv.devtools) {
-        mainWindow.openDevTools();
-    }
-    // Enable ECP and SSDP servers
-    if (argv.ecp) {
-        enableECP(mainWindow, deviceInfo);
-    }
+    ).then(() => {
+        // CLI Switches
+        if (argv.ecp) {
+            enableECP();
+            mainWindow.webContents.send("toggleECP", true);
+        }
+        if (env.name === "development" || argv.devtools) {
+            mainWindow.openDevTools();
+        }
+    });
+    // Initialize ECP and SSDP server
+    initECP(mainWindow, deviceInfo);
+    ipcMain.once("ECPEnabled", (event, enable) => {
+        if (enable) {
+            enableECP();
+        }
+    });
 });
 // Quit the Application
 app.on("window-all-closed", () => {

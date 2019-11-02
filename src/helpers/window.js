@@ -3,7 +3,7 @@
 // Can be used for more than one window, just construct many
 // instances of it and give each different name.
 
-import { app, BrowserWindow, screen, Menu } from "electron";
+import { app, BrowserWindow, screen } from "electron";
 import path from "path";
 import jetpack from "fs-jetpack";
 
@@ -18,7 +18,7 @@ export default (name, options, argv) => {
     let win;
 
     const restore = () => {
-        const appMenu = Menu.getApplicationMenu();
+        const appMenu = app.getApplicationMenu();
         let restoredState = {};
         try {
             restoredState = userDataDir.read(stateStoreFile, "json");
@@ -31,7 +31,7 @@ export default (name, options, argv) => {
     };
 
     const getWindowState = () => {
-        const appMenu = Menu.getApplicationMenu();
+        const appMenu = app.getApplicationMenu();
         const position = win.getPosition();
         const size = win.getSize();
         return {
