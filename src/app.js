@@ -68,8 +68,9 @@ let ECPEnabled = storage.getItem("ECPEnabled") || "false";
 ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
 updateECPOnStatus()
 // Web Installer Server 
-let InstallerEnabled = storage.getItem("InstallerEnabled") || "false";
-ipcRenderer.send("InstallerEnabled", InstallerEnabled === "true");
+let installerEnabled = storage.getItem("installerEnabled") || "false";
+let installerPassword = storage.getItem("installerPassword") || "rokudev";
+ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword);
 updateInstallerOnStatus()
 // Emulator Display
 const display = document.getElementById("display");
@@ -185,6 +186,9 @@ ipcRenderer.on("setOverscan", function(event, mode) {
     storage.setItem("overscanMode", mode);
     redrawDisplay();
 });
+ipcRenderer.on("setPassword", function(event, pwd) {
+    storage.setItem("installerPassword", pwd);
+});
 ipcRenderer.on("toggleStatusBar", function(event) {
     const enable = statusBar.style.visibility !== "visible";
     appMenu.getMenuItemById("status-bar").checked = enable;
@@ -197,10 +201,9 @@ ipcRenderer.on("toggleECP", function(event, enable) {
     updateECPOnStatus();
 });
 ipcRenderer.on("toggleInstaller", function(event, enable) {
-    console.log("toggleInstaller", enable);
     appMenu.getMenuItemById("web-installer").checked = enable;
-    InstallerEnabled = enable ? "true" : "false";
-    storage.setItem("InstallerEnabled", InstallerEnabled);
+    installerEnabled = enable ? "true" : "false";
+    storage.setItem("installerEnabled", installerEnabled);
     updateInstallerOnStatus();
 });
 ipcRenderer.on("console", function(event, text) {
@@ -982,7 +985,7 @@ function updateECPOnStatus() {
 }
 // Update Web Installer Server icon on Status Bar
 function updateInstallerOnStatus() {
-    if (InstallerEnabled === "true") {
+    if (installerEnabled === "true") {
         statusWeb.innerText = "Installer";
         statusIconWeb.innerHTML = "<i class='fa fa-upload'></i>";
         statusWeb.style.display = "";
@@ -1002,8 +1005,7 @@ function setupMenuSwitches(status = false) {
     appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
-    appMenu.getMenuItemById("web-installer").checked = (InstallerEnabled === "true");
-    console.log("setupMenuSwitches", InstallerEnabled);
+    appMenu.getMenuItemById("web-installer").checked = (installerEnabled === "true");
     if (status) {
         appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
     }

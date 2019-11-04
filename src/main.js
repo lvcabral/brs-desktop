@@ -11,7 +11,7 @@ import env from "env";
 import minimist from "minimist";
 import { app, screen, ipcMain } from "electron";
 import { initECP, enableECP } from "./servers/ecp"
-import { initInstaller, enableInstaller } from "./servers/installer";
+import { initInstaller, setPassword, enableInstaller } from "./servers/installer";
 import { createMenu } from "./menu/menuService"
 import createWindow from "./helpers/window";
 
@@ -34,8 +34,8 @@ const deviceInfo = {
 
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
-    string: [ "o" ],
-    alias: { d: "devtools", e: "ecp", f: "fullscreen", i: "installer" }
+    string: [ "o", "p" ],
+    alias: { d: "devtools", e: "ecp", f: "fullscreen", i: "installer", p: "pwd" }
 });
 
 // Save userData in separate folders for each environment.
@@ -77,6 +77,10 @@ app.on("ready", () => {
             enableECP();
             mainWindow.webContents.send("toggleECP", true);
         }
+        if (argv.pwd && argv.pwd.trim() !== "") {
+            setPassword(argv.pwd.trim());
+            mainWindow.webContents.send("setPassword", argv.pwd.trim());
+        }
         if (argv.installer) {
             enableInstaller();
             mainWindow.webContents.send("toggleInstaller", true);
@@ -94,7 +98,10 @@ app.on("ready", () => {
     });
     // Initialize Web Installer and Telnet servers
     initInstaller(mainWindow);
-    ipcMain.once("InstallerEnabled", (event, enable) => {
+    ipcMain.once("installerEnabled", (event, enable, password) => {
+        if (password) {
+            setPassword(password);
+        }
         if (enable) {
             enableInstaller();
         }
