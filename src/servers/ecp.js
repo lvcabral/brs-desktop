@@ -66,11 +66,11 @@ export function enableECP() {
             ssdpPort: SSDPPORT,
             suppressRootDeviceAdvertisements: true,
             headers: {"device-group.roku.com": "46F5CCE2472F2B14D77"},
-            customLogger(text, ...args) {
-                if (text.substr(0,13) === "Sending a 200") {
-                    console.log(text, ...args);
-                }
-            }
+            // customLogger(text, ...args) {
+            //     if (text.substr(0,13) === "Sending a 200") {
+            //         console.log(text, ...args);
+            //     }
+            // }
         });
         ssdp.addUSN("roku:ecp");
         ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
@@ -99,7 +99,6 @@ export function disableECP() {
 
 // REST API Methods
 function getDeviceRoot(req, res) {
-    console.log("Requested root xml");
     let xml = xmlbuilder.create("root").att("xmlns", "urn:schemas-upnp-org:device-1-0");
     let spec = xml.ele("specVersion");
     spec.ele("major", {}, 1);
@@ -133,7 +132,6 @@ function getDeviceRoot(req, res) {
 }
 
 function getDeviceInfo(req, res) {
-    console.log("Requested device info");
     const mac = getMacAddress();
     let xml = xmlbuilder.create("device-info");
     xml.ele("udn", {}, UDN);
@@ -265,22 +263,22 @@ function postLaunchApp(req, res) {
     } else {
         console.error("ECP Launch: File not found!");
     }
-    res.send("OK");
+    res.end();
 }
 
 function postKeyDown(req, res) {
     window.webContents.send("postKeyDown", req.params.key);
-    res.send("OK");
+    res.end();
 }
 
 function postKeyUp(req, res) {
     window.webContents.send("postKeyUp", req.params.key);
-    res.send("OK");
+    res.end();
 }
 
 function postKeyPress(req, res) {
     window.webContents.send("postKeyPress", req.params.key);
-    res.send("OK");
+    res.end();
 }
 
 // Helper Functions

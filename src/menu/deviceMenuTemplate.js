@@ -1,4 +1,4 @@
-import { isECPEnabled, enableECP, disableECP } from "../api/ecp";
+import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
 
 export const deviceMenuTemplate = {
     label: "&Device",

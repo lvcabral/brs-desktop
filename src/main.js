@@ -10,8 +10,8 @@ import url from "url";
 import env from "env";
 import minimist from "minimist";
 import { app, screen, ipcMain } from "electron";
-import { initECP, enableECP } from "./api/ecp"
-import { enableInstaller } from "./api/installer";
+import { initECP, enableECP } from "./servers/ecp"
+import { enableInstaller } from "./servers/installer";
 import { createMenu } from "./menu/menuService"
 import createWindow from "./helpers/window";
 

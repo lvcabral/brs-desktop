@@ -57,6 +57,7 @@
         "release": "npm test && webpack --config=build/webpack.app.config.js --env=production && electron-builder"
     },
     "dependencies": {
+        "busboy": "^0.3.1",
         "custom-electron-titlebar": "^3.1.0",
         "electron-about-window": "^1.13.1",
         "fs-jetpack": "^2.1.0",
