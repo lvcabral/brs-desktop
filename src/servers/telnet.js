@@ -22,3 +22,9 @@ export function enableTelnet() {
         console.log("Telnet server started listening port 8085");
     }
 }
+
+export function disableTelnet() {
+    if (server) {
+        server.close();
+    }
+}

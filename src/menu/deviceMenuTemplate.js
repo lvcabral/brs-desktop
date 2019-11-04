@@ -1,4 +1,5 @@
 import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
+import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
 
 export const deviceMenuTemplate = {
     label: "&Device",
@@ -74,6 +75,22 @@ export const deviceMenuTemplate = {
                 }
             }
         },
+        {
+            id: "web-installer",
+            label: "Web Installer (port 80)",
+            type: "checkbox",
+            checked: true,
+            click: (event, window) => {
+                if (hasInstaller) {
+                    disableInstaller();
+                    window.webContents.send("toggleInstaller", false);
+                } else {
+                    enableInstaller();
+                    window.webContents.send("toggleInstaller", true);
+                }
+            }
+        },
+        { type: "separator" },
         {
             label: "Reset Device",
             accelerator: "CmdOrCtrl+Shift+R",

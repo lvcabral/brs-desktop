@@ -11,7 +11,7 @@ import env from "env";
 import minimist from "minimist";
 import { app, screen, ipcMain } from "electron";
 import { initECP, enableECP } from "./servers/ecp"
-import { enableInstaller } from "./servers/installer";
+import { initInstaller, enableInstaller } from "./servers/installer";
 import { createMenu } from "./menu/menuService"
 import createWindow from "./helpers/window";
 
@@ -79,16 +79,24 @@ app.on("ready", () => {
         }
         if (argv.installer) {
             enableInstaller();
+            mainWindow.webContents.send("toggleInstaller", true);
         }
         if (env.name === "development" || argv.devtools) {
             mainWindow.openDevTools();
         }
     });
-    // Initialize ECP and SSDP server
+    // Initialize ECP and SSDP servers
     initECP(mainWindow, deviceInfo);
     ipcMain.once("ECPEnabled", (event, enable) => {
         if (enable) {
             enableECP();
+        }
+    });
+    // Initialize Web Installer and Telnet servers
+    initInstaller(mainWindow);
+    ipcMain.once("InstallerEnabled", (event, enable) => {
+        if (enable) {
+            enableInstaller();
         }
     });
 });

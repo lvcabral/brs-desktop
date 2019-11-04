@@ -1,10 +1,10 @@
-import { app } from "electron";
+import { app, BrowserWindow } from "electron";
 import Busboy from "busboy";
 import fs from "fs";
 import path from "path";
 import http from "http";
 import crypt from "crypto";
-import { enableTelnet } from "./telnet";
+import { enableTelnet, disableTelnet } from "./telnet";
 
 const PORT = 80;
 const credentials = {
@@ -12,11 +12,17 @@ const credentials = {
     password: 'bipw',
     realm: 'Digest Authentication'
 };
+let window;
 let server;
 let hash;
-
 export let hasInstaller = false;
+export function initInstaller(mainWindow) {
+    window = mainWindow;
+}
 export function enableInstaller() {
+    if (hasInstaller) {
+        return; // already started do nothing
+    }
     hash = cryptoUsingMD5(credentials.realm);
     server = http.createServer(function(req, res) {
         var authInfo, digestAuthObject = {};
@@ -46,6 +52,7 @@ export function enableInstaller() {
                 file.pipe(fs.createWriteStream(saveTo));
                 file.on("end", function() {
                     console.log(`File [${fieldname}] Finished`);
+                    window.webContents.send("fileSelected", [saveTo]);
                 });
             });
             busboy.on("field", function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype){
@@ -87,15 +94,17 @@ export function enableInstaller() {
         }
     }).listen(PORT, function() {
         console.log(`Installer server started listening port ${PORT}`);
+        hasInstaller = true;
         enableTelnet();
     });
 }
 
-export function disableinstaller() {
+export function disableInstaller() {
     if (server) {
         server.close();
+        disableTelnet();
     }
-    hasInstaller = false
+    hasInstaller = false;
     console.log("Installer server disabled.");
 }
 

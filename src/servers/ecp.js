@@ -80,7 +80,7 @@ export function enableECP() {
             console.error("Failed to start SSDP server:", e);
         })
         .then(() => {
-            console.log(`SSDP Server started listening port ${SSDPPORT}`);
+            console.log(`SSDP server started listening port ${SSDPPORT}`);
             isECPEnabled = true;
         });
     });

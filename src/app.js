@@ -64,6 +64,9 @@ Object.assign(deviceData, {registry: new Map()});
 let ECPEnabled = storage.getItem("ECPEnabled") || "false";
 ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
 updateECPOnStatus()
+// Web Installer Server 
+let InstallerEnabled = storage.getItem("InstallerEnabled") || "false";
+ipcRenderer.send("InstallerEnabled", InstallerEnabled === "true");
 // Emulator Display
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
@@ -188,6 +191,12 @@ ipcRenderer.on("toggleECP", function(event, enable) {
     ECPEnabled = enable ? "true" : "false";
     storage.setItem("ECPEnabled", ECPEnabled);
     updateECPOnStatus();
+});
+ipcRenderer.on("toggleInstaller", function(event, enable) {
+    console.log("toggleInstaller", enable);
+    appMenu.getMenuItemById("web-installer").checked = enable;
+    InstallerEnabled = enable ? "true" : "false";
+    storage.setItem("InstallerEnabled", InstallerEnabled);
 });
 ipcRenderer.on("console", function(event, text) {
     console.log(text);
@@ -974,6 +983,8 @@ function setupMenuSwitches(status = false) {
     appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
+    appMenu.getMenuItemById("web-installer").checked = (InstallerEnabled === "true");
+    console.log("setupMenuSwitches", InstallerEnabled);
     if (status) {
         appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
     }
