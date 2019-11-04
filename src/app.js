@@ -45,6 +45,9 @@ const statusIconRes = document.getElementById("statusIconRes");
 const statusResolution = document.getElementById("statusResolution");
 const statusIconECP = document.getElementById("statusIconECP");
 const statusECP = document.getElementById("statusECP");
+const statusSepWeb = document.getElementById("statusSepWeb");
+const statusIconWeb = document.getElementById("statusIconWeb");
+const statusWeb = document.getElementById("statusWeb");
 statusResolution.style.display = "none";
 statusIconRes.style.display = "none";
 statusSepRes.style.display = "none";
@@ -67,6 +70,7 @@ updateECPOnStatus()
 // Web Installer Server 
 let InstallerEnabled = storage.getItem("InstallerEnabled") || "false";
 ipcRenderer.send("InstallerEnabled", InstallerEnabled === "true");
+updateInstallerOnStatus()
 // Emulator Display
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
@@ -197,6 +201,7 @@ ipcRenderer.on("toggleInstaller", function(event, enable) {
     appMenu.getMenuItemById("web-installer").checked = enable;
     InstallerEnabled = enable ? "true" : "false";
     storage.setItem("InstallerEnabled", InstallerEnabled);
+    updateInstallerOnStatus();
 });
 ipcRenderer.on("console", function(event, text) {
     console.log(text);
@@ -973,6 +978,20 @@ function updateECPOnStatus() {
     } else {
         statusECP.innerText = "";
         statusIconECP.innerHTML = "";
+    }
+}
+// Update Web Installer Server icon on Status Bar
+function updateInstallerOnStatus() {
+    if (InstallerEnabled === "true") {
+        statusWeb.innerText = "Installer";
+        statusIconWeb.innerHTML = "<i class='fa fa-upload'></i>";
+        statusWeb.style.display = "";
+        statusIconWeb.style.display = "";
+        statusSepWeb.style.display = "";
+    } else {
+        statusWeb.style.display = "none";
+        statusIconWeb.style.display = "none";
+        statusSepWeb.style.display = "none";
     }
 }
 // Configure Menu Options
