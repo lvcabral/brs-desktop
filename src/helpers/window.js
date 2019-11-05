@@ -90,7 +90,8 @@ export default (name, options, argv) => {
     win = new BrowserWindow(
         Object.assign(full, options, state, {
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                webSecurity: false
             },
             icon: __dirname + "/images/icon512x512.png",
             frame: false,
