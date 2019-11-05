@@ -62,7 +62,7 @@ export const deviceMenuTemplate = {
         { type: "separator" },
         {
             id: "ecp-api",
-            label: "ECP Server (port 8060)",
+            label: "External Control Protocol",
             type: "checkbox",
             checked: true,
             click: (event, window) => {
@@ -77,7 +77,7 @@ export const deviceMenuTemplate = {
         },
         {
             id: "web-installer",
-            label: "Web Installer (port 80)",
+            label: "Web Application Installer",
             type: "checkbox",
             checked: true,
             click: (event, window) => {

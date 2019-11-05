@@ -226,13 +226,13 @@ function getActiveApp(req, res) {
 }
 
 function getDeviceImage(req, res) {
-    let image = fs.readFileSync(path.join(__dirname, "images/device-image.png"));
+    let image = fs.readFileSync(path.join(__dirname, "images", "device-image.png"));
     res.setHeader("content-type", "image/png");
     res.send(image);
 }
 
 function getScpdXML(req, res) {
-    let file = fs.readFileSync(path.join(__dirname, "ecp_SCPD.xml"));
+    let file = fs.readFileSync(path.join(__dirname, "web", "ecp_SCPD.xml"));
     res.setHeader("content-type", "application/xml");
     res.send(file);
 }
@@ -247,7 +247,7 @@ function getAppIcon(req, res) {
         }
     } 
     if (image === undefined) {
-        image = fs.readFileSync(path.join(__dirname, "images/channel-icon.png"));
+        image = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
     }    
     res.setHeader("content-type", "image/png");
     res.send(image);

@@ -976,7 +976,7 @@ function updateDisplayOnStatus() {
 // Update ECP Server icon on Status Bar
 function updateECPOnStatus() {
     if (ECPEnabled === "true") {
-        statusECP.innerText = "ECP";
+        statusECP.innerText = "ECP : 8060";
         statusIconECP.innerHTML = "<i class='fa fa-server'></i>";
     } else {
         statusECP.innerText = "";
@@ -986,7 +986,7 @@ function updateECPOnStatus() {
 // Update Web Installer Server icon on Status Bar
 function updateInstallerOnStatus() {
     if (installerEnabled === "true") {
-        statusWeb.innerText = "Installer";
+        statusWeb.innerText = "Web : 80";
         statusIconWeb.innerHTML = "<i class='fa fa-upload'></i>";
         statusWeb.style.display = "";
         statusIconWeb.style.display = "";

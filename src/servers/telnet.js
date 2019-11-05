@@ -1,5 +1,6 @@
 import telnet from "telnet";
 let server;
+
 export function enableTelnet() {
     server = telnet.createServer(function (client) {
         // make unicode characters work properly
@@ -9,6 +10,7 @@ export function enableTelnet() {
             console.log(b.toString());
             client.write("\n");
         });
+        // Handle exceptions from the client
         client.on('error', function(e) {
             if(e.code === "ECONNRESET" || e.code ==="ECONNABORTED") {
                 console.log("Telnet client quit unexpectedly.");

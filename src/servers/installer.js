@@ -35,34 +35,72 @@ export function enableInstaller() {
             authenticateUser(res);
             return;
         }
-        authInfo = req.headers.authorization.replace(/^Digest /, '');
+        authInfo = req.headers.authorization.replace(/^Digest /, "");
         authInfo = parseAuthenticationInfo(authInfo);
         if (authInfo.username !== credentials.userName) {
             authenticateUser(res); 
             return;
         }
-        digestAuthObject.ha1 = cryptoUsingMD5(authInfo.username + ':' + credentials.realm + ':' + credentials.password);
-        digestAuthObject.ha2 = cryptoUsingMD5(req.method + ':' + authInfo.uri);
-        let resp = cryptoUsingMD5([digestAuthObject.ha1, authInfo.nonce, authInfo.nc, authInfo.cnonce, authInfo.qop, digestAuthObject.ha2].join(':'));            
+        digestAuthObject.ha1 = cryptoUsingMD5(`${authInfo.username}:${credentials.realm}:${credentials.password}`);
+        digestAuthObject.ha2 = cryptoUsingMD5(`${req.method}:${authInfo.uri}`);
+        let resp = cryptoUsingMD5([digestAuthObject.ha1, authInfo.nonce, authInfo.nc, authInfo.cnonce, authInfo.qop, digestAuthObject.ha2].join(":"));
         digestAuthObject.response = resp;
         if (authInfo.response !== digestAuthObject.response) {
             authenticateUser(res); 
             return;
         }
+        console.log(req.method, req.url);
         if (req.method === "POST") {
+            let done = "";
             const busboy = new Busboy({ headers: req.headers });
             busboy.on("file", function(fieldname, file, filename, encoding, mimetype) {
                 console.log(`File [${fieldname}]: filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`);
-                let saveTo = path.join(app.getPath("userData"), "dev.zip");
-                file.pipe(fs.createWriteStream(saveTo));
-                file.on("end", function() {
-                    console.log(`File [${fieldname}] Finished`);
-                    window.webContents.send("fileSelected", [saveTo]);
-                });
+                if (filename && filename !== "") {
+                    let saveTo = path.join(app.getPath("userData"), "dev.zip");
+                    file.pipe(fs.createWriteStream(saveTo));
+                    file.on("end", function() {
+                        console.log(`File [${fieldname}] Finished`);
+                        window.webContents.send("fileSelected", [saveTo]);
+                        done = "file";
+                    });    
+                } else {
+                    res.writeHead(302, { "Location": "/" });
+                    res.end();
+                    return;
+                }
+            });
+            busboy.on("field", function (fieldname, value){
+                console.log(`Field: ${fieldname}: ${value}`);
+                if (fieldname === "mysubmit" && value === "Screenshot") {
+                    let saveTo = path.join(app.getPath("userData"), "dev.png");
+                    window.webContents.send("saveScreenshot", saveTo);
+                    done = "screenshot";
+                }
             });
             busboy.on("finish", function() {
                 console.log("Done parsing form!");
-                res.end("Channel Installed!");
+                if (done === "screenshot") {
+                    setTimeout(()=>{
+                        let saveTo = path.join(app.getPath("userData"), "dev.png");
+                        var s = fs.createReadStream(saveTo);
+                        s.on("open", () => {
+                            res.setHeader("Content-Type", "image/png");
+                            s.pipe(res);
+                        });
+                        s.on("error", () => {
+                            res.writeHead(404);
+                            res.end("Error 404: Not Found\nFile not found");                                
+                        });
+                    }, 1000);
+                    return;    
+                } else if (done === "file"){
+                    res.writeHead(200, { "Content-Type": "text/plain" });
+                    res.write("Channel Installed!");
+                } else {
+                    res.writeHead(501);
+                    res.write("Error 501: Not Implemented\nMethod not Implemented");
+                }
+                res.end();
             });
             req.pipe(busboy);
         } else if (req.method === "GET") {
@@ -71,9 +109,15 @@ export function enableInstaller() {
             if (req.url === "/css/global.css") {
                 filePath = path.join(__dirname, "css", "global.css");
                 contentType = "text/css";
-            } else if (req.url === "/" || req.url === "/index.html" || req.url === "/plugin_install" ) {
-                filePath = path.join(__dirname, "installer.html");
+            } else if (req.url === "/" || req.url === "/index.html" || req.url === "/plugin_install") {
+                filePath = path.join(__dirname, "web", "installer.html");
                 contentType = "text/html";
+            } else if (req.url === "/plugin_inspect") {
+                filePath = path.join(__dirname, "web", "utilities.html");
+                contentType = "text/html";
+            } else if (req.url === "/pkgs/dev.png" || req.url === "/pkgs/dev.jpg") {
+                filePath = path.join(app.getPath("userData"), "dev.png");
+                contentType = "image/png";
             }
             if (filePath !== "") {
                 fs.readFile(filePath, function (error, pgResp) {
@@ -81,7 +125,7 @@ export function enableInstaller() {
                         res.writeHead(404);
                         res.write("Error 404: Not Found\nFile not found");
                     } else {
-                        res.writeHead(200, { 'Content-Type': contentType });
+                        res.writeHead(200, { "Content-Type": contentType });
                         res.write(pgResp);
                     }                 
                     res.end();
@@ -110,20 +154,19 @@ export function disableInstaller() {
 
 // Helper Functions
 function cryptoUsingMD5(data) {
-    return crypt.createHash('md5').update(data).digest('hex');
+    return crypt.createHash("md5").update(data).digest("hex");
 }
 
 function authenticateUser(res) {
-    res.writeHead(401, { 'WWW-Authenticate': 'Digest realm="' + credentials.realm + '",qop="auth",nonce="' + Math.random() + '",opaque="' + hash + '"' });
-    res.end('Authorization is needed.');
+    res.writeHead(401, { "WWW-Authenticate": `Digest realm="${credentials.realm}",qop="auth",nonce="${Math.random()}",opaque="${hash}"` });
+    res.end("Authorization is needed.");
 }
 
 function parseAuthenticationInfo(authData) {
     let authenticationObj = {};
-    authData.split(', ').forEach(function (d) {
-        d = d.split('=');
- 
-        authenticationObj[d[0]] = d[1].replace(/"/g, '');
+    authData.split(", ").forEach(function (d) {
+        d = d.split("=");
+        authenticationObj[d[0]] = d[1].replace(/"/g, "");
     });
     //console.log(JSON.stringify(authenticationObj));
     return authenticationObj;
