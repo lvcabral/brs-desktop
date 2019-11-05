@@ -8,6 +8,7 @@
 import path from "path";
 import url from "url";
 import env from "env";
+import os from "os";
 import minimist from "minimist";
 import { app, screen, ipcMain } from "electron";
 import { initECP, enableECP } from "./servers/ecp"
@@ -21,6 +22,7 @@ const deviceInfo = {
     friendlyName: "BrightScript Emulator",
     serialNumber: "BRSEMUAPP070",
     deviceModel: "4200X",   // Can change according to the display mode in the front-end
+    firmwareVersion: "049.10E04111A",
     clientId: "6c5bf3a5-b2a5-4918-824d-7691d5c85364", // Unique identifier of the device
     RIDA: "f51ac698-bc60-4409-aae3-8fc3abc025c4", // Unique identifier for advertisement tracking
     countryCode: "US",
@@ -29,7 +31,8 @@ const deviceInfo = {
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     defaultFont: "Asap", // Desktop app only has Asap to reduce the package size
-    maxSimulStreams: 2
+    maxSimulStreams: 2,
+    localIps: getLocalIps()
 }
 
 // Parse CLI parameters
@@ -111,3 +114,29 @@ app.on("ready", () => {
 app.on("window-all-closed", () => {
     app.quit();
 });
+
+// Helper Functions
+function getLocalIps() {
+    const ifaces = os.networkInterfaces();
+    const ips = [];
+    Object.keys(ifaces).forEach(function (ifname) {
+      let alias = 0;    
+      ifaces[ifname].forEach(function (iface) {
+        if ('IPv4' !== iface.family || iface.internal !== false) {
+          // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+          return;
+        }
+        if (alias >= 1) {
+          // this single interface has multiple ipv4 addresses
+          console.log(`${ifname}:${alias}`, iface.address);
+          ips.push(`${ifname}:${alias},${iface.address}`);
+        } else {
+          // this interface has only one ipv4 adress
+          console.log(ifname, iface.address);
+          ips.push(`${ifname},${iface.address}`);
+        }
+        ++alias;
+      });
+    });
+    return ips;
+}

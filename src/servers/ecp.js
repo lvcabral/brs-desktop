@@ -141,7 +141,7 @@ function getDeviceInfo(req, res) {
     xml.ele("vendor-name", {}, "Roku");
     xml.ele("model-name", {}, getModelName(device.deviceModel));
     xml.ele("model-number", {}, device.deviceModel);
-    xml.ele("model-region", {}, "US");
+    xml.ele("model-region", {}, device.countryCode);
     xml.ele("is-tv", {}, false);
     xml.ele("is-stick", {}, false);
     xml.ele("wifi-mac", {}, mac);
@@ -152,7 +152,7 @@ function getDeviceInfo(req, res) {
     xml.ele("friendly-model-name", {}, getModelName(device.deviceModel));
     xml.ele("default-device-name", {}, `${device.friendlyName} - ${device.serialNumber}`);
     xml.ele("user-device-name", {}, device.friendlyName);
-    xml.ele("build-number", {}, "049.20E04131A");
+    xml.ele("build-number", {}, device.firmwareVersion);
     xml.ele("software-version", {}, "9.1.0");
     xml.ele("software-build", {}, "4111");
     xml.ele("secure-device", {}, true);
@@ -173,15 +173,15 @@ function getDeviceInfo(req, res) {
     xml.ele("support-rva", {}, true);
     xml.ele("developer-enabled", {}, true);
     xml.ele("keyed-developer-id", {}, device.developerId);
-    xml.ele("search-enabled", {}, true);
-    xml.ele("search-channels-enabled", {}, true);
-    xml.ele("voice-search-enabled", {}, true);
+    xml.ele("search-enabled", {}, false);
+    xml.ele("search-channels-enabled", {}, false);
+    xml.ele("voice-search-enabled", {}, false);
     xml.ele("notifications-enabled", {}, true);
     xml.ele("notifications-first-use", {}, false);
     xml.ele("supports-private-listeninig", {}, false);
     xml.ele("headphones-connected", {}, false);
     xml.ele("supports-ecs-textedit", {}, true);
-    xml.ele("supports-ecs-microphone", {}, true);
+    xml.ele("supports-ecs-microphone", {}, false);
     xml.ele("supports-wake-on-wlan", {}, false);
     xml.ele("has-play-on-roku", {}, true);
     xml.ele("has-mobile-screensaver", {}, false);
