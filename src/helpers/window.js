@@ -91,7 +91,8 @@ export default (name, options, argv) => {
         Object.assign(full, options, state, {
             webPreferences: {
                 nodeIntegration: true,
-                webSecurity: false
+                nodeIntegrationInWorker: true,
+                webSecurity: true
             },
             icon: __dirname + "/images/icon512x512.png",
             frame: false,

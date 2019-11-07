@@ -408,10 +408,10 @@ function openChannelZip(f) {
                     txtId++;
                 } else if (
                     !zipEntry.dir &&
-                    (ext === "png" || ext === "gif" || ext === "jpg" || ext === "jpeg")
+                    (ext === "png" || ext === "gif" || ext === "jpg" || ext === "jpeg" || ext === "bmp")
                 ) {
                     assetPaths.push({ url: relativePath, id: bmpId, type: "image" });
-                    assetsEvents.push(zipEntry.async("blob"));
+                    assetsEvents.push(zipEntry.async("arraybuffer"));
                     bmpId++;
                 } else if (!zipEntry.dir && (ext === "ttf" || ext === "otf")) {
                     assetPaths.push({ url: relativePath, id: fntId, type: "font" });
@@ -442,11 +442,10 @@ function openChannelZip(f) {
                     txts = [];
                     imgs = [];
                     fonts = [];
-                    const bmpEvents = [];
                     for (let index = 0; index < assets.length; index++) {
                         paths.push(assetPaths[index]);
                         if (assetPaths[index].type === "image") {
-                            bmpEvents.push(createImageBitmap(assets[index]));
+                            imgs.push(assets[index]);
                         } else if (assetPaths[index].type === "font") {
                             fonts.push(assets[index]);
                         } else if (assetPaths[index].type === "source") {
@@ -477,20 +476,10 @@ function openChannelZip(f) {
                             txts.push(assets[index]);
                         }
                     }
-                    Promise.all(bmpEvents).then(
-                        function success(bmps) {
-                            bmps.forEach((bmp) => {
-                                imgs.push(bmp);
-                            });
-                            setTimeout(function() {
-                                runChannel();
-                                ipcRenderer.send("addRecentPackage", currentChannel);
-                            }, splashTimeout);
-                        },
-                        function error(e) {
-                            clientException(`Error converting image: ${e.message}`);
-                        }
-                    );
+                    setTimeout(function() {
+                        runChannel();
+                        ipcRenderer.send("addRecentPackage", currentChannel);
+                    }, splashTimeout);
                 },
                 function error(e) {
                     clientException(`Error uncompressing file ${e.message}`);
