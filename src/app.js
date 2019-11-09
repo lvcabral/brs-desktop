@@ -242,6 +242,7 @@ function loadFile(filePath, fileData) {
     const fileExt = path.parse(filePath).ext.toLowerCase();
     const reader = new FileReader();
     reader.onload = function(progressEvent) {
+        currentChannel.title = fileName;
         paths = [];
         imgs = [];
         txts = [];
@@ -266,7 +267,7 @@ function loadFile(filePath, fileData) {
         resetSounds();
         bufferCanvas.width = 1;
     }
-    console.log(`Loading ${fileName}...`);
+    clientLog(`Loading ${fileName}...`);    
     if (fileExt === ".zip") {
         openChannelZip(fileData);
     } else {
@@ -509,6 +510,7 @@ function runChannel() {
     brsWorker.addEventListener("message", receiveMessage);
     const payload = {
         device: deviceData,
+        title: currentChannel.title,
         paths: paths,
         brs: source,
         texts: txts,
@@ -635,7 +637,12 @@ function receiveMessage(event) {
         } else {
             clientException(`Can't find wav sound: ${wav}`);
         }
-    } else if (event.data == "end") {
+    } else if (event.data.substr(0,3) === "log") {
+        clientLog(event.data.substr(4));
+    } else if (event.data.substr(0,5) === "error") {
+        clientException(event.data.substr(6));
+    } else if (event.data === "end") {
+        clientLog(`------ Finished '${currentChannel.title}' execution ------`);
         closeChannel();
     }
 }
@@ -865,9 +872,14 @@ function showStatusBar(visible) {
         statusBar.style.visibility = "hidden";
     }
 }
-// Exception Handler
+// Log to Telnet Server and Console
+function clientLog(msg) {
+    ipcRenderer.send("telnet", msg);
+    console.log(msg);
+}
 function clientException(msg, popup = false) {
     // TODO: Add icon on status bar to notify error and handle popup
+    ipcRenderer.send("telnet", msg);
     console.error(msg);
 }
 // Fix text color after focus change
