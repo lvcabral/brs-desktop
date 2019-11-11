@@ -452,27 +452,7 @@ function openChannelZip(f) {
                         } else if (assetPaths[index].type === "source") {
                             source.push(assets[index]);
                         } else if (assetPaths[index].type === "audio") {
-                            soundsIdx.set(
-                                `pkg:/${assetPaths[index].url.toLowerCase()}`,
-                                soundsDat.length
-                            );
-                            soundsDat.push(
-                                new Howl({
-                                    src: [window.URL.createObjectURL(assets[index])],
-                                    format: assetPaths[index].format,
-                                    preload: assetPaths[index].format === "wav",
-                                    onloaderror: function(id, message) {
-                                        clientException(
-                                            `Error loading ${assetPaths[index].url}: ${message}`
-                                        );
-                                    },
-                                    onplayerror: function(id, message) {
-                                        clientException(
-                                            `Error playing ${assetPaths[index].url}: ${message}`
-                                        );
-                                    },
-                                })
-                            );
+                            addSound(`pkg:/${assetPaths[index].url}`, assetPaths[index].format, assets[index]);
                         } else if (assetPaths[index].type === "text") {
                             txts.push(assets[index]);
                         }
@@ -540,6 +520,8 @@ function receiveMessage(event) {
         deviceData.registry.forEach(function(value, key) {
             storage.setItem(key, value);
         });
+    } else if (event.data.audioPath) {
+        addSound(event.data.audioPath, event.data.audioFormat, new Blob([event.data.audioData]));
     } else if (event.data instanceof Array) {
         if (playList.length > 0) {
             stopSound();
@@ -649,8 +631,16 @@ function receiveMessage(event) {
 // Sound Functions
 function playSound() {
     const audio = playList[playIndex];
-    if (audio && soundsIdx.has(audio.toLowerCase())) {
-        const sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
+    if (audio) {
+        let sound;
+        if (soundsIdx.has(audio.toLowerCase())) {
+            sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
+        } else if (audio.substr(0, 4).toLowerCase() === "http") {
+            sound = addWebSound(audio);
+        } else {
+            clientException(`Can't find audio data: ${audio}`);
+            return;
+        }
         sound.seek(0);
         sound.once("end", nextSound);
         if (sound.state() === "unloaded") {
@@ -664,7 +654,7 @@ function playSound() {
         sharedArray[dataType.IDX] = playIndex;
         sharedArray[dataType.SND] = audioEvent.SELECTED;
     } else {
-        clientException(`Can't find audio data: ${audio}`);
+        clientException(`Can't find audio index: ${playIndex}`);
     }
 }
 
@@ -695,6 +685,48 @@ function stopSound() {
     } else {
         clientException(`Can't find audio data: ${audio}`);
     }
+}
+
+function addSound(path, format, data) {
+    soundsIdx.set(path.toLowerCase(), soundsDat.length);
+    soundsDat.push(
+        new Howl({
+            src: [window.URL.createObjectURL(data)],
+            format: format,
+            preload: format === "wav",
+            onloaderror: function(id, message) {
+                clientException(
+                    `Error loading ${path}: ${message}`
+                );
+            },
+            onplayerror: function(id, message) {
+                clientException(
+                    `Error playing ${path}: ${message}`
+                );
+            },
+        })
+    );
+}
+
+function addWebSound(url) {
+    // TODO: Fix the WAV index if a roAudioResource is created after this call
+    soundsIdx.set(url.toLowerCase(), soundsDat.length);
+    let sound = new Howl({
+        src: [url],
+        preload: true,
+        onloaderror: function(id, message) {
+            clientException(
+                `Error loading ${path}: ${message}`
+            );
+        },
+        onplayerror: function(id, message) {
+            clientException(
+                `Error playing ${path}: ${message}`
+            );
+        },
+    })
+    soundsDat.push(sound);
+    return sound;
 }
 
 function resetSounds() {
