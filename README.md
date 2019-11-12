@@ -20,7 +20,9 @@ The binaries of this application are released together with the emulator library
 Here are **optional** arguments you can use when starting the emulator at the command line:
 
 ```
-"BrightScript Emulator" [[-o] <filePath>] [-f | --fullscreen] [-m <mode> | --mode=<mode>] [-e | -ecp] [-i | -installer] [-p <password> | --pwd=<password>] [-d | --devtools]
+"BrightScript Emulator" [-o <filePath>] [-f] [-m <mode>] [-e] [-i] [-p <password>] [-d]
+
+"BrightScript Emulator" [<filePath>] [--fullscreen] [--mode=<mode>] [--ecp] [--installer] [--pwd=<password>] [-devtools]
 ```
 
 |Argument                                |Description                                                                  |
