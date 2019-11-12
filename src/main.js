@@ -37,8 +37,8 @@ const deviceInfo = {
 
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
-    string: [ "o", "p" ],
-    alias: { d: "devtools", e: "ecp", f: "fullscreen", i: "installer", p: "pwd" }
+    string: [ "o", "p", "m" ],
+    alias: { d: "devtools", e: "ecp", f: "fullscreen", i: "installer", p: "pwd", m: "mode" }
 });
 
 // Save userData in separate folders for each environment.
@@ -88,6 +88,26 @@ app.on("ready", () => {
             enableInstaller();
             mainWindow.webContents.send("toggleInstaller", true);
         }
+        if (argv.mode && argv.mode.trim() !== "") {
+            switch (argv.mode.trim().toLowerCase()) {
+                case "sd":
+                    mainWindow.webContents.send("setDisplay", "480p");
+                    break;
+            
+                case "hd":
+                    mainWindow.webContents.send("setDisplay", "720p");
+                    break;
+
+                case "fhd":
+                    mainWindow.webContents.send("setDisplay", "1080p");
+                    break;
+
+                default:
+                    break;
+            }
+            mainWindow.webContents.send("updateMenu");
+        }
+
         if (env.name === "development" || argv.devtools) {
             mainWindow.openDevTools();
         }
