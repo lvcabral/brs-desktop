@@ -1,4 +1,5 @@
 import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
+import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet";
 import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
 
 export const deviceMenuTemplate = {
@@ -67,11 +68,22 @@ export const deviceMenuTemplate = {
             checked: true,
             click: (event, window) => {
                 if (isECPEnabled) {
-                    disableECP();
-                    window.webContents.send("toggleECP", false);
+                    disableECP(window);
                 } else {
-                    enableECP();
-                    window.webContents.send("toggleECP", true);
+                    enableECP(window);
+                }
+            }
+        },
+        {
+            id: "telnet",
+            label: "Telnet Debug Server",
+            type: "checkbox",
+            checked: true,
+            click: (event, window) => {
+                if (isTelnetEnabled) {
+                    disableTelnet(window);
+                } else {
+                    enableTelnet(window);
                 }
             }
         },
@@ -82,11 +94,9 @@ export const deviceMenuTemplate = {
             checked: true,
             click: (event, window) => {
                 if (hasInstaller) {
-                    disableInstaller();
-                    window.webContents.send("toggleInstaller", false);
+                    disableInstaller(window);
                 } else {
-                    enableInstaller();
-                    window.webContents.send("toggleInstaller", true);
+                    enableInstaller(window);
                 }
             }
         },

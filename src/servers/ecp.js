@@ -21,11 +21,11 @@ let ecp;
 let ssdp;
 
 export let isECPEnabled = false;
-export function initECP(mainWindow, deviceInfo) {
-    window = mainWindow;
+export function initECP(deviceInfo) {
     device = deviceInfo;    
 }
-export function enableECP() {
+export function enableECP(mainWindow) {
+    window = mainWindow;
     if (isECPEnabled) {
         return; // already started do nothing
     }
@@ -33,6 +33,9 @@ export function enableECP() {
     ecp = require("restana")({
         ignoreTrailingSlash: true
     });
+    ecp.getServer().on("error", (error)=>{
+        window.webContents.send("console",`Failed to start ECP server:${error.message}`, true);
+    })
     ecp.get("/", getDeviceRoot);
     ecp.get("/device-image.png", getDeviceImage);
     ecp.get("/ecp_SCPD.xml", getScpdXML)
@@ -48,11 +51,10 @@ export function enableECP() {
     ecp.post("/keydown/:key", postKeyDown);
     ecp.post("/keyup/:key", postKeyUp);
     ecp.start(ECPPORT)
-    .catch(e => {
-        console.error("Failed to start ECP server:", e);
+    .catch((error)=>{
+        window.webContents.send("console",`ECP server error:${error.message}`, true);
     })
     .then((server)=>{
-        console.log(`ECP server started listening port ${server.address().port}`);
         // Create SSDP Server
         ssdp = new SSDP({
             location: {
@@ -76,12 +78,12 @@ export function enableECP() {
         ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
         // Start server on all interfaces
         ssdp.start()
-        .catch(e => {
-            console.error("Failed to start SSDP server:", e);
+        .catch((e) => {
+            window.webContents.send("console",`Failed to start SSDP server:${e.message}`, true);
         })
         .then(() => {
-            console.log(`SSDP server started listening port ${SSDPPORT}`);
             isECPEnabled = true;
+            window.webContents.send("toggleECP", true, ECPPORT);
         });
     });
 }
@@ -94,7 +96,7 @@ export function disableECP() {
         ssdp.stop();
     }
     isECPEnabled = false;
-    console.log("ECP and SSDP Servers disabled.");
+    window.webContents.send("toggleECP", false);    
 }
 
 // REST API Methods
@@ -261,7 +263,7 @@ function postLaunchApp(req, res) {
             window.webContents.send("fileSelected", [zip]);
         }    
     } else {
-        console.error("ECP Launch: File not found!");
+        window.webContents.send("console", `ECP Launch: File not found! App Id=${req.params.appID}`, true);
     }
     res.end();
 }

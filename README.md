@@ -20,19 +20,21 @@ The binaries of this application are released together with the emulator library
 Here are **optional** arguments you can use when starting the emulator at the command line:
 
 ```
-"BrightScript Emulator" [-o <path>] [-f] [-m <mode>] [-e] [-i] [-p <newpwd>] [-d]
+"BrightScript Emulator" [-o <path>] [-f] [-m <dm>] [-e] [-t] [-w [<port>]] [-p <newpwd>] [-d]
 
-"BrightScript Emulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--installer] [--pwd=<newpwd>] [--devtools]
+"BrightScript Emulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--telnet] 
+                        [--web[=<port>]] [--pwd=<newpwd>] [--devtools]
 ```
 
 |Argument                                |Description                                                                  |
 |----------------------------------------|-----------------------------------------------------------------------------|
 |**-o** `<path>` or `<path>`             | Opens  a `.zip` or `.brs` when starting the emulator.                       |
 |**-f** or **--fullscreen**             | Opens the emulator in **full screen mode** (double-click screen to restore).|
-|**-m** `<dm>` or **--mode=**`<dm>`     | Change the **display mode**. Options are: `sd`, `hd`, or `fhd`              |
+|**-m** `<dm>` or **--mode=**`<dm>`     | Changes the **display mode**. Options are: `sd`, `hd`, or `fhd`              |
 |**-e** or **--ecp**                     | Enables [ECP and SSDP servers](https://developer.roku.com/en-ca/docs/developer-program/debugging/external-control-api.md) to allow remote control and detection.   |
-|**-i** or **--installer**               | Enables **Web Installer** (port 80) and **Telnet Server** (port 8085).     |
-|**-p** `<newpwd>` or **--pwd=**`<newpwd>`| Changes (and saves) the **Web Installer** password.                      |
+|**-t** or **--telnet**                 | Enables **Telnet Server** on port 8085 to allow remote console monitoring.|
+|**-w** `[<port>]` or **--web**`[=<port>]`   | Enables **Web Installer** on port 80, optionally set a custom `<port>`|
+|**-p** `<newpwd>` or **--pwd=**`<newpwd>`| Changes the **Web Installer** password. This option saves the password on local storage. |
 |**-d** or **--devtools**                | Opens the **developer tools** when starting the emulator.                  |
 
 ## Author Links

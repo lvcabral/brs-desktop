@@ -6,27 +6,28 @@ import http from "http";
 import crypt from "crypto";
 import { enableTelnet, disableTelnet } from "./telnet";
 
-const PORT = 80;
 const credentials = {
     userName: "rokudev",
     password: "rokudev",
     realm: "BrightScript Emulator"
 };
-let window;
+let port = 80;
 let server;
 let hash;
 export let hasInstaller = false;
-export function initInstaller(mainWindow) {
-    window = mainWindow;
-}
 export function setPassword(password) {
     if (password && password !== "") {
         credentials.password = password;
     }
 }
-export function enableInstaller() {
+export function enableInstaller(window, customPort) {
     if (hasInstaller) {
         return; // already started do nothing
+    }
+    if (typeof customPort === "number") {
+        port = customPort;       
+    } else if (typeof customPort === "string" && parseInt(customPort) !== NaN) {
+        port = parseInt(customPort);
     }
     hash = cryptoUsingMD5(credentials.realm);
     server = http.createServer(function(req, res) {
@@ -49,17 +50,15 @@ export function enableInstaller() {
             authenticateUser(res); 
             return;
         }
-        console.log(req.method, req.url);
         if (req.method === "POST") {
             let done = "";
             const busboy = new Busboy({ headers: req.headers });
             busboy.on("file", function(fieldname, file, filename, encoding, mimetype) {
-                console.log(`File [${fieldname}]: filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`);
+                //console.log(`File [${fieldname}]: filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`);
                 if (filename && filename !== "") {
                     let saveTo = path.join(app.getPath("userData"), "dev.zip");
                     file.pipe(fs.createWriteStream(saveTo));
                     file.on("end", function() {
-                        console.log(`File [${fieldname}] Finished`);
                         window.webContents.send("fileSelected", [saveTo]);
                         done = "file";
                     });    
@@ -70,7 +69,6 @@ export function enableInstaller() {
                 }
             });
             busboy.on("field", function (fieldname, value){
-                console.log(`Field: ${fieldname}: ${value}`);
                 if (fieldname === "mysubmit" && value === "Screenshot") {
                     let saveTo = path.join(app.getPath("userData"), "dev.png");
                     window.webContents.send("saveScreenshot", saveTo);
@@ -78,7 +76,6 @@ export function enableInstaller() {
                 }
             });
             busboy.on("finish", function() {
-                console.log("Done parsing form!");
                 if (done === "screenshot") {
                     setTimeout(()=>{
                         let saveTo = path.join(app.getPath("userData"), "dev.png");
@@ -136,20 +133,26 @@ export function enableInstaller() {
                 res.end();
             }
         }
-    }).listen(PORT, function() {
-        console.log(`Installer server started listening port ${PORT}`);
+    }).listen(port, () => {
         hasInstaller = true;
-        enableTelnet();
+        window.webContents.send("toggleInstaller", true, port);
     });
+    server.on("error", (error) => {
+        if (error.code === "EADDRINUSE") {
+            hasInstaller = false;
+            window.webContents.send("toggleInstaller", false, port, error.message);    
+        } else {
+            window.webContents.send("console", error.message, true);
+        }
+    })
 }
 
-export function disableInstaller() {
+export function disableInstaller(window) {
     if (server) {
         server.close();
-        disableTelnet();
     }
     hasInstaller = false;
-    console.log("Installer server disabled.");
+    window.webContents.send("toggleInstaller", false);
 }
 
 // Helper Functions

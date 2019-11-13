@@ -45,6 +45,9 @@ const statusIconRes = document.getElementById("statusIconRes");
 const statusResolution = document.getElementById("statusResolution");
 const statusIconECP = document.getElementById("statusIconECP");
 const statusECP = document.getElementById("statusECP");
+const statusSepTelnet = document.getElementById("statusSepTelnet");
+const statusIconTelnet = document.getElementById("statusIconTelnet");
+const statusTelnet = document.getElementById("statusTelnet");
 const statusSepWeb = document.getElementById("statusSepWeb");
 const statusIconWeb = document.getElementById("statusIconWeb");
 const statusWeb = document.getElementById("statusWeb");
@@ -66,12 +69,16 @@ Object.assign(deviceData, {registry: new Map()});
 // ECP Server 
 let ECPEnabled = storage.getItem("ECPEnabled") || "false";
 ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
-updateECPOnStatus()
+updateECPOnStatus(8060)
+// Telnet Server
+let telnetEnabled = storage.getItem("telnetEnabled") || "false";
+ipcRenderer.send("telnetEnabled", telnetEnabled === "true");
+updateTelnetOnStatus(8085)
 // Web Installer Server 
 let installerEnabled = storage.getItem("installerEnabled") || "false";
 let installerPassword = storage.getItem("installerPassword") || "rokudev";
 ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword);
-updateInstallerOnStatus()
+updateInstallerOnStatus(80)
 // Emulator Display
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
@@ -194,20 +201,47 @@ ipcRenderer.on("toggleStatusBar", function(event) {
     appMenu.getMenuItemById("status-bar").checked = enable;
     redrawDisplay();
 });
-ipcRenderer.on("toggleECP", function(event, enable) {
+ipcRenderer.on("toggleECP", function(event, enable, port) {
+    if (enable) {
+        console.log(`ECP server started listening port ${port}`);
+    } else {
+        console.log("ECP server disabled."); 
+    }
     appMenu.getMenuItemById("ecp-api").checked = enable;
     ECPEnabled = enable ? "true" : "false";
     storage.setItem("ECPEnabled", ECPEnabled);
-    updateECPOnStatus();
+    updateECPOnStatus(port);
 });
-ipcRenderer.on("toggleInstaller", function(event, enable) {
+ipcRenderer.on("toggleTelnet", function(event, enable, port) {
+    if (enable) {
+        console.log(`Telnet server started listening port ${port}`);
+    } else {
+        console.log("Telnet server disabled."); 
+    }
+    appMenu.getMenuItemById("telnet").checked = enable;
+    telnetEnabled = enable ? "true" : "false";
+    storage.setItem("telnetEnabled", telnetEnabled);
+    updateTelnetOnStatus(port);
+});
+ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
+    if (enable) {
+        console.log(`Installer server started listening port ${port}`);
+    } else if (error) {
+        console.error("Installer server error:", error);
+    } else {
+        console.log("Installer server disabled.");        
+    }
     appMenu.getMenuItemById("web-installer").checked = enable;
     installerEnabled = enable ? "true" : "false";
     storage.setItem("installerEnabled", installerEnabled);
-    updateInstallerOnStatus();
+    updateInstallerOnStatus(port);
 });
-ipcRenderer.on("console", function(event, text) {
-    console.log(text);
+ipcRenderer.on("console", function(event, text, error) {
+    if (error) {
+        console.error(text);
+    } else {
+        console.log(text);
+    }
 });
 ipcRenderer.on("fileSelected", function(event, file) {
     // TODO: Handle multiple events
@@ -1009,20 +1043,33 @@ function updateDisplayOnStatus() {
     }
 }
 // Update ECP Server icon on Status Bar
-function updateECPOnStatus() {
+function updateECPOnStatus(port) {
     if (ECPEnabled === "true") {
-        statusECP.innerText = "ECP : 8060";
-        statusIconECP.innerHTML = "<i class='fa fa-server'></i>";
+        statusECP.innerText = `ECP : ${port}`;
+        statusECP.style.display = "";
+        statusIconECP.style.display = "";
     } else {
-        statusECP.innerText = "";
-        statusIconECP.innerHTML = "";
+        statusECP.style.display = "none";
+        statusIconECP.style.display = "none";
+    }
+}
+// Update Telnet Server icon on Status Bar
+function updateTelnetOnStatus(port) {
+    if (telnetEnabled === "true") {
+        statusTelnet.innerText = `Telnet : ${port}`;
+        statusTelnet.style.display = "";
+        statusIconTelnet.style.display = "";
+        statusSepTelnet.style.display = "";
+    } else {
+        statusTelnet.style.display = "none";
+        statusIconTelnet.style.display = "none";
+        statusSepTelnet.style.display = "none";
     }
 }
 // Update Web Installer Server icon on Status Bar
-function updateInstallerOnStatus() {
+function updateInstallerOnStatus(port) {
     if (installerEnabled === "true") {
-        statusWeb.innerText = "Web : 80";
-        statusIconWeb.innerHTML = "<i class='fa fa-upload'></i>";
+        statusWeb.innerText = `Web : ${port}`;
         statusWeb.style.display = "";
         statusIconWeb.style.display = "";
         statusSepWeb.style.display = "";
@@ -1040,6 +1087,7 @@ function setupMenuSwitches(status = false) {
     appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
+    appMenu.getMenuItemById("telnet").checked = (telnetEnabled === "true");
     appMenu.getMenuItemById("web-installer").checked = (installerEnabled === "true");
     if (status) {
         appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";

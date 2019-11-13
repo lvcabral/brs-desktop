@@ -12,7 +12,8 @@ import os from "os";
 import minimist from "minimist";
 import { app, screen, ipcMain } from "electron";
 import { initECP, enableECP } from "./servers/ecp"
-import { initInstaller, setPassword, enableInstaller } from "./servers/installer";
+import { setPassword, enableInstaller } from "./servers/installer";
+import { enableTelnet } from "./servers/telnet";
 import { createMenu } from "./menu/menuService"
 import createWindow from "./helpers/window";
 
@@ -39,7 +40,8 @@ const deviceInfo = {
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
     string: [ "o", "p", "m" ],
-    alias: { d: "devtools", e: "ecp", f: "fullscreen", i: "installer", p: "pwd", m: "mode" }
+    boolean: ["d", "e", "f", "t"],
+    alias: { d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", t: "telnet" }
 });
 
 // Save userData in separate folders for each environment.
@@ -78,16 +80,17 @@ app.on("ready", () => {
     ).then(() => {
         // CLI Switches
         if (argv.ecp) {
-            enableECP();
-            mainWindow.webContents.send("toggleECP", true);
+            enableECP(mainWindow);
+        }
+        if (argv.telnet) {
+            enableTelnet(mainWindow);
         }
         if (argv.pwd && argv.pwd.trim() !== "") {
             setPassword(argv.pwd.trim());
             mainWindow.webContents.send("setPassword", argv.pwd.trim());
         }
-        if (argv.installer) {
-            enableInstaller();
-            mainWindow.webContents.send("toggleInstaller", true);
+        if (argv.web) {
+            enableInstaller(mainWindow, argv.web);
         }
         if (argv.mode && argv.mode.trim() !== "") {
             switch (argv.mode.trim().toLowerCase()) {
@@ -114,20 +117,25 @@ app.on("ready", () => {
         }
     });
     // Initialize ECP and SSDP servers
-    initECP(mainWindow, deviceInfo);
+    initECP(deviceInfo);
     ipcMain.once("ECPEnabled", (event, enable) => {
         if (enable) {
-            enableECP();
+            enableECP(mainWindow);
         }
     });
-    // Initialize Web Installer and Telnet servers
-    initInstaller(mainWindow);
+    // Initialize Telnet Server
+    ipcMain.once("telnetEnabled", (event, enable) => {
+        if (enable) {
+            enableTelnet(mainWindow);
+        }
+    });
+    // Initialize Web Installer servers
     ipcMain.once("installerEnabled", (event, enable, password) => {
         if (password) {
             setPassword(password);
         }
         if (enable) {
-            enableInstaller();
+            enableInstaller(mainWindow, argv.web);
         }
     });
 });
