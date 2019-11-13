@@ -626,6 +626,8 @@ function receiveMessage(event) {
     } else if (event.data === "end") {
         clientLog(`------ Finished '${currentChannel.title}' execution ------`);
         closeChannel();
+    } else if (event.data === "reset") {
+        mainWindow.reload();
     }
 }
 // Sound Functions
