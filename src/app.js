@@ -35,6 +35,8 @@ titleBar.titlebar.style.color = titleColor;
 const defaultTitle = document.title;
 // Status Bar Objects
 const statusBar = document.getElementById("status");
+const statusError = document.getElementById("statusError");
+const statusWarn = document.getElementById("statusWarn");
 const statusIconFile = document.getElementById("statusIconFile");
 const statusFile = document.getElementById("statusFile");
 const statusIconVersion = document.getElementById("statusIconVersion");
@@ -54,6 +56,13 @@ const statusWeb = document.getElementById("statusWeb");
 statusResolution.style.display = "none";
 statusIconRes.style.display = "none";
 statusSepRes.style.display = "none";
+let statusBgColor = getComputedStyle(document.documentElement).getPropertyValue("--status-background-color").trim();
+let statusErrColor = getComputedStyle(document.documentElement).getPropertyValue("--status-error-color").trim();
+let statusWarnColor = getComputedStyle(document.documentElement).getPropertyValue("--status-warning-color").trim();
+let errorCount = 0;
+let warnCount = 0;
+statusError.innerText = errorCount.toString();
+statusWarn.innerText = warnCount.toString();
 // Channel Data
 let splashTimeout = 1600;
 let source = [];
@@ -179,6 +188,16 @@ ipcRenderer.on("setTheme", function(event, theme) {
     titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor);
     titleBar.updateBackground(titleBarConfig.backgroundColor);
     titleBar.titlebar.style.color = titleColor;
+    statusBgColor = getComputedStyle(document.documentElement).getPropertyValue("--status-background-color").trim();
+    statusErrColor = getComputedStyle(document.documentElement).getPropertyValue("--status-error-color").trim();
+    statusWarnColor = getComputedStyle(document.documentElement).getPropertyValue("--status-warning-color").trim();
+    if (errorCount > 0) {
+        statusBar.style.backgroundColor = statusErrColor;
+    } else if (warnCount > 0) {
+        statusBar.style.backgroundColor = statusWarnColor;
+    } else {
+        statusBar.style.backgroundColor = statusBgColor;
+    }    
     storage.setItem("userTheme", theme);
 });
 ipcRenderer.on("setDisplay", function(event, mode) {
@@ -244,7 +263,11 @@ ipcRenderer.on("console", function(event, text, error) {
     }
 });
 ipcRenderer.on("fileSelected", function(event, file) {
-    // TODO: Handle multiple events
+    errorCount = 0;
+    warnCount = 0;
+    statusError.innerText = errorCount.toString();
+    statusWarn.innerText = warnCount.toString();
+    statusBar.style.backgroundColor = statusBgColor;
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
         filePath = file[0];
@@ -653,9 +676,11 @@ function receiveMessage(event) {
         } else {
             clientException(`Can't find wav sound: ${wav}`);
         }
-    } else if (event.data.substr(0,3) === "log") {
+    } else if (event.data.substr(0, 4) === "log,") {
         clientLog(event.data.substr(4));
-    } else if (event.data.substr(0,5) === "error") {
+    } else if (event.data.substr(0, 8) === "warning,") {
+        clientWarning(event.data.substr(8));
+    } else if (event.data.substr(0, 6) === "error,") {
         clientException(event.data.substr(6));
     } else if (event.data === "end") {
         clientLog(`------ Finished '${currentChannel.title}' execution ------`);
@@ -945,10 +970,21 @@ function clientLog(msg) {
     ipcRenderer.send("telnet", msg);
     console.log(msg);
 }
-function clientException(msg, popup = false) {
-    // TODO: Add icon on status bar to notify error and handle popup
+function clientWarning(msg) {
+    ipcRenderer.send("telnet", msg);
+    console.warn(msg);
+    warnCount++; 
+    statusWarn.innerText = warnCount.toString();
+    if (errorCount === 0) {
+        statusBar.style.backgroundColor = statusWarnColor;
+    }    
+}
+function clientException(msg) {
     ipcRenderer.send("telnet", msg);
     console.error(msg);
+    errorCount++; 
+    statusError.innerText = errorCount.toString();    
+    statusBar.style.backgroundColor = statusErrColor;
 }
 // Fix text color after focus change
 titleBar.onBlur = titleBar.onFocus = function() {

@@ -8,6 +8,8 @@
     --title-background-color: #3d1b56;
     --status-color: #f2f2f2;
     --status-background-color: #662d91;
+    --status-error-color: #912d70;
+    --status-warning-color: #914d2d;
 }
 [data-theme^="light"],
 [data-theme] [data-theme^="light"] {
@@ -18,6 +20,8 @@
     --title-background-color: #dddddd;
     --status-color: #f2f2f2;
     --status-background-color: #007acc;
+    --status-error-color: #a80000;
+    --status-warning-color: #cc6633;
 }
 [data-theme^="dark"],
 [data-theme] [data-theme^="dark"] {
@@ -28,6 +32,8 @@
     --title-background-color: #252526;
     --status-color: #f2f2f2;
     --status-background-color: #007acc;
+    --status-error-color: #a80000;
+    --status-warning-color: #cc6633;
 }
 /* Style Definitions */
 html,
