@@ -597,7 +597,7 @@ function receiveMessage(event) {
             sound.pause();
             sharedArray[dataType.SND] = audioEvent.PAUSED;
         } else {
-            clientException(`Can't find audio data: ${audio}`);
+            clientWarning(`[message:pause] Can't find audio data: ${playIndex} - ${audio}`);
         }
     } else if (event.data === "resume") {
         const audio = playList[playIndex];
@@ -606,14 +606,14 @@ function receiveMessage(event) {
             sound.play();
             sharedArray[dataType.SND] = audioEvent.RESUMED;
         } else {
-            clientException(`Can't find audio data: ${audio}`);
+            clientWarning(`[message:resume]Can't find audio data: ${playIndex} - ${audio}`);
         }
     } else if (event.data.substr(0, 4) === "loop") {
         const loop = event.data.split(",")[1];
         if (loop) {
             playLoop = loop === "true";
         } else {
-            clientException(`Missing loop parameter: ${event.data}`);
+            clientWarning(`Missing loop parameter: ${event.data}`);
         }
     } else if (event.data.substr(0, 4) === "next") {
         const newIndex = event.data.split(",")[1];
@@ -621,10 +621,10 @@ function receiveMessage(event) {
             playNext = parseInt(newIndex);
             if (playNext >= playList.length) {
                 playNext = -1;
-                clientException(`Next index out of range: ${newIndex}`);
+                clientWarning(`Next index out of range: ${newIndex}`);
             }
         } else {
-            clientException(`Invalid index: ${event.data}`);
+            clientWarning(`Invalid next index: ${event.data}`);
         }
     } else if (event.data.substr(0, 4) === "seek") {
         const audio = playList[playIndex];
@@ -634,10 +634,10 @@ function receiveMessage(event) {
                 const sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
                 sound.seek(parseInt(position));
             } else {
-                clientException(`Can't find audio data: ${audio}`);
+                clientWarning(`[message:seek] Can't find audio data: ${playIndex} - ${audio}`);
             }
         } else {
-            clientException(`Invalid seek position: ${event.data}`);
+            clientWarning(`Invalid seek position: ${event.data}`);
         }
     } else if (event.data.substr(0, 7) === "trigger") {
         const wav = event.data.split(",")[1];
@@ -674,7 +674,7 @@ function receiveMessage(event) {
             }
             sound.stop();
         } else {
-            clientException(`Can't find wav sound: ${wav}`);
+            clientWarning(`Can't find wav sound: ${wav}`);
         }
     } else if (event.data.substr(0, 4) === "log,") {
         clientLog(event.data.substr(4));
@@ -699,7 +699,7 @@ function playSound() {
         } else if (audio.substr(0, 4).toLowerCase() === "http") {
             sound = addWebSound(audio);
         } else {
-            clientException(`Can't find audio data: ${audio}`);
+            clientWarning(`[playSound] Can't find audio data: ${audio}`);
             return;
         }
         sound.seek(0);
@@ -715,7 +715,7 @@ function playSound() {
         sharedArray[dataType.IDX] = playIndex;
         sharedArray[dataType.SND] = audioEvent.SELECTED;
     } else {
-        clientException(`Can't find audio index: ${playIndex}`);
+        clientWarning(`Can't find audio index: ${playIndex}`);
     }
 }
 
@@ -744,7 +744,7 @@ function stopSound() {
         sound.stop();
         sharedArray[dataType.SND] = audioEvent.PARTIAL;
     } else {
-        clientException(`Can't find audio data: ${audio}`);
+        clientWarning(`[stopSound] Can't find audio data: ${playIndex} - ${audio}`);
     }
 }
 
@@ -756,12 +756,12 @@ function addSound(path, format, data) {
             format: format,
             preload: format === "wav",
             onloaderror: function(id, message) {
-                clientException(
+                clientWarning(
                     `Error loading ${path}: ${message}`
                 );
             },
             onplayerror: function(id, message) {
-                clientException(
+                clientWarning(
                     `Error playing ${path}: ${message}`
                 );
             },
@@ -776,12 +776,12 @@ function addWebSound(url) {
         src: [url],
         preload: true,
         onloaderror: function(id, message) {
-            clientException(
+            clientWarning(
                 `Error loading ${path}: ${message}`
             );
         },
         onplayerror: function(id, message) {
-            clientException(
+            clientWarning(
                 `Error playing ${path}: ${message}`
             );
         },
