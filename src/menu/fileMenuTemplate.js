@@ -173,7 +173,7 @@ export const fileMenuTemplate = {
             accelerator: "CmdOrCtrl+W",
             enabled: false,
             click: (event, window) => {
-                window.webContents.send("closeChannel");
+                window.webContents.send("closeChannel", "Menu");
             }
         },
         { type: "separator" },

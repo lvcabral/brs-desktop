@@ -160,9 +160,9 @@ ipcRenderer.on("postKeyPress", function(event, key) {
         handleKey(key.toLowerCase(), 0);
     }
 });
-ipcRenderer.on("closeChannel", function(event) {
+ipcRenderer.on("closeChannel", function(event, source) {
     if (running) {
-        closeChannel();
+        closeChannel(source);
     }
 });
 ipcRenderer.on("updateMenu", function(event) {
@@ -683,8 +683,7 @@ function receiveMessage(event) {
     } else if (event.data.substr(0, 6) === "error,") {
         clientException(event.data.substr(6));
     } else if (event.data === "end") {
-        clientLog(`------ Finished '${currentChannel.title}' execution ------`);
-        closeChannel();
+        closeChannel("Normal");
     } else if (event.data === "reset") {
         mainWindow.reload();
     }
@@ -813,7 +812,8 @@ function resetSounds() {
     playNext = -1;
 }
 // Restore emulator menu and terminate Worker
-function closeChannel() {
+function closeChannel(reason) {
+    clientLog(`------ Finished '${currentChannel.title}' execution [${reason}] ------`);
     ctx.fillStyle = "rgba(0, 0, 0, 1)";
     ctx.fillRect(0, 0, display.width, display.height);
     if (titleBar) {
@@ -876,7 +876,7 @@ function keyDownHandler(event) {
     } else if (event.keyCode == 27) {
         if (brsWorker != undefined) {
             // HOME BUTTON (ESC)
-            closeChannel();
+            closeChannel("Home Button");
         }
     }
     // TODO: Send TimeSinceLastKeypress()
