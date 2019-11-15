@@ -21,13 +21,15 @@ export function enableTelnet(window) {
         client.on("data", (data) => {
             // TODO: Handle debug commands
             let cmd = data.toString();
-            if (cmd.toLowerCase()==="exit\r\n") {
+            if (cmd.toLowerCase() === "exit\r\n") {
                 client.destroy();
-            } else if (cmd.toLowerCase()==="end\r\n") {
+            } else if (cmd.toLowerCase() === "end\r\n") {
                 window.webContents.send("closeChannel", "Telnet");
-            } else if (cmd === "\x03\r\n") {
+            } else if (cmd === "\x03\r\n" || cmd.toLowerCase() === "help\r\n") {
                 client.write(`BrightScript Debugger is not supported yet!
-                \r\nCommands available are:\r\n'exit' - close this connection\r\n'end' - finish the channel execution\r\n>`);
+                \r\nCommands available are:\r\nexit - close this connection\r\nend - finish the channel execution\r\n>`);
+            } else {
+                client.write(">");
             }
         });
         // Handle exceptions from the client
