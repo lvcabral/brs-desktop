@@ -11,20 +11,21 @@ import fs from "fs";
 import path from "path";
 import Mousetrap from "mousetrap";
 import * as customTitlebar from "custom-electron-titlebar";
-import { remote, ipcRenderer } from "electron";
+import { remote, ipcRenderer, shell } from "electron";
 import { Howl } from "howler";
 import JSZip from "jszip";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
+const colorValues = getComputedStyle(document.documentElement);
 const storage = window.localStorage;
 const currentChannel = {id: "", file: "", title: "", version: ""};
 let appMenu = remote.Menu.getApplicationMenu();
 let userTheme = storage.getItem("userTheme") || "purple";
-remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
+remote.getGlobal("sharedObject").backgroundColor = colorValues
     .getPropertyValue("--background-color")
     .trim();
-let titleColor = getComputedStyle(document.documentElement).getPropertyValue("--title-color").trim();
-let titleBgColor = getComputedStyle(document.documentElement).getPropertyValue("--title-background-color").trim();
+let titleColor = colorValues.getPropertyValue("--title-color").trim();
+let titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
 const titleBarConfig = {
     backgroundColor: customTitlebar.Color.fromHex(titleBgColor),
     icon: "./images/icon512x512.png",
@@ -35,6 +36,7 @@ titleBar.titlebar.style.color = titleColor;
 const defaultTitle = document.title;
 // Status Bar Objects
 const statusBar = document.getElementById("status");
+const statusDevTools = document.getElementById("statusDevTools");
 const statusError = document.getElementById("statusError");
 const statusWarn = document.getElementById("statusWarn");
 const statusIconFile = document.getElementById("statusIconFile");
@@ -45,24 +47,31 @@ const statusDisplay = document.getElementById("statusDisplay");
 const statusSepRes = document.getElementById("statusSepRes");
 const statusIconRes = document.getElementById("statusIconRes");
 const statusResolution = document.getElementById("statusResolution");
-const statusIconECP = document.getElementById("statusIconECP");
 const statusECP = document.getElementById("statusECP");
-const statusSepTelnet = document.getElementById("statusSepTelnet");
-const statusIconTelnet = document.getElementById("statusIconTelnet");
+const statusECPText = document.getElementById("statusECPText");
 const statusTelnet = document.getElementById("statusTelnet");
-const statusSepWeb = document.getElementById("statusSepWeb");
-const statusIconWeb = document.getElementById("statusIconWeb");
+const statusTelnetText = document.getElementById("statusTelnetText");
 const statusWeb = document.getElementById("statusWeb");
+const statusWebText = document.getElementById("statusWebText");
 statusResolution.style.display = "none";
 statusIconRes.style.display = "none";
 statusSepRes.style.display = "none";
-let statusBgColor = getComputedStyle(document.documentElement).getPropertyValue("--status-background-color").trim();
-let statusErrColor = getComputedStyle(document.documentElement).getPropertyValue("--status-error-color").trim();
-let statusWarnColor = getComputedStyle(document.documentElement).getPropertyValue("--status-warning-color").trim();
 let errorCount = 0;
 let warnCount = 0;
 statusError.innerText = errorCount.toString();
 statusWarn.innerText = warnCount.toString();
+statusDevTools.onclick = function() {
+    mainWindow.openDevTools();
+};
+let ECPPort = 8060;
+statusECP.onclick = function() {
+    shell.openExternal(`http://127.0.0.1:${ECPPort}/query/device-info`);
+};
+let installerPort = 80;
+statusWeb.onclick = function() {
+    shell.openExternal(`http://127.0.0.1:${installerPort}/`);
+};
+
 // Channel Data
 let splashTimeout = 1600;
 let source = [];
@@ -78,7 +87,7 @@ Object.assign(deviceData, {registry: new Map()});
 // ECP Server 
 let ECPEnabled = storage.getItem("ECPEnabled") || "false";
 ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
-updateECPOnStatus(8060)
+updateECPOnStatus(ECPPort)
 // Telnet Server
 let telnetEnabled = storage.getItem("telnetEnabled") || "false";
 ipcRenderer.send("telnetEnabled", telnetEnabled === "true");
@@ -87,7 +96,7 @@ updateTelnetOnStatus(8085)
 let installerEnabled = storage.getItem("installerEnabled") || "false";
 let installerPassword = storage.getItem("installerPassword") || "rokudev";
 ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword);
-updateInstallerOnStatus(80)
+updateInstallerOnStatus(installerPort)
 // Emulator Display
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
@@ -179,25 +188,14 @@ ipcRenderer.on("copyScreenshot", function(event) {
 ipcRenderer.on("setTheme", function(event, theme) {
     userTheme = theme;
     document.documentElement.setAttribute("data-theme", theme);
-    remote.getGlobal("sharedObject").backgroundColor = getComputedStyle(document.documentElement)
-        .getPropertyValue("--background-color")
-        .trim();
+    remote.getGlobal("sharedObject").backgroundColor = colorValues.getPropertyValue("--background-color").trim();
     mainWindow.setBackgroundColor(remote.getGlobal("sharedObject").backgroundColor);
-    titleColor = getComputedStyle(document.documentElement).getPropertyValue("--title-color").trim();
-    titleBgColor = getComputedStyle(document.documentElement).getPropertyValue("--title-background-color").trim();
+    titleColor = colorValues.getPropertyValue("--title-color").trim();
+    titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
     titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor);
     titleBar.updateBackground(titleBarConfig.backgroundColor);
     titleBar.titlebar.style.color = titleColor;
-    statusBgColor = getComputedStyle(document.documentElement).getPropertyValue("--status-background-color").trim();
-    statusErrColor = getComputedStyle(document.documentElement).getPropertyValue("--status-error-color").trim();
-    statusWarnColor = getComputedStyle(document.documentElement).getPropertyValue("--status-warning-color").trim();
-    if (errorCount > 0) {
-        statusBar.style.backgroundColor = statusErrColor;
-    } else if (warnCount > 0) {
-        statusBar.style.backgroundColor = statusWarnColor;
-    } else {
-        statusBar.style.backgroundColor = statusBgColor;
-    }    
+    setStatusColors();
     storage.setItem("userTheme", theme);
 });
 ipcRenderer.on("setDisplay", function(event, mode) {
@@ -230,6 +228,7 @@ ipcRenderer.on("toggleECP", function(event, enable, port) {
     ECPEnabled = enable ? "true" : "false";
     storage.setItem("ECPEnabled", ECPEnabled);
     updateECPOnStatus(port);
+    ECPPort = port;
 });
 ipcRenderer.on("toggleTelnet", function(event, enable, port) {
     if (enable) {
@@ -254,6 +253,7 @@ ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
     installerEnabled = enable ? "true" : "false";
     storage.setItem("installerEnabled", installerEnabled);
     updateInstallerOnStatus(port);
+    installerPort = port;
 });
 ipcRenderer.on("console", function(event, text, error) {
     if (error) {
@@ -265,9 +265,9 @@ ipcRenderer.on("console", function(event, text, error) {
 ipcRenderer.on("fileSelected", function(event, file) {
     errorCount = 0;
     warnCount = 0;
+    setStatusColors();
     statusError.innerText = errorCount.toString();
     statusWarn.innerText = warnCount.toString();
-    statusBar.style.backgroundColor = statusBgColor;
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
         filePath = file[0];
@@ -975,16 +975,14 @@ function clientWarning(msg) {
     console.warn(msg);
     warnCount++; 
     statusWarn.innerText = warnCount.toString();
-    if (errorCount === 0) {
-        statusBar.style.backgroundColor = statusWarnColor;
-    }    
+    setStatusColors();
 }
 function clientException(msg) {
     ipcRenderer.send("telnet", msg);
     console.error(msg);
     errorCount++; 
     statusError.innerText = errorCount.toString();    
-    statusBar.style.backgroundColor = statusErrColor;
+    setStatusColors();
 }
 // Fix text color after focus change
 titleBar.onBlur = titleBar.onFocus = function() {
@@ -1078,41 +1076,50 @@ function updateDisplayOnStatus() {
         statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
     }
 }
+// Set status bar colors
+function setStatusColors() {
+    if (errorCount > 0) {
+        statusBar.className = "statusbarError";
+        statusWeb.className = "statusIconsError";
+        statusECP.className = "statusIconsError";
+        statusDevTools.className = "statusIconsError";
+    } else if (warnCount > 0) {
+        statusBar.className = "statusbarWarn";
+        statusWeb.className = "statusIconsWarn";
+        statusECP.className = "statusIconsWarn";
+        statusDevTools.className = "statusIconsWarn";
+    } else {
+        statusBar.className = "statusbar";
+        statusWeb.className = "statusIcons";
+        statusECP.className = "statusIcons";
+        statusDevTools.className = "statusIcons";
+    }
+}
 // Update ECP Server icon on Status Bar
 function updateECPOnStatus(port) {
     if (ECPEnabled === "true") {
-        statusECP.innerText = `ECP : ${port}`;
+        statusECPText.innerText = `ECP : ${port}`;
         statusECP.style.display = "";
-        statusIconECP.style.display = "";
     } else {
         statusECP.style.display = "none";
-        statusIconECP.style.display = "none";
     }
 }
 // Update Telnet Server icon on Status Bar
 function updateTelnetOnStatus(port) {
     if (telnetEnabled === "true") {
-        statusTelnet.innerText = `Telnet : ${port}`;
+        statusTelnetText.innerText = `Telnet : ${port}`;
         statusTelnet.style.display = "";
-        statusIconTelnet.style.display = "";
-        statusSepTelnet.style.display = "";
     } else {
         statusTelnet.style.display = "none";
-        statusIconTelnet.style.display = "none";
-        statusSepTelnet.style.display = "none";
     }
 }
 // Update Web Installer Server icon on Status Bar
 function updateInstallerOnStatus(port) {
     if (installerEnabled === "true") {
-        statusWeb.innerText = `Web : ${port}`;
+        statusWebText.innerText = `Web : ${port}`;
         statusWeb.style.display = "";
-        statusIconWeb.style.display = "";
-        statusSepWeb.style.display = "";
     } else {
         statusWeb.style.display = "none";
-        statusIconWeb.style.display = "none";
-        statusSepWeb.style.display = "none";
     }
 }
 // Configure Menu Options

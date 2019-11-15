@@ -11,7 +11,7 @@ const watching = compiler.watch({}, (err, stats) => {
   if (!err && !stats.hasErrors() && !electronStarted) {
     electronStarted = true;
     childProcess
-      .spawn(electron, ["."].concat(process.argv.slice(2), //`-w 8888`//'--mode=sd'//'--pwd=newpwd'//"--installer" //"-e"
+      .spawn(electron, ["."].concat(process.argv.slice(2), //'-w 8888'//'--mode=sd'//'--pwd=newpwd'//"--installer" //"-e"
                 //  ["-o C:\\Projects\\Roku\\Lode-Runner-Roku\\out\\roku-deploy.zip", 
                 //  "-d", "--fullscreen" ] 
                 ),

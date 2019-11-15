@@ -18,10 +18,12 @@
     <canvas id="display"></canvas>
     <div id="status" class="statusbar">
         <span style="float:left"></span>
-        <span id="statusIconError" style="float:left"><i class="fa fa-times-circle"></i></span>
-        <span id="statusError" style="float:left">0</span>
-        <span id="statusIconWarn" style="float:left"><i class="fa fa-exclamation-triangle"></i></span>
-        <span id="statusWarn" style="float:left">0</span>
+        <a href="#" tabindex="-1" title="Open Console"><span id="statusDevTools" class="statusIcons">
+            <span style="float:left"><i class="fa fa-times-circle"></i></span>
+            <span id="statusError" style="float:left">0</span>
+            <span style="float:left"><i class="fa fa-exclamation-triangle"></i></span>
+            <span id="statusWarn" style="float:left">0</span>
+        </span></a>
 
         <span style="float:left"></span>
         <span id="statusIconFile" style="float:left"></span>
@@ -39,17 +41,21 @@
         <span id="statusResolution" style="float:right"></span>
         <span id="statusIconRes" style="float:right"></span>
 
-        <span id="statusSepWeb" style="float:right"></span>
-        <span id="statusWeb" style="float:right"></span>
-        <span id="statusIconWeb" style="float:right"><i class='fa fa-upload'></i></span>
-
-        <span id="statusSepTelnet" style="float:right"></span>
-        <span id="statusTelnet" style="float:right"></span>
-        <span id="statusIconTelnet" style="float:right"><i class='fa fa-terminal'></i></span>
-
-        <span style="float:right"></span>
-        <span id="statusECP" style="float:right"></span>
-        <span id="statusIconECP" style="float:right"><i class='fa fa-server'></i></span>
+        <span id="statusTelnet" style="float:right">
+            <span style="float:right"></span>
+            <span id="statusTelnetText" style="float:right"></span>
+            <span style="float:right"><i class='fa fa-terminal'></i></span>
+        </span>
+        <a href="#" tabindex="-2" title="Show Device Info XML"><span id="statusECP"  class="statusIcons" style="float:right">
+            <span style="float:right"></span>
+            <span id="statusECPText" style="float:right"></span>
+            <span style="float:right"><i class='fa fa-server'></i></span>
+        </span></a>
+        <a href="#" tabindex="-3" title="Open Web Installer"><span id="statusWeb" class="statusIcons" style="float:right">
+            <span style="float:right"></span>
+            <span id="statusWebText" style="float:right"></span>
+            <span style="float:right"><i class='fa fa-upload'></i></span>
+        </span></a>
     </div>
     <script src="app.js"></script>
 </body>

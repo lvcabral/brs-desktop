@@ -8,8 +8,11 @@
     --title-background-color: #3d1b56;
     --status-color: #f2f2f2;
     --status-background-color: #662d91;
+    --status-hover-color: #7e3ab3;
     --status-error-color: #912d70;
-    --status-warning-color: #914d2d;
+    --status-error-hover-color: #8d4c77;
+    --status-warning-color: #cc6633;
+    --status-warning-hover-color: #d4865f;
 }
 [data-theme^="light"],
 [data-theme] [data-theme^="light"] {
@@ -20,8 +23,11 @@
     --title-background-color: #dddddd;
     --status-color: #f2f2f2;
     --status-background-color: #007acc;
+    --status-hover-color: #1f8ad2;
     --status-error-color: #a80000;
+    --status-error-hover-color: #a03131;
     --status-warning-color: #cc6633;
+    --status-warning-hover-color: #d4865f;
 }
 [data-theme^="dark"],
 [data-theme] [data-theme^="dark"] {
@@ -32,8 +38,11 @@
     --title-background-color: #252526;
     --status-color: #f2f2f2;
     --status-background-color: #007acc;
+    --status-hover-color: #1f8ad2;
     --status-error-color: #a80000;
+    --status-error-hover-color: #a03131;
     --status-warning-color: #cc6633;
+    --status-warning-hover-color: #d4865f;
 }
 /* Style Definitions */
 html,
@@ -52,6 +61,7 @@ body {
 }
 a {
     color: var(--link-color);
+    outline: none;
 }
 .statusbar {
     overflow: hidden;
@@ -70,6 +80,51 @@ a {
     padding: 1px 4px;
     text-decoration: none;
     font-size: 12px;
+}
+.statusbarError {
+    overflow: hidden;
+    background-color: var(--status-error-color);
+    position: fixed;
+    bottom: 0;
+    height: 20px;
+    width: 100%;
+    -webkit-user-select: none;
+}
+.statusbarError span {
+    float: left;
+    display: block;
+    color: var(--status-color);
+    text-align: center;
+    padding: 1px 4px;
+    text-decoration: none;
+    font-size: 12px;
+}
+.statusbarWarn {
+    overflow: hidden;
+    background-color: var(--status-warning-color);
+    position: fixed;
+    bottom: 0;
+    height: 20px;
+    width: 100%;
+    -webkit-user-select: none;
+}
+.statusbarWarn span {
+    float: left;
+    display: block;
+    color: var(--status-color);
+    text-align: center;
+    padding: 1px 4px;
+    text-decoration: none;
+    font-size: 12px;
+}
+.statusIcons:hover {
+	background-color: var(--status-hover-color);
+}
+.statusIconsError:hover {
+	background-color: var(--status-error-hover-color);
+}
+.statusIconsWarn:hover {
+	background-color: var(--status-warning-hover-color);
 }
 #display {
     position: absolute;
