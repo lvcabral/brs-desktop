@@ -22,7 +22,7 @@ Here are **optional** arguments you can use when starting the emulator at the co
 ```
 "BrightScript Emulator" [-o <path>] [-f] [-m <dm>] [-e] [-t] [-w [<port>]] [-p <newpwd>] [-d]
 
-"BrightScript Emulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--telnet] 
+"BrightScript Emulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--rc] 
                         [--web[=<port>]] [--pwd=<newpwd>] [--devtools]
 ```
 
@@ -32,7 +32,7 @@ Here are **optional** arguments you can use when starting the emulator at the co
 |**-f** or **--fullscreen**             | Opens the emulator in **full screen mode** (double-click screen to restore).|
 |**-m** `<dm>` or **--mode=**`<dm>`     | Changes the **display mode**. Options are: `sd`, `hd`, or `fhd`              |
 |**-e** or **--ecp**                     | Enables [ECP and SSDP servers](https://developer.roku.com/en-ca/docs/developer-program/debugging/external-control-api.md) to allow remote control and detection.|
-|**-t** or **--telnet**                 | Enables **Telnet Server** on port 8085 to allow remote console monitoring.|
+|**-r** or **--rc**                 | Enables a telnet server on port 8085 to allow **Remote Console** monitoring.|
 |**-w** `[<port>]` or **--web**`[=<port>]`   | Enables **Web Installer** on port 80, optionally set a custom `<port>`|
 |**-p** `<newpwd>` or **--pwd=**`<newpwd>`| Changes the **Web Installer** password and saves it on local storage. |
 |**-d** or **--devtools**                | Opens the **developer tools** when starting the emulator.              |

@@ -40,8 +40,8 @@ const deviceInfo = {
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
     string: [ "o", "p", "m" ],
-    boolean: ["d", "e", "f", "t"],
-    alias: { d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", t: "telnet" }
+    boolean: ["d", "e", "f", "r"],
+    alias: { d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" }
 });
 
 // Save userData in separate folders for each environment.

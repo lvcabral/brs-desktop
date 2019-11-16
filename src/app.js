@@ -232,9 +232,9 @@ ipcRenderer.on("toggleECP", function(event, enable, port) {
 });
 ipcRenderer.on("toggleTelnet", function(event, enable, port) {
     if (enable) {
-        console.log(`Telnet server started listening port ${port}`);
+        console.log(`Remote console started listening port ${port}`);
     } else {
-        console.log("Telnet server disabled."); 
+        console.log("Remote console server disabled."); 
     }
     appMenu.getMenuItemById("telnet").checked = enable;
     telnetEnabled = enable ? "true" : "false";
@@ -1010,7 +1010,7 @@ function redrawDisplay() {
             screenSize.width = parseInt(screenSize.height * aspectRatio);
         }
     } else {
-        const ratio = 0.97;
+        const ratio = 0.99;
         let offset = 13;
         titleBar.titlebar.style.display = "";
         titleBar.container.style.top = "30px";
@@ -1098,7 +1098,7 @@ function setStatusColors() {
 // Update ECP Server icon on Status Bar
 function updateECPOnStatus(port) {
     if (ECPEnabled === "true") {
-        statusECPText.innerText = `ECP : ${port}`;
+        statusECPText.innerText = port;
         statusECP.style.display = "";
     } else {
         statusECP.style.display = "none";
@@ -1107,7 +1107,7 @@ function updateECPOnStatus(port) {
 // Update Telnet Server icon on Status Bar
 function updateTelnetOnStatus(port) {
     if (telnetEnabled === "true") {
-        statusTelnetText.innerText = `Telnet : ${port}`;
+        statusTelnetText.innerText = port;
         statusTelnet.style.display = "";
     } else {
         statusTelnet.style.display = "none";
@@ -1116,7 +1116,7 @@ function updateTelnetOnStatus(port) {
 // Update Web Installer Server icon on Status Bar
 function updateInstallerOnStatus(port) {
     if (installerEnabled === "true") {
-        statusWebText.innerText = `Web : ${port}`;
+        statusWebText.innerText = port;
         statusWeb.style.display = "";
     } else {
         statusWeb.style.display = "none";

@@ -62,6 +62,19 @@ export const deviceMenuTemplate = {
         },
         { type: "separator" },
         {
+            id: "web-installer",
+            label: "Web Application Installer",
+            type: "checkbox",
+            checked: true,
+            click: (event, window) => {
+                if (hasInstaller) {
+                    disableInstaller(window);
+                } else {
+                    enableInstaller(window);
+                }
+            }
+        },
+        {
             id: "ecp-api",
             label: "External Control Protocol",
             type: "checkbox",
@@ -76,7 +89,7 @@ export const deviceMenuTemplate = {
         },
         {
             id: "telnet",
-            label: "Telnet Debug Server",
+            label: "BrightScript Remote Console",
             type: "checkbox",
             checked: true,
             click: (event, window) => {
@@ -84,19 +97,6 @@ export const deviceMenuTemplate = {
                     disableTelnet(window);
                 } else {
                     enableTelnet(window);
-                }
-            }
-        },
-        {
-            id: "web-installer",
-            label: "Web Application Installer",
-            type: "checkbox",
-            checked: true,
-            click: (event, window) => {
-                if (hasInstaller) {
-                    disableInstaller(window);
-                } else {
-                    enableInstaller(window);
                 }
             }
         },

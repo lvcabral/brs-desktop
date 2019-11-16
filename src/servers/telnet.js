@@ -24,17 +24,19 @@ export function enableTelnet(window) {
             if (cmd.toLowerCase() === "exit\r\n") {
                 client.destroy();
             } else if (cmd.toLowerCase() === "end\r\n") {
-                window.webContents.send("closeChannel", "Telnet");
+                window.webContents.send("closeChannel", "Remote");
             } else if (cmd === "\x03\r\n" || cmd.toLowerCase() === "help\r\n") {
-                client.write(`BrightScript Debugger is not supported yet!
-                \r\nCommands available are:\r\nexit - close this connection\r\nend - finish the channel execution\r\n>`);
+                client.write("BrightScript Emulator Remote Console");
+                client.write("\r\nDebug features are not implemented yet.\r\n");
+                client.write("\r\nCommands available are:\r\nhelp - show this commands list");
+                client.write("\r\nexit - close the console\r\nend - finish current channel execution\r\n>");
             } else {
                 client.write(">");
             }
         });
         // Handle exceptions from the client
         client.on("error", (e) => {
-            window.webContents.send("console", `Telnet client error: ${e.message}`, true);
+            window.webContents.send("console", `Remote console client error: ${e.message}`, true);
             client.destroy();
         });
         client.on('close', function() {
@@ -60,7 +62,7 @@ export function enableTelnet(window) {
         });
     })
     server.on("error", (error) => {
-        window.webContents.send("console", `Telnet server error: ${error.message}`, true);
+        window.webContents.send("console", `Remote console server error: ${error.message}`, true);
     });
     server.listen(PORT);
 }
