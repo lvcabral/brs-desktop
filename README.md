@@ -18,7 +18,7 @@ There are many ways in which you can participate in the project, read documents 
 * [How to build from source](docs/build-from-source.md)
 
 ### Color Themes
-![Screen Themes](/../master/docs/images/screeshot-themes.png?raw=true)
+![Screen Themes](docs/images/screeshot-themes.png?raw=true)
 
 ### Remote Control Emulation
 
