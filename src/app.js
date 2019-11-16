@@ -63,13 +63,14 @@ statusWarn.innerText = warnCount.toString();
 statusDevTools.onclick = function() {
     mainWindow.openDevTools();
 };
+let localIp = "127.0.0.1";
 let ECPPort = 8060;
 statusECP.onclick = function() {
-    shell.openExternal(`http://127.0.0.1:${ECPPort}/query/device-info`);
+    shell.openExternal(`http://${localIp}:${ECPPort}/query/device-info`);
 };
 let installerPort = 80;
 statusWeb.onclick = function() {
-    shell.openExternal(`http://127.0.0.1:${installerPort}/`);
+    shell.openExternal(`http://${localIp}:${installerPort}/`);
 };
 
 // Channel Data
@@ -84,6 +85,9 @@ let running = false;
 // Device Data
 const deviceData = remote.getGlobal("sharedObject").deviceInfo;
 Object.assign(deviceData, {registry: new Map()});
+if (deviceData.localIps.length > 0) {
+    localIp = deviceData.localIps[0].split(",")[1];
+}
 // ECP Server 
 let ECPEnabled = storage.getItem("ECPEnabled") || "false";
 ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
