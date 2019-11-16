@@ -1,4 +1,4 @@
-# BrightScript 2D API Emulator - Desktop App
+# BrightScript 2D API Emulator - Desktop Application
 
 This project was created to develop a _multiplatform desktop application_ for the **BrightScript 2D API emulator**, please follow the link below to visit the emulator library repository and know all about the project features (and limitations):
 - http://github.com/lvcabral/brs-emu
@@ -38,7 +38,7 @@ Here are **optional** arguments you can use when starting the emulator at the co
 |Argument                                |Description                                                                  |
 |----------------------------------------|-----------------------------------------------------------------------------|
 |**-o** `<path>` or `<path>`             | Opens  a `.zip` or `.brs` when starting the emulator.                       |
-|**-f** or **--fullscreen**             | Opens the emulator in **full screen mode** (double-click screen to restore).|
+|**-f** or **--fullscreen**             | Opens the emulator in **full screen mode** (double-click screen to switch).|
 |**-m** `<dm>` or **--mode=**`<dm>`     | Changes the **display mode**. Options are: `sd`, `hd`, or `fhd`              |
 |**-e** or **--ecp**                     | Enables [ECP and SSDP servers](https://developer.roku.com/en-ca/docs/developer-program/debugging/external-control-api.md) to allow remote control and detection.|
 |**-r** or **--rc**                 | Enables a telnet server on port 8085 to allow **Remote Console** monitoring.|

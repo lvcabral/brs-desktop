@@ -946,9 +946,9 @@ function handleKey(key, mod) {
         sharedArray[dataType.KEY] = 17 + mod; // BUTTON_A
     } else if (key == "b") {
         sharedArray[dataType.KEY] = 18 + mod; // BUTTON_B
-    } else if (key == "home") {
+    } else if (key == "home" && mod === 0) {
         if (brsWorker != undefined) {        // HOME BUTTON (ESC)
-            closeChannel();
+            closeChannel("Home Button");
         }
     }
 }

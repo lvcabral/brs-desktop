@@ -12,24 +12,24 @@ export function enableTelnet(window) {
     if (isTelnetEnabled) {
         return;
     }
-    server = telnet.Server();
+    server = telnet.createServer();
     
-    server.on("connection", function (client) {
+    server.on("connection", (client) => {
         let id = clientId;
         clientId++;
         // listen for the actual data from the client
         client.on("data", (data) => {
             // TODO: Handle debug commands
-            let cmd = data.toString();
-            if (cmd.toLowerCase() === "exit\r\n") {
+            let cmd = data.toString().toLowerCase();
+            if (cmd.toLowerCase() === "close\r\n") {
                 client.destroy();
-            } else if (cmd.toLowerCase() === "end\r\n") {
+            } else if (cmd === "exit\r\n" || cmd === "quit\r\n") {
                 window.webContents.send("closeChannel", "Remote");
-            } else if (cmd === "\x03\r\n" || cmd.toLowerCase() === "help\r\n") {
+            } else if (cmd === "\x03\r\n" || cmd === "help\r\n") {
                 client.write("BrightScript Emulator Remote Console");
                 client.write("\r\nDebug features are not implemented yet.\r\n");
                 client.write("\r\nCommands available are:\r\nhelp - show this commands list");
-                client.write("\r\nexit - close the console\r\nend - finish current channel execution\r\n>");
+                client.write("\r\nclose - disconnects the console\r\nexit or quit - finish current channel execution\r\n>");
             } else {
                 client.write(">");
             }
@@ -60,7 +60,7 @@ export function enableTelnet(window) {
                 client.write(`${text.replace(/\r?\n/g, '\r\n')}\r\n`);
             });
         });
-    })
+    });
     server.on("error", (error) => {
         window.webContents.send("console", `Remote console server error: ${error.message}`, true);
     });
