@@ -6,14 +6,23 @@ This project was created to build a _multiplatform desktop application_ for the 
 The binaries of this application are released together with the emulator library at:
 - https://github.com/lvcabral/brs-emu/releases
 
+
+
 ## Documentation
+
+### Contributing
+
+There are many ways in which you can participate in the project, read documents below to know the details:
+
+* [How to contribute](docs/contributing.md)
+* [How to build from source](docs/build-from-source.md)
 
 ### Color Themes
 ![Screen Themes](/../master/docs/images/screeshot-themes.png?raw=true)
 
 ### Remote Control Emulation
 
-* [Control Keyboard Reference](https://github.com/lvcabral/brs-emu-app/blob/master/docs/control-reference.md)
+* [Control Keyboard Reference](docs/control-reference.md)
 
 ### Command Line Options
 
