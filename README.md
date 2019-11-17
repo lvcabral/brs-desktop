@@ -11,7 +11,7 @@ The binaries of this dektop application (for all platforms) are released togethe
 
 ## Documentation
 
-Below you will find the links for the documetation related to this project, how to contribute, build and use the desktop application.
+Below you will find the links for the documentation related to this project, how to contribute, build and use the desktop application.
 
 ### Contributing
 
@@ -25,6 +25,7 @@ There are many ways in which you can participate in the project, read documents 
 * [Menu Options](docs/how-to-use.md#menu-options)
 * [Command Line Options](docs/how-to-use.md#command-line-options)
 * [Control Keyboard Reference](docs/control-reference.md)
+* [Remote Access Services](docs/remote-access.md)
 
 ## Author Links
 - My website is [https://lvcabral.com](https://lvcabral.com)
