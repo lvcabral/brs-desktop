@@ -44,7 +44,7 @@ This section will describe the options available on the application menu, please
 
 ### Help Menu
 
-- Documentation
+- Documentation - Opens project [README file](../README.md)
 - Control Keyboard Reference - Opens the [remote control keyboard reference documentation](control-reference.md)
 - Release Notes - Opens the [release page](https://github.com/lvcabral/brs-emu/releases)
 - View License - Shows the [application license](../LICENSE)
