@@ -9,41 +9,47 @@ This section will describe the options available on the application menu, please
 
 ### File Menu
 
-- Open Channel Package
-- Open Source File
-- Open Recent
-- Save Screenshot
-- Close Channel
+- Open Channel Package - Allows the user to select a zip file to load a channel
+- Open Source File - Allows the user to select a brs file to run on the emulator
+- Open Recent - Display a submenu with the recent opened files
+- Save Screenshot - Saves the current channel screen image to a png file
+- Close Channel - Closes the current channel
 
 ### Edit Menu
 
-- Copy Screenshot
-- Settings
+- Copy Screenshot - Copy the current screen image to the OS clipboard
+- Settings - Not implemented yet.
 
 ### Device Menu
 
-- Display Modes
-- TV Overscan Modes
-- Web Application Installer
-- External Control Protocol
-- BrightScript Remote Console
-- Reset Device
+- Display Modes - Defines the default UI resolution of the emulated device
+    - SD 480p - Emulates a `Roku 2 (2720X)` with resolution of 720x480
+    - HD 720p - Emulates a `Roku 3 (4200X)` with resolution of 1280x720
+    - FHD 1080p - Emulates a `Roku Ultra (4640X)` with default UI resolution of 1920x1080
+- TV Overscan Modes - Allows emulation of TV overscan effect
+    - Disable - Shows the entire image with no cropping or guide lines
+    - Guide Lines - Shows guide lines delimiting a potential hidden area by the TV overscan
+    - Enabled - Crops the image to emulate the TV overscan effect
+- Web Application Installer - See [documentation](remote-access.md#web-application-installer)
+- External Control Protocol - See [documentation](remote-access.md#brightscript-remote-console)
+- BrightScript Remote Console - See [documentation](remote-access.md#brightscript-remote-console)
+- Reset Device - Resets the emulator releasing any channel from the memory, also reloading Dev Tools
 
 ### View Menu
 
-- Full Screen
-- Color Themes</br>
+- Full Screen - Enter full screen mode. If you double click the screen it also toggles full screen mode.
+- Color Themes - Allows to select among the 3 available themes</br>
 ![Screen Themes](images/screeshot-themes.png?raw=true)
-- Status Bar
+- Status Bar - Toggles if the status bar is displayed (Windows and Linux)
 
 ### Help Menu
 
 - Documentation
-- Control Keyboard Reference
-- Release Notes
-- View License
-- Check for Update
-- About
+- Control Keyboard Reference - Opens the [remote control keyboard reference documentation](control-reference.md)
+- Release Notes - Opens the [release page](https://github.com/lvcabral/brs-emu/releases)
+- View License - Shows the [application license](../LICENSE)
+- Check for Update - Not implemented yet.
+- About - Shows the about dialog box
 
 ## Command Line Options
 
