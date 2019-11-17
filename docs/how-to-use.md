@@ -4,7 +4,7 @@
 This section will describe the options available on the application menu, please notice that in **macOS** the options will be possibly in different location, as the OS has different standards than **Windows** an **Linux**.
 
 <p align="center">
-<img alt="Emulator Web and Desktop" src="docs/images/app.gif?raw=true"/>
+<img alt="Emulator Web and Desktop" src="docs/images/app-menu.gif?raw=true"/>
 </p>
 
 ### File Menu
