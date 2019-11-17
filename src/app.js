@@ -881,6 +881,7 @@ function keyDownHandler(event) {
         if (brsWorker != undefined) {
             // HOME BUTTON (ESC)
             closeChannel("Home Button");
+            soundsDat[0].play();
         }
     }
     // TODO: Send TimeSinceLastKeypress()
@@ -949,6 +950,7 @@ function handleKey(key, mod) {
     } else if (key == "home" && mod === 0) {
         if (brsWorker != undefined) {        // HOME BUTTON (ESC)
             closeChannel("Home Button");
+            soundsDat[0].play();
         }
     }
 }
