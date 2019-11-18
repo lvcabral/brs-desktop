@@ -72,7 +72,11 @@ let installerPort = 80;
 statusWeb.onclick = function() {
     shell.openExternal(`http://${localIp}:${installerPort}/`);
 };
-
+if (appMenu.getMenuItemById("status-bar").checked) {
+    statusBar.style.visibility = "visible";
+} else {
+    statusBar.style.visibility = "hidden";
+}
 // Channel Data
 let splashTimeout = 1600;
 let source = [];
@@ -216,6 +220,11 @@ ipcRenderer.on("setOverscan", function(event, mode) {
 });
 ipcRenderer.on("setPassword", function(event, pwd) {
     storage.setItem("installerPassword", pwd);
+});
+ipcRenderer.on("toggleOnTop", function(event) {
+    const onTop = !mainWindow.isAlwaysOnTop();
+    mainWindow.setAlwaysOnTop(onTop);
+    appMenu.getMenuItemById("on-top").checked = onTop;
 });
 ipcRenderer.on("toggleStatusBar", function(event) {
     const enable = statusBar.style.visibility !== "visible";
@@ -1138,7 +1147,4 @@ function setupMenuSwitches(status = false) {
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
     appMenu.getMenuItemById("telnet").checked = (telnetEnabled === "true");
     appMenu.getMenuItemById("web-installer").checked = (installerEnabled === "true");
-    if (status) {
-        appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
-    }
 }

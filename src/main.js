@@ -70,7 +70,7 @@ app.on("ready", () => {
     // Configure Window and load content
     let winBounds = mainWindow.getBounds();
     let display = screen.getDisplayNearestPoint({ x: winBounds.x, y: winBounds.y });
-    mainWindow.setMinimumSize(Math.min(900, display.size.width), Math.min(550, display.size.height));
+    mainWindow.setMinimumSize(Math.min(346, display.size.width), Math.min(264, display.size.height));
     mainWindow.loadURL(
         url.format({
             pathname: path.join(__dirname, "index.html"),

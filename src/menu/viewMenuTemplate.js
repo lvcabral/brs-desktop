@@ -40,6 +40,16 @@ export const viewMenuTemplate = {
         },
         { type: "separator" },
         {
+            id: "on-top",
+            label: "Always on Top",
+            type: "checkbox",
+            checked: false,
+            enabled: true,
+            click: (event, window) => {
+                window.webContents.send("toggleOnTop");
+            }
+        },
+        {
             id: "status-bar",
             label: "Status Bar",
             type: "checkbox",
