@@ -1,4 +1,5 @@
 import { remote, ipcRenderer } from "electron";
+import { titleBar } from "./titlebar";
 import { isStatusBarEnabled, showStatusBar, setResStatus } from "./statusbar";
 import Mousetrap from "mousetrap";
 
@@ -46,8 +47,8 @@ export function redrawDisplay(running) {
             screenSize.width = parseInt(screenSize.height * aspectRatio);
         }
     } else {
-        const ratio = 0.99;
-        let offset = 13;
+        const ratio = 0.98;
+        let offset = 25;
         titleBar.titlebar.style.display = "";
         titleBar.container.style.top = "30px";
         if (isStatusBarEnabled()) {
@@ -114,6 +115,7 @@ export function drawBufferImage(buffer) {
 
 // Show Display and set focus
 export function showDisplay() {
+    bufferCanvas.width = 1;
     display.style.opacity = 1;
     display.focus();
 }
@@ -130,4 +132,12 @@ export function copyScreenshot() {
         const item = new ClipboardItem({ "image/png": blob });
         navigator.clipboard.write([ item ]);
     });
+}
+
+export function setDisplayMode(mode) {
+    displayMode = mode;
+}
+
+export function setOverscanMode(mode) {
+    overscanMode = mode;
 }

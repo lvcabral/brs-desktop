@@ -1,12 +1,14 @@
 import { remote, ipcRenderer } from "electron";
+import { titleBar } from "./titlebar";
 import { drawSplashScreen, showDisplay, clearDisplay } from "./display";
+import { initSoundModule, addSound, resetSounds } from "./sound";
 import { clientLog, clientException } from "./console";
 import { setChannelStatus, clearChannelStatus, setLocalIp } from "./statusbar";
-
 import path from "path";
 import JSZip from "jszip";
 import fs from "fs";
-
+const appMenu = remote.Menu.getApplicationMenu();
+const defaultTitle = document.title;
 const currentChannel = {id: "", file: "", title: "", version: ""};
 let brsWorker;
 let workerCallback;
@@ -28,6 +30,8 @@ const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length
 export const sharedArray = new Int32Array(sharedBuffer);
 export const dataType = { KEY: 0, MOD: 1, SND: 2, IDX: 3, WAV: 4 };
 Object.freeze(dataType);
+// Initialize Sound Module
+initSoundModule(sharedArray, dataType, deviceData.maxSimulStreams);
 console.log("Loader module initialized!");
 // Open File
 export function loadFile(filePath, fileData) {
@@ -56,7 +60,6 @@ export function loadFile(filePath, fileData) {
         sharedArray[dataType.SND] = -1;
         sharedArray[dataType.IDX] = -1;
         resetSounds();
-        bufferCanvas.width = 1;
     }
     clientLog(`Loading ${fileName}...`);    
     if (fileExt === ".zip") {
@@ -260,7 +263,6 @@ function runChannel() {
         sharedArray[dataType.KEY] = 0;
         sharedArray[dataType.SND] = -1;
         sharedArray[dataType.IDX] = -1;
-        bufferCanvas.width = 1;
     }
     running = true;
     brsWorker = new Worker("lib/brsEmu.min.js");
@@ -296,7 +298,6 @@ export function closeChannel(reason) {
     sharedArray[dataType.SND] = -1;
     sharedArray[dataType.IDX] = -1;
     resetSounds();
-    bufferCanvas.width = 1;
     running = false;
     appMenu.getMenuItemById("close-channel").enabled = false;
     currentChannel.id = "";

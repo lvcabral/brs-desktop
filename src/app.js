@@ -6,35 +6,21 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import "./stylesheets/main.css";
+import "./stylesheets/fontawesome.min.css"
 import "./helpers/hash";
-import * as customTitlebar from "custom-electron-titlebar";
 import { remote, ipcRenderer } from "electron";
-import { setMessageCallback, loadFile, deviceData, dataType, sharedArray, running } from "./frontend/loader";
-import { displayMode, overscanMode, drawBufferImage, redrawDisplay } from "./frontend/display";
+import { userTheme } from "./frontend/titlebar";
+import { setMessageCallback, loadFile, closeChannel, deviceData, dataType, sharedArray, running } from "./frontend/loader";
+import { displayMode, overscanMode, setDisplayMode, setOverscanMode, drawBufferImage, redrawDisplay } from "./frontend/display";
 import { clientLog, clientWarning, clientException, errorCount, warnCount, clearCounters } from "./frontend/console";
-import { setServerStatus, setStatusColor, setDisplayStatus } from "./frontend/statusbar";
-import { Howl } from "howler";
+import { toggleStatusBar, setServerStatus, setStatusColor, setDisplayStatus } from "./frontend/statusbar";
+import { playSound, stopSound, pauseSound, resumeSound, setLoop, setNext, triggerWav, playWav, stopWav, addPlaylist, addSound } from "./frontend/sound";
 import fs from "fs";
 import path from "path";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
-const colorValues = getComputedStyle(document.documentElement);
 const storage = window.localStorage;
 let appMenu = remote.Menu.getApplicationMenu();
-let userTheme = storage.getItem("userTheme") || "purple";
-remote.getGlobal("sharedObject").backgroundColor = colorValues
-    .getPropertyValue("--background-color")
-    .trim();
-let titleColor = colorValues.getPropertyValue("--title-color").trim();
-let titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
-const titleBarConfig = {
-    backgroundColor: customTitlebar.Color.fromHex(titleBgColor),
-    icon: "./images/icon512x512.png",
-    shadow: true
-};
-const titleBar = new customTitlebar.Titlebar(titleBarConfig);
-titleBar.titlebar.style.color = titleColor;
-const defaultTitle = document.title;
 // ECP Server 
 let ECPEnabled = storage.getItem("ECPEnabled") || "false";
 ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
@@ -56,17 +42,6 @@ if (displayMode !== deviceData.displayMode) {
 }
 // Setup Menu
 setupMenuSwitches();
-// Sound Objects
-const audioEvent = { SELECTED: 0, FULL: 1, PARTIAL: 2, PAUSED: 3, RESUMED: 4, FAILED: 5 };
-Object.freeze(audioEvent);
-let soundsIdx = new Map();
-let soundsDat = new Array();
-let wavStreams = new Array(deviceData.maxSimulStreams);
-let playList = new Array();
-let playIndex = 0;
-let playLoop = false;
-let playNext = -1;
-resetSounds();
 // Keyboard handlers
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -110,19 +85,6 @@ ipcRenderer.on("saveScreenshot", function(event, file) {
     const data = img.replace(/^data:image\/\w+;base64,/, "");
     fs.writeFileSync(file, new Buffer(data, "base64"));
 });
-ipcRenderer.on("setTheme", function(event, theme) {
-    userTheme = theme;
-    document.documentElement.setAttribute("data-theme", theme);
-    remote.getGlobal("sharedObject").backgroundColor = colorValues.getPropertyValue("--background-color").trim();
-    mainWindow.setBackgroundColor(remote.getGlobal("sharedObject").backgroundColor);
-    titleColor = colorValues.getPropertyValue("--title-color").trim();
-    titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
-    titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor);
-    titleBar.updateBackground(titleBarConfig.backgroundColor);
-    titleBar.titlebar.style.color = titleColor;
-    setStatusColor(errorCount, warnCount);
-    storage.setItem("userTheme", theme);
-});
 ipcRenderer.on("setDisplay", function(event, mode) {
     if (mode !== deviceData.displayMode) {
         changeDisplayMode(mode);
@@ -130,8 +92,8 @@ ipcRenderer.on("setDisplay", function(event, mode) {
     }
 });
 ipcRenderer.on("setOverscan", function(event, mode) {
-    overscanMode = mode;
     storage.setItem("overscanMode", mode);
+    setOverscanMode(mode);
     redrawDisplay(running);
 });
 ipcRenderer.on("setPassword", function(event, pwd) {
@@ -143,8 +105,7 @@ ipcRenderer.on("toggleOnTop", function(event) {
     appMenu.getMenuItemById("on-top").checked = onTop;
 });
 ipcRenderer.on("toggleStatusBar", function(event) {
-    const enable = statusBar.style.visibility !== "visible";
-    appMenu.getMenuItemById("status-bar").checked = enable;
+    toggleStatusBar();
     redrawDisplay(running);
 });
 ipcRenderer.on("toggleECP", function(event, enable, port) {
@@ -226,52 +187,29 @@ setMessageCallback( function (event) {
         deviceData.registry.forEach(function(value, key) {
             storage.setItem(key, value);
         });
+    } else if (event.data instanceof Array) {
+        addPlaylist(event.data);
     } else if (event.data.audioPath) {
         addSound(event.data.audioPath, event.data.audioFormat, new Blob([event.data.audioData]));
-    } else if (event.data instanceof Array) {
-        if (playList.length > 0) {
-            stopSound();
-        }
-        playList = event.data;
-        playIndex = 0;
-        playNext = -1;
     } else if (event.data === "play") {
         playSound();
     } else if (event.data === "stop") {
         stopSound();
     } else if (event.data === "pause") {
-        const audio = playList[playIndex];
-        if (audio && soundsIdx.has(audio.toLowerCase())) {
-            const sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
-            sound.pause();
-            sharedArray[dataType.SND] = audioEvent.PAUSED;
-        } else {
-            clientWarning(`[message:pause] Can't find audio data: ${playIndex} - ${audio}`);
-        }
+        pauseSound();
     } else if (event.data === "resume") {
-        const audio = playList[playIndex];
-        if (audio && soundsIdx.has(audio.toLowerCase())) {
-            const sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
-            sound.play();
-            sharedArray[dataType.SND] = audioEvent.RESUMED;
-        } else {
-            clientWarning(`[message:resume]Can't find audio data: ${playIndex} - ${audio}`);
-        }
+        resumeSound();
     } else if (event.data.substr(0, 4) === "loop") {
         const loop = event.data.split(",")[1];
         if (loop) {
-            playLoop = loop === "true";
+            setLoop(loop === "true");
         } else {
             clientWarning(`Missing loop parameter: ${event.data}`);
         }
     } else if (event.data.substr(0, 4) === "next") {
         const newIndex = event.data.split(",")[1];
         if (newIndex && !isNaN(parseInt(newIndex))) {
-            playNext = parseInt(newIndex);
-            if (playNext >= playList.length) {
-                playNext = -1;
-                clientWarning(`Next index out of range: ${newIndex}`);
-            }
+            setNext(parseInt(newIndex));
         } else {
             clientWarning(`Invalid next index: ${event.data}`);
         }
@@ -279,52 +217,14 @@ setMessageCallback( function (event) {
         const audio = playList[playIndex];
         const position = event.data.split(",")[1];
         if (position && !isNaN(parseInt(position))) {
-            if (audio && soundsIdx.has(audio.toLowerCase())) {
-                const sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
-                sound.seek(parseInt(position));
-            } else {
-                clientWarning(`[message:seek] Can't find audio data: ${playIndex} - ${audio}`);
-            }
+            seekSound(parseInt(position));
         } else {
             clientWarning(`Invalid seek position: ${event.data}`);
         }
     } else if (event.data.substr(0, 7) === "trigger") {
-        const wav = event.data.split(",")[1];
-        if (wav && soundsIdx.has(wav.toLowerCase())) {
-            const soundId = soundsIdx.get(wav.toLowerCase());
-            const sound = soundsDat[soundId];
-            const volume = parseInt(event.data.split(",")[2]) / 100;
-            const index = parseInt(event.data.split(",")[3]);
-            if (volume && !isNaN(volume)) {
-                sound.volume(volume);
-            }
-            if (index >= 0 && index < deviceData.maxSimulStreams) {
-                if (wavStreams[index] && wavStreams[index].playing()) {
-                    wavStreams[index].stop();
-                }
-                wavStreams[index] = sound;
-                sound.on("end", function() {
-                    sharedArray[dataType.WAV + index] = -1;
-                });
-                sound.play();
-                sharedArray[dataType.WAV + index] = soundId;
-            }
-        }
+        triggerWav(event.data.split(",")[1]);
     } else if (event.data.substr(0, 5) === "stop,") {
-        const wav = event.data.split(",")[1];
-        if (wav && soundsIdx.has(wav.toLowerCase())) {
-            const soundId = soundsIdx.get(wav.toLowerCase());
-            const sound = soundsDat[soundId];
-            for (let index = 0; index < deviceData.maxSimulStreams; index++) {
-                if (sharedArray[dataType.WAV + index] === soundId) {
-                    sharedArray[dataType.WAV + index] = -1;
-                    break;
-                }
-            }
-            sound.stop();
-        } else {
-            clientWarning(`Can't find wav sound: ${wav}`);
-        }
+        stopWav(event.data.split(",")[1])
     } else if (event.data.substr(0, 4) === "log,") {
         clientLog(event.data.substr(4));
     } else if (event.data.substr(0, 8) === "warning,") {
@@ -338,129 +238,6 @@ setMessageCallback( function (event) {
     }
 });
 
-// Sound Functions
-function playSound() {
-    const audio = playList[playIndex];
-    if (audio) {
-        let sound;
-        if (soundsIdx.has(audio.toLowerCase())) {
-            sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
-        } else if (audio.substr(0, 4).toLowerCase() === "http") {
-            sound = addWebSound(audio);
-        } else {
-            clientWarning(`[playSound] Can't find audio data: ${audio}`);
-            return;
-        }
-        sound.seek(0);
-        sound.once("end", nextSound);
-        if (sound.state() === "unloaded") {
-            sound.once("load", function() {
-                sound.play();
-            });
-            sound.load();
-        } else {
-            sound.play();
-        }
-        sharedArray[dataType.IDX] = playIndex;
-        sharedArray[dataType.SND] = audioEvent.SELECTED;
-    } else {
-        clientWarning(`Can't find audio index: ${playIndex}`);
-    }
-}
-
-function nextSound() {
-    if (playNext >= 0 && playNext < playList.length) {
-        playIndex = playNext;
-    } else {
-        playIndex++;
-    }
-    playNext = -1;
-    if (playIndex < playList.length) {
-        playSound();
-    } else if (playLoop) {
-        playIndex = 0;
-        playSound();
-    } else {
-        playIndex = 0;
-        sharedArray[dataType.SND] = audioEvent.FULL;
-    }
-}
-
-function stopSound() {
-    const audio = playList[playIndex];
-    if (audio && soundsIdx.has(audio.toLowerCase())) {
-        const sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
-        sound.stop();
-        sharedArray[dataType.SND] = audioEvent.PARTIAL;
-    } else {
-        clientWarning(`[stopSound] Can't find audio data: ${playIndex} - ${audio}`);
-    }
-}
-
-function addSound(path, format, data) {
-    soundsIdx.set(path.toLowerCase(), soundsDat.length);
-    soundsDat.push(
-        new Howl({
-            src: [window.URL.createObjectURL(data)],
-            format: format,
-            preload: format === "wav",
-            onloaderror: function(id, message) {
-                clientWarning(
-                    `Error loading ${path}: ${message}`
-                );
-            },
-            onplayerror: function(id, message) {
-                clientWarning(
-                    `Error playing ${path}: ${message}`
-                );
-            },
-        })
-    );
-}
-
-function addWebSound(url) {
-    // TODO: Fix the WAV index if a roAudioResource is created after this call
-    soundsIdx.set(url.toLowerCase(), soundsDat.length);
-    let sound = new Howl({
-        src: [url],
-        preload: true,
-        onloaderror: function(id, message) {
-            clientWarning(
-                `Error loading ${path}: ${message}`
-            );
-        },
-        onplayerror: function(id, message) {
-            clientWarning(
-                `Error playing ${path}: ${message}`
-            );
-        },
-    })
-    soundsDat.push(sound);
-    return sound;
-}
-
-function resetSounds() {
-    if (soundsDat.length > 0) {
-        soundsDat.forEach(sound => {
-            sound.unload();
-        });
-    }
-    soundsIdx = new Map();
-    soundsDat = new Array();
-    wavStreams = new Array(deviceData.maxSimulStreams);
-    soundsIdx.set("select", 0);
-    soundsDat.push(new Howl({ src: ["./audio/select.wav"] }));
-    soundsIdx.set("navsingle", 1);
-    soundsDat.push(new Howl({ src: ["./audio/navsingle.wav"] }));
-    soundsIdx.set("navmulti", 2);
-    soundsDat.push(new Howl({ src: ["./audio/navmulti.wav"] }));
-    soundsIdx.set("deadend", 3);
-    soundsDat.push(new Howl({ src: ["./audio/deadend.wav"] }));
-    playList = new Array();
-    playIndex = 0;
-    playLoop = false;
-    playNext = -1;
-}
 // Remote control emulator
 function keyDownHandler(event) {
     if (event.keyCode == 8) {
@@ -499,7 +276,7 @@ function keyDownHandler(event) {
         if (running) {
             // HOME BUTTON (ESC)
             closeChannel("Home Button");
-            soundsDat[0].play();
+            playWav(0);
         }
     }
     // TODO: Send TimeSinceLastKeypress()
@@ -564,14 +341,10 @@ function handleKey(key, mod) {
     } else if (key == "home" && mod === 0) {
         if (running) {        // HOME BUTTON (ESC)
             closeChannel("Home Button");
-            soundsDat[0].play();
+            playWav(0);
         }
     }
 }
-// Fix text color after focus change
-titleBar.onBlur = titleBar.onFocus = function() {
-    titleBar.titlebar.style.color = titleColor;
-};
 // Toggle Full Screen when Double Click
 display.ondblclick = function() {
     const toggle = !mainWindow.isFullScreen();
@@ -589,8 +362,8 @@ function changeDisplayMode(mode) {
     }
     deviceData.displayMode = mode;
     deviceData.deviceModel = mode == "720p" ? "4200X" : mode == "1080p" ? "4640X" : "2720X";    
-    displayMode = mode;
     setDisplayStatus(mode);
+    setDisplayMode(mode);
     redrawDisplay(running);
 }
 

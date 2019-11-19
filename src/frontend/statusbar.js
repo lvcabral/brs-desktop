@@ -36,7 +36,7 @@ let installerPort = 80;
 statusWeb.onclick = function() {
     shell.openExternal(`http://${localIp}:${installerPort}/`);
 };
-let appMenu = remote.Menu.getApplicationMenu();
+const appMenu = remote.Menu.getApplicationMenu();
 if (appMenu.getMenuItemById("status-bar").checked) {
     statusBar.style.visibility = "visible";
 } else {
@@ -44,6 +44,10 @@ if (appMenu.getMenuItemById("status-bar").checked) {
 }
 console.log("StatusBar module initialized!");
 // Status Bar visibility
+export function toggleStatusBar() {
+    const enable = statusBar.style.visibility !== "visible";
+    appMenu.getMenuItemById("status-bar").checked = enable;
+}
 export function showStatusBar(visible) {
     if (visible) {
         display.style.bottom = "20px";
