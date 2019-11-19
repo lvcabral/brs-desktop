@@ -7,18 +7,20 @@
  *--------------------------------------------------------------------------------------------*/
 import "./stylesheets/main.css";
 import "./helpers/hash";
+import { remote, ipcRenderer } from "electron";
+import { loadFile, currentChannel, deviceData, brsWorker } from "./frontend/loader";
+import { drawBufferImage } from "./frontend/display";
+import { clientLog, clientWarning, clientException, errorCount, warnCount, clearCounters } from "./frontend/console";
+import { setServerStatus, setStatusColor, clearChannelStatus } from "./frontend/statusbar";
+import { Howl } from "howler";
 import fs from "fs";
 import path from "path";
 import Mousetrap from "mousetrap";
 import * as customTitlebar from "custom-electron-titlebar";
-import { remote, ipcRenderer, shell } from "electron";
-import { Howl } from "howler";
-import JSZip from "jszip";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
 const colorValues = getComputedStyle(document.documentElement);
 const storage = window.localStorage;
-const currentChannel = {id: "", file: "", title: "", version: ""};
 let appMenu = remote.Menu.getApplicationMenu();
 let userTheme = storage.getItem("userTheme") || "purple";
 remote.getGlobal("sharedObject").backgroundColor = colorValues
@@ -34,99 +36,23 @@ const titleBarConfig = {
 const titleBar = new customTitlebar.Titlebar(titleBarConfig);
 titleBar.titlebar.style.color = titleColor;
 const defaultTitle = document.title;
-// Status Bar Objects
-const statusBar = document.getElementById("status");
-const statusDevTools = document.getElementById("statusDevTools");
-const statusError = document.getElementById("statusError");
-const statusWarn = document.getElementById("statusWarn");
-const statusIconFile = document.getElementById("statusIconFile");
-const statusFile = document.getElementById("statusFile");
-const statusIconVersion = document.getElementById("statusIconVersion");
-const statusVersion = document.getElementById("statusVersion");
-const statusDisplay = document.getElementById("statusDisplay");
-const statusSepRes = document.getElementById("statusSepRes");
-const statusIconRes = document.getElementById("statusIconRes");
-const statusResolution = document.getElementById("statusResolution");
-const statusECP = document.getElementById("statusECP");
-const statusECPText = document.getElementById("statusECPText");
-const statusTelnet = document.getElementById("statusTelnet");
-const statusTelnetText = document.getElementById("statusTelnetText");
-const statusWeb = document.getElementById("statusWeb");
-const statusWebText = document.getElementById("statusWebText");
-statusResolution.style.display = "none";
-statusIconRes.style.display = "none";
-statusSepRes.style.display = "none";
-let errorCount = 0;
-let warnCount = 0;
-statusError.innerText = errorCount.toString();
-statusWarn.innerText = warnCount.toString();
-statusDevTools.onclick = function() {
-    mainWindow.openDevTools();
-};
-let localIp = "127.0.0.1";
-let ECPPort = 8060;
-statusECP.onclick = function() {
-    shell.openExternal(`http://${localIp}:${ECPPort}/query/device-info`);
-};
-let installerPort = 80;
-statusWeb.onclick = function() {
-    shell.openExternal(`http://${localIp}:${installerPort}/`);
-};
-if (appMenu.getMenuItemById("status-bar").checked) {
-    statusBar.style.visibility = "visible";
-} else {
-    statusBar.style.visibility = "hidden";
-}
 // Channel Data
-let splashTimeout = 1600;
-let source = [];
-let paths = [];
-let txts = [];
-let imgs = [];
-let fonts = [];
-let brsWorker;
 let running = false;
 // Device Data
-const deviceData = remote.getGlobal("sharedObject").deviceInfo;
 Object.assign(deviceData, {registry: new Map()});
-if (deviceData.localIps.length > 0) {
-    localIp = deviceData.localIps[0].split(",")[1];
-}
 // ECP Server 
 let ECPEnabled = storage.getItem("ECPEnabled") || "false";
 ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
-updateECPOnStatus(ECPPort)
+setServerStatus("ECP", 8060, ECPEnabled === "true");
 // Telnet Server
 let telnetEnabled = storage.getItem("telnetEnabled") || "false";
 ipcRenderer.send("telnetEnabled", telnetEnabled === "true");
-updateTelnetOnStatus(8085)
+setServerStatus("Telnet", 8085, telnetEnabled === "true");
 // Web Installer Server 
 let installerEnabled = storage.getItem("installerEnabled") || "false";
 let installerPassword = storage.getItem("installerPassword") || "rokudev";
 ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword);
-updateInstallerOnStatus(installerPort)
-// Emulator Display
-const display = document.getElementById("display");
-const ctx = display.getContext("2d", { alpha: false });
-const screenSize = { width: 1280, height: 720 };
-let displayMode = storage.getItem("displayMode") || "720p";
-if (displayMode === "1080p") {
-    screenSize.width = 1920;
-    screenSize.height = 1080;
-} else if (displayMode === "480p") {
-    screenSize.width = 720;
-    screenSize.height = 480;
-}
-let aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
-if (displayMode !== deviceData.displayMode) {
-    changeDisplayMode(displayMode);
-} else {
-    updateDisplayOnStatus();
-}
-// Buffer Objects
-const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
-const bufferCtx = bufferCanvas.getContext("2d");
-let buffer = new ImageData(screenSize.width, screenSize.height);
+setServerStatus("Web", 80, installerEnabled === "true");
 // Overscan Mode
 let overscanMode = storage.getItem("overscanMode") || "disabled";
 // Setup Menu
@@ -203,20 +129,20 @@ ipcRenderer.on("setTheme", function(event, theme) {
     titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(titleBgColor);
     titleBar.updateBackground(titleBarConfig.backgroundColor);
     titleBar.titlebar.style.color = titleColor;
-    setStatusColors();
+    setStatusColor(errorCount, warnCount);
     storage.setItem("userTheme", theme);
 });
 ipcRenderer.on("setDisplay", function(event, mode) {
     if (mode !== deviceData.displayMode) {
         displayMode = mode;
-        changeDisplayMode(mode);
+        changeDisplayMode(mode, overscanMode);
         storage.setItem("displayMode", mode);
     }
 });
 ipcRenderer.on("setOverscan", function(event, mode) {
     overscanMode = mode;
     storage.setItem("overscanMode", mode);
-    redrawDisplay();
+    redrawDisplay(overscanMode);
 });
 ipcRenderer.on("setPassword", function(event, pwd) {
     storage.setItem("installerPassword", pwd);
@@ -229,7 +155,7 @@ ipcRenderer.on("toggleOnTop", function(event) {
 ipcRenderer.on("toggleStatusBar", function(event) {
     const enable = statusBar.style.visibility !== "visible";
     appMenu.getMenuItemById("status-bar").checked = enable;
-    redrawDisplay();
+    redrawDisplay(overscanMode);
 });
 ipcRenderer.on("toggleECP", function(event, enable, port) {
     if (enable) {
@@ -240,8 +166,7 @@ ipcRenderer.on("toggleECP", function(event, enable, port) {
     appMenu.getMenuItemById("ecp-api").checked = enable;
     ECPEnabled = enable ? "true" : "false";
     storage.setItem("ECPEnabled", ECPEnabled);
-    updateECPOnStatus(port);
-    ECPPort = port;
+    setServerStatus("ECP", port, enable);
 });
 ipcRenderer.on("toggleTelnet", function(event, enable, port) {
     if (enable) {
@@ -252,7 +177,7 @@ ipcRenderer.on("toggleTelnet", function(event, enable, port) {
     appMenu.getMenuItemById("telnet").checked = enable;
     telnetEnabled = enable ? "true" : "false";
     storage.setItem("telnetEnabled", telnetEnabled);
-    updateTelnetOnStatus(port);
+    setServerStatus("Telnet", port, enable);
 });
 ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
     if (enable) {
@@ -265,8 +190,7 @@ ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
     appMenu.getMenuItemById("web-installer").checked = enable;
     installerEnabled = enable ? "true" : "false";
     storage.setItem("installerEnabled", installerEnabled);
-    updateInstallerOnStatus(port);
-    installerPort = port;
+    setServerStatus("Web", port, enable);
 });
 ipcRenderer.on("console", function(event, text, error) {
     if (error) {
@@ -276,11 +200,8 @@ ipcRenderer.on("console", function(event, text, error) {
     }
 });
 ipcRenderer.on("fileSelected", function(event, file) {
-    errorCount = 0;
-    warnCount = 0;
-    setStatusColors();
-    statusError.innerText = errorCount.toString();
-    statusWarn.innerText = warnCount.toString();
+    clearCounters()
+    setStatusColor(errorCount, warnCount);
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
         filePath = file[0];
@@ -306,285 +227,10 @@ ipcRenderer.on("fileSelected", function(event, file) {
         clientException(`File format not supported: ${fileExt}`);
     }
 });
-// Open File
-function loadFile(filePath, fileData) {
-    const fileName = path.parse(filePath).base;
-    const fileExt = path.parse(filePath).ext.toLowerCase();
-    const reader = new FileReader();
-    reader.onload = function(progressEvent) {
-        currentChannel.title = fileName;
-        paths = [];
-        imgs = [];
-        txts = [];
-        fonts = [];
-        source.push(this.result);
-        paths.push({ url: `source/${fileName}`, id: 0, type: "source" });
-        ctx.fillStyle = "rgba(0, 0, 0, 1)";
-        ctx.fillRect(0, 0, display.width, display.height);
-        statusIconFile.innerHTML = "<i class='far fa-file'></i>";
-        statusFile.innerText = currentChannel.file;
-        ipcRenderer.send("addRecentSource", currentChannel.file);
-        runChannel();
-    };
-    source = [];
-    currentChannel.id = filePath.hashCode();
-    currentChannel.file = filePath;
-    if (brsWorker != undefined) {
-        brsWorker.terminate();
-        sharedArray[dataType.KEY] = 0;
-        sharedArray[dataType.SND] = -1;
-        sharedArray[dataType.IDX] = -1;
-        resetSounds();
-        bufferCanvas.width = 1;
-    }
-    clientLog(`Loading ${fileName}...`);    
-    if (fileExt === ".zip") {
-        openChannelZip(fileData);
-    } else {
-        reader.readAsText(fileData);
-    }   
-}
-// Uncompress Zip and execute
-function openChannelZip(f) {
-    JSZip.loadAsync(f).then(
-        function(zip) {
-            const manifest = zip.file("manifest");
-            if (manifest) {
-                manifest.async("string").then(
-                    function success(content) {
-                        const manifestMap = new Map();
-                        content.match(/[^\r\n]+/g).map(function(ln) {
-                            const line = ln.split("=");
-                            manifestMap.set(line[0].toLowerCase(), line[1]);
-                        });
-                        const splashMinTime = manifestMap.get("splash_min_time");
-                        if (splashMinTime && !isNaN(splashMinTime)) {
-                            splashTimeout = parseInt(splashMinTime);
-                        }
-
-                        let splash;
-                        if (deviceData.displayMode == "480p") {
-                            splash = manifestMap.get("splash_screen_sd");
-                            if (!splash) {
-                                splash = manifestMap.get("splash_screen_hd");
-                                if (!splash) {
-                                    splash = manifestMap.get("splash_screen_fhd");
-                                }
-                            }
-                        } else {
-                            splash = manifestMap.get("splash_screen_hd");
-                            if (!splash) {
-                                splash = manifestMap.get("splash_screen_fhd");
-                                if (!splash) {
-                                    splash = manifestMap.get("splash_screen_sd");
-                                }
-                            }
-                        }
-                        ctx.fillStyle = "rgba(0, 0, 0, 1)";
-                        ctx.fillRect(0, 0, display.width, display.height);
-                        if (splash && splash.substr(0, 5) === "pkg:/") {
-                            const splashFile = zip.file(splash.substr(5));
-                            if (splashFile) {
-                                splashFile.async("blob").then((blob) => {
-                                    createImageBitmap(blob).then((imgData) => {
-                                        display.style.opacity = 1;
-                                        ctx.drawImage(imgData, 0, 0, screenSize.width, screenSize.height);
-                                        buffer = ctx.getImageData(0, 0, screenSize.width, screenSize.height);
-                                        bufferCanvas.width = buffer.width;
-                                        bufferCanvas.height = buffer.height;
-                                        bufferCtx.putImageData(buffer, 0, 0);
-                                    });
-                                });
-                            }
-                        }
-                        let icon;
-                        icon = manifestMap.get("mm_icon_focus_hd");
-                        if (!icon) {
-                            icon = manifestMap.get("mm_icon_focus_fhd");
-                            if (!icon) {
-                                icon = manifestMap.get("mm_icon_focus_sd");
-                            }
-                        }
-                        if (icon && icon.substr(0, 5) === "pkg:/") {
-                            const iconFile = zip.file(icon.substr(5));
-                            if (iconFile) {
-                                iconFile.async("nodebuffer").then((content) => {
-                                    const iconPath = path.join(
-                                        remote.app.getPath("userData"), 
-                                        currentChannel.id + ".png"
-                                    );
-                                    fs.writeFileSync(iconPath, content);
-                                });
-                            }
-                        }
-                        statusIconFile.innerHTML = "<i class='fa fa-cube'></i>";
-                        statusFile.innerText = currentChannel.file;
-                        if (titleBar) {
-                            const title = manifestMap.get("title");
-                            if (title) {
-                                titleBar.updateTitle(defaultTitle + " - " + title);
-                                currentChannel.title = title;
-                            } else {
-                                titleBar.updateTitle(defaultTitle);
-                                currentChannel.title = "No Title";
-                            }
-                            currentChannel.version = "";
-                            const majorVersion = manifestMap.get("major_version");
-                            if (majorVersion) {
-                                currentChannel.version += "v" + majorVersion;
-                            }
-                            const minorVersion = manifestMap.get("minor_version");
-                            if (minorVersion) {
-                                currentChannel.version += "." + minorVersion;
-                            }
-                            const buildVersion = manifestMap.get("build_version");
-                            if (buildVersion) {
-                                currentChannel.version += "." + buildVersion;
-                            }
-                            statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
-                            statusVersion.innerText = currentChannel.version;
-                        }
-                    },
-                    function error(e) {
-                        clientException(`Error uncompressing manifest: ${e.message}`);
-                        running = false;
-                        return;
-                    }
-                );
-            } else {
-                clientException("Invalid Channel Package: missing manifest.");
-                running = false;
-                return;
-            }
-            let assetPaths = [];
-            let assetsEvents = [];
-            let bmpId = 0;
-            let txtId = 0;
-            let srcId = 0;
-            let fntId = 0;
-            let audId = 0;
-            zip.forEach(function(relativePath, zipEntry) {
-                const lcasePath = relativePath.toLowerCase();
-                const ext = lcasePath.split(".").pop();
-                if (!zipEntry.dir && lcasePath.substr(0, 6) === "source" && ext === "brs") {
-                    assetPaths.push({ url: relativePath, id: srcId, type: "source" });
-                    assetsEvents.push(zipEntry.async("string"));
-                    srcId++;
-                } else if (
-                    !zipEntry.dir &&
-                    (lcasePath === "manifest" || ext === "csv" || ext === "xml" || ext === "json")
-                ) {
-                    assetPaths.push({ url: relativePath, id: txtId, type: "text" });
-                    assetsEvents.push(zipEntry.async("string"));
-                    txtId++;
-                } else if (
-                    !zipEntry.dir &&
-                    (ext === "png" || ext === "gif" || ext === "jpg" || ext === "jpeg" || ext === "bmp")
-                ) {
-                    assetPaths.push({ url: relativePath, id: bmpId, type: "image" });
-                    assetsEvents.push(zipEntry.async("arraybuffer"));
-                    bmpId++;
-                } else if (!zipEntry.dir && (ext === "ttf" || ext === "otf")) {
-                    assetPaths.push({ url: relativePath, id: fntId, type: "font" });
-                    assetsEvents.push(zipEntry.async("arraybuffer"));
-                    fntId++;
-                } else if (
-                    !zipEntry.dir &&
-                    (ext === "wav" ||
-                        ext === "mp2" ||
-                        ext === "mp3" ||
-                        ext === "mp4" ||
-                        ext === "m4a" ||
-                        ext === "aac" ||
-                        ext === "ogg" ||
-                        ext === "oga" ||
-                        ext === "ac3" ||
-                        ext === "wma" ||
-                        ext === "flac")
-                ) {
-                    assetPaths.push({ url: relativePath, id: audId, type: "audio", format: ext });
-                    assetsEvents.push(zipEntry.async("blob"));
-                    audId++;
-                }
-            });
-            Promise.all(assetsEvents).then(
-                function success(assets) {
-                    paths = [];
-                    txts = [];
-                    imgs = [];
-                    fonts = [];
-                    for (let index = 0; index < assets.length; index++) {
-                        paths.push(assetPaths[index]);
-                        if (assetPaths[index].type === "image") {
-                            imgs.push(assets[index]);
-                        } else if (assetPaths[index].type === "font") {
-                            fonts.push(assets[index]);
-                        } else if (assetPaths[index].type === "source") {
-                            source.push(assets[index]);
-                        } else if (assetPaths[index].type === "audio") {
-                            addSound(`pkg:/${assetPaths[index].url}`, assetPaths[index].format, assets[index]);
-                        } else if (assetPaths[index].type === "text") {
-                            txts.push(assets[index]);
-                        }
-                    }
-                    setTimeout(function() {
-                        runChannel();
-                        ipcRenderer.send("addRecentPackage", currentChannel);
-                    }, splashTimeout);
-                },
-                function error(e) {
-                    clientException(`Error uncompressing file ${e.message}`);
-                }
-            );
-        },
-        function(e) {
-            clientException(`Error reading ${f.name}: ${e.message}`, true);
-            running = false;
-        }
-    );
-}
-// Execute Emulator Web Worker
-function runChannel() {
-    appMenu.getMenuItemById("close-channel").enabled = true;
-    display.style.opacity = 1;
-    display.focus();
-    if (running || brsWorker != undefined) {
-        brsWorker.terminate();
-        sharedArray[dataType.KEY] = 0;
-        sharedArray[dataType.SND] = -1;
-        sharedArray[dataType.IDX] = -1;
-        bufferCanvas.width = 1;
-    }
-    running = true;
-    brsWorker = new Worker("lib/brsEmu.min.js");
-    brsWorker.addEventListener("message", receiveMessage);
-    const payload = {
-        device: deviceData,
-        title: currentChannel.title,
-        paths: paths,
-        brs: source,
-        texts: txts,
-        fonts: fonts,
-        images: imgs
-    };
-    brsWorker.postMessage(sharedBuffer);
-    brsWorker.postMessage(payload, imgs);
-}
 // Receive Screen and Registry data from Web Worker
 function receiveMessage(event) {
     if (event.data instanceof ImageData) {
-        buffer = event.data;
-        if (bufferCanvas.width !== buffer.width || bufferCanvas.height !== buffer.height) {
-            statusResolution.innerText = `${buffer.width}x${buffer.height}`;
-            statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
-            statusResolution.style.display = "";
-            statusIconRes.style.display = "";
-            statusSepRes.style.display = "";
-            bufferCanvas.width = buffer.width;
-            bufferCanvas.height = buffer.height;
-        }
-        bufferCtx.putImageData(buffer, 0, 0);
-        drawBufferImage();
+        drawBufferImage(overscanMode, event.data);
     } else if (event.data instanceof Map) {
         deviceData.registry = event.data;
         deviceData.registry.forEach(function(value, key) {
@@ -831,14 +477,8 @@ function closeChannel(reason) {
     ctx.fillRect(0, 0, display.width, display.height);
     if (titleBar) {
         titleBar.updateTitle(defaultTitle);
-        statusIconFile.innerText = "";
-        statusFile.innerText = "";
-        statusIconVersion.innerText = "";
-        statusVersion.innerText = "";
-        statusResolution.style.display = "none";
-        statusIconRes.style.display = "none";
-        statusSepRes.style.display = "none";
-}
+        clearChannelStatus();
+    }
     brsWorker.terminate();
     sharedArray[dataType.KEY] = 0;
     sharedArray[dataType.SND] = -1;
@@ -970,35 +610,6 @@ function copyScreenshot() {
         navigator.clipboard.write([ item ]);
     });
 }
-// Status Bar visibility
-function showStatusBar(visible) {
-    if (visible) {
-        display.style.bottom = "20px";
-        statusBar.style.visibility = "visible";
-    } else {
-        display.style.bottom = "0px";
-        statusBar.style.visibility = "hidden";
-    }
-}
-// Log to Telnet Server and Console
-function clientLog(msg) {
-    ipcRenderer.send("telnet", msg);
-    console.log(msg);
-}
-function clientWarning(msg) {
-    ipcRenderer.send("telnet", msg);
-    console.warn(msg);
-    warnCount++; 
-    statusWarn.innerText = warnCount.toString();
-    setStatusColors();
-}
-function clientException(msg) {
-    ipcRenderer.send("telnet", msg);
-    console.error(msg);
-    errorCount++; 
-    statusError.innerText = errorCount.toString();    
-    setStatusColors();
-}
 // Fix text color after focus change
 titleBar.onBlur = titleBar.onFocus = function() {
     titleBar.titlebar.style.color = titleColor;
@@ -1010,133 +621,9 @@ display.ondblclick = function() {
 };
 // Window Resize Event
 window.onload = window.onresize = function() {
-    redrawDisplay();
+    redrawDisplay(overscanMode);
 };
-// Redraw Display Canvas
-function redrawDisplay() {
-    if (mainWindow.isFullScreen()) {
-        titleBar.titlebar.style.display = "none";
-        titleBar.container.style.top = "0px";
-        showStatusBar(false);
-        screenSize.width = window.innerWidth;
-        screenSize.height = parseInt(screenSize.width / aspectRatio);
-        if (screenSize.height > window.innerHeight) {
-            screenSize.height = window.innerHeight;
-            screenSize.width = parseInt(screenSize.height * aspectRatio);
-        }
-    } else {
-        const ratio = 0.99;
-        let offset = 13;
-        titleBar.titlebar.style.display = "";
-        titleBar.container.style.top = "30px";
-        if (appMenu.getMenuItemById("status-bar").checked) {
-            showStatusBar(true);
-            offset = 30;
-        } else {
-            showStatusBar(false);
-        }
-        screenSize.width = window.innerWidth * ratio;
-        screenSize.height = parseInt(screenSize.width / aspectRatio);
-        if (screenSize.height > window.innerHeight * ratio - offset) {
-            screenSize.height = window.innerHeight * ratio - offset;
-            screenSize.width = parseInt(screenSize.height * aspectRatio);
-        }
-    }
-    display.width = screenSize.width;
-    display.style.width = screenSize.width;
-    display.height = screenSize.height;
-    display.style.height = screenSize.height;
-    if (running) {
-        drawBufferImage();
-    }
-}
-// Draw Buffer Image to the Display Canvas
-function drawBufferImage() {
-    let overscan = 0.04;
-    if (overscanMode === "enabled") {
-        let x = Math.round(bufferCanvas.width * overscan);
-        let y = Math.round(bufferCanvas.height * overscan);
-        let w = bufferCanvas.width - x * 2;
-        let h = bufferCanvas.height - y * 2;
-        ctx.drawImage(bufferCanvas, x, y, w, h, 0, 0, screenSize.width, screenSize.height);
-    } else {
-        ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
-    }
-    if (overscanMode === "guide-lines") {
-        let x = Math.round(screenSize.width * overscan);
-        let y = Math.round(screenSize.height * overscan);
-        let w = screenSize.width - x * 2;
-        let h = screenSize.height - y * 2;
-        ctx.strokeStyle = "#D0D0D0FF";
-        ctx.lineWidth = 2;
-        ctx.setLineDash([ 1, 2 ]);
-        ctx.strokeRect(x, y, w, h);
-    }
-}
-// Change Display Mode
-function changeDisplayMode(mode) {
-    if (running) {
-        closeChannel();
-    }
-    deviceData.displayMode = mode;
-    deviceData.deviceModel = mode == "720p" ? "4200X" : mode == "1080p" ? "4640X" : "2720X";
-    aspectRatio = deviceData.displayMode === "480p" ? 4 / 3 : 16 / 9;
-    updateDisplayOnStatus();
-    redrawDisplay();
-}
-// Update Display Mode on Status Bar
-function updateDisplayOnStatus() {
-    if (statusBar) {
-        let ui = deviceData.displayMode == "720p" ? "HD" : deviceData.displayMode == "1080p" ? "FHD" : "SD";
-        statusDisplay.innerText = `${ui} (${deviceData.displayMode})`;
-    }
-}
-// Set status bar colors
-function setStatusColors() {
-    if (errorCount > 0) {
-        statusBar.className = "statusbarError";
-        statusWeb.className = "statusIconsError";
-        statusECP.className = "statusIconsError";
-        statusDevTools.className = "statusIconsError";
-    } else if (warnCount > 0) {
-        statusBar.className = "statusbarWarn";
-        statusWeb.className = "statusIconsWarn";
-        statusECP.className = "statusIconsWarn";
-        statusDevTools.className = "statusIconsWarn";
-    } else {
-        statusBar.className = "statusbar";
-        statusWeb.className = "statusIcons";
-        statusECP.className = "statusIcons";
-        statusDevTools.className = "statusIcons";
-    }
-}
-// Update ECP Server icon on Status Bar
-function updateECPOnStatus(port) {
-    if (ECPEnabled === "true") {
-        statusECPText.innerText = port;
-        statusECP.style.display = "";
-    } else {
-        statusECP.style.display = "none";
-    }
-}
-// Update Telnet Server icon on Status Bar
-function updateTelnetOnStatus(port) {
-    if (telnetEnabled === "true") {
-        statusTelnetText.innerText = port;
-        statusTelnet.style.display = "";
-    } else {
-        statusTelnet.style.display = "none";
-    }
-}
-// Update Web Installer Server icon on Status Bar
-function updateInstallerOnStatus(port) {
-    if (installerEnabled === "true") {
-        statusWebText.innerText = port;
-        statusWeb.style.display = "";
-    } else {
-        statusWeb.style.display = "none";
-    }
-}
+
 // Configure Menu Options
 function setupMenuSwitches(status = false) {
     appMenu = remote.Menu.getApplicationMenu();
@@ -1147,4 +634,7 @@ function setupMenuSwitches(status = false) {
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
     appMenu.getMenuItemById("telnet").checked = (telnetEnabled === "true");
     appMenu.getMenuItemById("web-installer").checked = (installerEnabled === "true");
+    if (status) {
+        appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
+    }
 }
