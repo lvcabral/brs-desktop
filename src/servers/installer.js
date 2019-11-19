@@ -19,15 +19,18 @@ export function setPassword(password) {
         credentials.password = password;
     }
 }
+export function setPort(customPort) {
+    if (typeof customPort === "number") {
+        port = customPort;       
+    } else if (typeof customPort === "string" && !isNaN(parseInt(customPort))) {
+        port = parseInt(customPort);
+    }
+}
 export function enableInstaller(window, customPort) {
     if (hasInstaller) {
         return; // already started do nothing
     }
-    if (typeof customPort === "number") {
-        port = customPort;       
-    } else if (typeof customPort === "string" && parseInt(customPort) !== NaN) {
-        port = parseInt(customPort);
-    }
+    setPort(customPort);
     hash = cryptoUsingMD5(credentials.realm);
     server = http.createServer(function(req, res) {
         let authInfo, digestAuthObject = {};

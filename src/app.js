@@ -60,18 +60,6 @@ let errorCount = 0;
 let warnCount = 0;
 statusError.innerText = errorCount.toString();
 statusWarn.innerText = warnCount.toString();
-statusDevTools.onclick = function() {
-    mainWindow.openDevTools();
-};
-let localIp = "127.0.0.1";
-let ECPPort = 8060;
-statusECP.onclick = function() {
-    shell.openExternal(`http://${localIp}:${ECPPort}/query/device-info`);
-};
-let installerPort = 80;
-statusWeb.onclick = function() {
-    shell.openExternal(`http://${localIp}:${installerPort}/`);
-};
 if (appMenu.getMenuItemById("status-bar").checked) {
     statusBar.style.visibility = "visible";
 } else {
@@ -87,6 +75,7 @@ let fonts = [];
 let brsWorker;
 let running = false;
 // Device Data
+let localIp = "127.0.0.1";
 const deviceData = remote.getGlobal("sharedObject").deviceInfo;
 Object.assign(deviceData, {registry: new Map()});
 if (deviceData.localIps.length > 0) {
@@ -94,6 +83,7 @@ if (deviceData.localIps.length > 0) {
 }
 // ECP Server 
 let ECPEnabled = storage.getItem("ECPEnabled") || "false";
+let ECPPort = 8060;
 ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
 updateECPOnStatus(ECPPort)
 // Telnet Server
@@ -103,7 +93,8 @@ updateTelnetOnStatus(8085)
 // Web Installer Server 
 let installerEnabled = storage.getItem("installerEnabled") || "false";
 let installerPassword = storage.getItem("installerPassword") || "rokudev";
-ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword);
+let installerPort = storage.getItem("installerPort") || "80";
+ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword, installerPort);
 updateInstallerOnStatus(installerPort)
 // Emulator Display
 const display = document.getElementById("display");
@@ -148,6 +139,16 @@ Object.freeze(dataType);
 const length = 7;
 const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length);
 const sharedArray = new Int32Array(sharedBuffer);
+// Status Bar Click Events
+statusDevTools.onclick = function() {
+    mainWindow.openDevTools();
+};
+statusECP.onclick = function() {
+    shell.openExternal(`http://${localIp}:${ECPPort}/query/device-info`);
+};
+statusWeb.onclick = function() {
+    shell.openExternal(`http://${localIp}:${installerPort}/`);
+};
 // Keyboard handlers
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -257,10 +258,12 @@ ipcRenderer.on("toggleTelnet", function(event, enable, port) {
 ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
     if (enable) {
         console.log(`Installer server started listening port ${port}`);
+        installerPort = port;
+        storage.setItem("installerPort", port);
     } else if (error) {
         console.error("Installer server error:", error);
     } else {
-        console.log("Installer server disabled.");        
+        console.log("Installer server disabled.");
     }
     appMenu.getMenuItemById("web-installer").checked = enable;
     installerEnabled = enable ? "true" : "false";

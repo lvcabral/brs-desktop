@@ -65,10 +65,10 @@ Here are **optional** arguments you can use when starting the emulator at the co
 |Argument                                |Description                                                                  |
 |----------------------------------------|-----------------------------------------------------------------------------|
 |**-o** `<path>` or `<path>`             | Opens  a `.zip` or `.brs` when starting the emulator.                       |
-|**-f** or **--fullscreen**             | Opens the emulator in **full screen mode** (double-click screen to switch).|
-|**-m** `<dm>` or **--mode=**`<dm>`     | Changes the **display mode**. Options are: `sd`, `hd`, or `fhd`              |
+|**-f** or **--fullscreen**              | Opens the emulator in **full screen mode** (double-click screen to switch). |
+|**-m** `<dm>` or **--mode=**`<dm>`      | Changes the **display mode**. Options are: `sd`, `hd`, or `fhd`.            |
 |**-e** or **--ecp**                     | Enables [ECP and SSDP servers](https://developer.roku.com/en-ca/docs/developer-program/debugging/external-control-api.md) to allow remote control and detection.|
-|**-r** or **--rc**                 | Enables a telnet server on port 8085 to allow **Remote Console** monitoring.|
-|**-w** `[<port>]` or **--web**`[=<port>]`   | Enables **Web Installer** on port 80, optionally set a custom `<port>`|
-|**-p** `<newpwd>` or **--pwd=**`<newpwd>`| Changes the **Web Installer** password and saves it on local storage. |
-|**-d** or **--devtools**                | Opens the **developer tools** when starting the emulator.              |
+|**-r** or **--rc**                      | Enables a telnet server on port 8085 to allow **Remote Console** monitoring.|
+|**-w** `[<port>]` or **--web**`[=<port>]`| Enables **Web Installer** on port 80 or a custom `<port>` saving to local storage.|
+|**-p** `<newpwd>` or **--pwd=**`<newpwd>`| Changes the **Web Installer** password and saves it on local storage.      |
+|**-d** or **--devtools**                | Opens the **developer tools** when starting the emulator.                   |

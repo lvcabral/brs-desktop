@@ -10,7 +10,7 @@ This service allows to remotely _side load_ a channel in the emulator, it has a 
 <img alt="Emulator Web Installer" src="images/web-installer.png?raw=true"/>
 </p>
 
-The Web Installer is disabled by default and when enabled it listens to the TCP port 80 and requires authentication to be used. Because this port is the default HTTP port, it may cause conflict with existing services or be blocked by IT security policies. To overcome that, is possible to run the emulator with the command line `--port=<newport>` to load the Web Installer listening to the defined port, this option is not persisted, if you run the emulator without this command line option it will revert to port 80. An icon is shown in the status bar with the listening port number indicating the service is active, if the icon is clicked it will opoen the Wen Installer page on the default driver (image above).
+The Web Installer is disabled by default and when enabled it listens to the TCP port 80 and requires authentication to be used. Because this port is the default HTTP port, it may cause conflict with existing services or be blocked by IT security policies. To overcome that, is possible to run the emulator with the command line `--web=<newport>` to load the Web Installer listening to the defined port, this option is saved in the app local storage. An icon is shown in the status bar with the listening port number indicating the service is active, if the icon is clicked it will opoen the Web Installer page on the default driver (image above).
 
 The Web Installer default user and password are both `rokudev`, the password can be changed (and saved) by using the command line `--pwd=<newpwd>`.
 

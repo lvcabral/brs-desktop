@@ -12,7 +12,7 @@ import os from "os";
 import minimist from "minimist";
 import { app, screen, ipcMain } from "electron";
 import { initECP, enableECP } from "./servers/ecp"
-import { setPassword, enableInstaller } from "./servers/installer";
+import { setPassword, setPort, enableInstaller } from "./servers/installer";
 import { enableTelnet } from "./servers/telnet";
 import { createMenu } from "./menu/menuService"
 import createWindow from "./helpers/window";
@@ -91,6 +91,7 @@ app.on("ready", () => {
         }
         if (argv.web) {
             enableInstaller(mainWindow, argv.web);
+            mainWindow.webContents.send("toggleInstaller", true, argv.web);
         }
         if (argv.mode && argv.mode.trim() !== "") {
             switch (argv.mode.trim().toLowerCase()) {
@@ -130,12 +131,14 @@ app.on("ready", () => {
         }
     });
     // Initialize Web Installer servers
-    ipcMain.once("installerEnabled", (event, enable, password) => {
+    ipcMain.once("installerEnabled", (event, enable, password, port) => {
         if (password) {
             setPassword(password);
         }
         if (enable) {
-            enableInstaller(mainWindow, argv.web);
+            enableInstaller(mainWindow, port);
+        } else {
+            setPort(port);
         }
     });
 });
