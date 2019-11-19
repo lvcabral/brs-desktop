@@ -1147,4 +1147,7 @@ function setupMenuSwitches(status = false) {
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
     appMenu.getMenuItemById("telnet").checked = (telnetEnabled === "true");
     appMenu.getMenuItemById("web-installer").checked = (installerEnabled === "true");
+    if (status) {
+        appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
+    }
 }
