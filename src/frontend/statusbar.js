@@ -67,6 +67,7 @@ export function setChannelStatus(fileType, path, version) {
     statusFile.innerText = path;
     if (version) {
         statusVersion.innerText = version;
+        statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
         statusIconVersion.style.display = "";
     }
 }
