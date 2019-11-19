@@ -1,11 +1,15 @@
-import { isStatusBarEnabled, showStatusBar, setDisplayStatus, setResStatus } from "./statusbar";
+import { remote, ipcRenderer } from "electron";
+import { isStatusBarEnabled, showStatusBar, setResStatus } from "./statusbar";
+import Mousetrap from "mousetrap";
 
 // Emulator Display
 const mainWindow = remote.getCurrentWindow();
+const storage = window.localStorage;
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
 const screenSize = { width: 1280, height: 720 };
-let displayMode = storage.getItem("displayMode") || "720p";
+export let overscanMode = storage.getItem("overscanMode") || "disabled";
+export let displayMode = storage.getItem("displayMode") || "720p";
 if (displayMode === "1080p") {
     screenSize.width = 1920;
     screenSize.height = 1080;
@@ -13,20 +17,24 @@ if (displayMode === "1080p") {
     screenSize.width = 720;
     screenSize.height = 480;
 }
-let aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
-if (displayMode !== deviceData.displayMode) {
-    changeDisplayMode(displayMode);
-} else {
-    setDisplayStatus(displayMode);
-}
-// Buffer Objects
 const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
 const bufferCtx = bufferCanvas.getContext("2d");
-let buffer = new ImageData(screenSize.width, screenSize.height);
+let aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
+Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
+    copyScreenshot();
+    return false;
+});
+
 console.log("Display module initialized!");
 
+// Main process events
+ipcRenderer.on("copyScreenshot", function(event) {
+    copyScreenshot();
+});
+
 // Redraw Display Canvas
-function redrawDisplay(overscanMode) {
+export function redrawDisplay(running) {
+    aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
     if (mainWindow.isFullScreen()) {
         titleBar.titlebar.style.display = "none";
         titleBar.container.style.top = "0px";
@@ -60,20 +68,20 @@ function redrawDisplay(overscanMode) {
     display.height = screenSize.height;
     display.style.height = screenSize.height;
     if (running) {
-        drawBufferImage(overscanMode);
+        drawBufferImage();
     }
 }
-
+// Draw Channel Splash 
 export function drawSplashScreen(imgData) {
     display.style.opacity = 1;
     ctx.drawImage(imgData, 0, 0, screenSize.width, screenSize.height);
-    buffer = ctx.getImageData(0, 0, screenSize.width, screenSize.height);
+    let buffer = ctx.getImageData(0, 0, screenSize.width, screenSize.height);
     bufferCanvas.width = buffer.width;
     bufferCanvas.height = buffer.height;
     bufferCtx.putImageData(buffer, 0, 0);
 }
 // Draw Buffer Image to the Display Canvas
-export function drawBufferImage(overscanMode, buffer) {
+export function drawBufferImage(buffer) {
     if (buffer) {
         if (bufferCanvas.width !== buffer.width || bufferCanvas.height !== buffer.height) {
             setResStatus(`${buffer.width}x${buffer.height}`);
@@ -103,14 +111,23 @@ export function drawBufferImage(overscanMode, buffer) {
         ctx.strokeRect(x, y, w, h);
     }
 }
-// Change Display Mode
-function changeDisplayMode(displayMode, overscanMode) {
-    if (running) {
-        closeChannel();
-    }
-    deviceData.displayMode = mode;
-    deviceData.deviceModel = mode == "720p" ? "4200X" : mode == "1080p" ? "4640X" : "2720X";
-    aspectRatio = deviceData.displayMode === "480p" ? 4 / 3 : 16 / 9;
-    setDisplayStatus(displayMode);
-    redrawDisplay(overscanMode);
+
+// Show Display and set focus
+export function showDisplay() {
+    display.style.opacity = 1;
+    display.focus();
+}
+
+//Clear Display
+export function clearDisplay() {
+    ctx.fillStyle = "rgba(0, 0, 0, 1)";
+    ctx.fillRect(0, 0, display.width, display.height);
+}
+
+// Copy Screenshot to the Clipboard
+export function copyScreenshot() {
+    display.toBlob(function(blob) {
+        const item = new ClipboardItem({ "image/png": blob });
+        navigator.clipboard.write([ item ]);
+    });
 }

@@ -7,16 +7,15 @@
  *--------------------------------------------------------------------------------------------*/
 import "./stylesheets/main.css";
 import "./helpers/hash";
+import * as customTitlebar from "custom-electron-titlebar";
 import { remote, ipcRenderer } from "electron";
-import { loadFile, currentChannel, deviceData, brsWorker } from "./frontend/loader";
-import { drawBufferImage } from "./frontend/display";
+import { setMessageCallback, loadFile, deviceData, dataType, sharedArray, running } from "./frontend/loader";
+import { displayMode, overscanMode, drawBufferImage, redrawDisplay } from "./frontend/display";
 import { clientLog, clientWarning, clientException, errorCount, warnCount, clearCounters } from "./frontend/console";
-import { setServerStatus, setStatusColor, clearChannelStatus } from "./frontend/statusbar";
+import { setServerStatus, setStatusColor, setDisplayStatus } from "./frontend/statusbar";
 import { Howl } from "howler";
 import fs from "fs";
 import path from "path";
-import Mousetrap from "mousetrap";
-import * as customTitlebar from "custom-electron-titlebar";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
 const colorValues = getComputedStyle(document.documentElement);
@@ -36,10 +35,6 @@ const titleBarConfig = {
 const titleBar = new customTitlebar.Titlebar(titleBarConfig);
 titleBar.titlebar.style.color = titleColor;
 const defaultTitle = document.title;
-// Channel Data
-let running = false;
-// Device Data
-Object.assign(deviceData, {registry: new Map()});
 // ECP Server 
 let ECPEnabled = storage.getItem("ECPEnabled") || "false";
 ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
@@ -53,8 +48,12 @@ let installerEnabled = storage.getItem("installerEnabled") || "false";
 let installerPassword = storage.getItem("installerPassword") || "rokudev";
 ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword);
 setServerStatus("Web", 80, installerEnabled === "true");
-// Overscan Mode
-let overscanMode = storage.getItem("overscanMode") || "disabled";
+// Set Display Mode
+if (displayMode !== deviceData.displayMode) {
+    changeDisplayMode(displayMode);
+} else {
+    setDisplayStatus(displayMode);
+}
 // Setup Menu
 setupMenuSwitches();
 // Sound Objects
@@ -68,16 +67,11 @@ let playIndex = 0;
 let playLoop = false;
 let playNext = -1;
 resetSounds();
-// Shared buffer (Keys and Sounds)
-const dataType = { KEY: 0, MOD: 1, SND: 2, IDX: 3, WAV: 4 };
-Object.freeze(dataType);
-const length = 7;
-const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length);
-const sharedArray = new Int32Array(sharedBuffer);
 // Keyboard handlers
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 // Load Registry
+Object.assign(deviceData, {registry: new Map()});
 for (let index = 0; index < storage.length; index++) {
     const key = storage.key(index);
     if (key.substr(0, deviceData.developerId.length) === deviceData.developerId) {
@@ -116,9 +110,6 @@ ipcRenderer.on("saveScreenshot", function(event, file) {
     const data = img.replace(/^data:image\/\w+;base64,/, "");
     fs.writeFileSync(file, new Buffer(data, "base64"));
 });
-ipcRenderer.on("copyScreenshot", function(event) {
-    copyScreenshot();
-});
 ipcRenderer.on("setTheme", function(event, theme) {
     userTheme = theme;
     document.documentElement.setAttribute("data-theme", theme);
@@ -134,15 +125,14 @@ ipcRenderer.on("setTheme", function(event, theme) {
 });
 ipcRenderer.on("setDisplay", function(event, mode) {
     if (mode !== deviceData.displayMode) {
-        displayMode = mode;
-        changeDisplayMode(mode, overscanMode);
+        changeDisplayMode(mode);
         storage.setItem("displayMode", mode);
     }
 });
 ipcRenderer.on("setOverscan", function(event, mode) {
     overscanMode = mode;
     storage.setItem("overscanMode", mode);
-    redrawDisplay(overscanMode);
+    redrawDisplay(running);
 });
 ipcRenderer.on("setPassword", function(event, pwd) {
     storage.setItem("installerPassword", pwd);
@@ -155,7 +145,7 @@ ipcRenderer.on("toggleOnTop", function(event) {
 ipcRenderer.on("toggleStatusBar", function(event) {
     const enable = statusBar.style.visibility !== "visible";
     appMenu.getMenuItemById("status-bar").checked = enable;
-    redrawDisplay(overscanMode);
+    redrawDisplay(running);
 });
 ipcRenderer.on("toggleECP", function(event, enable, port) {
     if (enable) {
@@ -227,10 +217,10 @@ ipcRenderer.on("fileSelected", function(event, file) {
         clientException(`File format not supported: ${fileExt}`);
     }
 });
-// Receive Screen and Registry data from Web Worker
-function receiveMessage(event) {
+// Receive Messages from Web Worker
+setMessageCallback( function (event) {
     if (event.data instanceof ImageData) {
-        drawBufferImage(overscanMode, event.data);
+        drawBufferImage(event.data);
     } else if (event.data instanceof Map) {
         deviceData.registry = event.data;
         deviceData.registry.forEach(function(value, key) {
@@ -346,7 +336,8 @@ function receiveMessage(event) {
     } else if (event.data === "reset") {
         mainWindow.reload();
     }
-}
+});
+
 // Sound Functions
 function playSound() {
     const audio = playList[playIndex];
@@ -470,28 +461,6 @@ function resetSounds() {
     playLoop = false;
     playNext = -1;
 }
-// Restore emulator menu and terminate Worker
-function closeChannel(reason) {
-    clientLog(`------ Finished '${currentChannel.title}' execution [${reason}] ------`);
-    ctx.fillStyle = "rgba(0, 0, 0, 1)";
-    ctx.fillRect(0, 0, display.width, display.height);
-    if (titleBar) {
-        titleBar.updateTitle(defaultTitle);
-        clearChannelStatus();
-    }
-    brsWorker.terminate();
-    sharedArray[dataType.KEY] = 0;
-    sharedArray[dataType.SND] = -1;
-    sharedArray[dataType.IDX] = -1;
-    resetSounds();
-    bufferCanvas.width = 1;
-    running = false;
-    appMenu.getMenuItemById("close-channel").enabled = false;
-    currentChannel.id = "";
-    currentChannel.file = "";
-    currentChannel.title = "";
-    currentChannel.version = "";
-}
 // Remote control emulator
 function keyDownHandler(event) {
     if (event.keyCode == 8) {
@@ -527,7 +496,7 @@ function keyDownHandler(event) {
     } else if (event.keyCode == 90) {
         sharedArray[dataType.KEY] = 18; // BUTTON_B_PRESSED
     } else if (event.keyCode == 27) {
-        if (brsWorker != undefined) {
+        if (running) {
             // HOME BUTTON (ESC)
             closeChannel("Home Button");
             soundsDat[0].play();
@@ -564,10 +533,6 @@ function keyUpHandler(event) {
         sharedArray[dataType.KEY] = 118; // BUTTON_B_RELEASED
     }
 }
-Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
-    copyScreenshot();
-    return false;
-});
 
 function handleKey(key, mod) {
     if (key == "back") {
@@ -597,18 +562,11 @@ function handleKey(key, mod) {
     } else if (key == "b") {
         sharedArray[dataType.KEY] = 18 + mod; // BUTTON_B
     } else if (key == "home" && mod === 0) {
-        if (brsWorker != undefined) {        // HOME BUTTON (ESC)
+        if (running) {        // HOME BUTTON (ESC)
             closeChannel("Home Button");
             soundsDat[0].play();
         }
     }
-}
-// Copy Screenshot to the Clipboard
-function copyScreenshot() {
-    display.toBlob(function(blob) {
-        const item = new ClipboardItem({ "image/png": blob });
-        navigator.clipboard.write([ item ]);
-    });
 }
 // Fix text color after focus change
 titleBar.onBlur = titleBar.onFocus = function() {
@@ -621,8 +579,20 @@ display.ondblclick = function() {
 };
 // Window Resize Event
 window.onload = window.onresize = function() {
-    redrawDisplay(overscanMode);
+    redrawDisplay(running);
 };
+
+// Change Display Mode
+function changeDisplayMode(mode) {
+    if (running) {
+        closeChannel();
+    }
+    deviceData.displayMode = mode;
+    deviceData.deviceModel = mode == "720p" ? "4200X" : mode == "1080p" ? "4640X" : "2720X";    
+    displayMode = mode;
+    setDisplayStatus(mode);
+    redrawDisplay(running);
+}
 
 // Configure Menu Options
 function setupMenuSwitches(status = false) {
@@ -634,7 +604,7 @@ function setupMenuSwitches(status = false) {
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
     appMenu.getMenuItemById("telnet").checked = (telnetEnabled === "true");
     appMenu.getMenuItemById("web-installer").checked = (installerEnabled === "true");
-    if (status) {
-        appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
-    }
+    // if (status) {
+    //     appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
+    // }
 }

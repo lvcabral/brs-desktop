@@ -1,25 +1,33 @@
 import { remote, ipcRenderer } from "electron";
-import { drawSplashScreen } from "./display";
+import { drawSplashScreen, showDisplay, clearDisplay } from "./display";
 import { clientLog, clientException } from "./console";
-import { setChannelStatus, setLocalIp } from "./statusbar";
+import { setChannelStatus, clearChannelStatus, setLocalIp } from "./statusbar";
 
 import path from "path";
 import JSZip from "jszip";
 import fs from "fs";
 
+const currentChannel = {id: "", file: "", title: "", version: ""};
+let brsWorker;
+let workerCallback;
 let splashTimeout = 1600;
 let source = [];
 let paths = [];
 let txts = [];
 let imgs = [];
 let fonts = [];
-
-export const currentChannel = {id: "", file: "", title: "", version: ""};
-export let brsWorker;
+// Channel Data
+export let running = false;
 export let deviceData = remote.getGlobal("sharedObject").deviceInfo;
 if (deviceData.localIps.length > 0) {
     setLocalIp(deviceData.localIps[0].split(",")[1]);
 }
+// Shared buffer (Keys and Sounds)
+const length = 7;
+const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length);
+export const sharedArray = new Int32Array(sharedBuffer);
+export const dataType = { KEY: 0, MOD: 1, SND: 2, IDX: 3, WAV: 4 };
+Object.freeze(dataType);
 console.log("Loader module initialized!");
 // Open File
 export function loadFile(filePath, fileData) {
@@ -34,8 +42,7 @@ export function loadFile(filePath, fileData) {
         fonts = [];
         source.push(this.result);
         paths.push({ url: `source/${fileName}`, id: 0, type: "source" });
-        ctx.fillStyle = "rgba(0, 0, 0, 1)";
-        ctx.fillRect(0, 0, display.width, display.height);
+        clearDisplay();
         setChannelStatus("brs", currentChannel.file);
         ipcRenderer.send("addRecentSource", currentChannel.file);
         runChannel();
@@ -94,8 +101,7 @@ function openChannelZip(f) {
                                 }
                             }
                         }
-                        ctx.fillStyle = "rgba(0, 0, 0, 1)";
-                        ctx.fillRect(0, 0, display.width, display.height);
+                        clearDisplay()
                         if (splash && splash.substr(0, 5) === "pkg:/") {
                             const splashFile = zip.file(splash.substr(5));
                             if (splashFile) {
@@ -248,8 +254,7 @@ function openChannelZip(f) {
 // Execute Emulator Web Worker
 function runChannel() {
     appMenu.getMenuItemById("close-channel").enabled = true;
-    display.style.opacity = 1;
-    display.focus();
+    showDisplay()
     if (running || brsWorker != undefined) {
         brsWorker.terminate();
         sharedArray[dataType.KEY] = 0;
@@ -259,7 +264,7 @@ function runChannel() {
     }
     running = true;
     brsWorker = new Worker("lib/brsEmu.min.js");
-    brsWorker.addEventListener("message", receiveMessage);
+    brsWorker.addEventListener("message", workerCallback);
     const payload = {
         device: deviceData,
         title: currentChannel.title,
@@ -271,4 +276,31 @@ function runChannel() {
     };
     brsWorker.postMessage(sharedBuffer);
     brsWorker.postMessage(payload, imgs);
+}
+
+// Set Worker Message Callback Function
+export function setMessageCallback(callback) {
+    workerCallback = callback;
+}
+
+// Restore emulator menu and terminate Worker
+export function closeChannel(reason) {
+    clientLog(`------ Finished '${currentChannel.title}' execution [${reason}] ------`);
+    clearDisplay();
+    if (titleBar) {
+        titleBar.updateTitle(defaultTitle);
+        clearChannelStatus();
+    }
+    brsWorker.terminate();
+    sharedArray[dataType.KEY] = 0;
+    sharedArray[dataType.SND] = -1;
+    sharedArray[dataType.IDX] = -1;
+    resetSounds();
+    bufferCanvas.width = 1;
+    running = false;
+    appMenu.getMenuItemById("close-channel").enabled = false;
+    currentChannel.id = "";
+    currentChannel.file = "";
+    currentChannel.title = "";
+    currentChannel.version = "";
 }
