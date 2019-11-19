@@ -1025,8 +1025,8 @@ function redrawDisplay() {
             screenSize.width = parseInt(screenSize.height * aspectRatio);
         }
     } else {
-        const ratio = 0.99;
-        let offset = 13;
+        const ratio = 0.98;
+        let offset = 25;
         titleBar.titlebar.style.display = "";
         titleBar.container.style.top = "30px";
         if (appMenu.getMenuItemById("status-bar").checked) {
