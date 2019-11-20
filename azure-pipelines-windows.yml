@@ -14,10 +14,8 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    npm install -g yarn
-    yarn install
-    yarn dist
-    yarn dist-win
+    npm install
+    npm run dist-win
   displayName: 'building app for Windows platform'
 
 - task: PublishPipelineArtifact@1
