@@ -16,6 +16,7 @@ steps:
 - script: |
     npm install -g yarn
     yarn install
+    yarn dist
     yarn dist-win
   displayName: 'building app for Windows platform'
 
