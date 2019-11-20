@@ -1,0 +1,29 @@
+# Electron with Webpack pipeline
+# using yarn to get packages and build
+
+trigger:
+- master
+
+pool:
+  vmImage: 'macos-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install -g yarn
+    yarn install
+    yarn dist
+  displayName: 'building app for macOS'
+
+- task: CopyFiles@2
+  inputs:
+    contents: '$(Build.SourcesDirectory)/dist/**'
+    targetFolder: $(Build.ArtifactStagingDirectory)
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: $(Build.ArtifactStagingDirectory)
+    artifactName: 'brs-emu-app-macos'
