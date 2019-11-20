@@ -39,7 +39,7 @@ This section will describe the options available on the application menu, please
 
 - Full Screen - Enter full screen mode. If you double click the screen it also toggles full screen mode.
 - Color Themes - Allows to select among the 3 available themes</br>
-![Screen Themes](images/screeshot-themes.png?raw=true)
+![Screen Themes](images/screeshot-themes.png)
 - Status Bar - Toggles if the status bar is displayed (Windows and Linux)
 
 ### Help Menu
