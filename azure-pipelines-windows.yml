@@ -15,6 +15,9 @@ steps:
 
 - script: |
     npm install
+  displayName: 'installing dependencies'
+
+- script: |
     npm run dist-win
   displayName: 'building app for Windows platform'
 
