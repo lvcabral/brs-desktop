@@ -2,7 +2,7 @@
 # using yarn to get packages and build
 
 trigger:
-- master
+- release
 
 pool:
   vmImage: 'macos-latest'
