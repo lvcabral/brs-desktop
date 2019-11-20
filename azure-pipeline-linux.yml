@@ -21,7 +21,11 @@ steps:
     yarn dist-deb64
   displayName: 'building app for Linux platform'
 
-- task: PublishPipelineArtifact@1
+- task: CopyFiles@2
   inputs:
-    targetPath: '$(Pipeline.Workspace)/s/dist'
-    artifact: 'brs-emu-app-linux'
+    contents: '$(Build.SourcesDirectory)/dist/**'
+    targetFolder: $(Build.ArtifactStagingDirectory)
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: $(Build.ArtifactStagingDirectory)
+    artifactName: 'brs-emu-app-windows'
