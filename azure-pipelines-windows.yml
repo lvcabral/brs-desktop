@@ -14,11 +14,15 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    npm install
+    npm install -g yarn
+  displayName: 'installing yarn'
+
+- script: |
+    yarn install
   displayName: 'installing dependencies'
 
 - script: |
-    npm run dist-win
+    yarn dist-win
   displayName: 'building app for Windows platform'
 
 - task: CopyFiles@2
