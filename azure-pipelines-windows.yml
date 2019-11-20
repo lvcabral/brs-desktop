@@ -18,11 +18,8 @@ steps:
     yarn install
     yarn dist-win
   displayName: 'building app for Windows platform'
-- task: CopyFiles@2
+
+- task: PublishPipelineArtifact@1
   inputs:
-    contents: '_buildOutput/**'
-    targetFolder: $(Build.ArtifactStagingDirectory)
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: $(Build.ArtifactStagingDirectory)
-    artifactName: 'brs-emu-app-windows'
+    targetPath: '$(Pipeline.Workspace)/s/dist'
+    artifact: 'brs-emu-app-windows'
