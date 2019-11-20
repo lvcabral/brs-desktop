@@ -20,7 +20,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    contents: '$(Pipeline.Workspace)/s/dist/**'
+    contents: '$(Pipeline.Workspace)/dist/**'
     targetFolder: $(Build.ArtifactStagingDirectory)
 - task: PublishBuildArtifacts@1
   inputs:
