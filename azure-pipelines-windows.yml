@@ -18,7 +18,11 @@ steps:
     npm run dist-win
   displayName: 'building app for Windows platform'
 
-- task: PublishPipelineArtifact@1
+- task: CopyFiles@2
   inputs:
-    targetPath: '$(Pipeline.Workspace)/s/dist'
-    artifact: 'brs-emu-app-windows'
+    contents: '_buildOutput/**'
+    targetFolder: $(Build.ArtifactStagingDirectory)
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: $(Build.ArtifactStagingDirectory)
+    artifactName: 'brs-emu-app-windows'
