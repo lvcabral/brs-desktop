@@ -1,0 +1,25 @@
+# Electron with Webpack pipeline
+# using yarn to get packages and build
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install -g yarn
+    yarn install
+    yarn dist-win
+  displayName: 'building app for Windows platform'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Pipeline.Workspace)/s/dist'
+    artifact: 'brs-emu-app-windows'
