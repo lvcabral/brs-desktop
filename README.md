@@ -1,6 +1,6 @@
 # BrightScript 2D API Emulator - Desktop Application
 <p align="center">
-<img alt="Emulator Desktop Apps" src="docs/images/brs-emu-app.png?raw=true"/>
+<img alt="Emulator Desktop Apps" src="docs/images/brs-emu-app.png"/>
 </p>
 
 This project was created to develop a _multiplatform desktop application_ for the **BrightScript 2D API emulator**, please follow the link below to visit the emulator library repository and know all about the project features (and limitations):
