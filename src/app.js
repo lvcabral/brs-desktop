@@ -6,6 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import "./stylesheets/main.css";
+import "./stylesheets/fontawesome.min.css";
 import "./helpers/hash";
 import fs from "fs";
 import path from "path";
