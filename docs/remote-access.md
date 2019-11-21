@@ -7,7 +7,7 @@ The **BrightScript Emulator** desktop app, the same way all Roku devices, implem
 This service allows to remotely _side load_ a channel in the emulator, it has a web interface that can be accessed using a web browser, or any http client application. It also has a `Utilities` option where the user can request a screenshot of the currently running channel.
 
 <p align="center">
-<img alt="Emulator Web Installer" src="images/web-installer.png"/>
+<img alt="Emulator Web Installer" src="images/web-installer.png?raw=true"/>
 </p>
 
 The Web Installer is disabled by default and when enabled it listens to the TCP port 80 and requires authentication to be used. Because this port is the default HTTP port, it may cause conflict with existing services or be blocked by IT security policies. To overcome that, is possible to run the emulator with the command line `--web=<newport>` to load the Web Installer listening to the defined port, this option is saved in the app local storage. An icon is shown in the status bar with the listening port number indicating the service is active, if the icon is clicked it will opoen the Web Installer page on the default driver (image above).
@@ -41,7 +41,7 @@ The emulator desktop app only implements a subset of ECP commands, here a list o
 
 The remote console can be accessed using telnet through a shell application such as [PuTTY](http://www.putty.org/) for Windows or terminal on Mac and Linux:
 ```
-telnet <emulator-ip-address> 8085
+$ telnet <emulator-ip-address> 8085
 ```
 Unlike a Roku device, the emulator still do not allow interactive debugging using the remote console, currently it only displays console output (`print` statements results and exceptions). However there are a couple of commands that can be executed using the remote console:
 - `exit` or `quit` - Finishes current channel execution
