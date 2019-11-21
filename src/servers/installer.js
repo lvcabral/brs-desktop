@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 import http from "http";
 import crypt from "crypto";
-import { enableTelnet, disableTelnet } from "./telnet";
 
 const credentials = {
     userName: "rokudev",
@@ -20,15 +19,18 @@ export function setPassword(password) {
         credentials.password = password;
     }
 }
+export function setPort(customPort) {
+    if (typeof customPort === "number") {
+        port = customPort;       
+    } else if (typeof customPort === "string" && !isNaN(parseInt(customPort))) {
+        port = parseInt(customPort);
+    }
+}
 export function enableInstaller(window, customPort) {
     if (hasInstaller) {
         return; // already started do nothing
     }
-    if (typeof customPort === "number") {
-        port = customPort;       
-    } else if (typeof customPort === "string" && parseInt(customPort) !== NaN) {
-        port = parseInt(customPort);
-    }
+    setPort(customPort);
     hash = cryptoUsingMD5(credentials.realm);
     server = http.createServer(function(req, res) {
         let authInfo, digestAuthObject = {};
@@ -54,14 +56,20 @@ export function enableInstaller(window, customPort) {
             let done = "";
             const busboy = new Busboy({ headers: req.headers });
             busboy.on("file", function(fieldname, file, filename, encoding, mimetype) {
-                //console.log(`File [${fieldname}]: filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`);
+                // console.log(`File [${fieldname}]: filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`);
                 if (filename && filename !== "") {
-                    let saveTo = path.join(app.getPath("userData"), "dev.zip");
-                    file.pipe(fs.createWriteStream(saveTo));
-                    file.on("end", function() {
-                        window.webContents.send("fileSelected", [saveTo]);
-                        done = "file";
-                    });    
+                    try {
+                        let saveTo = path.join(app.getPath("userData"), "dev.zip");
+                        file.pipe(fs.createWriteStream(saveTo));
+                        file.on("end", function() {
+                            window.webContents.send("fileSelected", [saveTo]);
+                            done = "file";
+                        });        
+                    } catch (error) {
+                        res.writeHead(500);
+                        res.end("Error 500: Internal Server Error\nCould not write channel file!");
+                        return;
+                    }
                 } else {
                     res.writeHead(302, { "Location": "/" });
                     res.end();
@@ -69,13 +77,28 @@ export function enableInstaller(window, customPort) {
                 }
             });
             busboy.on("field", function (fieldname, value){
-                if (fieldname === "mysubmit" && value === "Screenshot") {
-                    let saveTo = path.join(app.getPath("userData"), "dev.png");
-                    window.webContents.send("saveScreenshot", saveTo);
-                    done = "screenshot";
+                // console.log("field:", fieldname, value);
+                if (fieldname && value) {
+                    if (fieldname === "mysubmit" && value.toLowerCase() === "screenshot") {
+                        let saveTo = path.join(app.getPath("userData"), "dev.png");
+                        window.webContents.send("saveScreenshot", saveTo);
+                        done = "screenshot";
+                    } else if (fieldname === "mysubmit" && value.toLowerCase() === "delete") {
+                        let toDelete = path.join(app.getPath("userData"), "dev.zip");
+                        try {
+                            fs.unlinkSync(toDelete);
+                        } catch (error) {
+                            // ignore error as the file may not exist anymore;
+                            console.error("Error deleting dev.zip - ", error);
+                        }
+                        done = "delete";
+                    } else {
+                        done = value;
+                    }
                 }
             });
             busboy.on("finish", function() {
+                // console.log("method", done);
                 if (done === "screenshot") {
                     setTimeout(()=>{
                         let saveTo = path.join(app.getPath("userData"), "dev.png");
@@ -86,14 +109,18 @@ export function enableInstaller(window, customPort) {
                         });
                         s.on("error", () => {
                             res.writeHead(404);
-                            res.end("Error 404: Not Found\nFile not found");                                
+                            res.end("Error 404: Not Found\nFile not found");
                         });
                     }, 1000);
                     return;    
                 } else if (done === "file"){
                     res.writeHead(200, { "Content-Type": "text/plain" });
                     res.write("Channel Installed!");
+                } else if (done === "delete"){
+                    res.writeHead(200, { "Content-Type": "text/plain" });
+                    res.write("File Deleted!");
                 } else {
+                    console.warn(`[Web Installer] Invalid method: ${done}`);
                     res.writeHead(501);
                     res.write("Error 501: Not Implemented\nMethod not Implemented");
                 }

@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import "./stylesheets/main.css";
-import "./stylesheets/fontawesome.min.css"
+import "./stylesheets/fontawesome.min.css";
 import "./helpers/hash";
 import { remote, ipcRenderer } from "electron";
 import { userTheme } from "./frontend/titlebar";
@@ -32,8 +32,9 @@ setServerStatus("Telnet", 8085, telnetEnabled === "true");
 // Web Installer Server 
 let installerEnabled = storage.getItem("installerEnabled") || "false";
 let installerPassword = storage.getItem("installerPassword") || "rokudev";
-ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword);
-setServerStatus("Web", 80, installerEnabled === "true");
+let installerPort = storage.getItem("installerPort") || "80";
+ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword, installerPort);
+setServerStatus("Web", installerPort, installerEnabled === "true");
 // Set Display Mode
 if (displayMode !== deviceData.displayMode) {
     changeDisplayMode(displayMode);
@@ -133,10 +134,12 @@ ipcRenderer.on("toggleTelnet", function(event, enable, port) {
 ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
     if (enable) {
         console.log(`Installer server started listening port ${port}`);
+        installerPort = port;
+        storage.setItem("installerPort", port);
     } else if (error) {
         console.error("Installer server error:", error);
     } else {
-        console.log("Installer server disabled.");        
+        console.log("Installer server disabled.");
     }
     appMenu.getMenuItemById("web-installer").checked = enable;
     installerEnabled = enable ? "true" : "false";
@@ -354,7 +357,6 @@ display.ondblclick = function() {
 window.onload = window.onresize = function() {
     redrawDisplay(running);
 };
-
 // Change Display Mode
 function changeDisplayMode(mode) {
     if (running) {
