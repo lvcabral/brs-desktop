@@ -10,15 +10,17 @@ import "./stylesheets/fontawesome.min.css";
 import "./helpers/hash";
 import { remote, ipcRenderer } from "electron";
 import { userTheme } from "./frontend/titlebar";
-import { setMessageCallback, loadFile, closeChannel, deviceData, dataType, sharedArray, running } from "./frontend/loader";
-import { displayMode, overscanMode, setDisplayMode, setOverscanMode, drawBufferImage, redrawDisplay } from "./frontend/display";
+import { handleKey } from "./frontend/control";
+import { setMessageCallback, loadFile, closeChannel, deviceData, running } from "./frontend/loader";
+import { displayMode, overscanMode, setDisplayMode, setOverscanMode, drawBufferImage, redrawDisplay, copyScreenshot } from "./frontend/display";
 import { clientLog, clientWarning, clientException, errorCount, warnCount, clearCounters } from "./frontend/console";
 import { toggleStatusBar, setServerStatus, setStatusColor, setDisplayStatus } from "./frontend/statusbar";
-import { playSound, stopSound, pauseSound, resumeSound, setLoop, setNext, triggerWav, playWav, stopWav, addPlaylist, addSound } from "./frontend/sound";
+import { playSound, stopSound, pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist, addSound } from "./frontend/sound";
 import fs from "fs";
 import path from "path";
 // App menu and theme configuration
 const mainWindow = remote.getCurrentWindow();
+const display = document.getElementById("display");
 const storage = window.localStorage;
 let appMenu = remote.Menu.getApplicationMenu();
 // ECP Server 
@@ -43,9 +45,11 @@ if (displayMode !== deviceData.displayMode) {
 }
 // Setup Menu
 setupMenuSwitches();
-// Keyboard handlers
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
+// Toggle Full Screen when Double Click
+display.ondblclick = function() {
+    const toggle = !mainWindow.isFullScreen();
+    mainWindow.setFullScreen(toggle);
+};
 // Load Registry
 Object.assign(deviceData, {registry: new Map()});
 for (let index = 0; index < storage.length; index++) {
@@ -95,7 +99,7 @@ ipcRenderer.on("setDisplay", function(event, mode) {
 ipcRenderer.on("setOverscan", function(event, mode) {
     storage.setItem("overscanMode", mode);
     setOverscanMode(mode);
-    redrawDisplay(running);
+    redrawDisplay(running, mainWindow.isFullScreen());
 });
 ipcRenderer.on("setPassword", function(event, pwd) {
     storage.setItem("installerPassword", pwd);
@@ -107,7 +111,7 @@ ipcRenderer.on("toggleOnTop", function(event) {
 });
 ipcRenderer.on("toggleStatusBar", function(event) {
     toggleStatusBar();
-    redrawDisplay(running);
+    redrawDisplay(running, mainWindow.isFullScreen());
 });
 ipcRenderer.on("toggleECP", function(event, enable, port) {
     if (enable) {
@@ -145,6 +149,9 @@ ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
     installerEnabled = enable ? "true" : "false";
     storage.setItem("installerEnabled", installerEnabled);
     setServerStatus("Web", port, enable);
+});
+ipcRenderer.on("copyScreenshot", function(event) {
+    copyScreenshot();
 });
 ipcRenderer.on("console", function(event, text, error) {
     if (error) {
@@ -240,122 +247,9 @@ setMessageCallback( function (event) {
         mainWindow.reload();
     }
 });
-
-// Remote control emulator
-function keyDownHandler(event) {
-    if (event.keyCode == 8) {
-        sharedArray[dataType.KEY] = 0; // BUTTON_BACK_PRESSED
-    } else if (event.keyCode == 13) {
-        sharedArray[dataType.KEY] = 6; // BUTTON_SELECT_PRESSED
-        event.preventDefault();
-    } else if (event.keyCode == 37) {
-        sharedArray[dataType.KEY] = 4; // BUTTON_LEFT_PRESSED
-        event.preventDefault();
-    } else if (event.keyCode == 39) {
-        sharedArray[dataType.KEY] = 5; // BUTTON_RIGHT_PRESSED
-        event.preventDefault();
-    } else if (event.keyCode == 38) {
-        sharedArray[dataType.KEY] = 2; // BUTTON_UP_PRESSED
-        event.preventDefault();
-    } else if (event.keyCode == 40) {
-        sharedArray[dataType.KEY] = 3; // BUTTON_DOWN_PRESSED
-        event.preventDefault();
-    } else if (event.keyCode == 111) {
-        sharedArray[dataType.KEY] = 7; // BUTTON_INSTANT_REPLAY_PRESSED
-    } else if (event.keyCode == 106) {
-        sharedArray[dataType.KEY] = 10; // BUTTON_INFO_PRESSED
-    } else if (event.keyCode == 188) {
-        sharedArray[dataType.KEY] = 8; // BUTTON_REWIND_PRESSED
-    } else if (event.keyCode == 32) {
-        sharedArray[dataType.KEY] = 13; // BUTTON_PLAY_PRESSED
-        event.preventDefault();
-    } else if (event.keyCode == 190) {
-        sharedArray[dataType.KEY] = 9; // BUTTON_FAST_FORWARD_PRESSED
-    } else if (event.keyCode == 65) {
-        sharedArray[dataType.KEY] = 17; // BUTTON_A_PRESSED
-    } else if (event.keyCode == 90) {
-        sharedArray[dataType.KEY] = 18; // BUTTON_B_PRESSED
-    } else if (event.keyCode == 27) {
-        if (running) {
-            // HOME BUTTON (ESC)
-            closeChannel("Home Button");
-            playWav(0);
-        }
-    }
-    // TODO: Send TimeSinceLastKeypress()
-}
-function keyUpHandler(event) {
-    if (event.keyCode == 8) {
-        sharedArray[dataType.KEY] = 100; // BUTTON_BACK_RELEASED
-    } else if (event.keyCode == 13) {
-        sharedArray[dataType.KEY] = 106; // BUTTON_SELECT_RELEASED
-    } else if (event.keyCode == 37) {
-        sharedArray[dataType.KEY] = 104; // BUTTON_LEFT_RELEASED
-    } else if (event.keyCode == 39) {
-        sharedArray[dataType.KEY] = 105; // BUTTON_RIGHT_RELEASED
-    } else if (event.keyCode == 38) {
-        sharedArray[dataType.KEY] = 102; // BUTTON_UP_RELEASED
-    } else if (event.keyCode == 40) {
-        sharedArray[dataType.KEY] = 103; // BUTTON_DOWN_RELEASED
-    } else if (event.keyCode == 111) {
-        sharedArray[dataType.KEY] = 107; // BUTTON_INSTANT_REPLAY_RELEASED
-    } else if (event.keyCode == 106) {
-        sharedArray[dataType.KEY] = 110; // BUTTON_INFO_RELEASED
-    } else if (event.keyCode == 188) {
-        sharedArray[dataType.KEY] = 108; // BUTTON_REWIND_RELEASED
-    } else if (event.keyCode == 32) {
-        sharedArray[dataType.KEY] = 113; // BUTTON_PLAY_RELEASED
-    } else if (event.keyCode == 190) {
-        sharedArray[dataType.KEY] = 109; // BUTTON_FAST_FORWARD_RELEASED
-    } else if (event.keyCode == 65) {
-        sharedArray[dataType.KEY] = 117; // BUTTON_A_RELEASED
-    } else if (event.keyCode == 90) {
-        sharedArray[dataType.KEY] = 118; // BUTTON_B_RELEASED
-    }
-}
-
-function handleKey(key, mod) {
-    if (key == "back") {
-        sharedArray[dataType.KEY] = 0 + mod; // BUTTON_BACK
-    } else if (key == "select") {
-        sharedArray[dataType.KEY] = 6 + mod; // BUTTON_SELECT
-    } else if (key == "left") {
-        sharedArray[dataType.KEY] = 4 + mod; // BUTTON_LEFT
-    } else if (key == "right") {
-        sharedArray[dataType.KEY] = 5 + mod; // BUTTON_RIGHT
-    } else if (key == "up") {
-        sharedArray[dataType.KEY] = 2 + mod; // BUTTON_UP
-    } else if (key == "down") {
-        sharedArray[dataType.KEY] = 3 + mod; // BUTTON_DOWN
-    } else if (key == "instantreplay") {
-        sharedArray[dataType.KEY] = 7 + mod; // BUTTON_INSTANT_REPLAY
-    } else if (key == "info") {
-        sharedArray[dataType.KEY] = 10 + mod; // BUTTON_INFO
-    } else if (key == "rev") {
-        sharedArray[dataType.KEY] = 8 + mod; // BUTTON_REWIND
-    } else if (key == "play") {
-        sharedArray[dataType.KEY] = 13 + mod; // BUTTON_PLAY
-    } else if (key == "fwd") {
-        sharedArray[dataType.KEY] = 9 + mod; // BUTTON_FAST_FORWARD
-    } else if (key == "a") {
-        sharedArray[dataType.KEY] = 17 + mod; // BUTTON_A
-    } else if (key == "b") {
-        sharedArray[dataType.KEY] = 18 + mod; // BUTTON_B
-    } else if (key == "home" && mod === 0) {
-        if (running) {        // HOME BUTTON (ESC)
-            closeChannel("Home Button");
-            playWav(0);
-        }
-    }
-}
-// Toggle Full Screen when Double Click
-display.ondblclick = function() {
-    const toggle = !mainWindow.isFullScreen();
-    mainWindow.setFullScreen(toggle);
-};
 // Window Resize Event
 window.onload = window.onresize = function() {
-    redrawDisplay(running);
+    redrawDisplay(running, mainWindow.isFullScreen());
 };
 // Change Display Mode
 function changeDisplayMode(mode) {
@@ -366,9 +260,8 @@ function changeDisplayMode(mode) {
     deviceData.deviceModel = mode == "720p" ? "4200X" : mode == "1080p" ? "4640X" : "2720X";    
     setDisplayStatus(mode);
     setDisplayMode(mode);
-    redrawDisplay(running);
+    redrawDisplay(running, mainWindow.isFullScreen());
 }
-
 // Configure Menu Options
 function setupMenuSwitches(status = false) {
     appMenu = remote.Menu.getApplicationMenu();

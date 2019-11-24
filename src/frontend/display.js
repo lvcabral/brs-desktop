@@ -1,10 +1,8 @@
-import { remote, ipcRenderer } from "electron";
 import { titleBar } from "./titlebar";
 import { isStatusBarEnabled, showStatusBar, setResStatus } from "./statusbar";
 import Mousetrap from "mousetrap";
 
 // Emulator Display
-const mainWindow = remote.getCurrentWindow();
 const storage = window.localStorage;
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
@@ -21,22 +19,17 @@ if (displayMode === "1080p") {
 const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
 const bufferCtx = bufferCanvas.getContext("2d");
 let aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
+// Detect Clipboard Copy to create Screenshot
 Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
     copyScreenshot();
     return false;
 });
-
 console.log("Display module initialized!");
 
-// Main process events
-ipcRenderer.on("copyScreenshot", function(event) {
-    copyScreenshot();
-});
-
 // Redraw Display Canvas
-export function redrawDisplay(running) {
+export function redrawDisplay(running, fullScreen) {
     aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
-    if (mainWindow.isFullScreen()) {
+    if (fullScreen) {
         titleBar.titlebar.style.display = "none";
         titleBar.container.style.top = "0px";
         showStatusBar(false);
