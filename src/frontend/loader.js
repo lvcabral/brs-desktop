@@ -1,4 +1,4 @@
-import { drawBufferImage, drawSplashScreen, showDisplay, clearDisplay } from "./display";
+import { subscribeDisplay, drawBufferImage, drawSplashScreen, showDisplay, clearDisplay } from "./display";
 import { initSoundModule, addSound, resetSounds, playSound, stopSound, 
          pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist } from "./sound";
 import { clientLog, clientWarning, clientException } from "./console";
@@ -36,6 +36,15 @@ function notifyAll(eventName, eventData) {
         callback(eventName, eventData);
     });
 }
+// Subscribe Events
+subscribeDisplay("loader", (event, data) => {
+    if (event === "mode") {
+        if (currentChannel.running) {
+            closeChannel("DisplayMode");
+        }
+    }
+});
+
 // Open File
 export function loadFile(filePath, fileData) {
     const fileName = path.parse(filePath).base;

@@ -1,20 +1,22 @@
+import { deviceData } from "./device";
+
 // Emulator Display
 const storage = window.localStorage;
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
 const screenSize = { width: 1280, height: 720 };
-export let overscanMode = storage.getItem("overscanMode") || "disabled";
-export let displayMode = storage.getItem("displayMode") || "720p";
-if (displayMode === "1080p") {
+const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
+const bufferCtx = bufferCanvas.getContext("2d");
+let aspectRatio;
+setDisplayMode(storage.getItem("displayMode") || "720p");
+if (deviceData.displayMode === "1080p") {
     screenSize.width = 1920;
     screenSize.height = 1080;
-} else if (displayMode === "480p") {
+} else if (deviceData.displayMode === "480p") {
     screenSize.width = 720;
     screenSize.height = 480;
 }
-const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
-const bufferCtx = bufferCanvas.getContext("2d");
-let aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
+export let overscanMode = storage.getItem("overscanMode") || "disabled";
 // Observers Handling
 const observers = new Map();
 export function subscribeDisplay(observerId, observerCallback) {
@@ -30,8 +32,7 @@ function notifyAll(eventName, eventData) {
 }
 // Redraw Display Canvas
 export function redrawDisplay(running, fullScreen) {
-    notifyAll("redraw", fullScreen);
-    aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
+    notifyAll("redraw", fullScreen);    
     if (fullScreen) {
         screenSize.width = window.innerWidth;
         screenSize.height = parseInt(screenSize.width / aspectRatio);
@@ -121,13 +122,19 @@ export function copyScreenshot() {
         navigator.clipboard.write([ item ]);
     });
 }
-
-export function setDisplayMode(mode) {
-    displayMode = mode;
-    notifyAll("mode", mode);
+// Set Display Mode
+export function setDisplayMode(mode, save) {
+    deviceData.displayMode = mode;
+    deviceData.deviceModel = mode === "720p" ? "4200X" : mode === "1080p" ? "4640X" : "2720X";
+    aspectRatio = mode === "480p" ? 4 / 3 : 16 / 9;
+    if (save) {
+        storage.setItem("displayMode", mode);
+        notifyAll("mode", mode);    
+    }
 }
-
+// Set Overscan Mode
 export function setOverscanMode(mode) {
+    storage.setItem("overscanMode", mode);
     overscanMode = mode;
 }
 console.log("Display module initialized!");

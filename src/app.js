@@ -14,7 +14,7 @@ import { handleKey } from "./frontend/control";
 import { deviceData } from "./frontend/device";
 import { subscribeLoader, loadFile, closeChannel, currentChannel } from "./frontend/loader";
 import { toggleStatusBar, setServerStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
-import { displayMode, overscanMode, setDisplayMode, setOverscanMode, redrawDisplay, copyScreenshot } from "./frontend/display";
+import { setDisplayMode, setOverscanMode, redrawDisplay, copyScreenshot, overscanMode } from "./frontend/display";
 import { clientException } from "./frontend/console";
 import Mousetrap from "mousetrap";
 import fs from "fs";
@@ -38,12 +38,6 @@ let installerPassword = storage.getItem("installerPassword") || "rokudev";
 let installerPort = storage.getItem("installerPort") || "80";
 ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword, installerPort);
 setServerStatus("Web", installerPort, installerEnabled === "true");
-// Set Display Mode
-if (displayMode !== deviceData.displayMode) {
-    changeDisplayMode(displayMode);
-} else {
-    setDisplayMode(displayMode);
-}
 // Setup Menu
 setupMenuSwitches();
 // Toggle Full Screen when Double Click
@@ -90,12 +84,11 @@ ipcRenderer.on("saveScreenshot", function(event, file) {
 });
 ipcRenderer.on("setDisplay", function(event, mode) {
     if (mode !== deviceData.displayMode) {
-        changeDisplayMode(mode);
-        storage.setItem("displayMode", mode);
+        setDisplayMode(mode, true);
+        redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
     }
 });
 ipcRenderer.on("setOverscan", function(event, mode) {
-    storage.setItem("overscanMode", mode);
     setOverscanMode(mode);
     redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
 });
@@ -205,22 +198,12 @@ subscribeLoader("app", (event, data) => {
 window.onload = window.onresize = function() {
     redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
 };
-// Change Display Mode
-function changeDisplayMode(mode) {
-    if (currentChannel.running) {
-        closeChannel("Display Mode");
-    }
-    deviceData.displayMode = mode;
-    deviceData.deviceModel = mode == "720p" ? "4200X" : mode == "1080p" ? "4640X" : "2720X";    
-    setDisplayMode(mode);
-    redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
-}
 // Configure Menu Options
 function setupMenuSwitches(status = false) {
     appMenu = remote.Menu.getApplicationMenu();
     appMenu.getMenuItemById("close-channel").enabled = currentChannel.running;
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
-    appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
+    appMenu.getMenuItemById(`device-${deviceData.displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
     appMenu.getMenuItemById("telnet").checked = (telnetEnabled === "true");

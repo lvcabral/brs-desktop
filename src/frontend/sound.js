@@ -126,13 +126,11 @@ export function setNext(index) {
 
 export function triggerWav(wav, volume, index) {
     if (wav && soundsIdx.has(wav.toLowerCase())) {
-        console.log(wav, volume, index);
         const soundId = soundsIdx.get(wav.toLowerCase());
         const sound = soundsDat[soundId];
         if (volume && !isNaN(volume)) {
             sound.volume(volume / 100);
         }
-        console.log(maxStreams)
         if (index >= 0 && index < maxStreams) {
             if (wavStreams[index] && wavStreams[index].playing()) {
                 wavStreams[index].stop();
@@ -143,7 +141,6 @@ export function triggerWav(wav, volume, index) {
             });
             sound.play();
             sharedArray[dataType.WAV + index] = soundId;
-            console.log(sound);
         }
     }
 }

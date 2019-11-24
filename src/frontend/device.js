@@ -1,5 +1,4 @@
 import { remote} from "electron";
-
 // Load Device Info and Registry
 const storage = window.localStorage;
 export let deviceData = {};
