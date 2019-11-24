@@ -20,7 +20,6 @@ export function clientLog(msg) {
 export function clientWarning(msg) {
     ipcRenderer.send("telnet", msg);
     console.warn(msg);
-    warnCount++; 
     notifyAll("warning");
 }
 export function clientException(msg) {

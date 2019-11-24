@@ -1,5 +1,6 @@
 import { remote, shell } from "electron";
-import { subscribeLoader, deviceData } from "./loader";
+import { deviceData } from "./device";
+import { subscribeLoader } from "./loader";
 import { subscribeDisplay } from "./display";
 import { subscribeConsole } from "./console";
 

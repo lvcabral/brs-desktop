@@ -11,11 +11,11 @@ import "./helpers/hash";
 import { remote, ipcRenderer } from "electron";
 import { userTheme } from "./frontend/titlebar";
 import { handleKey } from "./frontend/control";
-import { setMessageCallback, subscribeLoader, loadFile, closeChannel, deviceData, currentChannel } from "./frontend/loader";
+import { deviceData } from "./frontend/device";
+import { subscribeLoader, loadFile, closeChannel, currentChannel } from "./frontend/loader";
 import { toggleStatusBar, setServerStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
-import { displayMode, overscanMode, setDisplayMode, setOverscanMode, drawBufferImage, redrawDisplay, copyScreenshot } from "./frontend/display";
-import { playSound, stopSound, pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist, addSound } from "./frontend/sound";
-import { clientLog, clientWarning, clientException } from "./frontend/console";
+import { displayMode, overscanMode, setDisplayMode, setOverscanMode, redrawDisplay, copyScreenshot } from "./frontend/display";
+import { clientException } from "./frontend/console";
 import Mousetrap from "mousetrap";
 import fs from "fs";
 import path from "path";
@@ -42,7 +42,7 @@ setServerStatus("Web", installerPort, installerEnabled === "true");
 if (displayMode !== deviceData.displayMode) {
     changeDisplayMode(displayMode);
 } else {
-    setDisplayMode(mode);
+    setDisplayMode(displayMode);
 }
 // Setup Menu
 setupMenuSwitches();
@@ -56,14 +56,6 @@ Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
     copyScreenshot();
     return false;
 });
-// Load Device Info and Registry
-Object.assign(deviceData, remote.getGlobal("sharedObject").deviceInfo, {registry: new Map()});
-for (let index = 0; index < storage.length; index++) {
-    const key = storage.key(index);
-    if (key.substr(0, deviceData.developerId.length) === deviceData.developerId) {
-        deviceData.registry.set(key, storage.getItem(key));
-    }
-}
 // Events from Main process
 ipcRenderer.on("postKeyDown", function(event, key) {
     if (currentChannel.running) {
@@ -205,65 +197,8 @@ subscribeLoader("app", (event, data) => {
             currentChannel.id + ".png"
         );
         fs.writeFileSync(iconPath, data);
-    }
-});
-// Receive Messages from Web Worker
-setMessageCallback( function (event) {
-    if (event.data instanceof ImageData) {
-        drawBufferImage(event.data);
-    } else if (event.data instanceof Map) {
-        deviceData.registry = event.data;
-        deviceData.registry.forEach(function(value, key) {
-            storage.setItem(key, value);
-        });
-    } else if (event.data instanceof Array) {
-        addPlaylist(event.data);
-    } else if (event.data.audioPath) {
-        addSound(event.data.audioPath, event.data.audioFormat, new Blob([event.data.audioData]));
-    } else if (event.data === "play") {
-        playSound();
-    } else if (event.data === "stop") {
-        stopSound();
-    } else if (event.data === "pause") {
-        pauseSound();
-    } else if (event.data === "resume") {
-        resumeSound();
-    } else if (event.data.substr(0, 4) === "loop") {
-        const loop = event.data.split(",")[1];
-        if (loop) {
-            setLoop(loop === "true");
-        } else {
-            clientWarning(`Missing loop parameter: ${event.data}`);
-        }
-    } else if (event.data.substr(0, 4) === "next") {
-        const newIndex = event.data.split(",")[1];
-        if (newIndex && !isNaN(parseInt(newIndex))) {
-            setNext(parseInt(newIndex));
-        } else {
-            clientWarning(`Invalid next index: ${event.data}`);
-        }
-    } else if (event.data.substr(0, 4) === "seek") {
-        const audio = playList[playIndex];
-        const position = event.data.split(",")[1];
-        if (position && !isNaN(parseInt(position))) {
-            seekSound(parseInt(position));
-        } else {
-            clientWarning(`Invalid seek position: ${event.data}`);
-        }
-    } else if (event.data.substr(0, 7) === "trigger") {
-        triggerWav(event.data.split(",")[1]);
-    } else if (event.data.substr(0, 5) === "stop,") {
-        stopWav(event.data.split(",")[1])
-    } else if (event.data.substr(0, 4) === "log,") {
-        clientLog(event.data.substr(4));
-    } else if (event.data.substr(0, 8) === "warning,") {
-        clientWarning(event.data.substr(8));
-    } else if (event.data.substr(0, 6) === "error,") {
-        clientException(event.data.substr(6));
-    } else if (event.data === "end") {
-        closeChannel("Normal");
-    } else if (event.data === "reset") {
-        mainWindow.reload();
+    } else if (event === "reset") {
+        mainWindow.reload();        
     }
 });
 // Window Resize Event
@@ -273,7 +208,7 @@ window.onload = window.onresize = function() {
 // Change Display Mode
 function changeDisplayMode(mode) {
     if (currentChannel.running) {
-        closeChannel();
+        closeChannel("Display Mode");
     }
     deviceData.displayMode = mode;
     deviceData.deviceModel = mode == "720p" ? "4200X" : mode == "1080p" ? "4640X" : "2720X";    
