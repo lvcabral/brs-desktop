@@ -1,9 +1,17 @@
 import { ipcRenderer } from "electron";
-import { setStatusColor } from "./statusbar";
-export let errorCount = 0;
-export let warnCount = 0;
-
-console.log("Console module initialized!");
+// Observers Handling
+const observers = new Map();
+export function subscribeConsole(observerId, observerCallback) {
+    observers.set(observerId, observerCallback);
+}
+export function unsubscribeConsole(observerId) {
+    observers.delete(observerId);
+}
+function notifyAll(eventName, eventData) {
+    observers.forEach( (callback, id) => {
+        callback(eventName, eventData);
+    });
+}
 // Log to Telnet Server and Console
 export function clientLog(msg) {
     ipcRenderer.send("telnet", msg);
@@ -13,16 +21,11 @@ export function clientWarning(msg) {
     ipcRenderer.send("telnet", msg);
     console.warn(msg);
     warnCount++; 
-    setStatusColor(errorCount, warnCount);
+    notifyAll("warning");
 }
 export function clientException(msg) {
     ipcRenderer.send("telnet", msg);
     console.error(msg);
-    errorCount++; 
-    setStatusColor(errorCount, warnCount);
+    notifyAll("error");
 }
-
-export function clearCounters() {
-    errorCount = 0;
-    warnCount = 0;
-}
+console.log("Console module initialized!");

@@ -1,4 +1,4 @@
-import { closeChannel, sharedArray, dataType, running } from "./loader";
+import { closeChannel, sharedArray, dataType, currentChannel } from "./loader";
 import { playWav } from "./sound";
 
 // Keyboard Mapping
@@ -34,33 +34,33 @@ document.addEventListener("keyup", function keyUpHandler(event) {
 // Keyboard Handler
 export function handleKey(key, mod) {
     if (key == "back") {
-        sharedArray[dataType.KEY] = 0 + mod; // BUTTON_BACK
+        sharedArray[dataType.KEY] = 0 + mod;
     } else if (key == "select") {
-        sharedArray[dataType.KEY] = 6 + mod; // BUTTON_SELECT
+        sharedArray[dataType.KEY] = 6 + mod;
     } else if (key == "left") {
-        sharedArray[dataType.KEY] = 4 + mod; // BUTTON_LEFT
+        sharedArray[dataType.KEY] = 4 + mod;
     } else if (key == "right") {
-        sharedArray[dataType.KEY] = 5 + mod; // BUTTON_RIGHT
+        sharedArray[dataType.KEY] = 5 + mod;
     } else if (key == "up") {
-        sharedArray[dataType.KEY] = 2 + mod; // BUTTON_UP
+        sharedArray[dataType.KEY] = 2 + mod;
     } else if (key == "down") {
-        sharedArray[dataType.KEY] = 3 + mod; // BUTTON_DOWN
+        sharedArray[dataType.KEY] = 3 + mod;
     } else if (key == "instantreplay") {
-        sharedArray[dataType.KEY] = 7 + mod; // BUTTON_INSTANT_REPLAY
+        sharedArray[dataType.KEY] = 7 + mod;
     } else if (key == "info") {
-        sharedArray[dataType.KEY] = 10 + mod; // BUTTON_INFO
+        sharedArray[dataType.KEY] = 10 + mod;
     } else if (key == "rev") {
-        sharedArray[dataType.KEY] = 8 + mod; // BUTTON_REWIND
+        sharedArray[dataType.KEY] = 8 + mod;
     } else if (key == "play") {
-        sharedArray[dataType.KEY] = 13 + mod; // BUTTON_PLAY
+        sharedArray[dataType.KEY] = 13 + mod;
     } else if (key == "fwd") {
-        sharedArray[dataType.KEY] = 9 + mod; // BUTTON_FAST_FORWARD
+        sharedArray[dataType.KEY] = 9 + mod;
     } else if (key == "a") {
-        sharedArray[dataType.KEY] = 17 + mod; // BUTTON_A
+        sharedArray[dataType.KEY] = 17 + mod;
     } else if (key == "b") {
-        sharedArray[dataType.KEY] = 18 + mod; // BUTTON_B
+        sharedArray[dataType.KEY] = 18 + mod;
     } else if (key == "home" && mod === 0) {
-        if (running) {                       // HOME BUTTON (ESC)
+        if (currentChannel.running) {
             closeChannel("Home Button");
             playWav(0);
         }

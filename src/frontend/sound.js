@@ -14,7 +14,6 @@ let sharedArray;
 let dataType;
 let wavStreams;
 let maxStreams;
-console.log("Sound module initialized!");
 // Initialize Sound Module
 export function initSoundModule(array, types, streams) {
     sharedArray = array;
@@ -243,3 +242,4 @@ function addWebSound(url) {
     soundsDat.push(sound);
     return sound;
 }
+console.log("Sound module initialized!");

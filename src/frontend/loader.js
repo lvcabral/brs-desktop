@@ -1,15 +1,8 @@
-import { remote, ipcRenderer } from "electron";
-import { titleBar } from "./titlebar";
 import { drawSplashScreen, showDisplay, clearDisplay } from "./display";
 import { initSoundModule, addSound, resetSounds } from "./sound";
 import { clientLog, clientException } from "./console";
-import { setChannelStatus, clearChannelStatus, setLocalIp } from "./statusbar";
 import path from "path";
 import JSZip from "jszip";
-import fs from "fs";
-const appMenu = remote.Menu.getApplicationMenu();
-const defaultTitle = document.title;
-const currentChannel = {id: "", file: "", title: "", version: ""};
 let brsWorker;
 let workerCallback;
 let splashTimeout = 1600;
@@ -19,11 +12,8 @@ let txts = [];
 let imgs = [];
 let fonts = [];
 // Channel Data
-export let running = false;
-export let deviceData = remote.getGlobal("sharedObject").deviceInfo;
-if (deviceData.localIps.length > 0) {
-    setLocalIp(deviceData.localIps[0].split(",")[1]);
-}
+export const currentChannel = {id: "", file: "", title: "", version: "", running: false};
+export let deviceData = {};
 // Shared buffer (Keys and Sounds)
 const length = 7;
 const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length);
@@ -32,13 +22,26 @@ export const dataType = { KEY: 0, MOD: 1, SND: 2, IDX: 3, WAV: 4 };
 Object.freeze(dataType);
 // Initialize Sound Module
 initSoundModule(sharedArray, dataType, deviceData.maxSimulStreams);
-console.log("Loader module initialized!");
+// Observers Handling
+const observers = new Map();
+export function subscribeLoader(observerId, observerCallback) {
+    observers.set(observerId, observerCallback);
+}
+export function unsubscribeLoader(observerId) {
+    observers.delete(observerId);
+}
+function notifyAll(eventName, eventData) {
+    observers.forEach((callback, id) => {
+        callback(eventName, eventData);
+    });
+}
 // Open File
 export function loadFile(filePath, fileData) {
     const fileName = path.parse(filePath).base;
     const fileExt = path.parse(filePath).ext.toLowerCase();
     const reader = new FileReader();
     reader.onload = function(progressEvent) {
+        currentChannel.id = "brs";
         currentChannel.title = fileName;
         paths = [];
         imgs = [];
@@ -47,8 +50,7 @@ export function loadFile(filePath, fileData) {
         source.push(this.result);
         paths.push({ url: `source/${fileName}`, id: 0, type: "source" });
         clearDisplay();
-        setChannelStatus("brs", currentChannel.file);
-        ipcRenderer.send("addRecentSource", currentChannel.file);
+        notifyAll("loaded", currentChannel);
         runChannel();
     };
     source = [];
@@ -125,20 +127,14 @@ function openChannelZip(f) {
                             const iconFile = zip.file(icon.substr(5));
                             if (iconFile) {
                                 iconFile.async("nodebuffer").then((content) => {
-                                    const iconPath = path.join(
-                                        remote.app.getPath("userData"), 
-                                        currentChannel.id + ".png"
-                                    );
-                                    fs.writeFileSync(iconPath, content);
+                                    notifyAll("icon", content);
                                 });
                             }
                         }
                         const title = manifestMap.get("title");
                         if (title) {
-                            titleBar.updateTitle(defaultTitle + " - " + title);
                             currentChannel.title = title;
                         } else {
-                            titleBar.updateTitle(defaultTitle);
                             currentChannel.title = "No Title";
                         }
                         currentChannel.version = "";
@@ -154,17 +150,17 @@ function openChannelZip(f) {
                         if (buildVersion) {
                             currentChannel.version += "." + buildVersion;
                         }
-                        setChannelStatus("zip", currentChannel.file, currentChannel.version);
+                        notifyAll("loaded", currentChannel);
                     },
                     function error(e) {
                         clientException(`Error uncompressing manifest: ${e.message}`);
-                        running = false;
+                        currentChannel.running = false;
                         return;
                     }
                 );
             } else {
                 clientException("Invalid Channel Package: missing manifest.");
-                running = false;
+                currentChannel.running = false;
                 return;
             }
             let assetPaths = [];
@@ -238,10 +234,7 @@ function openChannelZip(f) {
                             txts.push(assets[index]);
                         }
                     }
-                    setTimeout(function() {
-                        runChannel();
-                        ipcRenderer.send("addRecentPackage", currentChannel);
-                    }, splashTimeout);
+                    setTimeout(runChannel, splashTimeout);
                 },
                 function error(e) {
                     clientException(`Error uncompressing file ${e.message}`);
@@ -250,21 +243,20 @@ function openChannelZip(f) {
         },
         function(e) {
             clientException(`Error reading ${f.name}: ${e.message}`, true);
-            running = false;
+            currentChannel.running = false;
         }
     );
 }
 // Execute Emulator Web Worker
-function runChannel() {
-    appMenu.getMenuItemById("close-channel").enabled = true;
+function runChannel() {    
     showDisplay()
-    if (running || brsWorker != undefined) {
+    if (currentChannel.running || brsWorker != undefined) {
         brsWorker.terminate();
         sharedArray[dataType.KEY] = 0;
         sharedArray[dataType.SND] = -1;
         sharedArray[dataType.IDX] = -1;
     }
-    running = true;
+    currentChannel.running = true;
     brsWorker = new Worker("lib/brsEmu.min.js");
     brsWorker.addEventListener("message", workerCallback);
     const payload = {
@@ -289,19 +281,16 @@ export function setMessageCallback(callback) {
 export function closeChannel(reason) {
     clientLog(`------ Finished '${currentChannel.title}' execution [${reason}] ------`);
     clearDisplay();
-    if (titleBar) {
-        titleBar.updateTitle(defaultTitle);
-        clearChannelStatus();
-    }
     brsWorker.terminate();
     sharedArray[dataType.KEY] = 0;
     sharedArray[dataType.SND] = -1;
     sharedArray[dataType.IDX] = -1;
     resetSounds();
-    running = false;
-    appMenu.getMenuItemById("close-channel").enabled = false;
     currentChannel.id = "";
     currentChannel.file = "";
     currentChannel.title = "";
     currentChannel.version = "";
+    currentChannel.running = false;
+    notifyAll("closed", currentChannel);
 }
+console.log("Loader module initialized!");

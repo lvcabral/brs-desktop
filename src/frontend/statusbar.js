@@ -1,4 +1,7 @@
 import { remote, shell } from "electron";
+import { subscribeLoader, deviceData } from "./loader";
+import { subscribeDisplay } from "./display";
+import { subscribeConsole } from "./console";
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
@@ -19,6 +22,8 @@ const statusTelnet = document.getElementById("statusTelnet");
 const statusTelnetText = document.getElementById("statusTelnetText");
 const statusWeb = document.getElementById("statusWeb");
 const statusWebText = document.getElementById("statusWebText");
+const appMenu = remote.Menu.getApplicationMenu();
+const menuStatus = appMenu.getMenuItemById("status-bar");
 statusResolution.style.display = "none";
 statusIconRes.style.display = "none";
 statusSepRes.style.display = "none";
@@ -27,28 +32,75 @@ statusWarn.innerText = "0";
 statusDevTools.onclick = function() {
     remote.getCurrentWindow().openDevTools();
 };
-let localIp = "127.0.0.1";
+let errorCount = 0;
+let warnCount = 0;
 let ECPPort = 8060;
 statusECP.onclick = function() {
-    shell.openExternal(`http://${localIp}:${ECPPort}/query/device-info`);
+    shell.openExternal(`http://${getLocalIp()}:${ECPPort}/query/device-info`);
 };
 let installerPort = 80;
 statusWeb.onclick = function() {
-    shell.openExternal(`http://${localIp}:${installerPort}/`);
+    shell.openExternal(`http://${getLocalIp()}:${installerPort}/`);
 };
-const appMenu = remote.Menu.getApplicationMenu();
-if (appMenu.getMenuItemById("status-bar").checked) {
-    statusBar.style.visibility = "visible";
-} else {
-    statusBar.style.visibility = "hidden";
+function getLocalIp() {
+    let localIp = "127.0.0.1";
+    if (deviceData.localIps.length > 0) {
+        localIp = deviceData.localIps[0].split(",")[1];
+    }
+    return localIp;    
 }
-console.log("StatusBar module initialized!");
+showStatusBar(menuStatus.checked);
+// Subscribe Events
+subscribeLoader("statusbar", (event, data) => {
+    if (event === "loaded") {
+        statusIconFile.innerHTML = data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
+        statusFile.innerText = data.file;
+        if (data.version !== "") {
+            statusVersion.innerText = data.version;
+            statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
+            statusIconVersion.style.display = "";
+        }
+        appMenu.getMenuItemById("close-channel").enabled = true;
+    } else if (event === "closed") {
+        statusIconFile.innerText = "";
+        statusFile.innerText = "";
+        statusVersion.innerText = "";
+        statusIconVersion.style.display = "none";
+        statusResolution.style.display = "none";
+        statusIconRes.style.display = "none";
+        statusSepRes.style.display = "none";
+        appMenu.getMenuItemById("close-channel").enabled = false;
+    }
+});
+subscribeDisplay("statusbar", (event, data) => {
+    if (event === "redraw") {
+        let visible = !data && appMenu.getMenuItemById("status-bar").checked;
+        showStatusBar(visible);
+    } else if (event === "resolution") {
+        statusResolution.innerText = `${data.width}x${data.height}`;
+        statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
+        statusResolution.style.display = "";
+        statusIconRes.style.display = "";
+        statusSepRes.style.display = "";    
+    } else if (event === "mode") {
+        let ui = data == "720p" ? "HD" : data == "1080p" ? "FHD" : "SD";
+        statusDisplay.innerText = `${ui} (${data})`;    
+    }
+});
+subscribeConsole("statusbar", (event, data) => {
+    if (event === "error") {
+        errorCount++;
+    } else if (event === "warning") {
+        warnCount++;
+    }
+    setStatusColor();
+});
 // Status Bar visibility
 export function toggleStatusBar() {
-    const enable = statusBar.style.visibility !== "visible";
-    appMenu.getMenuItemById("status-bar").checked = enable;
+    menuStatus.checked = !menuStatus.checked;
+    showStatusBar(menuStatus.checked);
 }
-export function showStatusBar(visible) {
+function showStatusBar(visible) {
     if (visible) {
         display.style.bottom = "20px";
         statusBar.style.visibility = "visible";
@@ -57,40 +109,8 @@ export function showStatusBar(visible) {
         statusBar.style.visibility = "hidden";
     }
 }
-// Get Status Bar state
-export function isStatusBarEnabled() {
-    return appMenu.getMenuItemById("status-bar").checked;
-}
-// Set current channel file
-export function setChannelStatus(fileType, path, version) {
-    statusIconFile.innerHTML = fileType ==="zip" ? "<i class='fa fa-cube'></i>" : "<i class='far fa-file'></i>";
-    statusFile.innerText = path;
-    if (version) {
-        statusVersion.innerText = version;
-        statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
-        statusIconVersion.style.display = "";
-    }
-}
-// Set resolution icon and text
-export function setResStatus(resolution) {
-    statusResolution.innerText = resolution;
-    statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
-    statusResolution.style.display = "";
-    statusIconRes.style.display = "";
-    statusSepRes.style.display = "";
-}
-// Clear Channel Stauts information
-export function clearChannelStatus() {
-    statusIconFile.innerText = "";
-    statusFile.innerText = "";
-    statusVersion.innerText = "";
-    statusIconVersion.style.display = "none";
-    statusResolution.style.display = "none";
-    statusIconRes.style.display = "none";
-    statusSepRes.style.display = "none";
-}
 // Set status bar colors
-export function setStatusColor(errorCount, warnCount) {
+export function setStatusColor() {
     statusError.innerText = errorCount.toString();
     statusWarn.innerText = warnCount.toString();
     if (errorCount > 0) {
@@ -109,11 +129,6 @@ export function setStatusColor(errorCount, warnCount) {
         statusECP.className = "statusIcons";
         statusDevTools.className = "statusIcons";
     }
-}
-// Update Display Mode on Status Bar
-export function setDisplayStatus(displayMode) {
-    let ui = displayMode == "720p" ? "HD" : displayMode == "1080p" ? "FHD" : "SD";
-    statusDisplay.innerText = `${ui} (${displayMode})`;
 }
 // Update server icons on Sttus Bar
 export function setServerStatus(name, port, enabled) {
@@ -142,7 +157,9 @@ export function setServerStatus(name, port, enabled) {
         }    
     }
 }
-// Update Local IP Address
-export function setLocalIp(ip) {
-    localIp = ip;
+// Clear error and warning counters
+export function clearCounters() {
+    errorCount = 0;
+    warnCount = 0;
 }
+console.log("StatusBar module initialized!");

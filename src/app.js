@@ -11,11 +11,12 @@ import "./helpers/hash";
 import { remote, ipcRenderer } from "electron";
 import { userTheme } from "./frontend/titlebar";
 import { handleKey } from "./frontend/control";
-import { setMessageCallback, loadFile, closeChannel, deviceData, running } from "./frontend/loader";
+import { setMessageCallback, subscribeLoader, loadFile, closeChannel, deviceData, currentChannel } from "./frontend/loader";
+import { toggleStatusBar, setServerStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
 import { displayMode, overscanMode, setDisplayMode, setOverscanMode, drawBufferImage, redrawDisplay, copyScreenshot } from "./frontend/display";
-import { clientLog, clientWarning, clientException, errorCount, warnCount, clearCounters } from "./frontend/console";
-import { toggleStatusBar, setServerStatus, setStatusColor, setDisplayStatus } from "./frontend/statusbar";
 import { playSound, stopSound, pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist, addSound } from "./frontend/sound";
+import { clientLog, clientWarning, clientException } from "./frontend/console";
+import Mousetrap from "mousetrap";
 import fs from "fs";
 import path from "path";
 // App menu and theme configuration
@@ -41,7 +42,7 @@ setServerStatus("Web", installerPort, installerEnabled === "true");
 if (displayMode !== deviceData.displayMode) {
     changeDisplayMode(displayMode);
 } else {
-    setDisplayStatus(displayMode);
+    setDisplayMode(mode);
 }
 // Setup Menu
 setupMenuSwitches();
@@ -50,27 +51,32 @@ display.ondblclick = function() {
     const toggle = !mainWindow.isFullScreen();
     mainWindow.setFullScreen(toggle);
 };
-// Load Registry
-Object.assign(deviceData, {registry: new Map()});
+// Detect Clipboard Copy to create Screenshot
+Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
+    copyScreenshot();
+    return false;
+});
+// Load Device Info and Registry
+Object.assign(deviceData, remote.getGlobal("sharedObject").deviceInfo, {registry: new Map()});
 for (let index = 0; index < storage.length; index++) {
     const key = storage.key(index);
     if (key.substr(0, deviceData.developerId.length) === deviceData.developerId) {
         deviceData.registry.set(key, storage.getItem(key));
     }
 }
-// Events from background thread
+// Events from Main process
 ipcRenderer.on("postKeyDown", function(event, key) {
-    if (running) {
+    if (currentChannel.running) {
         handleKey(key.toLowerCase(), 0);
     }
 });
 ipcRenderer.on("postKeyUp", function(event, key) {
-    if (running) {
+    if (currentChannel.running) {
         handleKey(key.toLowerCase(), 100);
     }
 });
 ipcRenderer.on("postKeyPress", function(event, key) {
-    if (running) {
+    if (currentChannel.running) {
         setTimeout(function() {
             handleKey(key.toLowerCase(), 100);
         }, 300);
@@ -78,7 +84,7 @@ ipcRenderer.on("postKeyPress", function(event, key) {
     }
 });
 ipcRenderer.on("closeChannel", function(event, source) {
-    if (running) {
+    if (currentChannel.running) {
         closeChannel(source);
     }
 });
@@ -99,7 +105,7 @@ ipcRenderer.on("setDisplay", function(event, mode) {
 ipcRenderer.on("setOverscan", function(event, mode) {
     storage.setItem("overscanMode", mode);
     setOverscanMode(mode);
-    redrawDisplay(running, mainWindow.isFullScreen());
+    redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
 });
 ipcRenderer.on("setPassword", function(event, pwd) {
     storage.setItem("installerPassword", pwd);
@@ -111,7 +117,7 @@ ipcRenderer.on("toggleOnTop", function(event) {
 });
 ipcRenderer.on("toggleStatusBar", function(event) {
     toggleStatusBar();
-    redrawDisplay(running, mainWindow.isFullScreen());
+    redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
 });
 ipcRenderer.on("toggleECP", function(event, enable, port) {
     if (enable) {
@@ -150,6 +156,9 @@ ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
     storage.setItem("installerEnabled", installerEnabled);
     setServerStatus("Web", port, enable);
 });
+ipcRenderer.on("setTheme", function(event, theme) {
+    setStatusColor();
+});
 ipcRenderer.on("copyScreenshot", function(event) {
     copyScreenshot();
 });
@@ -162,7 +171,7 @@ ipcRenderer.on("console", function(event, text, error) {
 });
 ipcRenderer.on("fileSelected", function(event, file) {
     clearCounters()
-    setStatusColor(errorCount, warnCount);
+    setStatusColor();
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
         filePath = file[0];
@@ -186,6 +195,16 @@ ipcRenderer.on("fileSelected", function(event, file) {
         }
     } else {
         clientException(`File format not supported: ${fileExt}`);
+    }
+});
+// Subscribe Loader Events
+subscribeLoader("app", (event, data) => {
+    if (event === "icon") {
+        const iconPath = path.join(
+            remote.app.getPath("userData"), 
+            currentChannel.id + ".png"
+        );
+        fs.writeFileSync(iconPath, data);
     }
 });
 // Receive Messages from Web Worker
@@ -249,23 +268,22 @@ setMessageCallback( function (event) {
 });
 // Window Resize Event
 window.onload = window.onresize = function() {
-    redrawDisplay(running, mainWindow.isFullScreen());
+    redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
 };
 // Change Display Mode
 function changeDisplayMode(mode) {
-    if (running) {
+    if (currentChannel.running) {
         closeChannel();
     }
     deviceData.displayMode = mode;
     deviceData.deviceModel = mode == "720p" ? "4200X" : mode == "1080p" ? "4640X" : "2720X";    
-    setDisplayStatus(mode);
     setDisplayMode(mode);
-    redrawDisplay(running, mainWindow.isFullScreen());
+    redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
 }
 // Configure Menu Options
 function setupMenuSwitches(status = false) {
     appMenu = remote.Menu.getApplicationMenu();
-    appMenu.getMenuItemById("close-channel").enabled = running;
+    appMenu.getMenuItemById("close-channel").enabled = currentChannel.running;
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
     appMenu.getMenuItemById(`device-${displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;

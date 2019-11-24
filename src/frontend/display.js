@@ -1,7 +1,3 @@
-import { titleBar } from "./titlebar";
-import { isStatusBarEnabled, showStatusBar, setResStatus } from "./statusbar";
-import Mousetrap from "mousetrap";
-
 // Emulator Display
 const storage = window.localStorage;
 const display = document.getElementById("display");
@@ -19,20 +15,24 @@ if (displayMode === "1080p") {
 const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
 const bufferCtx = bufferCanvas.getContext("2d");
 let aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
-// Detect Clipboard Copy to create Screenshot
-Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
-    copyScreenshot();
-    return false;
-});
-console.log("Display module initialized!");
-
+// Observers Handling
+const observers = new Map();
+export function subscribeDisplay(observerId, observerCallback) {
+    observers.set(observerId, observerCallback);
+}
+export function unsubscribeDisplay(observerId) {
+    observers.delete(observerId);
+}
+function notifyAll(eventName, eventData) {
+    observers.forEach( (callback, id) => {
+        callback(eventName, eventData);
+    });
+}
 // Redraw Display Canvas
 export function redrawDisplay(running, fullScreen) {
+    notifyAll("redraw", fullScreen);
     aspectRatio = displayMode === "480p" ? 4 / 3 : 16 / 9;
     if (fullScreen) {
-        titleBar.titlebar.style.display = "none";
-        titleBar.container.style.top = "0px";
-        showStatusBar(false);
         screenSize.width = window.innerWidth;
         screenSize.height = parseInt(screenSize.width / aspectRatio);
         if (screenSize.height > window.innerHeight) {
@@ -42,13 +42,8 @@ export function redrawDisplay(running, fullScreen) {
     } else {
         const ratio = 0.98;
         let offset = 25;
-        titleBar.titlebar.style.display = "";
-        titleBar.container.style.top = "30px";
-        if (isStatusBarEnabled()) {
-            showStatusBar(true);
+        if (display.style.bottom !== "0px") { // TODO: Check if this is  effective
             offset = 30;
-        } else {
-            showStatusBar(false);
         }
         screenSize.width = window.innerWidth * ratio;
         screenSize.height = parseInt(screenSize.width / aspectRatio);
@@ -78,7 +73,7 @@ export function drawSplashScreen(imgData) {
 export function drawBufferImage(buffer) {
     if (buffer) {
         if (bufferCanvas.width !== buffer.width || bufferCanvas.height !== buffer.height) {
-            setResStatus(`${buffer.width}x${buffer.height}`);
+            notifyAll("resolution", {width: buffer.width, height: buffer.width});
             bufferCanvas.width = buffer.width;
             bufferCanvas.height = buffer.height;
         }
@@ -129,8 +124,10 @@ export function copyScreenshot() {
 
 export function setDisplayMode(mode) {
     displayMode = mode;
+    notifyAll("mode", mode);
 }
 
 export function setOverscanMode(mode) {
     overscanMode = mode;
 }
+console.log("Display module initialized!");
