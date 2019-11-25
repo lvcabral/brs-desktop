@@ -238,7 +238,6 @@ function openChannelZip(f) {
                         } else if (assetPaths[index].type === "source") {
                             source.push(assets[index]);
                         } else if (assetPaths[index].type === "audio") {
-                            console.log(`pkg:/${assetPaths[index].url}`);
                             addSound(`pkg:/${assetPaths[index].url}`, assetPaths[index].format, assets[index]);
                         } else if (assetPaths[index].type === "text") {
                             txts.push(assets[index]);

@@ -199,7 +199,7 @@ window.onload = window.onresize = function() {
     redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
 };
 // Configure Menu Options
-function setupMenuSwitches(status = false) {
+function setupMenuSwitches(status) {
     appMenu = remote.Menu.getApplicationMenu();
     appMenu.getMenuItemById("close-channel").enabled = currentChannel.running;
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
@@ -208,7 +208,8 @@ function setupMenuSwitches(status = false) {
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
     appMenu.getMenuItemById("telnet").checked = (telnetEnabled === "true");
     appMenu.getMenuItemById("web-installer").checked = (installerEnabled === "true");
-    // if (status) {
-    //     appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
-    // }
+    if (status) {
+        const statusBar = document.getElementById("status");
+        appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
+    }
 }

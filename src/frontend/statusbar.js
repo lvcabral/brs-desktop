@@ -50,7 +50,6 @@ function getLocalIp() {
     }
     return localIp;    
 }
-showStatusBar(menuStatus.checked);
 // Subscribe Events
 subscribeLoader("statusbar", (event, data) => {
     if (event === "loaded") {
@@ -75,8 +74,13 @@ subscribeLoader("statusbar", (event, data) => {
 });
 subscribeDisplay("statusbar", (event, data) => {
     if (event === "redraw") {
-        let visible = !data && appMenu.getMenuItemById("status-bar").checked;
-        showStatusBar(visible);
+        if (!data && menuStatus.checked) {
+            display.style.bottom = "20px";
+            statusBar.style.visibility = "visible";
+        } else {
+            display.style.bottom = "0px";
+            statusBar.style.visibility = "hidden";
+        }
     } else if (event === "resolution") {
         statusResolution.innerText = `${data.width}x${data.height}`;
         statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
@@ -98,17 +102,8 @@ subscribeConsole("statusbar", (event, data) => {
 });
 // Status Bar visibility
 export function toggleStatusBar() {
-    menuStatus.checked = !menuStatus.checked;
-    showStatusBar(menuStatus.checked);
-}
-function showStatusBar(visible) {
-    if (visible) {
-        display.style.bottom = "20px";
-        statusBar.style.visibility = "visible";
-    } else {
-        display.style.bottom = "0px";
-        statusBar.style.visibility = "hidden";
-    }
+    let visible = statusBar.style.visibility === "visible";
+    menuStatus.checked = !visible;
 }
 // Set status bar colors
 export function setStatusColor() {
