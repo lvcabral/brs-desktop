@@ -109,7 +109,7 @@ export default (name, options, argv) => {
         } else {
             try {
                 let index = argv._.length - 1;
-                if (index) {
+                if (index && argv._[index]) {
                     if (jetpack.exists(argv._[index])) {
                         openFile = argv._[index];
                     }
