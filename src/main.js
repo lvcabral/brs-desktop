@@ -91,7 +91,6 @@ app.on("ready", () => {
         }
         if (argv.web) {
             enableInstaller(mainWindow, argv.web);
-            mainWindow.webContents.send("toggleInstaller", true, argv.web);
         }
         if (argv.mode && argv.mode.trim() !== "") {
             switch (argv.mode.trim().toLowerCase()) {
@@ -124,13 +123,13 @@ app.on("ready", () => {
             enableECP(mainWindow);
         }
     });
-    // Initialize Telnet Server
+    // Initialize Telnet server
     ipcMain.once("telnetEnabled", (event, enable) => {
         if (enable) {
             enableTelnet(mainWindow);
         }
     });
-    // Initialize Web Installer servers
+    // Initialize Web Installer server
     ipcMain.once("installerEnabled", (event, enable, password, port) => {
         if (password) {
             setPassword(password);

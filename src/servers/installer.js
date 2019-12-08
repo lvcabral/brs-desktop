@@ -27,10 +27,15 @@ export function setPort(customPort) {
     }
 }
 export function enableInstaller(window, customPort) {
-    if (hasInstaller) {
+    if (hasInstaller && customPort === port) {
         return; // already started do nothing
+    } else if (customPort !== port) {
+        setPort(customPort);
+        if (server) {
+            server.close();
+        }
+        hasInstaller = false;
     }
-    setPort(customPort);
     hash = cryptoUsingMD5(credentials.realm);
     server = http.createServer(function(req, res) {
         let authInfo, digestAuthObject = {};
