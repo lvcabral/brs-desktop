@@ -50,6 +50,10 @@ function getLocalIp() {
     }
     return localIp;    
 }
+let mode = deviceData.displayMode;
+let ui = mode == "720p" ? "HD" : mode == "1080p" ? "FHD" : "SD";
+statusDisplay.innerText = `${ui} (${mode})`;    
+
 // Subscribe Events
 subscribeLoader("statusbar", (event, data) => {
     if (event === "loaded") {
@@ -126,7 +130,7 @@ export function setStatusColor() {
         statusDevTools.className = "statusIcons";
     }
 }
-// Update server icons on Sttus Bar
+// Update server icons on Status Bar
 export function setServerStatus(name, port, enabled) {
     if (name === "ECP") {
         ECPPort = port;
