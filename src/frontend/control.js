@@ -4,7 +4,7 @@ import { playWav } from "./sound";
 // Keyboard Mapping
 const preventDefault = new Set([13, 32, 37, 38, 39, 40]);
 const keys = new Map();
-keys.set(8, "home");
+keys.set(8, "back");
 keys.set(13, "select");
 keys.set(27, "home");
 keys.set(32, "play");
