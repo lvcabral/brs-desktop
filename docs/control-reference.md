@@ -12,6 +12,7 @@ The emulator supports by default the following mapping of the desktop keyboard t
 | * (from numpad) |    Options  |  Open channel settings. Check channel instructions for custom usage.      |
 | , (comma)       |    Rewind   |  Reverse scan button. Check channel instructions for custom usage.        |
 | . (dot)         | Fast Forward|  Forward scan button. Check channel instructions for custom usage.        |
+| (space bar)     |  Play/Pause |  Play/Pause button. Check channel instructions for custom usage.          |
 | A               |     A       |  A game buttom. Check channel instructions for custom usage.              |
 | Z               |     B       |  B game buttom. Check channel instructions for custom usage.              |
 
