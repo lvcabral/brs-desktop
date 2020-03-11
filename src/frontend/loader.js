@@ -361,4 +361,3 @@ export function closeChannel(reason) {
     currentChannel.running = false;
     notifyAll("closed", currentChannel);
 }
-console.log("Loader module initialized!");

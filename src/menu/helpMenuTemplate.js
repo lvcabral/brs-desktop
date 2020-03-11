@@ -33,8 +33,8 @@ export const helpMenuTemplate = {
                 shell.openExternalSync("https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE");
             }
         },
-        { type: "separator" },
-        { label: "Check for Updates...", enabled: false },
+        // { type: "separator" },
+        // { label: "Check for Updates...", enabled: false },
         { type: "separator", visible: !isMacOS },
         {
             label: "About",

@@ -137,4 +137,3 @@ export function setOverscanMode(mode) {
     storage.setItem("overscanMode", mode);
     overscanMode = mode;
 }
-console.log("Display module initialized!");

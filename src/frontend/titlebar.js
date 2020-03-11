@@ -62,4 +62,3 @@ ipcRenderer.on("setTheme", function(event, theme) {
     titleBar.titlebar.style.color = titleColor;
     storage.setItem("userTheme", theme);
 });
-console.log("TitleBar module initialized!");

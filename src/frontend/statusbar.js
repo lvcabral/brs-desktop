@@ -162,4 +162,4 @@ export function clearCounters() {
     errorCount = 0;
     warnCount = 0;
 }
-console.log("StatusBar module initialized!");
+

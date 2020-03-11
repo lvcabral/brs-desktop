@@ -9,4 +9,3 @@ for (let index = 0; index < storage.length; index++) {
         deviceData.registry.set(key, storage.getItem(key));
     }
 }
-console.log("Device module initialized!");

@@ -240,4 +240,3 @@ function addWebSound(url) {
     soundsDat.push(sound);
     return sound;
 }
-console.log("Sound module initialized!");

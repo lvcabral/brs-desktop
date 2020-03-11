@@ -27,4 +27,3 @@ export function clientException(msg) {
     console.error(msg);
     notifyAll("error");
 }
-console.log("Console module initialized!");

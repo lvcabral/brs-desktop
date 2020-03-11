@@ -66,4 +66,3 @@ export function handleKey(key, mod) {
         }
     }
 }
-console.log("Control module initialized!");

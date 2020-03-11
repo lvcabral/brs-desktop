@@ -8,7 +8,7 @@ export const editMenuTemplate = {
                 window.webContents.send("copyScreenshot");
             }
         },
-        { type: "separator" },
-        { label: "Settings...", accelerator: "CmdOrCtrl+,", enabled: false }
+        // { type: "separator" },
+        // { label: "Settings...", accelerator: "CmdOrCtrl+,", enabled: false }
     ]
 };
