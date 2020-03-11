@@ -62,6 +62,85 @@ export const deviceMenuTemplate = {
         },
         { type: "separator" },
         {
+            id: "locale-menu",
+            label: "Localization",
+            submenu: [
+                {
+                    id: "en_US",
+                    label: "US English (en-US)",
+                    type: "radio",
+                    checked: true,
+                    click: (event, window) => {
+                        changeLocale(window, "en_US");
+                    }
+                },
+                {
+                    id: "en_GB",
+                    label: "British English (en-GB)",
+                    type: "radio",
+                    checked: false,
+                    click: (event, window) => {
+                        changeLocale(window, "en_GB");
+                    }
+                },
+                {
+                    id: "fr_CA",
+                    label: "Canadian French (fr-CA)",
+                    type: "radio",
+                    checked: false,
+                    click: (event, window) => {
+                        changeLocale(window, "fr_CA");
+                    }
+                },
+                {
+                    id: "es_ES",
+                    label: "International Spanish (es-ES)",
+                    type: "radio",
+                    checked: false,
+                    click: (event, window) => {
+                        changeLocale(window, "es_ES");
+                    }
+                },
+                {
+                    id: "es_MX",
+                    label: "Mexican Spanish (es-MX)",
+                    type: "radio",
+                    checked: false,
+                    click: (event, window) => {
+                        changeLocale(window, "es_MX");
+                    }
+                },
+                {
+                    id: "de_DE",
+                    label: "German (de-DE)",
+                    type: "radio",
+                    checked: false,
+                    click: (event, window) => {
+                        changeLocale(window, "de_DE");
+                    }
+                },
+                {
+                    id: "it_IT",
+                    label: "Italian (it-IT)",
+                    type: "radio",
+                    checked: false,
+                    click: (event, window) => {
+                        changeLocale(window, "it_IT");
+                    }
+                },
+                {
+                    id: "pt_BR",
+                    label: "Brazilian Portuguese (pt-BR)",
+                    type: "radio",
+                    checked: false,
+                    click: (event, window) => {
+                        changeLocale(window, "pt_BR");
+                    }
+                },
+            ]
+        },
+        { type: "separator" },
+        {
             id: "web-installer",
             label: "Web Application Installer",
             type: "checkbox",
@@ -110,3 +189,9 @@ export const deviceMenuTemplate = {
         }
     ]
 };
+
+function changeLocale(window, locale) {
+    window.webContents.send("setLocale", locale);
+    window.blur();
+    window.focus();
+}

@@ -39,6 +39,7 @@ let installerPort = storage.getItem("installerPort") || "80";
 ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword, installerPort);
 setServerStatus("Web", installerPort, installerEnabled === "true");
 // Setup Menu
+deviceData.locale = storage.getItem("deviceLocale") || "en_US";
 setupMenuSwitches();
 // Toggle Full Screen when Double Click
 display.ondblclick = function() {
@@ -91,6 +92,12 @@ ipcRenderer.on("setDisplay", function(event, mode) {
 ipcRenderer.on("setOverscan", function(event, mode) {
     setOverscanMode(mode);
     redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
+});
+ipcRenderer.on("setLocale", function(event, locale) {
+    if (locale !== deviceData.locale) {
+        deviceData.locale = locale;
+        storage.setItem("deviceLocale", locale);
+    }
 });
 ipcRenderer.on("setPassword", function(event, pwd) {
     storage.setItem("installerPassword", pwd);
@@ -205,6 +212,7 @@ function setupMenuSwitches(status) {
     appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
     appMenu.getMenuItemById(`device-${deviceData.displayMode}`).checked = true;
     appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
+    appMenu.getMenuItemById(deviceData.locale).checked = true;
     appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
     appMenu.getMenuItemById("telnet").checked = (telnetEnabled === "true");
     appMenu.getMenuItemById("web-installer").checked = (installerEnabled === "true");
