@@ -2,14 +2,14 @@
     "name": "brs-emu-app",
     "productName": "BrightScript 2D API Emulator",
     "description": "Desktop Emulator for Roku 2D API",
-    "version": "0.7.2",
+    "version": "0.8.0",
     "private": true,
     "author": {
         "name": "Marcelo Lv Cabral",
         "email": "marcelo@lvcabral.com",
         "url": "https://lvcabral.com/"
     },
-    "copyright": "© 2019, Marcelo Lv Cabral",
+    "copyright": "© 2019-2020, Marcelo Lv Cabral",
     "homepage": "https://lvcabral.com/brs/",
     "repository": {
         "type": "git",
@@ -58,7 +58,7 @@
     },
     "dependencies": {
         "busboy": "^0.3.1",
-        "custom-electron-titlebar": "^3.1.0",
+        "custom-electron-titlebar": "3.1.0",
         "electron-about-window": "^1.13.1",
         "fs-jetpack": "^2.1.0",
         "howler": "^2.1.2",
