@@ -30,6 +30,7 @@ This section will describe the options available on the application menu, please
     - Disable - Shows the entire image with no cropping or guide lines
     - Guide Lines - Shows guide lines delimiting a potential hidden area by the TV overscan
     - Enabled - Crops the image to emulate the TV overscan effect
+- Localization - Submenu with all languages available for channel localization
 - Web Application Installer - See [documentation](remote-access.md#web-application-installer)
 - External Control Protocol - See [documentation](remote-access.md#brightscript-remote-console)
 - BrightScript Remote Console - See [documentation](remote-access.md#brightscript-remote-console)
