@@ -18,7 +18,7 @@ export default (name, options, argv) => {
     let win;
 
     const restore = () => {
-        const appMenu = app.getApplicationMenu();
+        const appMenu = app.applicationMenu;
         let restoredState = {};
         try {
             restoredState = userDataDir.read(stateStoreFile, "json");
@@ -32,7 +32,7 @@ export default (name, options, argv) => {
     };
 
     const getWindowState = () => {
-        const appMenu = app.getApplicationMenu();
+        const appMenu = app.applicationMenu;
         const position = win.getPosition();
         const size = win.getSize();
         return {
@@ -92,6 +92,7 @@ export default (name, options, argv) => {
     win = new BrowserWindow(
         Object.assign(full, options, state, {
             webPreferences: {
+                enableRemoteModule: true,
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
                 webSecurity: true

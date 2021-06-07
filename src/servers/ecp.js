@@ -210,7 +210,7 @@ function getApps(req, res) {
 function getActiveApp(req, res) {
     const xml = xmlbuilder.create("apps");
     const id = getRecentId(0);
-    const appMenu = app.getApplicationMenu();
+    const appMenu = app.applicationMenu;
     if (id && appMenu.getMenuItemById("close-channel").enabled) {
         xml.ele(
             "app", 

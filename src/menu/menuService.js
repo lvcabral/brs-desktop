@@ -153,7 +153,7 @@ function rebuildMenu(template = false) {
             window.webContents.send("updateMenu");
         }
     } else {
-        const appMenu = app.getApplicationMenu();
+        const appMenu = app.applicationMenu;
         const recentMenu = appMenu.getMenuItemById("file-open-recent").submenu;
         for (let index = 0; index < maxFiles; index++) {
             let fileMenu = recentMenu.getMenuItemById(`zip-${index}`);
