@@ -4816,7 +4816,7 @@ minimist@^1.1.0, minimist@^1.1.3:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.3.tgz#3db5c0765545ab8637be71f333a104a965a9ca3f"
   integrity sha512-+bMdgqjMN/Z77a6NlY/I3U5LlRDbnmaAk6lDveAPKwSpcPM4tKAuYsvYF8xjhOPXhOYGe/73vVLVez5PW+jqhw==
 
-minimist@^1.2.0, minimist@^1.2.2, minimist@^1.2.5:
+minimist@^1.2.0, minimist@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
@@ -4923,7 +4923,7 @@ mocha@^7.1.2:
     yargs-parser "13.1.2"
     yargs-unparser "1.6.0"
 
-mousetrap@^1.6.3:
+mousetrap@^1.6.5:
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/mousetrap/-/mousetrap-1.6.5.tgz#8a766d8c272b08393d5f56074e0b5ec183485bf9"
   integrity sha512-QNo4kEepaIBwiT8CDhP98umTetp+JNfQYBWvC1pc6/OAibuXtRcxZ58Qz8skvEHYvURne/7R8T5VoOI7rDsEUA==
@@ -5047,10 +5047,10 @@ node-releases@^1.1.71:
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.72.tgz#14802ab6b1039a79a0c7d662b610a5bbd76eacbe"
   integrity sha512-LLUo+PpH3dU6XizX3iVoubUNheF/owjXCZZ5yACDxNnPtgFuludV1ZL3ayK1kVep42Rmm0+R9/Y60NQbZ2bifw==
 
-node-ssdp@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/node-ssdp/-/node-ssdp-4.0.0.tgz#030de2d9d321aed04eccb989ca2e8e7a80a4eefa"
-  integrity sha512-JQoNKfRYj/MvOFvE5de/SRJEhkLIHx2MVyiYi46rEGWkH+LuFZhSHvWP7JaFiVs+C+GOdl3c1qC9yDs8lSV4Fg==
+node-ssdp@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/node-ssdp/-/node-ssdp-4.0.1.tgz#ea5b2e9a287823b58b3ede348b22a08159cf718f"
+  integrity sha512-uJXkLZVuyaMg1qNbMbGQ6YzNzyOD+NLxYyxIJocPTKTVECPDokOiCZA686jTLXHMUnV34uY/lcUSJ+/5fhY43A==
   dependencies:
     async "^2.6.0"
     bluebird "^3.5.1"
