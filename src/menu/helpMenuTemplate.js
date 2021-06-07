@@ -48,7 +48,7 @@ export const helpMenuTemplate = {
                 var y = Math.round(window.getPosition()[1] + Math.abs(window.getSize()[1] - h + 25) / 2);
                 const about = openAboutWindow({
                     icon_path: path.join(__dirname, "images/icon512x512.png"),
-                    copyright: "Copyright © 2019 Marcelo Lv Cabral",
+                    copyright: "Copyright © 2019-2021 Marcelo Lv Cabral",
                     win_options: {
                         parent: window,
                         x: x,
