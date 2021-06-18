@@ -10,27 +10,27 @@ export const helpMenuTemplate = {
             label: "Documentation",
             accelerator: "F1",
             click: () => {
-                shell.openExternalSync("https://github.com/lvcabral/brs-emu-app/blob/master/README.md");
+                shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/README.md");
             }
         },
         {
             label: "Control Keyboard Reference",
             accelerator: "CmdOrCtrl+F1",
             click: () => {
-                shell.openExternalSync("https://github.com/lvcabral/brs-emu-app/blob/master/docs/control-reference.md");
+                shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/docs/control-reference.md");
             }
         },
         { type: "separator" },
         {
             label: "Release Notes",
             click: () => {
-                shell.openExternalSync("https://github.com/lvcabral/brs-emu/releases");
+                shell.openExternal("https://github.com/lvcabral/brs-emu/releases");
             }
         },
         {
             label: "View License",
             click: () => {
-                shell.openExternalSync("https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE");
+                shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE");
             }
         },
         // { type: "separator" },
