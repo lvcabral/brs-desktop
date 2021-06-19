@@ -14,6 +14,7 @@ const statusFile = document.getElementById("statusFile");
 const statusIconVersion = document.getElementById("statusIconVersion");
 const statusVersion = document.getElementById("statusVersion");
 const statusDisplay = document.getElementById("statusDisplay");
+const statusLocale = document.getElementById("statusLocale");
 const statusSepRes = document.getElementById("statusSepRes");
 const statusIconRes = document.getElementById("statusIconRes");
 const statusResolution = document.getElementById("statusResolution");
@@ -139,6 +140,10 @@ export function setStatusColor() {
         statusECP.className = "statusIcons";
         statusDevTools.className = "statusIcons";
     }
+}
+// Update locale id on Status Bar
+export function setLocaleStatus(localeId) {
+    statusLocale.innerText = localeId.replace("_","-");
 }
 // Update server icons on Status Bar
 export function setServerStatus(name, port, enabled) {

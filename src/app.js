@@ -13,7 +13,7 @@ import { userTheme } from "./frontend/titlebar";
 import { handleKey } from "./frontend/control";
 import { deviceData } from "./frontend/device";
 import { subscribeLoader, loadFile, closeChannel, currentChannel } from "./frontend/loader";
-import { toggleStatusBar, setServerStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
+import { toggleStatusBar, setServerStatus, setLocaleStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
 import { setDisplayMode, setOverscanMode, redrawDisplay, copyScreenshot, overscanMode } from "./frontend/display";
 import { clientException } from "./frontend/console";
 import Mousetrap from "mousetrap";
@@ -40,6 +40,7 @@ ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassw
 setServerStatus("Web", installerPort, installerEnabled === "true");
 // Setup Menu
 deviceData.locale = storage.getItem("deviceLocale") || "en_US";
+setLocaleStatus(deviceData.locale)
 setupMenuSwitches();
 // Toggle Full Screen when Double Click
 display.ondblclick = function() {
@@ -97,6 +98,7 @@ ipcRenderer.on("setLocale", function(event, locale) {
     if (locale !== deviceData.locale) {
         deviceData.locale = locale;
         storage.setItem("deviceLocale", locale);
+        setLocaleStatus(locale);
     }
 });
 ipcRenderer.on("setPassword", function(event, pwd) {
