@@ -164,6 +164,7 @@ ipcRenderer.on("console", function(event, text, error) {
     }
 });
 ipcRenderer.on("fileSelected", function(event, file) {
+    if (file==undefined) return;
     clearCounters()
     setStatusColor();
     let filePath;

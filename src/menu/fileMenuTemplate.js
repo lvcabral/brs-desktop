@@ -25,6 +25,7 @@ export const fileMenuTemplate = {
                 {
                     id: "zip-0",
                     label: "",
+                    accelerator: "CmdOrCtrl+R",
                     visible: false,
                     click: (event, window) => {
                         packageClick(window, 0);
