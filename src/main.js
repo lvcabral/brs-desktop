@@ -33,8 +33,10 @@ const deviceInfo = {
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     defaultFont: "Asap", // Desktop app only has Asap to reduce the package size
     maxSimulStreams: 2,
+    connectionType: "WiFiConnection", // Options: "WiFiConnection", "WiredConnection", ""
     localIps: getLocalIps(),
-    startTime: Date.now()
+    startTime: Date.now(),
+    audioVolume: 40
 }
 
 // Parse CLI parameters
