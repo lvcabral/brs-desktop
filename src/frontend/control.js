@@ -2,33 +2,33 @@ import { closeChannel, sharedArray, dataType, currentChannel } from "./loader";
 import { playWav } from "./sound";
 
 // Keyboard Mapping
-const preventDefault = new Set([13, 32, 37, 38, 39, 40]);
+const preventDefault = new Set(["Enter", "Space", "ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"]);
 const keys = new Map();
-keys.set(8, "back");
-keys.set(13, "select");
-keys.set(27, "home");
-keys.set(32, "play");
-keys.set(37, "left");
-keys.set(38, "up")
-keys.set(39, "right");
-keys.set(40, "down");
-keys.set(111, "instantreplay");
-keys.set(106, "info");
-keys.set(188, "rev");
-keys.set(190, "fwd");
-keys.set(65, "a");
-keys.set(90, "b");
+keys.set("Backspace", "back");
+keys.set("Enter", "select");
+keys.set("Escape", "home");
+keys.set("Space", "play");
+keys.set("ArrowLeft", "left");
+keys.set("ArrowUp", "up")
+keys.set("ArrowRight", "right");
+keys.set("ArrowDown", "down");
+keys.set("Slash", "instantreplay");
+keys.set("NumpadMultiply", "info");
+keys.set("Digit8", "info");
+keys.set("Comma", "rev");
+keys.set("Period", "fwd");
+keys.set("KeyA", "a");
+keys.set("KeyZ", "b");
 
 // Keyboard handlers
-document.addEventListener("keydown", function (event) {
-    handleKey(keys.get(event.keyCode), 0);
-    if (preventDefault.has(event.keyCode)) {
+document.addEventListener("keydown", function (event) {    
+    handleKey(keys.get(event.code), 0);
+    if (preventDefault.has(event.code)) {
         event.preventDefault();
     }
-    // TODO: Send TimeSinceLastKeypress()
 });
 document.addEventListener("keyup", function keyUpHandler(event) {
-    handleKey(keys.get(event.keyCode), 100);
+    handleKey(keys.get(event.code), 100);
 });
 
 // Keyboard Handler
