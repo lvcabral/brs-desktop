@@ -69,6 +69,9 @@ export function enableInstaller(window, customPort) {
                         file.on("end", function() {
                             window.webContents.send("fileSelected", [saveTo]);
                             done = "file";
+                            if (window.isMinimized()) {
+                                window.restore()
+                            }                            
                         });        
                     } catch (error) {
                         res.writeHead(500);
