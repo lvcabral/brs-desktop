@@ -24,8 +24,8 @@ const deviceInfo = {
     serialNumber: "BRSEMUAPP090",
     deviceModel: "4200X",   // Can change according to the display mode in the front-end
     firmwareVersion: "049.10E04111A",
-    clientId: "6c5bf3a5-b2a5-4918-824d-7691d5c85364", // Unique identifier of the device
-    RIDA: "f51ac698-bc60-4409-aae3-8fc3abc025c4", // Unique identifier for advertisement tracking
+    clientId: "810e74d8-f387-49c2-8644-c72bd0e8e2a1", // Unique identifier of the device
+    RIDA: "fad884dd-583f-4753-b694-fd0748152064", // Unique identifier for advertisement tracking
     countryCode: "US",
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     locale: "en_US",

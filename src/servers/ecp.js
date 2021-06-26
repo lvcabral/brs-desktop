@@ -11,11 +11,11 @@ import { Server as SSDP } from "node-ssdp";
 import xmlbuilder from "xmlbuilder";
 import fs from "fs";
 import path from "path";
-
+const { createHash } = require('crypto');
 const ECPPORT = 8060;
 const SSDPPORT = 1900;
 const MAC = getMacAddress();
-const UDN = "404d7944-8d29-45e3-8ef3-" + MAC.replace(/:\s*/g, "");
+const UDN = "138aedd0-d6ad-11eb-b8bc-" + MAC.replace(/:\s*/g, "");
 let window;
 let device;
 let ecp;
@@ -36,12 +36,12 @@ export function enableECP(mainWindow) {
     });
     ecp.getServer().on("error", (error)=>{
         window.webContents.send("console",`Failed to start ECP server:${error.message}`, true);
-    })
+    });
     ecp.get("/", getDeviceRoot);
     ecp.get("/device-image.png", getDeviceImage);
     ecp.get("/ecp_SCPD.xml", getScpdXML)
     ecp.get("/dial_SCPD.xml", getScpdXML)
-    ecp.get("/ecp-session", getScpdXML)
+    ecp.get("/ecp-session", getEcpSession)
     ecp.get("/query/device-info", getDeviceInfo);
     ecp.get("//query/device-info", getDeviceInfo);
     ecp.get("/query/apps", getApps);
@@ -51,10 +51,10 @@ export function enableECP(mainWindow) {
     ecp.post("/keypress/:key", postKeyPress);
     ecp.post("/keydown/:key", postKeyDown);
     ecp.post("/keyup/:key", postKeyUp);
-    // ecp.use((req, res, next) => {
-    //     console.log(req.url, req.method, req.headers);
-    //     return next();
-    //   });
+    ecp.use((req, res, next) => {
+        console.log(req.url, req.method, req.headers);
+        return next();
+      });
     ecp.start(ECPPORT)
     .catch((error)=>{
         window.webContents.send("console",`ECP server error:${error.message}`, true);
@@ -244,6 +244,26 @@ function getScpdXML(req, res) {
     res.setHeader("content-type", "application/xml");
     res.send(file);
 }
+
+function getEcpSession(req, res) {
+    const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
+    const protocol = req.headers['sec-websocket-protocol'];
+    const key = req.headers['sec-websocket-key'] !== undefined
+      ? req.headers['sec-websocket-key'].trim()
+      : false;
+    const digest = createHash('sha1').update(key + GUID).digest('base64');
+    const headers = {
+        "Server": "Roku UPnP/1.0 Roku/9.1.0",
+        "Content-Length": 0,
+        "Connection": "Upgrade",
+        "Sec-WebSocket-Accept": digest,
+        "Sec-WebSocket-Protocol": protocol,
+        "Upgrade": "websocket"
+    };
+    // res.writeHead(101, "Switching Protocols", headers);
+    // console.log(headers);
+    res.send(Buffer.alloc(0), 101, headers, err => { if (err) console.log(err) });
+}   
 
 function getAppIcon(req, res) {
     let image;
