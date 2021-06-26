@@ -13,9 +13,11 @@ The binaries of this dektop application (for all platforms) are released togethe
 
 Below you will find the links for the documentation related to this project, how to contribute, build and use the desktop application.
 
-### Contributing
+### Application Architecture
 
-There are many ways in which you can participate in the project, read documents below to know the details:
+* [Overview Diagram](docs/images/brs-emu-app-architecture-overview.png)
+
+### Contributing
 
 * [How to contribute](docs/contributing.md)
 * [How to build from source](docs/build-from-source.md)
@@ -35,6 +37,6 @@ There are many ways in which you can participate in the project, read documents 
 
 ## License
 
-Copyright © 2019 Marcelo Lv Cabral. All rights reserved.
+Copyright © 2019-2021 Marcelo Lv Cabral. All rights reserved.
 
 Licensed under [MIT](LICENSE) License.
