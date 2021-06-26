@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -21,7 +21,7 @@ import createWindow from "./helpers/window";
 const deviceInfo = {
     developerId: "emulator-dev-id", // Unique id to segregate registry among channels
     friendlyName: "BrightScript Emulator",
-    serialNumber: "BRSEMUAPP070",
+    serialNumber: "BRSEMUAPP090",
     deviceModel: "4200X",   // Can change according to the display mode in the front-end
     firmwareVersion: "049.10E04111A",
     clientId: "6c5bf3a5-b2a5-4918-824d-7691d5c85364", // Unique identifier of the device

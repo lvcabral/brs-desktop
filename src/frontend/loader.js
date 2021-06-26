@@ -67,6 +67,7 @@ export function loadFile(filePath, fileData) {
     if (brsWorker != undefined) {
         brsWorker.terminate();
         sharedArray[dataType.KEY] = 0;
+        sharedArray[dataType.MOD] = 0;
         sharedArray[dataType.SND] = -1;
         sharedArray[dataType.IDX] = -1;
         resetSounds();
@@ -250,6 +251,7 @@ function runChannel() {
     if (currentChannel.running || brsWorker != undefined) {
         brsWorker.terminate();
         sharedArray[dataType.KEY] = 0;
+        sharedArray[dataType.MOD] = 0;
         sharedArray[dataType.SND] = -1;
         sharedArray[dataType.IDX] = -1;
     }
@@ -338,6 +340,7 @@ export function closeChannel(reason) {
     clearDisplay();
     brsWorker.terminate();
     sharedArray[dataType.KEY] = 0;
+    sharedArray[dataType.MOD] = 0;
     sharedArray[dataType.SND] = -1;
     sharedArray[dataType.IDX] = -1;
     resetSounds();

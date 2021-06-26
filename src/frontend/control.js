@@ -22,47 +22,56 @@ keys.set("KeyZ", "b");
 
 // Keyboard handlers
 document.addEventListener("keydown", function (event) {    
-    handleKey(keys.get(event.code), 0);
-    if (preventDefault.has(event.code)) {
-        event.preventDefault();
-    }
+    if (keys.has(event.code)) {
+        handleKey(keys.get(event.code), 0);
+        if (preventDefault.has(event.code)) {
+            event.preventDefault();
+        }    
+    }   
 });
 document.addEventListener("keyup", function keyUpHandler(event) {
-    handleKey(keys.get(event.code), 100);
+    if (keys.has(event.code)) {
+        handleKey(keys.get(event.code), 100);
+    }
 });
 
 // Keyboard Handler
 export function handleKey(key, mod) {
-    if (key == "back") {
+    sharedArray[dataType.MOD] = mod;
+    if (key.toLowerCase() == "back") {
         sharedArray[dataType.KEY] = 0 + mod;
-    } else if (key == "select") {
+    } else if (key.toLowerCase() == "select") {
         sharedArray[dataType.KEY] = 6 + mod;
-    } else if (key == "left") {
+    } else if (key.toLowerCase() == "left") {
         sharedArray[dataType.KEY] = 4 + mod;
-    } else if (key == "right") {
+    } else if (key.toLowerCase() == "right") {
         sharedArray[dataType.KEY] = 5 + mod;
-    } else if (key == "up") {
+    } else if (key.toLowerCase() == "up") {
         sharedArray[dataType.KEY] = 2 + mod;
-    } else if (key == "down") {
+    } else if (key.toLowerCase() == "down") {
         sharedArray[dataType.KEY] = 3 + mod;
-    } else if (key == "instantreplay") {
+    } else if (key.toLowerCase() == "instantreplay") {
         sharedArray[dataType.KEY] = 7 + mod;
-    } else if (key == "info") {
+    } else if (key.toLowerCase() == "info") {
         sharedArray[dataType.KEY] = 10 + mod;
-    } else if (key == "rev") {
+    } else if (key.toLowerCase() == "rev") {
         sharedArray[dataType.KEY] = 8 + mod;
-    } else if (key == "play") {
+    } else if (key.toLowerCase() == "play") {
         sharedArray[dataType.KEY] = 13 + mod;
-    } else if (key == "fwd") {
+    } else if (key.toLowerCase() == "fwd") {
         sharedArray[dataType.KEY] = 9 + mod;
-    } else if (key == "a") {
+    } else if (key.toLowerCase() == "a") {
         sharedArray[dataType.KEY] = 17 + mod;
-    } else if (key == "b") {
+    } else if (key.toLowerCase() == "b") {
         sharedArray[dataType.KEY] = 18 + mod;
-    } else if (key == "home" && mod === 0) {
+    } else if (key.toLowerCase() == "home" && mod == 0) {
         if (currentChannel.running) {
             closeChannel("Home Button");
             playWav(0);
+        }
+    } else if (key.substr(0,4).toLowerCase() === "lit_") {
+        if (key.substr(4).length == 1 && key.charCodeAt(4) >= 32 && key.charCodeAt(4) < 255) {
+            sharedArray[dataType.KEY] = key.charCodeAt(4) + mod; 
         }
     }
 }

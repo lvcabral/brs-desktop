@@ -14,7 +14,8 @@ import path from "path";
 
 const ECPPORT = 8060;
 const SSDPPORT = 1900;
-const UDN = "404d7944-8d29-45e3-8ef3-873eaa9f7770";
+const MAC = getMacAddress();
+const UDN = "404d7944-8d29-45e3-8ef3-" + MAC.replace(/:\s*/g, "");
 let window;
 let device;
 let ecp;
@@ -50,6 +51,10 @@ export function enableECP(mainWindow) {
     ecp.post("/keypress/:key", postKeyPress);
     ecp.post("/keydown/:key", postKeyDown);
     ecp.post("/keyup/:key", postKeyUp);
+    // ecp.use((req, res, next) => {
+    //     console.log(req.url, req.method, req.headers);
+    //     return next();
+    //   });
     ecp.start(ECPPORT)
     .catch((error)=>{
         window.webContents.send("console",`ECP server error:${error.message}`, true);
@@ -134,7 +139,6 @@ function getDeviceRoot(req, res) {
 }
 
 function getDeviceInfo(req, res) {
-    const mac = getMacAddress();
     let xml = xmlbuilder.create("device-info");
     xml.ele("udn", {}, UDN);
     xml.ele("serial-number", {}, device.serialNumber);
@@ -146,8 +150,9 @@ function getDeviceInfo(req, res) {
     xml.ele("model-region", {}, device.countryCode);
     xml.ele("is-tv", {}, false);
     xml.ele("is-stick", {}, false);
-    xml.ele("wifi-mac", {}, mac);
-    xml.ele("ethernet-mac", {}, mac);
+    xml.ele("ui-resolution", {}, device.displayMode);
+    xml.ele("wifi-mac", {}, MAC);
+    xml.ele("ethernet-mac", {}, MAC);
     xml.ele("network-type", {}, "wifi");
     xml.ele("network-name", {}, "Local");
     xml.ele("friendly-device-name", {}, device.friendlyName);
@@ -187,6 +192,7 @@ function getDeviceInfo(req, res) {
     xml.ele("supports-wake-on-wlan", {}, false);
     xml.ele("has-play-on-roku", {}, true);
     xml.ele("has-mobile-screensaver", {}, false);
+    xml.ele("support-url", {}, "roku.com/support");
     res.setHeader("content-type", "application/xml");
     res.send(xml.end({ pretty: true }));
 }
@@ -300,10 +306,16 @@ function getMacAddress() {
         if ('IPv4' !== iface.family || iface.internal !== false) {
           // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
           return;
+        } else if (ifname.substr(0, 6).toLowerCase() === "vmware" ||
+        ifname.substr(0, 10).toLowerCase() === "virtualbox") {
+            return;
         }
         mac = iface.mac;
         return;
       });
-    });
+    });   
+    if (mac === "") {
+        mac = "87:3e:aa:9f:77:70";
+    }
     return mac;
 }
