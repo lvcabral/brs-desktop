@@ -1,7 +1,7 @@
 # How to Use the Application
 
 ## Menu Options
-This section will describe the options available on the application menu, please notice that in **macOS** the options will be possibly in different location, as the OS has different standards than **Windows** an **Linux**.
+This section will describe the options available on the application menu, please notice that in **macOS** the options will be possibly in different location, as the OS has different standards than **Windows** and **Linux**.
 
 <p align="center">
 <img alt="Emulator Web and Desktop" src="images/app-menu.gif?raw=true"/>
@@ -17,8 +17,7 @@ This section will describe the options available on the application menu, please
 
 ### Edit Menu
 
-- Copy Screenshot - Copy the current screen image to the OS clipboard
-- Settings - Not implemented yet.
+- Copy Screenshot - Copies the current screen image to the OS clipboard
 
 ### Device Menu
 
@@ -38,7 +37,7 @@ This section will describe the options available on the application menu, please
 
 ### View Menu
 
-- Full Screen - Enter full screen mode. If you double click the screen it also toggles full screen mode.
+- Full Screen - Enter full screen mode. If you double click the screen it also toggles full screen mode
 - Color Themes - Allows to select among the 3 available themes</br>
 ![Screen Themes](images/screeshot-themes.png)
 - Always on Top - Toggles if the application will stay on top of other windows when it loses focus
@@ -50,7 +49,6 @@ This section will describe the options available on the application menu, please
 - Control Keyboard Reference - Opens the [remote control keyboard reference documentation](control-reference.md)
 - Release Notes - Opens the [release page](https://github.com/lvcabral/brs-emu/releases)
 - View License - Shows the [application license](../LICENSE)
-- Check for Update - Not implemented yet.
 - About - Shows the about dialog box
 
 ## Command Line Options
