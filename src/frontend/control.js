@@ -5,6 +5,7 @@ import { playWav } from "./sound";
 const preventDefault = new Set(["Enter", "Space", "ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"]);
 const keys = new Map();
 keys.set("Backspace", "back");
+keys.set("Delete", "backspace");
 keys.set("Enter", "select");
 keys.set("Escape", "home");
 keys.set("Space", "play");
@@ -54,12 +55,20 @@ export function handleKey(key, mod) {
         sharedArray[dataType.KEY] = 7 + mod;
     } else if (key.toLowerCase() == "info") {
         sharedArray[dataType.KEY] = 10 + mod;
+    } else if (key.toLowerCase() == "backspace") {
+        sharedArray[dataType.KEY] = 11 + mod;
+    } else if (key.toLowerCase() == "enter") {
+        sharedArray[dataType.KEY] = 15 + mod;
     } else if (key.toLowerCase() == "rev") {
         sharedArray[dataType.KEY] = 8 + mod;
-    } else if (key.toLowerCase() == "play") {
-        sharedArray[dataType.KEY] = 13 + mod;
     } else if (key.toLowerCase() == "fwd") {
         sharedArray[dataType.KEY] = 9 + mod;
+    } else if (key.toLowerCase() == "play") {
+        sharedArray[dataType.KEY] = 13 + mod;
+    } else if (key.toLowerCase() == "playonly") {
+        sharedArray[dataType.KEY] = 22 + mod;
+    } else if (key.toLowerCase() == "stop") {
+        sharedArray[dataType.KEY] = 23 + mod;
     } else if (key.toLowerCase() == "a") {
         sharedArray[dataType.KEY] = 17 + mod;
     } else if (key.toLowerCase() == "b") {
