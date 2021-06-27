@@ -67,6 +67,7 @@
         "mousetrap": "^1.6.5",
         "node-ssdp": "^4.0.1",
         "restana": "^3.4.2",
+        "ws": "^7.5.0",
         "xmlbuilder": "^13.0.2"
     },
     "devDependencies": {
