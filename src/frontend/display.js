@@ -74,7 +74,7 @@ export function drawSplashScreen(imgData) {
 export function drawBufferImage(buffer) {
     if (buffer) {
         if (bufferCanvas.width !== buffer.width || bufferCanvas.height !== buffer.height) {
-            notifyAll("resolution", {width: buffer.width, height: buffer.width});
+            notifyAll("resolution", {width: buffer.width, height: buffer.height});
             bufferCanvas.width = buffer.width;
             bufferCanvas.height = buffer.height;
         }

@@ -14,6 +14,7 @@ const statusFile = document.getElementById("statusFile");
 const statusIconVersion = document.getElementById("statusIconVersion");
 const statusVersion = document.getElementById("statusVersion");
 const statusDisplay = document.getElementById("statusDisplay");
+const statusLocale = document.getElementById("statusLocale");
 const statusSepRes = document.getElementById("statusSepRes");
 const statusIconRes = document.getElementById("statusIconRes");
 const statusResolution = document.getElementById("statusResolution");
@@ -53,12 +54,17 @@ function getLocalIp() {
 let mode = deviceData.displayMode;
 let ui = mode == "720p" ? "HD" : mode == "1080p" ? "FHD" : "SD";
 statusDisplay.innerText = `${ui} (${mode})`;    
+const MIN_PATH_SIZE = 30;
+const PATH_SIZE_FACTOR = 0.045;
+let filePath = "";
 
 // Subscribe Events
 subscribeLoader("statusbar", (event, data) => {
     if (event === "loaded") {
         statusIconFile.innerHTML = data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
-        statusFile.innerText = data.file;
+        statusFile.innerText = shortenPath(data.file, 
+            Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR));
+        filePath = data.file;
         if (data.version !== "") {
             statusVersion.innerText = data.version;
             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
@@ -68,6 +74,7 @@ subscribeLoader("statusbar", (event, data) => {
     } else if (event === "closed") {
         statusIconFile.innerText = "";
         statusFile.innerText = "";
+        filePath = "";
         statusVersion.innerText = "";
         statusIconVersion.style.display = "none";
         statusResolution.style.display = "none";
@@ -81,6 +88,10 @@ subscribeDisplay("statusbar", (event, data) => {
         if (!data && menuStatus.checked) {
             display.style.bottom = "20px";
             statusBar.style.visibility = "visible";
+            if (filePath !== "") {
+                statusFile.innerText = shortenPath(filePath, 
+                    Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR));
+            }
         } else {
             display.style.bottom = "0px";
             statusBar.style.visibility = "hidden";
@@ -130,6 +141,10 @@ export function setStatusColor() {
         statusDevTools.className = "statusIcons";
     }
 }
+// Update locale id on Status Bar
+export function setLocaleStatus(localeId) {
+    statusLocale.innerText = localeId.replace("_","-");
+}
 // Update server icons on Status Bar
 export function setServerStatus(name, port, enabled) {
     if (name === "ECP") {
@@ -163,3 +178,29 @@ export function clearCounters() {
     warnCount = 0;
 }
 
+// Function that shortens a path (based on code by https://stackoverflow.com/users/2149492/johnpan)
+function shortenPath(bigPath, maxLen) {
+    if (bigPath.length <= maxLen) return bigPath;
+    var splitter = bigPath.indexOf('/')>-1 ? '/' : "\\",
+        tokens = bigPath.split(splitter), 
+        maxLen = maxLen || 25,
+        drive = bigPath.indexOf(':')>-1 ? tokens[0] : "",  
+        fileName = tokens[tokens.length - 1],
+        len = drive.length + fileName.length,    
+        remLen = maxLen - len - 3, // remove the current length and also space for ellipsis char and 2 slashes
+        path, lenA, lenB, pathA, pathB;    
+    //remove first and last elements from the array
+    tokens.splice(0, 1);
+    tokens.splice(tokens.length - 1, 1);
+    //recreate our path
+    path = tokens.join(splitter);
+    //handle the case of an odd length
+    lenA = Math.ceil(remLen / 2);
+    lenB = Math.floor(remLen / 2);
+    //rebuild the path from beginning and end
+    pathA = path.substring(0, lenA);
+    pathB = path.substring(path.length - lenB);
+    path = drive + splitter + pathA + "…" + pathB + splitter ;
+    path = path + fileName; 
+    return path;
+}

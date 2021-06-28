@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -21,11 +21,11 @@ import createWindow from "./helpers/window";
 const deviceInfo = {
     developerId: "emulator-dev-id", // Unique id to segregate registry among channels
     friendlyName: "BrightScript Emulator",
-    serialNumber: "BRSEMUAPP070",
+    serialNumber: "BRSEMUAPP090",
     deviceModel: "4200X",   // Can change according to the display mode in the front-end
     firmwareVersion: "049.10E04111A",
-    clientId: "6c5bf3a5-b2a5-4918-824d-7691d5c85364", // Unique identifier of the device
-    RIDA: "f51ac698-bc60-4409-aae3-8fc3abc025c4", // Unique identifier for advertisement tracking
+    clientId: "810e74d8-f387-49c2-8644-c72bd0e8e2a1", // Unique identifier of the device
+    RIDA: "fad884dd-583f-4753-b694-fd0748152064", // Unique identifier for advertisement tracking
     countryCode: "US",
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     locale: "en_US",
@@ -33,8 +33,10 @@ const deviceInfo = {
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     defaultFont: "Asap", // Desktop app only has Asap to reduce the package size
     maxSimulStreams: 2,
+    connectionType: "WiFiConnection", // Options: "WiFiConnection", "WiredConnection", ""
     localIps: getLocalIps(),
-    startTime: Date.now()
+    startTime: Date.now(),
+    audioVolume: 40
 }
 
 // Parse CLI parameters

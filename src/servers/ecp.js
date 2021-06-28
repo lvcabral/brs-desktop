@@ -12,9 +12,14 @@ import xmlbuilder from "xmlbuilder";
 import fs from "fs";
 import path from "path";
 
+const WebSocket = require('ws');
+const url = require('url');
+
+const DEBUG = false;
 const ECPPORT = 8060;
 const SSDPPORT = 1900;
-const UDN = "404d7944-8d29-45e3-8ef3-873eaa9f7770";
+const MAC = getMacAddress();
+const UDN = "138aedd0-d6ad-11eb-b8bc-" + MAC.replace(/:\s*/g, "");
 let window;
 let device;
 let ecp;
@@ -35,21 +40,26 @@ export function enableECP(mainWindow) {
     });
     ecp.getServer().on("error", (error)=>{
         window.webContents.send("console",`Failed to start ECP server:${error.message}`, true);
-    })
-    ecp.get("/", getDeviceRoot);
-    ecp.get("/device-image.png", getDeviceImage);
-    ecp.get("/ecp_SCPD.xml", getScpdXML)
-    ecp.get("/dial_SCPD.xml", getScpdXML)
-    ecp.get("/ecp-session", getScpdXML)
-    ecp.get("/query/device-info", getDeviceInfo);
-    ecp.get("//query/device-info", getDeviceInfo);
-    ecp.get("/query/apps", getApps);
-    ecp.get("/query/active-app", getActiveApp);
-    ecp.get("/query/icon/:appID", getAppIcon);
-    ecp.post("/launch/:appID", postLaunchApp);
-    ecp.post("/keypress/:key", postKeyPress);
-    ecp.post("/keydown/:key", postKeyDown);
-    ecp.post("/keyup/:key", postKeyUp);
+    });
+    ecp.get("/", sendDeviceRoot);
+    ecp.get("/device-image.png", sendDeviceImage);
+    ecp.get("/ecp_SCPD.xml", sendScpdXML)
+    ecp.get("/dial_SCPD.xml", sendScpdXML)
+    ecp.get("/query/device-info", sendDeviceInfo);
+    ecp.get("//query/device-info", sendDeviceInfo);
+    ecp.get("/query/apps", sendApps);
+    ecp.get("/query/active-app", sendActiveApp);
+    ecp.get("/query/icon/:appID", sendAppIcon);
+    ecp.post("/launch/:appID", sendLaunchApp);
+    ecp.post("/keypress/:key", sendKeyPress);
+    ecp.post("/keydown/:key", sendKeyDown);
+    ecp.post("/keyup/:key", sendKeyUp);
+    if (DEBUG) {
+        ecp.use((req, res, next) => {
+            console.log(req.url, req.method, req.headers);
+            return next();
+        });
+    }
     ecp.start(ECPPORT)
     .catch((error)=>{
         window.webContents.send("console",`ECP server error:${error.message}`, true);
@@ -68,11 +78,6 @@ export function enableECP(mainWindow) {
             ssdpPort: SSDPPORT,
             suppressRootDeviceAdvertisements: true,
             headers: {"device-group.roku.com": "46F5CCE2472F2B14D77"},
-            // customLogger(text, ...args) {
-            //     if (text.substr(0,13) === "Sending a 200") {
-            //         console.log(text, ...args);
-            //     }
-            // }
         });
         ssdp.addUSN("roku:ecp");
         ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
@@ -85,6 +90,30 @@ export function enableECP(mainWindow) {
             isECPEnabled = true;
             window.webContents.send("toggleECP", true, ECPPORT);
         });
+        // Create ECP-2 WebSocket Server
+        const wss = new WebSocket.Server({ noServer: true });
+        wss.on('connection', function connection(ws) {
+            const auth = `{"notify":"authenticate","param-challenge":"jONQirQ3WxSQWdI9Zn0enA==","timestamp":"${process.uptime().toFixed(3)}"}`;
+            if (DEBUG) {console.log("received connection!", auth);}
+            ws.send(auth);
+            ws.on("message", function incoming(message) {
+                processRequest(ws, message);
+            });
+            ws.on('ping', function heartbeat(p) {
+                ws.pong();
+            });
+    	});
+        server.on("upgrade", function upgrade(request, socket, head) {
+            const pathname = url.parse(request.url).pathname;
+            if (pathname === '/ecp-session') {
+                if (DEBUG) {console.log("ecp-2 websocket session started!");}
+                wss.handleUpgrade(request, socket, head, function done(ws) {
+                    wss.emit('connection', ws, request);
+                });
+            } else {
+              socket.destroy();
+            }
+          });
     });
 }
 
@@ -99,8 +128,120 @@ export function disableECP() {
     window.webContents.send("toggleECP", false);    
 }
 
-// REST API Methods
-function getDeviceRoot(req, res) {
+// ECP-2 WebSocket API
+function processRequest(ws, message) {
+    if (message) {
+        if (DEBUG) {console.log('received: %s', message);}
+        let reply = "";
+        let msg;
+        try {
+            msg = JSON.parse(message);            
+        } catch (error) {
+            console.warn("invalid ecp-2 message:", message);
+            return;
+        }
+        const statusOK = `"response":"${msg["request"]}","response-id":"${msg["request-id"]}","status":"200","status-msg":"OK"`;
+        if (msg["request"] == "authenticate" && msg["param-response"]) {
+            reply = `{${statusOK}}`;
+        } else if (msg["request"] == "query-device-info") {
+            reply = `{"content-data":"${genDeviceInfoXml(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+        } else if (msg["request"] == "query-themes") {
+            reply = `{"content-data":"${genThemesXml(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+        } else if (msg["request"] == "query-screensavers") {
+            reply = `{"content-data":"${genScrsvXml(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+        } else if (msg["request"] == "query-apps") {
+            reply = `{"content-data":"${genAppsXml(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+        } else if (msg["request"] == "query-icon") {
+            reply = `{"content-data":"${genAppIcon(msg["param-channel-id"], true)}","content-type":"image/png",${statusOK}}`;
+        } else if (msg["request"] == "query-tv-active-channel") {
+            reply = `{"content-data":"${genActiveApp(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+        } else if (msg["request"] == "launch") {
+            launchApp(msg["param-channel-id"]);
+            reply = `{${statusOK}}`;
+        } else if (msg["request"] == "request-events") {
+            reply = `{${statusOK}}`;
+        } else if (msg["request"] == "query-media-player") {
+            const content = Buffer.from(`<?xml version="1.0" encoding="UTF-8" ?>`).toString('base64');
+            reply = `{"content-data":"${content}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+        } else if (msg["request"] == "query-audio-device") {
+            const content = Buffer.from(`<?xml version="1.0" encoding="UTF-8" ?>`).toString('base64');
+            reply = `{"content-data":"${content}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+        } else if (msg["request"] == "query-textedit-state") {
+            const content = Buffer.from(`{"textedit-state":{"textedit-id":"none"}}`).toString('base64');
+            reply = `{"content-data":"${content}","content-type":"application/json",${statusOK}}`;
+        } else if (msg["request"] == "key-press") {
+            window.webContents.send("postKeyPress", msg["param-key"]);
+            reply = `{${statusOK}}`;
+        }
+        if (reply !== "") {
+            if (DEBUG) {console.log(`replying: %s`, reply)}
+            ws.send(reply);
+        } else if (DEBUG) {
+            console.log(`no reply for: %s`, msg["request-id"]);
+        }
+    }
+}
+
+// ECP REST API Methods
+function sendDeviceRoot(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genDeviceRootXml());
+}
+
+function sendDeviceInfo(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genDeviceInfoXml(false));
+}
+
+function sendApps(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genAppsXml(false));
+}
+
+function sendActiveApp(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genActiveApp(false));
+}
+
+function sendDeviceImage(req, res) {
+    let image = fs.readFileSync(path.join(__dirname, "images", "device-image.png"));
+    res.setHeader("content-type", "image/png");
+    res.send(image);
+}
+
+function sendScpdXML(req, res) {
+    let file = fs.readFileSync(path.join(__dirname, "web", "ecp_SCPD.xml"));
+    res.setHeader("content-type", "application/xml");
+    res.send(file);
+}
+
+function sendAppIcon(req, res) {
+    res.setHeader("content-type", "image/png");
+    res.send(genAppIcon(req.params.appID, false));
+}
+
+function sendLaunchApp(req, res) {
+    launchApp(req.params.appID);
+    res.end();
+}
+
+function sendKeyDown(req, res) {
+    window.webContents.send("postKeyDown", req.params.key);
+    res.end();
+}
+
+function sendKeyUp(req, res) {
+    window.webContents.send("postKeyUp", req.params.key);
+    res.end();
+}
+
+function sendKeyPress(req, res) {
+    window.webContents.send("postKeyPress", req.params.key);
+    res.end();
+}
+
+// Content Generation Functions
+function genDeviceRootXml() {
     let xml = xmlbuilder.create("root").att("xmlns", "urn:schemas-upnp-org:device-1-0");
     let spec = xml.ele("specVersion");
     spec.ele("major", {}, 1);
@@ -129,14 +270,13 @@ function getDeviceRoot(req, res) {
     xmlDial.ele("controlURL");
     xmlDial.ele("eventSubURL");
     xmlDial.ele("SCPDURL", {}, "dial_SCPD.xml");
-    res.setHeader("content-type", "application/xml");
-    res.send(xml.end({ pretty: true }));
+    return xml.end({ pretty: true });
 }
 
-function getDeviceInfo(req, res) {
-    const mac = getMacAddress();
+function genDeviceInfoXml(encrypt) {
     let xml = xmlbuilder.create("device-info");
     xml.ele("udn", {}, UDN);
+    if (encrypt) {xml.ele("virtual-device-id", {}, device.serialNumber);}
     xml.ele("serial-number", {}, device.serialNumber);
     xml.ele("device-id", {}, device.serialNumber);
     xml.ele("advertising-id", {}, device.RIDA);
@@ -146,8 +286,9 @@ function getDeviceInfo(req, res) {
     xml.ele("model-region", {}, device.countryCode);
     xml.ele("is-tv", {}, false);
     xml.ele("is-stick", {}, false);
-    xml.ele("wifi-mac", {}, mac);
-    xml.ele("ethernet-mac", {}, mac);
+    xml.ele("ui-resolution", {}, device.displayMode);
+    xml.ele("wifi-mac", {}, MAC);
+    xml.ele("ethernet-mac", {}, MAC);
     xml.ele("network-type", {}, "wifi");
     xml.ele("network-name", {}, "Local");
     xml.ele("friendly-device-name", {}, device.friendlyName);
@@ -185,13 +326,32 @@ function getDeviceInfo(req, res) {
     xml.ele("supports-ecs-textedit", {}, true);
     xml.ele("supports-ecs-microphone", {}, false);
     xml.ele("supports-wake-on-wlan", {}, false);
-    xml.ele("has-play-on-roku", {}, true);
+    xml.ele("has-play-on-roku", {}, false);
     xml.ele("has-mobile-screensaver", {}, false);
-    res.setHeader("content-type", "application/xml");
-    res.send(xml.end({ pretty: true }));
+    xml.ele("support-url", {}, "roku.com/support");
+    const strXml = xml.end({ pretty: true });
+    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
 }
 
-function getApps(req, res) {
+function genThemesXml(encrypt) {
+    const xml = xmlbuilder.create("themes");
+    xml.ele("theme", {id: "brand", selected: true }, "Roku (default)");
+    xml.ele("theme", {id: "Graphene"}, "Graphene");
+    xml.ele("theme", {id: "Brown"}, "Decaf");
+    xml.ele("theme", {id: "Space"}, "Nebula");
+    const strXml = xml.end({ pretty: true });
+    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
+}
+
+function genScrsvXml(encrypt) {
+    const xml = xmlbuilder.create("screensavers");
+    xml.ele("screensaver", {default: true, id: "5533", selected: true }, "Roku Digital Clock");
+    xml.ele("screensaver", {id: "5534"}, "Roku Analog Clock");
+    const strXml = xml.end({ pretty: true });
+    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
+}
+
+function genAppsXml(encrypt) {
     const xml = xmlbuilder.create("apps");
     getPackages().forEach((value, index) => {
         xml.ele(
@@ -203,11 +363,26 @@ function getApps(req, res) {
                 getRecentName(index)
         );
     });
-    res.setHeader("content-type", "application/xml");
-    res.send(xml.end({ pretty: true }));
+    const strXml = xml.end({ pretty: true });
+    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
 }
 
-function getActiveApp(req, res) {
+function genAppIcon(appID, encrypt) {
+    let image;
+    let index = getChannelIds().indexOf(appID);
+    if (index >= 0) {
+        const iconPath = path.join(app.getPath("userData"), getRecentId(index) + ".png");
+        if (fs.existsSync(iconPath)) {
+            image = fs.readFileSync(iconPath);
+        }
+    } 
+    if (image === undefined) {
+        image = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
+    }
+    return encrypt ? image.toString('base64') : image;
+}
+
+function genActiveApp(encrypt) {
     const xml = xmlbuilder.create("apps");
     const id = getRecentId(0);
     const appMenu = app.applicationMenu;
@@ -222,68 +397,24 @@ function getActiveApp(req, res) {
         );
     } else {
         xml.ele("app", {}, app.getName());
-    }    
-    res.setHeader("content-type", "application/xml");
-    res.send(xml.end({ pretty: true }));
+    }
+    const strXml = xml.end({ pretty: true });
+    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
 }
 
-function getDeviceImage(req, res) {
-    let image = fs.readFileSync(path.join(__dirname, "images", "device-image.png"));
-    res.setHeader("content-type", "image/png");
-    res.send(image);
-}
-
-function getScpdXML(req, res) {
-    let file = fs.readFileSync(path.join(__dirname, "web", "ecp_SCPD.xml"));
-    res.setHeader("content-type", "application/xml");
-    res.send(file);
-}
-
-function getAppIcon(req, res) {
-    let image;
-    let index = getChannelIds().indexOf(req.params.appID);
-    if (index >= 0) {
-        const iconPath = path.join(app.getPath("userData"), getRecentId(index) + ".png");
-        if (fs.existsSync(iconPath)) {
-            image = fs.readFileSync(iconPath);
-        }
-    } 
-    if (image === undefined) {
-        image = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
-    }    
-    res.setHeader("content-type", "image/png");
-    res.send(image);
-}
-
-function postLaunchApp(req, res) {
-    let index = getChannelIds().indexOf(req.params.appID);
+// Helper Functions
+function launchApp(appID) {
+    let index = getChannelIds().indexOf(appID);
     if (index >= 0) {
         let zip = getRecentPackage(index);
         if (zip) {
             window.webContents.send("fileSelected", [zip]);
         }    
     } else {
-        window.webContents.send("console", `ECP Launch: File not found! App Id=${req.params.appID}`, true);
+        window.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
     }
-    res.end();
 }
 
-function postKeyDown(req, res) {
-    window.webContents.send("postKeyDown", req.params.key);
-    res.end();
-}
-
-function postKeyUp(req, res) {
-    window.webContents.send("postKeyUp", req.params.key);
-    res.end();
-}
-
-function postKeyPress(req, res) {
-    window.webContents.send("postKeyPress", req.params.key);
-    res.end();
-}
-
-// Helper Functions
 function getModelName(model) {
     return `Roku ${model === "4640X" ? "Ultra" : model === "4200X" ? "3" : "2"}`;
 }
@@ -300,10 +431,16 @@ function getMacAddress() {
         if ('IPv4' !== iface.family || iface.internal !== false) {
           // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
           return;
+        } else if (ifname.substr(0, 6).toLowerCase() === "vmware" ||
+        ifname.substr(0, 10).toLowerCase() === "virtualbox") {
+            return;
         }
         mac = iface.mac;
         return;
       });
-    });
+    });   
+    if (mac === "") {
+        mac = "87:3e:aa:9f:77:70";
+    }
     return mac;
 }

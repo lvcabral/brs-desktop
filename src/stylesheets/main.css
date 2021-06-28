@@ -70,6 +70,7 @@ a {
     bottom: 0;
     height: 20px;
     width: 100%;
+    user-select: none;
     -webkit-user-select: none;
 }
 .statusbar span {
@@ -88,6 +89,7 @@ a {
     bottom: 0;
     height: 20px;
     width: 100%;
+    user-select: none;
     -webkit-user-select: none;
 }
 .statusbarError span {
@@ -106,6 +108,7 @@ a {
     bottom: 0;
     height: 20px;
     width: 100%;
+    user-select: none;
     -webkit-user-select: none;
 }
 .statusbarWarn span {

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -13,7 +13,7 @@ import { userTheme } from "./frontend/titlebar";
 import { handleKey } from "./frontend/control";
 import { deviceData } from "./frontend/device";
 import { subscribeLoader, loadFile, closeChannel, currentChannel } from "./frontend/loader";
-import { toggleStatusBar, setServerStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
+import { toggleStatusBar, setServerStatus, setLocaleStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
 import { setDisplayMode, setOverscanMode, redrawDisplay, copyScreenshot, overscanMode } from "./frontend/display";
 import { clientException } from "./frontend/console";
 import Mousetrap from "mousetrap";
@@ -40,6 +40,7 @@ ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassw
 setServerStatus("Web", installerPort, installerEnabled === "true");
 // Setup Menu
 deviceData.locale = storage.getItem("deviceLocale") || "en_US";
+setLocaleStatus(deviceData.locale)
 setupMenuSwitches();
 // Toggle Full Screen when Double Click
 display.ondblclick = function() {
@@ -54,20 +55,20 @@ Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
 // Events from Main process
 ipcRenderer.on("postKeyDown", function(event, key) {
     if (currentChannel.running) {
-        handleKey(key.toLowerCase(), 0);
+        handleKey(key, 0);
     }
 });
 ipcRenderer.on("postKeyUp", function(event, key) {
     if (currentChannel.running) {
-        handleKey(key.toLowerCase(), 100);
+        handleKey(key, 100);
     }
 });
 ipcRenderer.on("postKeyPress", function(event, key) {
     if (currentChannel.running) {
         setTimeout(function() {
-            handleKey(key.toLowerCase(), 100);
+            handleKey(key, 100);
         }, 300);
-        handleKey(key.toLowerCase(), 0);
+        handleKey(key, 0);
     }
 });
 ipcRenderer.on("closeChannel", function(event, source) {
@@ -97,6 +98,7 @@ ipcRenderer.on("setLocale", function(event, locale) {
     if (locale !== deviceData.locale) {
         deviceData.locale = locale;
         storage.setItem("deviceLocale", locale);
+        setLocaleStatus(locale);
     }
 });
 ipcRenderer.on("setPassword", function(event, pwd) {
@@ -162,6 +164,7 @@ ipcRenderer.on("console", function(event, text, error) {
     }
 });
 ipcRenderer.on("fileSelected", function(event, file) {
+    if (file==undefined) return;
     clearCounters()
     setStatusColor();
     let filePath;
