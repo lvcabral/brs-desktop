@@ -256,7 +256,7 @@ function runChannel() {
         sharedArray[dataType.IDX] = -1;
     }
     currentChannel.running = true;
-    brsWorker = new Worker("lib/brsEmu.min.js");
+    brsWorker = new Worker("../node_modules/brs-emu/app/lib/brsEmu.js");
     brsWorker.addEventListener("message", workerCallback);
     const payload = {
         device: deviceData,
