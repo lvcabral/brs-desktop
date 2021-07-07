@@ -1,5 +1,4 @@
 import { clientWarning } from "./console";
-import { Howl } from "howler";
 
 // Sound Objects
 const audioEvent = { SELECTED: 0, FULL: 1, PARTIAL: 2, PAUSED: 3, RESUMED: 4, FAILED: 5 };

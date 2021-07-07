@@ -1,4 +1,5 @@
 import * as dialog from "../helpers/dialog";
+import { loadFile } from "../helpers/files";
 import { getRecentPackage, clearRecentFiles, getRecentSource } from "./menuService";
 
 export const fileMenuTemplate = {
@@ -161,6 +162,7 @@ export const fileMenuTemplate = {
         },
         { type: "separator" },
         {
+            id: "save-screen",
             label: "Save Screenshot...",
             accelerator: "CmdOrCtrl+S",
             click: () => {
@@ -185,13 +187,13 @@ export const fileMenuTemplate = {
 };
 
 function packageClick(window, id) {
-    window.webContents.send("fileSelected", [ getRecentPackage(id) ]);
+    loadFile([ getRecentPackage(id) ]);
     window.blur();
     window.focus();
 }
 
 function sourceClick(window, id) {
-    window.webContents.send("fileSelected", [ getRecentSource(id) ]);
+    loadFile([ getRecentSource(id) ]);
     window.blur();
     window.focus();
 }

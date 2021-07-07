@@ -1,4 +1,3 @@
-import { remote, shell } from "electron";
 import { deviceData } from "./device";
 import { subscribeLoader } from "./loader";
 import { subscribeDisplay } from "./display";
@@ -24,25 +23,23 @@ const statusTelnet = document.getElementById("statusTelnet");
 const statusTelnetText = document.getElementById("statusTelnetText");
 const statusWeb = document.getElementById("statusWeb");
 const statusWebText = document.getElementById("statusWebText");
-const appMenu = remote.Menu.getApplicationMenu();
-const menuStatus = appMenu.getMenuItemById("status-bar");
 statusResolution.style.display = "none";
 statusIconRes.style.display = "none";
 statusSepRes.style.display = "none";
 statusError.innerText = "0";
 statusWarn.innerText = "0";
 statusDevTools.onclick = function() {
-    remote.getCurrentWindow().openDevTools();
+    api.send("openDevTools");
 };
 let errorCount = 0;
 let warnCount = 0;
 let ECPPort = 8060;
 statusECP.onclick = function() {
-    shell.openExternal(`http://${getLocalIp()}:${ECPPort}/query/device-info`);
+    api.openExternal(`http://${getLocalIp()}:${ECPPort}/query/device-info`);
 };
 let installerPort = 80;
 statusWeb.onclick = function() {
-    shell.openExternal(`http://${getLocalIp()}:${installerPort}/`);
+    api.openExternal(`http://${getLocalIp()}:${installerPort}/`);
 };
 function getLocalIp() {
     let localIp = "127.0.0.1";
@@ -70,7 +67,6 @@ subscribeLoader("statusbar", (event, data) => {
             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
             statusIconVersion.style.display = "";
         }
-        appMenu.getMenuItemById("close-channel").enabled = true;
     } else if (event === "closed") {
         statusIconFile.innerText = "";
         statusFile.innerText = "";
@@ -80,12 +76,11 @@ subscribeLoader("statusbar", (event, data) => {
         statusResolution.style.display = "none";
         statusIconRes.style.display = "none";
         statusSepRes.style.display = "none";
-        appMenu.getMenuItemById("close-channel").enabled = false;
     }
 });
 subscribeDisplay("statusbar", (event, data) => {
     if (event === "redraw") {
-        if (!data && menuStatus.checked) {
+        if (!data && api.isMenuStatusChecked()) {
             display.style.bottom = "20px";
             statusBar.style.visibility = "visible";
             if (filePath !== "") {
@@ -118,7 +113,7 @@ subscribeConsole("statusbar", (event, data) => {
 // Status Bar visibility
 export function toggleStatusBar() {
     let visible = statusBar.style.visibility === "visible";
-    menuStatus.checked = !visible;
+    api.checkMenuItem("status-bar", !visible);
 }
 // Set status bar colors
 export function setStatusColor() {

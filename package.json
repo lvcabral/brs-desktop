@@ -69,8 +69,14 @@
         "node-ssdp": "^4.0.1",
         "restana": "^3.4.2",
         "ws": "^7.5.0",
-        "xmlbuilder": "^13.0.2"
-    },
+        "xmlbuilder": "^13.0.2",
+        "eventemitter2": "^5.0.1",
+        "load-json-file": "^6.2.0",
+        "lodash": "^4.17.21",
+        "react-color": "^2.14.1",
+        "react-modal": "^3.13.1",
+        "write-json-file": "^4.3.0"
+        },
     "devDependencies": {
         "@babel/core": "^7.14.3",
         "@babel/preset-env": "^7.14.4",

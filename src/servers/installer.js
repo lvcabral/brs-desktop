@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import http from "http";
 import crypt from "crypto";
+import { loadFile } from "../helpers/files";
 
 const credentials = {
     userName: "rokudev",
@@ -67,7 +68,7 @@ export function enableInstaller(window, customPort) {
                         let saveTo = path.join(app.getPath("userData"), "dev.zip");
                         file.pipe(fs.createWriteStream(saveTo));
                         file.on("end", function() {
-                            window.webContents.send("fileSelected", [saveTo]);
+                            loadFile([saveTo]);
                             done = "file";
                             if (window.isMinimized()) {
                                 window.restore()

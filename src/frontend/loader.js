@@ -3,8 +3,6 @@ import { initSoundModule, addSound, resetSounds, playSound, stopSound,
          pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist } from "./sound";
 import { clientLog, clientWarning, clientException } from "./console";
 import { deviceData } from "./device";
-import path from "path";
-import JSZip from "jszip";
 const storage = window.localStorage;
 let brsWorker;
 let splashTimeout = 1600;
@@ -46,8 +44,8 @@ subscribeDisplay("loader", (event, data) => {
 
 // Open File
 export function loadFile(filePath, fileData) {
-    const fileName = path.parse(filePath).base;
-    const fileExt = path.parse(filePath).ext.toLowerCase();
+    const fileName = api.pathParse(filePath).base;
+    const fileExt = api.pathParse(filePath).ext.toLowerCase();
     const reader = new FileReader();
     reader.onload = function(progressEvent) {
         currentChannel.id = "brs";
@@ -134,7 +132,7 @@ function openChannelZip(f) {
                         if (icon && icon.substr(0, 5) === "pkg:/") {
                             const iconFile = zip.file(icon.substr(5));
                             if (iconFile) {
-                                iconFile.async("nodebuffer").then((content) => {
+                                iconFile.async("base64").then((content) => {
                                     notifyAll("icon", content);
                                 });
                             }

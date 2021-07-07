@@ -15,6 +15,7 @@ import { initECP, enableECP } from "./servers/ecp"
 import { setPassword, setPort, enableInstaller } from "./servers/installer";
 import { enableTelnet } from "./servers/telnet";
 import { createMenu } from "./menu/menuService"
+import { saveFile } from "./helpers/files";
 import createWindow from "./helpers/window";
 
 // Emulator Device Information Object
@@ -140,6 +141,25 @@ app.on("ready", () => {
         } else {
             setPort(port);
         }
+    });
+    // Open Developer Tools
+    ipcMain.on("openDevTools", (event, data) => {
+        mainWindow.openDevTools();
+    });
+    // Save Files
+    ipcMain.on("saveFile", (event, data) => {
+        saveFile(data[0], data[1]);
+    });
+    ipcMain.on("saveIcon", (event, data) => {
+        const iconPath = path.join(
+            app.getPath("userData"),
+            data[0] + ".png"
+        );
+        saveFile(iconPath, data[1]);
+    });
+    // Reset device
+    ipcMain.on("reset", () => {
+        mainWindow.reload();
     });
 });
 // Quit the Application

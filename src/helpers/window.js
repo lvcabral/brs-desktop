@@ -4,6 +4,7 @@
 // instances of it and give each different name.
 
 import { app, BrowserWindow, screen } from "electron";
+import { loadFile } from "./files";
 import path from "path";
 import jetpack from "fs-jetpack";
 
@@ -92,6 +93,8 @@ export default (name, options, argv) => {
     win = new BrowserWindow(
         Object.assign(full, options, state, {
             webPreferences: {
+                preload: path.join(__dirname, './preload.js'),
+                contextIsolation: true,
                 enableRemoteModule: true,
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
@@ -121,10 +124,8 @@ export default (name, options, argv) => {
         }
         if (openFile) {
             const fileExt = path.parse(openFile).ext.toLowerCase();
-            if (fileExt === ".zip") {
-                win.webContents.send("fileSelected", [ openFile ]);
-            } else if (fileExt === ".brs") {
-                win.webContents.send("fileSelected", [ openFile ]);
+            if (fileExt === ".zip" || fileExt === ".brs" ) {
+                loadFile([ openFile ]);
             } else {
                 console.log("File format not supported: ", fileExt);
             }        

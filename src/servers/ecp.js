@@ -7,6 +7,7 @@ import {
     getRecentName,
     getRecentVersion
 } from "../menu/menuService";
+import { loadFile } from "../helpers/files";
 import { Server as SSDP } from "node-ssdp";
 import xmlbuilder from "xmlbuilder";
 import fs from "fs";
@@ -408,7 +409,7 @@ function launchApp(appID) {
     if (index >= 0) {
         let zip = getRecentPackage(index);
         if (zip) {
-            window.webContents.send("fileSelected", [zip]);
+            loadFile([zip]);
         }    
     } else {
         window.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);

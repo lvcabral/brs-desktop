@@ -16,7 +16,7 @@ export const viewMenuTemplate = {
             label: "Purple Theme",
             type: "radio",
             checked: true,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("setTheme", "purple");
             }
         },
@@ -25,7 +25,7 @@ export const viewMenuTemplate = {
             label: "Light Theme",
             type: "radio",
             checked: false,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("setTheme", "light");
             }
         },
@@ -34,7 +34,7 @@ export const viewMenuTemplate = {
             label: "Dark Theme",
             type: "radio",
             checked: false,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("setTheme", "dark");
             }
         },
@@ -45,8 +45,10 @@ export const viewMenuTemplate = {
             type: "checkbox",
             checked: false,
             enabled: true,
-            click: (event, window) => {
-                window.webContents.send("toggleOnTop");
+            click: (item, window) => {
+                const onTop = !window.isAlwaysOnTop();
+                window.setAlwaysOnTop(onTop);
+                item.checked = !onTop;
             }
         },
         {
@@ -55,7 +57,7 @@ export const viewMenuTemplate = {
             type: "checkbox",
             checked: true,
             enabled: true,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("toggleStatusBar");
             }
         }

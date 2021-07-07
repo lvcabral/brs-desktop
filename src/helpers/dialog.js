@@ -1,5 +1,5 @@
 import { dialog, BrowserWindow } from "electron";
-
+import { loadFile } from "./files";
 /*
  * Show open dialog to open a .zip or .brs file.
  */
@@ -17,7 +17,7 @@ export function openChannelPackage() {
                 console.log("cancelled");
                 return;
             }
-            window.webContents.send("fileSelected", result.filePaths);
+            loadFile(result.filePaths);
         })
         .catch((err) => {
             console.log(err);
@@ -38,7 +38,7 @@ export function openBrightScriptFile() {
                 console.log("cancelled");
                 return;
             }
-            window.webContents.send("fileSelected", result.filePaths);
+            loadFile(result.filePaths);
         })
         .catch((err) => {
             console.log(err);

@@ -1,4 +1,3 @@
-import { ipcRenderer } from "electron";
 // Observers Handling
 const observers = new Map();
 export function subscribeConsole(observerId, observerCallback) {
@@ -14,16 +13,16 @@ function notifyAll(eventName, eventData) {
 }
 // Log to Telnet Server and Console
 export function clientLog(msg) {
-    ipcRenderer.send("telnet", msg);
+    api.send("telnet", msg);
     console.log(msg);
 }
 export function clientWarning(msg) {
-    ipcRenderer.send("telnet", msg);
+    api.send("telnet", msg);
     console.warn(msg);
     notifyAll("warning");
 }
 export function clientException(msg) {
-    ipcRenderer.send("telnet", msg);
+    api.send("telnet", msg);
     console.error(msg);
     notifyAll("error");
 }

@@ -32,7 +32,8 @@ function notifyAll(eventName, eventData) {
 }
 // Redraw Display Canvas
 export function redrawDisplay(running, fullScreen) {
-    notifyAll("redraw", fullScreen);    
+    notifyAll("redraw", fullScreen);
+    api.titleBarRedraw(fullScreen);
     if (fullScreen) {
         screenSize.width = window.innerWidth;
         screenSize.height = parseInt(screenSize.width / aspectRatio);

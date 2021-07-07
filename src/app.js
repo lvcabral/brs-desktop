@@ -8,134 +8,123 @@
 import "./stylesheets/main.css";
 import "./stylesheets/fontawesome.min.css";
 import "./helpers/hash";
-import { remote, ipcRenderer } from "electron";
-import { userTheme } from "./frontend/titlebar";
 import { handleKey } from "./frontend/control";
 import { deviceData } from "./frontend/device";
 import { subscribeLoader, loadFile, closeChannel, currentChannel } from "./frontend/loader";
 import { toggleStatusBar, setServerStatus, setLocaleStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
 import { setDisplayMode, setOverscanMode, redrawDisplay, copyScreenshot, overscanMode } from "./frontend/display";
 import { clientException } from "./frontend/console";
-import Mousetrap from "mousetrap";
-import fs from "fs";
-import path from "path";
+
 // App menu and theme configuration
-const mainWindow = remote.getCurrentWindow();
+const defaultTitle = document.title;
 const display = document.getElementById("display");
 const storage = window.localStorage;
-let appMenu = remote.Menu.getApplicationMenu();
+const colorValues = getComputedStyle(document.documentElement);
+let titleColor = colorValues.getPropertyValue("--title-color").trim();
+let titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
+api.setBackgroundColor(colorValues.getPropertyValue("--background-color").trim());
+api.createNewTitleBar(titleColor, titleBgColor);
 // ECP Server 
 let ECPEnabled = storage.getItem("ECPEnabled") || "false";
-ipcRenderer.send("ECPEnabled", ECPEnabled === "true");
+api.send("ECPEnabled", ECPEnabled === "true");
 setServerStatus("ECP", 8060, ECPEnabled === "true");
 // Telnet Server
 let telnetEnabled = storage.getItem("telnetEnabled") || "false";
-ipcRenderer.send("telnetEnabled", telnetEnabled === "true");
+api.send("telnetEnabled", telnetEnabled === "true");
 setServerStatus("Telnet", 8085, telnetEnabled === "true");
 // Web Installer Server 
 let installerEnabled = storage.getItem("installerEnabled") || "false";
 let installerPassword = storage.getItem("installerPassword") || "rokudev";
 let installerPort = storage.getItem("installerPort") || "80";
-ipcRenderer.send("installerEnabled", installerEnabled === "true", installerPassword, installerPort);
+api.send("installerEnabled", installerEnabled === "true", installerPassword, installerPort);
 setServerStatus("Web", installerPort, installerEnabled === "true");
 // Setup Menu
 deviceData.locale = storage.getItem("deviceLocale") || "en_US";
 setLocaleStatus(deviceData.locale)
 setupMenuSwitches();
 // Toggle Full Screen when Double Click
-display.ondblclick = function() {
-    const toggle = !mainWindow.isFullScreen();
-    mainWindow.setFullScreen(toggle);
+display.ondblclick = function () {
+    api.toggleFullScreen();
 };
-// Detect Clipboard Copy to create Screenshot
-Mousetrap.bind([ "command+c", "ctrl+c" ], function() {
-    copyScreenshot();
-    return false;
-});
 // Events from Main process
-ipcRenderer.on("postKeyDown", function(event, key) {
+api.receive("postKeyDown", function (event, key) {
     if (currentChannel.running) {
         handleKey(key, 0);
     }
 });
-ipcRenderer.on("postKeyUp", function(event, key) {
+api.receive("postKeyUp", function (key) {
     if (currentChannel.running) {
         handleKey(key, 100);
     }
 });
-ipcRenderer.on("postKeyPress", function(event, key) {
+api.receive("postKeyPress", function (key) {
     if (currentChannel.running) {
-        setTimeout(function() {
+        setTimeout(function () {
             handleKey(key, 100);
         }, 300);
         handleKey(key, 0);
     }
 });
-ipcRenderer.on("closeChannel", function(event, source) {
+api.receive("closeChannel", function (source) {
     if (currentChannel.running) {
         closeChannel(source);
     }
 });
-ipcRenderer.on("updateMenu", function(event) {
+api.receive("updateMenu", function () {
     setupMenuSwitches(true);
 });
-ipcRenderer.on("saveScreenshot", function(event, file) {
+api.receive("saveScreenshot", function (file) {
     const img = display.toDataURL("image/png");
     const data = img.replace(/^data:image\/\w+;base64,/, "");
-    fs.writeFileSync(file, new Buffer(data, "base64"));
+    api.send("saveFile", [file, data])
 });
-ipcRenderer.on("setDisplay", function(event, mode) {
+api.receive("setDisplay", function (mode) {
     if (mode !== deviceData.displayMode) {
         setDisplayMode(mode, true);
-        redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
+        redrawDisplay(currentChannel.running, api.isFullScreen());
     }
 });
-ipcRenderer.on("setOverscan", function(event, mode) {
+api.receive("setOverscan", function (mode) {
     setOverscanMode(mode);
-    redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
+    redrawDisplay(currentChannel.running, api.isFullScreen());
 });
-ipcRenderer.on("setLocale", function(event, locale) {
+api.receive("setLocale", function (locale) {
     if (locale !== deviceData.locale) {
         deviceData.locale = locale;
         storage.setItem("deviceLocale", locale);
         setLocaleStatus(locale);
     }
 });
-ipcRenderer.on("setPassword", function(event, pwd) {
+api.receive("setPassword", function (pwd) {
     storage.setItem("installerPassword", pwd);
 });
-ipcRenderer.on("toggleOnTop", function(event) {
-    const onTop = !mainWindow.isAlwaysOnTop();
-    mainWindow.setAlwaysOnTop(onTop);
-    appMenu.getMenuItemById("on-top").checked = onTop;
-});
-ipcRenderer.on("toggleStatusBar", function(event) {
+api.receive("toggleStatusBar", function () {
     toggleStatusBar();
-    redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
+    redrawDisplay(currentChannel.running, api.isFullScreen());
 });
-ipcRenderer.on("toggleECP", function(event, enable, port) {
+api.receive("toggleECP", function (enable, port) {
     if (enable) {
         console.log(`ECP server started listening port ${port}`);
     } else {
-        console.log("ECP server disabled."); 
+        console.log("ECP server disabled.");
     }
-    appMenu.getMenuItemById("ecp-api").checked = enable;
+    api.checkMenuItem("ecp-api", enable);
     ECPEnabled = enable ? "true" : "false";
     storage.setItem("ECPEnabled", ECPEnabled);
     setServerStatus("ECP", port, enable);
 });
-ipcRenderer.on("toggleTelnet", function(event, enable, port) {
+api.receive("toggleTelnet", function (enable, port) {
     if (enable) {
         console.log(`Remote console started listening port ${port}`);
     } else {
-        console.log("Remote console server disabled."); 
+        console.log("Remote console server disabled.");
     }
-    appMenu.getMenuItemById("telnet").checked = enable;
+    api.checkMenuItem("telnet", enable);
     telnetEnabled = enable ? "true" : "false";
     storage.setItem("telnetEnabled", telnetEnabled);
     setServerStatus("Telnet", port, enable);
 });
-ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
+api.receive("toggleInstaller", function (enable, port, error) {
     if (enable) {
         console.log(`Installer server started listening port ${port}`);
         installerPort = port;
@@ -145,82 +134,84 @@ ipcRenderer.on("toggleInstaller", function(event, enable, port, error) {
     } else {
         console.log("Installer server disabled.");
     }
-    appMenu.getMenuItemById("web-installer").checked = enable;
+    api.checkMenuItem("web-installer", enable);
     installerEnabled = enable ? "true" : "false";
     storage.setItem("installerEnabled", installerEnabled);
     setServerStatus("Web", port, enable);
 });
-ipcRenderer.on("setTheme", function(event, theme) {
+api.receive("setTheme", function (theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    let bg = colorValues.getPropertyValue("--background-color").trim();
+    api.setBackgroundColor(bg);
+    titleColor = colorValues.getPropertyValue("--title-color").trim();
+    titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
+    api.updateTitlebarColor(titleColor, titleBgColor);
+    storage.setItem("userTheme", theme);
     setStatusColor();
 });
-ipcRenderer.on("copyScreenshot", function(event) {
+api.receive("copyScreenshot", function () {
     copyScreenshot();
 });
-ipcRenderer.on("console", function(event, text, error) {
+api.receive("console", function (text, error) {
     if (error) {
         console.error(text);
     } else {
         console.log(text);
     }
 });
-ipcRenderer.on("fileSelected", function(event, file) {
-    if (file==undefined) return;
+api.receive("clientException", function (msg) {
+    clientException(msg);
+});
+api.receive("fileSelected", function (filePath, data) {
     clearCounters()
     setStatusColor();
-    let filePath;
-    if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
-        filePath = file[0];
-    } else {
-        clientException(`Invalid file: ${file[0]}`);
-        return;
-    }
-    const fileName = path.parse(filePath).base;
-    const fileExt = path.parse(filePath).ext.toLowerCase();
-    if (fileExt === ".zip") {
-        try {
-            loadFile(filePath, fs.readFileSync(filePath));
-        } catch (error) {
-            clientException(`Error opening ${fileName}:${error.message}`);
-        }
-    } else if (fileExt === ".brs") {
-        try {
-            loadFile(filePath, new Blob([ fs.readFileSync(filePath) ], { type: "text/plain" }));
-        } catch (error) {
-            clientException(`Error opening ${fileName}:${error.message}`);
-        }
-    } else {
-        clientException(`File format not supported: ${fileExt}`);
+    try {
+        loadFile(filePath, data);
+    } catch (error) {
+        clientException(`Error opening ${filePath}:${error.message}`);
     }
 });
 // Subscribe Loader Events
 subscribeLoader("app", (event, data) => {
-    if (event === "icon") {
-        const iconPath = path.join(
-            remote.app.getPath("userData"), 
-            currentChannel.id + ".png"
-        );
-        fs.writeFileSync(iconPath, data);
+    if (event === "loaded") {
+        api.updateTitle(defaultTitle + " - " + data.title);
+        if (data.id === "brs") {
+            api.send("addRecentSource", data.file);
+        } else {
+            api.send("addRecentPackage", data);
+        }
+        api.enableMenuItem("close-channel", true);
+        api.enableMenuItem("save-screen", true);
+        api.enableMenuItem("copy-screen", true);
+    } else if (event === "closed") {
+        api.updateTitle(defaultTitle);
+        api.enableMenuItem("close-channel", false);
+        api.enableMenuItem("save-screen", false);
+        api.enableMenuItem("copy-screen", false);
+    } else if (event === "icon") {
+        api.send("saveIcon", [currentChannel.id, data]);
     } else if (event === "reset") {
-        mainWindow.reload();        
+        api.send("reset");
     }
 });
 // Window Resize Event
-window.onload = window.onresize = function() {
-    redrawDisplay(currentChannel.running, mainWindow.isFullScreen());
+window.onload = window.onresize = function () {
+    redrawDisplay(currentChannel.running, api.isFullScreen());
 };
 // Configure Menu Options
 function setupMenuSwitches(status) {
-    appMenu = remote.Menu.getApplicationMenu();
-    appMenu.getMenuItemById("close-channel").enabled = currentChannel.running;
-    appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
-    appMenu.getMenuItemById(`device-${deviceData.displayMode}`).checked = true;
-    appMenu.getMenuItemById(`overscan-${overscanMode}`).checked = true;
-    appMenu.getMenuItemById(deviceData.locale).checked = true;
-    appMenu.getMenuItemById("ecp-api").checked = (ECPEnabled === "true");
-    appMenu.getMenuItemById("telnet").checked = (telnetEnabled === "true");
-    appMenu.getMenuItemById("web-installer").checked = (installerEnabled === "true");
+    api.enableMenuItem("close-channel", currentChannel.running);
+    api.enableMenuItem("save-screen", currentChannel.running);
+    api.enableMenuItem("copy-screen", currentChannel.running);
+    api.checkMenuItem(`theme-${storage.getItem("userTheme") || "purple"}`, true);
+    api.checkMenuItem(`device-${deviceData.displayMode}`,  true);
+    api.checkMenuItem(`overscan-${overscanMode}`, true);
+    api.checkMenuItem(deviceData.locale, true);
+    api.checkMenuItem("ecp-api", (ECPEnabled === "true"));
+    api.checkMenuItem("telnet", (telnetEnabled === "true"));
+    api.checkMenuItem("web-installer", (installerEnabled === "true"));
     if (status) {
         const statusBar = document.getElementById("status");
-        appMenu.getMenuItemById("status-bar").checked = statusBar.style.visibility === "visible";
+        api.checkMenuItem("status-bar",  statusBar.style.visibility === "visible");
     }
 }
