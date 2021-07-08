@@ -80,7 +80,7 @@ subscribeLoader("statusbar", (event, data) => {
 });
 subscribeDisplay("statusbar", (event, data) => {
     if (event === "redraw") {
-        if (!data && api.isMenuStatusChecked()) {
+        if (!data && api.isStatusEnabled()) {
             display.style.bottom = "20px";
             statusBar.style.visibility = "visible";
             if (filePath !== "") {

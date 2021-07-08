@@ -3,6 +3,9 @@ const customTitlebar = require("custom-electron-titlebar");
 const Mousetrap = require("mousetrap");
 const path = require("path");
 
+const mainWindow = remote.getCurrentWindow();
+const appMenu = remote.Menu.getApplicationMenu();
+
 let onPreferencesChangedHandler = (preferences) => { };
 let titleBar;
 let titleBarConfig;
@@ -11,7 +14,6 @@ let titleColor;
 window.addEventListener('DOMContentLoaded', () => {
     // Detect Clipboard Copy to create Screenshot
     Mousetrap.bind(["command+c", "ctrl+c"], function () {
-        const mainWindow = remote.getCurrentWindow();
         mainWindow.webContents.send("copyScreenshot");
         return false;
     });
@@ -27,14 +29,14 @@ contextBridge.exposeInMainWorld("api", {
     onPreferencesChanged: (handler) => {
         onPreferencesChangedHandler = handler;
     },
-    isMenuStatusChecked: () => {
-        return remote.Menu.getApplicationMenu().getMenuItemById("status-bar").checked;
+    isStatusEnabled: () => {
+        return appMenu.getMenuItemById("status-bar").checked;
     },
     getDeviceInfo: () => {
         return remote.getGlobal("sharedObject").deviceInfo;
     },
     setBackgroundColor: (color) => {
-        remote.getCurrentWindow().setBackgroundColor(color);
+        mainWindow.setBackgroundColor(color);
         remote.getGlobal("sharedObject").backgroundColor = color;
     },
     openExternal: (url) => {
@@ -44,12 +46,10 @@ contextBridge.exposeInMainWorld("api", {
         return path.parse(fullPath);
     },
     isFullScreen: () => {
-        return remote.getCurrentWindow().isFullScreen();
+        return mainWindow.isFullScreen();
     },
     toggleFullScreen: () => {
-        const mainWindow = remote.getCurrentWindow();
-        const toggle = !mainWindow.isFullScreen();
-        mainWindow.setFullScreen(toggle);
+        mainWindow.setFullScreen(!mainWindow.isFullScreen());
     },
     createNewTitleBar: (mnColor, bgColor) => {
         titleColor = mnColor;
@@ -83,13 +83,11 @@ contextBridge.exposeInMainWorld("api", {
             titleBar.container.style.top = "30px";    
         }
     },
-    enableMenuItem: (id, enable) => {
-        const appMenu = remote.Menu.getApplicationMenu();
-        appMenu.getMenuItemById(id).enabled = enable;
-    },
     checkMenuItem: (id, enable) => {
-        const appMenu = remote.Menu.getApplicationMenu();
-        appMenu.getMenuItemById(id).checked = enable;
+        ipcRenderer.send("checkMenuItem", id, enable);
+    },
+    enableMenuItem: (id, enable) => {
+        ipcRenderer.send("enableMenuItem", id, enable);
     },
     send: (channel, data) => {
         // whitelist channels
@@ -145,5 +143,3 @@ contextBridge.exposeInMainWorld("api", {
 ipcRenderer.on('preferencesUpdated', (e, preferences) => {
     onPreferencesChangedHandler(preferences);
 });
-
-console.log("API Preloaded!");

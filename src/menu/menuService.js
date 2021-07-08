@@ -11,6 +11,9 @@ const isMacOS = process.platform === "darwin";
 const maxFiles = 7;
 const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
+const ASPECT_RATIO_SD = 1.27;
+const ASPECT_RATIO_HD = 1.67;
+
 let fileMenuIndex = 0;
 let recentMenuIndex = 2;
 let recentFiles;
@@ -62,6 +65,17 @@ export function clearRecentFiles() {
     rebuildMenu();
 }
 
+export function setAspectRatio(id) {
+    const window = BrowserWindow.fromId(1);
+    if (id === "device-480p") {
+        console.log("ASPECT_RATIO_SD");
+        window.setAspectRatio(ASPECT_RATIO_SD);
+    } else {
+        console.log("ASPECT_RATIO_HD");
+        window.setAspectRatio(ASPECT_RATIO_HD);
+    }
+}
+
 // Events
 ipcMain.on("addRecentPackage", (event, currentChannel) => {
     let idx = recentFiles.ids.indexOf(currentChannel.id);
@@ -87,6 +101,17 @@ ipcMain.on("addRecentSource" , (event, filePath) => {
     recentFiles.brs.unshift(filePath);
     saveRecentFiles();
     rebuildMenu();
+});
+
+ipcMain.on("checkMenuItem" , (event, id, enable) => {
+    app.applicationMenu.getMenuItemById(id).checked = enable;
+    if (id.substr(0,6) === "device") {
+        setAspectRatio(id);
+    }
+});
+
+ipcMain.on("enableMenuItem" , (event, id, enable) => {
+    app.applicationMenu.getMenuItemById(id).enabled = enable;
 });
 
 // Internal functions

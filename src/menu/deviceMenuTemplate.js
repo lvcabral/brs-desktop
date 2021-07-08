@@ -1,3 +1,4 @@
+import { setAspectRatio } from "./menuService";
 import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet";
 import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
@@ -10,8 +11,9 @@ export const deviceMenuTemplate = {
             label: "Display Mode: SD 480p (4:3)",
             type: "radio",
             checked: false,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("setDisplay", "480p");
+                setAspectRatio(item.id);
             }
         },
         {
@@ -19,8 +21,9 @@ export const deviceMenuTemplate = {
             label: "Display Mode: HD 720p (16:9)",
             type: "radio",
             checked: true,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("setDisplay", "720p");
+                setAspectRatio(item.id);
             }
         },
         {
@@ -28,8 +31,9 @@ export const deviceMenuTemplate = {
             label: "Display Mode: FHD 1080p (16:9)",
             type: "radio",
             checked: false,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("setDisplay", "1080p");
+                setAspectRatio(item.id);
             }
         },
         { type: "separator" },
@@ -38,7 +42,7 @@ export const deviceMenuTemplate = {
             label: "TV Overscan: Disabled",
             type: "radio",
             checked: true,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("setOverscan", "disabled");
             }
         },
@@ -47,7 +51,7 @@ export const deviceMenuTemplate = {
             label: "TV Overscan: Guide Lines",
             type: "radio",
             checked: false,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("setOverscan", "guide-lines");
             }
         },
@@ -56,7 +60,7 @@ export const deviceMenuTemplate = {
             label: "TV Overscan: Enabled",
             type: "radio",
             checked: false,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("setOverscan", "enabled");
             }
         },
@@ -124,7 +128,7 @@ export const deviceMenuTemplate = {
                     label: "Italian (it-IT)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
+                    click: (item, window) => {
                         changeLocale(window, "it_IT");
                     }
                 },
@@ -133,7 +137,7 @@ export const deviceMenuTemplate = {
                     label: "Brazilian Portuguese (pt-BR)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
+                    click: (item, window) => {
                         changeLocale(window, "pt_BR");
                     }
                 },
@@ -145,7 +149,7 @@ export const deviceMenuTemplate = {
             label: "Web Application Installer",
             type: "checkbox",
             checked: true,
-            click: (event, window) => {
+            click: (item, window) => {
                 if (hasInstaller) {
                     disableInstaller(window);
                 } else {
@@ -158,7 +162,7 @@ export const deviceMenuTemplate = {
             label: "External Control Protocol",
             type: "checkbox",
             checked: true,
-            click: (event, window) => {
+            click: (item, window) => {
                 if (isECPEnabled) {
                     disableECP(window);
                 } else {
@@ -171,7 +175,7 @@ export const deviceMenuTemplate = {
             label: "BrightScript Remote Console",
             type: "checkbox",
             checked: true,
-            click: (event, window) => {
+            click: (item, window) => {
                 if (isTelnetEnabled) {
                     disableTelnet(window);
                 } else {
@@ -183,7 +187,7 @@ export const deviceMenuTemplate = {
         {
             label: "Reset Device",
             accelerator: "CmdOrCtrl+Shift+R",
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.reloadIgnoringCache();
             }
         }

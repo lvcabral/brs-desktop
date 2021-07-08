@@ -128,7 +128,7 @@ export default (name, options, argv) => {
                 loadFile([ openFile ]);
             } else {
                 console.log("File format not supported: ", fileExt);
-            }        
+            }
         }
         win.show();
         win.focus();
