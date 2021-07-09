@@ -100,7 +100,7 @@ export default (name, options, argv) => {
                 nodeIntegrationInWorker: true,
                 webSecurity: true
             },
-            icon: __dirname + "/images/icon512x512.png",
+            icon: __dirname + "/images/icon48x48.ico",
             frame: false,
             show: false
         })

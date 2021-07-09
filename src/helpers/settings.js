@@ -31,7 +31,7 @@ export function getSettings(window) {
                 'title': 'Emulator Settings',
                 'parent': window,
                 'modal': true,
-                'icon': __dirname + "/images/icon512x512.png",
+                'icon': __dirname + "/images/icon48x48.ico",
                 'minimizable': false,
                 'maximizable': false,
             },
