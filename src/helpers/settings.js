@@ -1,9 +1,10 @@
+import { app, Menu } from "electron";
 import path from "path";
 import os from "os";
-const ElectronPreferences = require("./preferences.js");
+import ElectronPreferences from "electron-preferences";
 
 export const preferences = new ElectronPreferences({
-    'dataStore': path.resolve(__dirname, 'settings.json'),
+    'dataStore': path.resolve(app.getPath('userData'), 'settings.json'),
     'defaults': {
         'notes': {
             'folder': path.resolve(os.homedir(), 'Notes')
@@ -222,6 +223,7 @@ export const preferences = new ElectronPreferences({
                                 'type': 'radio',
                                 'options': [
                                     {'label': 'System (default)', 'value': 'system'},
+                                    {'label': 'Purple', 'value': 'purple'},
                                     {'label': 'Light', 'value': 'light'},
                                     {'label': 'Dark', 'value': 'dark'}
                                 ],
@@ -232,5 +234,37 @@ export const preferences = new ElectronPreferences({
                 ]
             }
         }
-    ]
+    ],
+	/**
+	 * These parameters on the preference window settings can be overwrinten
+	 */
+	browserWindowOpts: {
+		'title': 'Emulator Settings',
+		'width': 900,
+		'maxWidth': 1000,
+		'height': 700,
+		'maxHeight': 1000,
+		'resizable': true,
+		'maximizable': false,
+        'minimizable': false
+		//...
+	},
+	/**
+	 * These parameters create an optional menu bar
+	 */
+	menu: Menu.buildFromTemplate(
+		[
+			{
+			label: 'Window',
+			role: 'window',
+			submenu: [
+				{
+				label: 'Close',
+				accelerator: 'CmdOrCtrl+W',
+				role: 'close'
+				}
+			]
+			}
+		]
+	)    
 });
