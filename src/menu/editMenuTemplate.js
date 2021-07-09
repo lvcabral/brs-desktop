@@ -1,4 +1,5 @@
-import { preferences } from "../helpers/settings";
+import { getSettings } from "../helpers/settings";
+
 export const editMenuTemplate = {
     label: "&Edit",
     submenu: [
@@ -6,7 +7,7 @@ export const editMenuTemplate = {
             id: "copy-screen",
             label: "Copy Screenshot",
             accelerator: "CmdOrCtrl+C",
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("copyScreenshot");
             }
         },
@@ -15,8 +16,8 @@ export const editMenuTemplate = {
             id: "settings",
             label: "Settings...", 
             accelerator: "CmdOrCtrl+,",
-            click: (event, window) => {
-                preferences.show();
+            click: (item, window) => {
+                getSettings(window).show();
             }
         }
     ]

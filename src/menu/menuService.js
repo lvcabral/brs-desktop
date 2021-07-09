@@ -68,10 +68,8 @@ export function clearRecentFiles() {
 export function setAspectRatio(id) {
     const window = BrowserWindow.fromId(1);
     if (id === "device-480p") {
-        console.log("ASPECT_RATIO_SD");
         window.setAspectRatio(ASPECT_RATIO_SD);
     } else {
-        console.log("ASPECT_RATIO_HD");
         window.setAspectRatio(ASPECT_RATIO_HD);
     }
 }
