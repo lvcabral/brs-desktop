@@ -1,3 +1,5 @@
+import { getSettings, setThemeSource } from "../helpers/settings";
+
 export const viewMenuTemplate = {
     label: "&View",
     submenu: [
@@ -17,7 +19,8 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: true,
             click: (item, window) => {
-                window.webContents.send("setTheme", "purple");
+                getSettings(window).value("theme.theme", "purple");
+                window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
             }
         },
         {
@@ -26,7 +29,8 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                window.webContents.send("setTheme", "light");
+                getSettings(window).value("theme.theme", "light");
+                window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
             }
         },
         {
@@ -35,7 +39,18 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                window.webContents.send("setTheme", "dark");
+                getSettings(window).value("theme.theme", "dark");
+                window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
+            }
+        },
+        {
+            id: "theme-system",
+            label: "System Theme",
+            type: "radio",
+            checked: false,
+            click: (item, window) => {
+                getSettings(window).value("theme.theme", "system");
+                window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
             }
         },
         { type: "separator" },

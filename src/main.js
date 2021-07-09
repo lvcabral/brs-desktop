@@ -16,6 +16,7 @@ import { setPassword, setPort, enableInstaller } from "./servers/installer";
 import { enableTelnet } from "./servers/telnet";
 import { createMenu } from "./menu/menuService"
 import { saveFile } from "./helpers/files";
+import { getSettings } from "./helpers/settings";
 import createWindow from "./helpers/window";
 
 // Emulator Device Information Object
@@ -80,6 +81,12 @@ app.on("ready", () => {
             slashes: true
         })
     ).then(() => {
+        // Load Emulator Settings
+        let settings = getSettings(mainWindow);
+        if (settings.preferences.theme) {
+            let userTheme = settings.preferences.theme.theme;
+            app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+        }
         // CLI Switches
         if (argv.ecp) {
             enableECP(mainWindow);

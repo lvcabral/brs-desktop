@@ -203,7 +203,6 @@ function setupMenuSwitches(status) {
     api.enableMenuItem("close-channel", currentChannel.running);
     api.enableMenuItem("save-screen", currentChannel.running);
     api.enableMenuItem("copy-screen", currentChannel.running);
-    api.checkMenuItem(`theme-${storage.getItem("userTheme") || "purple"}`, true);
     api.checkMenuItem(`device-${deviceData.displayMode}`,  true);
     api.checkMenuItem(`overscan-${overscanMode}`, true);
     api.checkMenuItem(deviceData.locale, true);

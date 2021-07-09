@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app, nativeTheme } from "electron";
 import path from "path";
 import os from "os";
 import ElectronPreferences from "electron-preferences";
@@ -8,7 +8,7 @@ let settings;
 export function getSettings(window) {
     if (settings === undefined) {
         settings = new ElectronPreferences({
-            'dataStore': path.resolve(app.getPath('userData'), 'settings.json'),
+            'dataStore': path.resolve(app.getPath('userData'), 'brs-settings.json'),
             'defaults': {
                 'notes': {
                     'folder': path.resolve(os.homedir(), 'Notes')
@@ -22,6 +22,9 @@ export function getSettings(window) {
                 },
                 'drawer': {
                     'show': true
+                },
+                'theme': {
+                    'theme': 'purple'
                 }
             },
             'webPreferences': {
@@ -231,10 +234,10 @@ export function getSettings(window) {
                                         'key': 'theme',
                                         'type': 'radio',
                                         'options': [
-                                            { 'label': 'System (default)', 'value': 'system' },
-                                            { 'label': 'Purple', 'value': 'purple' },
+                                            { 'label': 'Purple (default)', 'value': 'purple' },
                                             { 'label': 'Light', 'value': 'light' },
-                                            { 'label': 'Dark', 'value': 'dark' }
+                                            { 'label': 'Dark', 'value': 'dark' },
+                                            { 'label': 'System', 'value': 'system' },
                                         ],
                                         'help': 'Light or dark theme?'
                                     }
@@ -245,6 +248,29 @@ export function getSettings(window) {
                 }
             ]
         });
+        setThemeSource(settings.preferences);
+        settings.on('save', (preferences) => {
+            window.webContents.send("setTheme", setThemeSource(preferences));
+        });
     }
     return settings;
+}
+
+export function setThemeSource(preferences) {
+    let userTheme = "purple";
+    let systemTheme = "system";
+    if (preferences.theme) {
+        userTheme = preferences.theme.theme;
+        app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+        if (userTheme === "purple") {
+            systemTheme = "system";
+        } else {
+            systemTheme = userTheme;
+        }
+    }
+    nativeTheme.themeSource = systemTheme;
+    if (userTheme === "system") {
+        userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
+    }
+    return userTheme;
 }
