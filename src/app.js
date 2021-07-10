@@ -11,7 +11,7 @@ import "./helpers/hash";
 import { handleKey } from "./frontend/control";
 import { deviceData } from "./frontend/device";
 import { subscribeLoader, loadFile, closeChannel, currentChannel } from "./frontend/loader";
-import { toggleStatusBar, setServerStatus, setLocaleStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
+import { setServerStatus, setLocaleStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
 import { setDisplayMode, setOverscanMode, redrawDisplay, copyScreenshot, overscanMode } from "./frontend/display";
 import { clientException } from "./frontend/console";
 
@@ -71,7 +71,7 @@ api.receive("closeChannel", function (source) {
     }
 });
 api.receive("updateMenu", function () {
-    setupMenuSwitches(true);
+    setupMenuSwitches();
 });
 api.receive("saveScreenshot", function (file) {
     const img = display.toDataURL("image/png");
@@ -197,7 +197,7 @@ window.onload = window.onresize = function () {
     redrawDisplay(currentChannel.running, api.isFullScreen());
 };
 // Configure Menu Options
-function setupMenuSwitches(status) {
+function setupMenuSwitches() {
     api.enableMenuItem("close-channel", currentChannel.running);
     api.enableMenuItem("save-screen", currentChannel.running);
     api.enableMenuItem("copy-screen", currentChannel.running);
@@ -207,8 +207,4 @@ function setupMenuSwitches(status) {
     api.checkMenuItem("ecp-api", (ECPEnabled === "true"));
     api.checkMenuItem("telnet", (telnetEnabled === "true"));
     api.checkMenuItem("web-installer", (installerEnabled === "true"));
-    if (status) {
-        const statusBar = document.getElementById("status");
-        api.checkMenuItem("status-bar",  statusBar.style.visibility === "visible");
-    }
 }
