@@ -10,7 +10,7 @@ import url from "url";
 import env from "env";
 import os from "os";
 import minimist from "minimist";
-import { app, screen, ipcMain } from "electron";
+import { app, screen, ipcMain, nativeTheme } from "electron";
 import { initECP, enableECP } from "./servers/ecp"
 import { setPassword, setPort, enableInstaller } from "./servers/installer";
 import { enableTelnet } from "./servers/telnet";
@@ -23,9 +23,9 @@ import createWindow from "./helpers/window";
 const deviceInfo = {
     developerId: "emulator-dev-id", // Unique id to segregate registry among channels
     friendlyName: "BrightScript Emulator",
-    serialNumber: "BRSEMUAPP090",
-    deviceModel: "4200X",   // Can change according to the display mode in the front-end
-    firmwareVersion: "049.10E04111A",
+    serialNumber: "BRSEMUAPP091",
+    deviceModel: "4200X",
+    firmwareVersion: "46A.00E04209A",
     clientId: "810e74d8-f387-49c2-8644-c72bd0e8e2a1", // Unique identifier of the device
     RIDA: "fad884dd-583f-4753-b694-fd0748152064", // Unique identifier for advertisement tracking
     countryCode: "US",
@@ -33,10 +33,10 @@ const deviceInfo = {
     locale: "en_US",
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
-    maxSimulStreams: 2,
     connectionType: "WiFiConnection", // Options: "WiFiConnection", "WiredConnection", ""
     localIps: getLocalIps(),
     startTime: Date.now(),
+    maxSimulStreams: 2,
     audioVolume: 40
 }
 
@@ -57,6 +57,7 @@ app.on("ready", () => {
     createMenu();
     // Shared Object with Front End
     global.sharedObject = {
+        theme: "purple",
         backgroundColor: "#251135",
         deviceInfo: deviceInfo
     };
@@ -74,6 +75,17 @@ app.on("ready", () => {
     let winBounds = mainWindow.getBounds();
     let display = screen.getDisplayNearestPoint({ x: winBounds.x, y: winBounds.y });
     mainWindow.setMinimumSize(Math.min(346, display.size.width), Math.min(264, display.size.height));
+    // Load Emulator Settings
+    let settings = getSettings(mainWindow);
+    if (settings.preferences.emulator) {
+        let userTheme = settings.preferences.emulator.theme || "purple";
+        app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+        if (userTheme === "system") {
+            userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
+        }
+        global.sharedObject.theme = userTheme;
+    }
+    // Load Renderer
     mainWindow.loadURL(
         url.format({
             pathname: path.join(__dirname, "index.html"),
@@ -81,12 +93,6 @@ app.on("ready", () => {
             slashes: true
         })
     ).then(() => {
-        // Load Emulator Settings
-        let settings = getSettings(mainWindow);
-        if (settings.preferences.theme) {
-            let userTheme = settings.preferences.theme.theme;
-            app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
-        }
         // CLI Switches
         if (argv.ecp) {
             enableECP(mainWindow);

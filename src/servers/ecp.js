@@ -297,8 +297,8 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("default-device-name", {}, `${device.friendlyName} - ${device.serialNumber}`);
     xml.ele("user-device-name", {}, device.friendlyName);
     xml.ele("build-number", {}, device.firmwareVersion);
-    xml.ele("software-version", {}, "9.1.0");
-    xml.ele("software-build", {}, "4111");
+    xml.ele("software-version", {}, "10.0.0");
+    xml.ele("software-build", {}, "4209");
     xml.ele("secure-device", {}, true);
     xml.ele("language", {}, device.locale.split("_")[0]);
     xml.ele("country", {}, device.locale.split("_")[1]);

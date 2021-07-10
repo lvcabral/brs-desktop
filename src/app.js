@@ -146,7 +146,6 @@ api.receive("setTheme", function (theme) {
     titleColor = colorValues.getPropertyValue("--title-color").trim();
     titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
     api.updateTitlebarColor(titleColor, titleBgColor);
-    storage.setItem("userTheme", theme);
     setStatusColor();
 });
 api.receive("copyScreenshot", function () {

@@ -35,6 +35,9 @@ contextBridge.exposeInMainWorld("api", {
     getDeviceInfo: () => {
         return remote.getGlobal("sharedObject").deviceInfo;
     },
+    getTheme: () => {
+        return remote.getGlobal("sharedObject").theme;
+    },
     setBackgroundColor: (color) => {
         mainWindow.setBackgroundColor(color);
         remote.getGlobal("sharedObject").backgroundColor = color;

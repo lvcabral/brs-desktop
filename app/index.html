@@ -2,13 +2,11 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' data: blob: 'self';"> -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' data: blob: 'self';">
     <title>BrightScript 2D API Emulator</title>
     <script>
         window.__setTheme = () => {
-            let userTheme = localStorage.getItem("userTheme");
-            let defaultTheme = 'purple';
-            document.documentElement.setAttribute('data-theme', userTheme || defaultTheme);
+            document.documentElement.setAttribute('data-theme', api.getTheme() || "purple");
         }
         __setTheme();
     </script>

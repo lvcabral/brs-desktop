@@ -19,7 +19,7 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: true,
             click: (item, window) => {
-                getSettings(window).value("theme.theme", "purple");
+                getSettings(window).value("emulator.theme", "purple");
                 window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
             }
         },
@@ -29,7 +29,7 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                getSettings(window).value("theme.theme", "light");
+                getSettings(window).value("emulator.theme", "light");
                 window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
             }
         },
@@ -39,7 +39,7 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                getSettings(window).value("theme.theme", "dark");
+                getSettings(window).value("emulator.theme", "dark");
                 window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
             }
         },
@@ -49,7 +49,7 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                getSettings(window).value("theme.theme", "system");
+                getSettings(window).value("emulator.theme", "system");
                 window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
             }
         },
