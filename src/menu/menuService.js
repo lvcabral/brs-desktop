@@ -4,6 +4,7 @@ import { editMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
+import { loadFile } from "../helpers/files";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
 
@@ -71,6 +72,32 @@ export function setAspectRatio(id) {
         window.setAspectRatio(ASPECT_RATIO_SD);
     } else {
         window.setAspectRatio(ASPECT_RATIO_HD);
+    }
+}
+
+export function loadPackage(window, id, skipFocus) {
+    let pkg = getRecentPackage(id);
+    if (pkg) {
+        loadFile([pkg]);
+        if (!skipFocus) {
+            window.blur();
+            window.focus();    
+        }
+    } else {
+        console.log("No recent package to load!");
+    }
+}
+
+export function loadSource(window, id, skipFocus) {
+    let brs = getRecentSource(id);
+    if (brs) {
+        loadFile([brs]);
+        if (!skipFocus) {
+            window.blur();
+            window.focus();
+        }
+    } else {
+        console.log("No recent file to load!");
     }
 }
 

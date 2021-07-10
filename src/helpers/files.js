@@ -14,15 +14,9 @@ export function loadFile(file) {
     }
     const fileName = path.parse(filePath).base;
     const fileExt = path.parse(filePath).ext.toLowerCase();
-    if (fileExt === ".zip") {
+    if (fileExt === ".zip" || fileExt === ".brs") {
         try {
             window.webContents.send("fileSelected", filePath, fs.readFileSync(filePath));
-        } catch (error) {
-            window.webContents.send("clientException",`Error opening ${fileName}:${error.message}`);
-        }
-    } else if (fileExt === ".brs") {
-        try {
-            window.webContents.send("fileSelected", filePath, new Blob([fs.readFileSync(filePath)], { type: "text/plain" }));
         } catch (error) {
             window.webContents.send("clientException",`Error opening ${fileName}:${error.message}`);
         }

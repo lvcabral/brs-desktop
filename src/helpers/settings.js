@@ -74,9 +74,9 @@ export function getSettings(window) {
                                         type: "checkbox",
                                         options: [
                                             { label: "Enter Fullscreen Mode on Startup", value: "fullScreen" },
-                                            { label: "Run last channel on Startup", value: "run" },
-                                            { label: "Start with Developer Tools", value: "devTools" },
-                                            { label: "Enable Always on Top Mode", value: "onTop" },
+                                            { label: "Run last channel on Startup", value: "runLastChannel" },
+                                            { label: "Open Developer Tools on Startup", value: "devTools" },
+                                            { label: "Enable Always on Top Mode", value: "alwaysOnTop" },
                                             { label: "Show Status Bar", value: "statusBar" },
                                         ],
                                         help: "Select one or more configuration options."

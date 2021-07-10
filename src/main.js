@@ -14,7 +14,7 @@ import { app, screen, ipcMain, nativeTheme } from "electron";
 import { initECP, enableECP } from "./servers/ecp"
 import { setPassword, setPort, enableInstaller } from "./servers/installer";
 import { enableTelnet } from "./servers/telnet";
-import { createMenu } from "./menu/menuService"
+import { createMenu, loadPackage } from "./menu/menuService"
 import { saveFile } from "./helpers/files";
 import { getSettings } from "./helpers/settings";
 import createWindow from "./helpers/window";
@@ -42,7 +42,7 @@ const deviceInfo = {
 
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
-    string: [ "o", "p", "m" ],
+    string: ["o", "p", "m"],
     boolean: ["d", "e", "f", "r"],
     alias: { d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" }
 });
@@ -77,7 +77,36 @@ app.on("ready", () => {
     mainWindow.setMinimumSize(Math.min(346, display.size.width), Math.min(264, display.size.height));
     // Load Emulator Settings
     let settings = getSettings(mainWindow);
+    let startup = {
+        devTools: false,
+        runLastChannel: false,
+        alwaysOnTop: false,
+        statusBar: false
+    }
     if (settings.preferences.emulator) {
+        if (settings.preferences.emulator.options) {
+            settings.preferences.emulator.options.forEach(function (option) {
+                switch (option) {
+                    case "fullScreen":
+                        mainWindow.fullScreen = true;
+                        break;
+                    case "runLastChannel":
+                        startup.runLastChannel = true;
+                        break;
+                    case "devTools":
+                        startup.devTools = true;
+                        break;
+                    case "alwaysOnTop":
+                        startup.alwaysOnTop = true;
+                        break;
+                    case "statusBar":
+                        startup.statusBar = true;
+                        break;
+                    default:
+                        break;
+                }
+            })
+        }
         let userTheme = settings.preferences.emulator.theme || "purple";
         app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
         if (userTheme === "system") {
@@ -112,23 +141,22 @@ app.on("ready", () => {
                 case "sd":
                     mainWindow.webContents.send("setDisplay", "480p");
                     break;
-            
                 case "hd":
                     mainWindow.webContents.send("setDisplay", "720p");
                     break;
-
                 case "fhd":
                     mainWindow.webContents.send("setDisplay", "1080p");
                     break;
-
                 default:
                     break;
             }
             mainWindow.webContents.send("updateMenu");
         }
-
-        if (env.name === "development" || argv.devtools) {
+        if (startup.devTools || argv.devtools) {
             mainWindow.openDevTools();
+        }
+        if (startup.runLastChannel) {
+            loadPackage(mainWindow, 0, true);
         }
     });
     // Initialize ECP and SSDP servers
@@ -185,23 +213,23 @@ function getLocalIps() {
     const ifaces = os.networkInterfaces();
     const ips = [];
     Object.keys(ifaces).forEach(function (ifname) {
-      let alias = 0;    
-      ifaces[ifname].forEach(function (iface) {
-        if ('IPv4' !== iface.family || iface.internal !== false) {
-          // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-          return;
-        }
-        if (alias >= 1) {
-          // this single interface has multiple ipv4 addresses
-          console.log(`${ifname}:${alias}`, iface.address);
-          ips.push(`${ifname}:${alias},${iface.address}`);
-        } else {
-          // this interface has only one ipv4 adress
-          console.log(ifname, iface.address);
-          ips.push(`${ifname},${iface.address}`);
-        }
-        ++alias;
-      });
+        let alias = 0;
+        ifaces[ifname].forEach(function (iface) {
+            if ('IPv4' !== iface.family || iface.internal !== false) {
+                // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+                return;
+            }
+            if (alias >= 1) {
+                // this single interface has multiple ipv4 addresses
+                console.log(`${ifname}:${alias}`, iface.address);
+                ips.push(`${ifname}:${alias},${iface.address}`);
+            } else {
+                // this interface has only one ipv4 adress
+                console.log(ifname, iface.address);
+                ips.push(`${ifname},${iface.address}`);
+            }
+            ++alias;
+        });
     });
     return ips;
 }

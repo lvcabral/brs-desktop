@@ -74,7 +74,7 @@ export function loadFile(filePath, fileData) {
     if (fileExt === ".zip") {
         openChannelZip(fileData);
     } else {
-        reader.readAsText(fileData);
+        reader.readAsText(new Blob([fileData], { type: "text/plain" }));
     }   
 }
 // Uncompress Zip and execute

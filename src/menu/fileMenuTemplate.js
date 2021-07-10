@@ -1,6 +1,5 @@
 import * as dialog from "../helpers/dialog";
-import { loadFile } from "../helpers/files";
-import { getRecentPackage, clearRecentFiles, getRecentSource } from "./menuService";
+import { loadPackage, loadSource, clearRecentFiles } from "./menuService";
 
 export const fileMenuTemplate = {
     label: "&File",
@@ -28,56 +27,56 @@ export const fileMenuTemplate = {
                     label: "",
                     accelerator: "CmdOrCtrl+R",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 0);
+                    click: (item, window) => {
+                        loadPackage(window, 0);
                     }
                 },
                 {
                     id: "zip-1",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 1);
+                    click: (item, window) => {
+                        loadPackage(window, 1);
                     }
                 },
                 {
                     id: "zip-2",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 2);
+                    click: (item, window) => {
+                        loadPackage(window, 2);
                     }
                 },
                 {
                     id: "zip-3",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 3);
+                    click: (item, window) => {
+                        loadPackage(window, 3);
                     }
                 },
                 {
                     id: "zip-4",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 4);
+                    click: (item, window) => {
+                        loadPackage(window, 4);
                     }
                 },
                 {
                     id: "zip-5",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 5);
+                    click: (item, window) => {
+                        loadPackage(window, 5);
                     }
                 },
                 {
                     id: "zip-6",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 6);
+                    click: (item, window) => {
+                        loadPackage(window, 6);
                     }
                 },
                 {
@@ -90,56 +89,56 @@ export const fileMenuTemplate = {
                     id: "brs-0",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 0);
+                    click: (item, window) => {
+                        loadSource(window, 0);
                     }
                 },
                 {
                     id: "brs-1",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 1);
+                    click: (item, window) => {
+                        loadSource(window, 1);
                     }
                 },
                 {
                     id: "brs-2",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 2);
+                    click: (item, window) => {
+                        loadSource(window, 2);
                     }
                 },
                 {
                     id: "brs-3",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 3);
+                    click: (item, window) => {
+                        loadSource(window, 3);
                     }
                 },
                 {
                     id: "brs-4",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 4);
+                    click: (item, window) => {
+                        loadSource(window, 4);
                     }
                 },
                 {
                     id: "brs-5",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 5);
+                    click: (item, window) => {
+                        loadSource(window, 5);
                     }
                 },
                 {
                     id: "brs-6",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 6);
+                    click: (item, window) => {
+                        loadSource(window, 6);
                     }
                 },
                 {
@@ -152,7 +151,7 @@ export const fileMenuTemplate = {
                     id: "file-clear",
                     label: "Clear Recently Opened",
                     enabled: false,
-                    click: (event, window) => {
+                    click: (item, window) => {
                         clearRecentFiles();
                         window.blur();
                         window.focus();
@@ -175,7 +174,7 @@ export const fileMenuTemplate = {
             label: "Close Channel",
             accelerator: "CmdOrCtrl+W",
             enabled: false,
-            click: (event, window) => {
+            click: (item, window) => {
                 window.webContents.send("closeChannel", "Menu");
             }
         },
@@ -185,15 +184,3 @@ export const fileMenuTemplate = {
         }
     ]
 };
-
-function packageClick(window, id) {
-    loadFile([ getRecentPackage(id) ]);
-    window.blur();
-    window.focus();
-}
-
-function sourceClick(window, id) {
-    loadFile([ getRecentSource(id) ]);
-    window.blur();
-    window.focus();
-}
