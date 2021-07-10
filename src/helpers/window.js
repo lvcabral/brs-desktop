@@ -23,7 +23,6 @@ export default (name, options, argv) => {
         let restoredState = {};
         try {
             restoredState = userDataDir.read(stateStoreFile, "json");
-            appMenu.getMenuItemById("on-top").checked = restoredState.alwaysOnTop;
             appMenu.getMenuItemById("status-bar").checked = restoredState.status;
         } catch (err) {
             // For some reason json can't be read (might be corrupted).
@@ -42,7 +41,6 @@ export default (name, options, argv) => {
             width: size[0],
             height: size[1],
             backgroundColor: global.sharedObject.backgroundColor,
-            alwaysOnTop: appMenu.getMenuItemById("on-top").checked,
             status: appMenu.getMenuItemById("status-bar").checked
         };
     };
@@ -84,14 +82,9 @@ export default (name, options, argv) => {
     };
 
     state = ensureVisibleOnSomeDisplay(restore());
-    let full = {};
-
-    if (argv.fullscreen) {
-        full = { fullscreen: true };
-    }
 
     win = new BrowserWindow(
-        Object.assign(full, options, state, {
+        Object.assign(options, state, {
             webPreferences: {
                 preload: path.join(__dirname, './preload.js'),
                 contextIsolation: true,

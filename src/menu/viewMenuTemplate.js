@@ -62,6 +62,16 @@ export const viewMenuTemplate = {
             enabled: true,
             click: (item, window) => {
                 const onTop = !window.isAlwaysOnTop();
+                let options = getSettings(window).value("emulator.options");
+                if (options) {
+                    const key = "alwaysOnTop";
+                    if (onTop && !options.includes(key)) {
+                        options.push(key);
+                    } else if (!onTop && options.includes(key)) {
+                        options = options.filter(item => item !== key);
+                    }
+                    getSettings(window).value("emulator.options", options);
+                }
                 window.setAlwaysOnTop(onTop);
                 item.checked = !onTop;
             }

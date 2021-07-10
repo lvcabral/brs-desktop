@@ -80,32 +80,18 @@ app.on("ready", () => {
     let startup = {
         devTools: false,
         runLastChannel: false,
-        alwaysOnTop: false,
         statusBar: false
     }
     if (settings.preferences.emulator) {
         if (settings.preferences.emulator.options) {
-            settings.preferences.emulator.options.forEach(function (option) {
-                switch (option) {
-                    case "fullScreen":
-                        mainWindow.fullScreen = true;
-                        break;
-                    case "runLastChannel":
-                        startup.runLastChannel = true;
-                        break;
-                    case "devTools":
-                        startup.devTools = true;
-                        break;
-                    case "alwaysOnTop":
-                        startup.alwaysOnTop = true;
-                        break;
-                    case "statusBar":
-                        startup.statusBar = true;
-                        break;
-                    default:
-                        break;
-                }
-            })
+            const options = settings.preferences.emulator.options;
+            const onTop = options.includes("alwaysOnTop");
+            app.applicationMenu.getMenuItemById("on-top").checked = onTop;
+            mainWindow.setAlwaysOnTop(onTop);
+            mainWindow.setFullScreen(argv.fullscreen || options.includes("fullScreen"));
+            startup.runLastChannel = options.includes("runLastChannel");
+            startup.devTools = options.includes("devTools");
+            startup.statusBar = options.includes("statusBar");
         }
         let userTheme = settings.preferences.emulator.theme || "purple";
         app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;

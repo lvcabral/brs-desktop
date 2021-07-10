@@ -321,6 +321,9 @@ export function getSettings(window) {
         settings.on("save", (preferences) => {
             if (preferences.emulator) {
                 window.webContents.send("setTheme", setThemeSource(preferences));
+                const onTop = preferences.emulator.options.includes("alwaysOnTop");
+                app.applicationMenu.getMenuItemById("on-top").checked = onTop;
+                window.setAlwaysOnTop(onTop);
             }
         });
     }
