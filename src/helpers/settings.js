@@ -320,10 +320,17 @@ export function getSettings(window) {
         setThemeSource(settings.preferences);
         settings.on("save", (preferences) => {
             if (preferences.emulator) {
-                window.webContents.send("setTheme", setThemeSource(preferences));
-                const onTop = preferences.emulator.options.includes("alwaysOnTop");
-                app.applicationMenu.getMenuItemById("on-top").checked = onTop;
+                const appMenu = app.applicationMenu;               
+                const options = preferences.emulator.options;
+                const onTop = options.includes("alwaysOnTop");
+                const statusBar = options.includes("statusBar");
+                appMenu.getMenuItemById("on-top").checked = onTop;
                 window.setAlwaysOnTop(onTop);
+                if (appMenu.getMenuItemById("status-bar").checked != statusBar) {
+                    appMenu.getMenuItemById("status-bar").checked = statusBar;
+                    window.webContents.send("toggleStatusBar");
+                }
+                window.webContents.send("setTheme", setThemeSource(preferences));
             }
         });
     }
@@ -340,6 +347,18 @@ export function setThemeSource(preferences) {
     }
     global.sharedObject.theme = userTheme;
     return userTheme;
+}
+
+export function setEmulatorOption(key, enable) {
+    let options = settings.value("emulator.options");
+    if (options) {
+        if (enable && !options.includes(key)) {
+            options.push(key);
+        } else if (!enable && options.includes(key)) {
+            options = options.filter(item => item !== key);
+        }
+        settings.value("emulator.options", options);
+    }
 }
 
 // Data Arrays

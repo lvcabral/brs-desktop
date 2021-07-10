@@ -1,4 +1,4 @@
-import { getSettings, setThemeSource } from "../helpers/settings";
+import { getSettings, setThemeSource, setEmulatorOption } from "../helpers/settings";
 
 export const viewMenuTemplate = {
     label: "&View",
@@ -62,18 +62,9 @@ export const viewMenuTemplate = {
             enabled: true,
             click: (item, window) => {
                 const onTop = !window.isAlwaysOnTop();
-                let options = getSettings(window).value("emulator.options");
-                if (options) {
-                    const key = "alwaysOnTop";
-                    if (onTop && !options.includes(key)) {
-                        options.push(key);
-                    } else if (!onTop && options.includes(key)) {
-                        options = options.filter(item => item !== key);
-                    }
-                    getSettings(window).value("emulator.options", options);
-                }
+                setEmulatorOption("alwaysOnTop", onTop);
                 window.setAlwaysOnTop(onTop);
-                item.checked = !onTop;
+                item.checked = !item.checked;
             }
         },
         {
@@ -83,6 +74,8 @@ export const viewMenuTemplate = {
             checked: true,
             enabled: true,
             click: (item, window) => {
+                setEmulatorOption("statusBar", item.checked);
+                item.checked = !item.checked;
                 window.webContents.send("toggleStatusBar");
             }
         }

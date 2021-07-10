@@ -86,8 +86,8 @@ contextBridge.exposeInMainWorld("api", {
             titleBar.container.style.top = "30px";    
         }
     },
-    checkMenuItem: (id, enable) => {
-        ipcRenderer.send("checkMenuItem", id, enable);
+    checkMenuItem: (id, check) => {
+        ipcRenderer.send("checkMenuItem", id, check);
     },
     enableMenuItem: (id, enable) => {
         ipcRenderer.send("enableMenuItem", id, enable);

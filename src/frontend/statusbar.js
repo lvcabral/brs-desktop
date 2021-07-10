@@ -110,11 +110,6 @@ subscribeConsole("statusbar", (event, data) => {
     }
     setStatusColor();
 });
-// Status Bar visibility
-export function toggleStatusBar() {
-    let visible = statusBar.style.visibility === "visible";
-    api.checkMenuItem("status-bar", !visible);
-}
 // Set status bar colors
 export function setStatusColor() {
     statusError.innerText = errorCount.toString();

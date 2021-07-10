@@ -23,7 +23,6 @@ export default (name, options, argv) => {
         let restoredState = {};
         try {
             restoredState = userDataDir.read(stateStoreFile, "json");
-            appMenu.getMenuItemById("status-bar").checked = restoredState.status;
         } catch (err) {
             // For some reason json can't be read (might be corrupted).
             // No worries, we have defaults.
@@ -41,7 +40,6 @@ export default (name, options, argv) => {
             width: size[0],
             height: size[1],
             backgroundColor: global.sharedObject.backgroundColor,
-            status: appMenu.getMenuItemById("status-bar").checked
         };
     };
 

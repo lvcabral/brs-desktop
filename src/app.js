@@ -99,7 +99,6 @@ api.receive("setPassword", function (pwd) {
     storage.setItem("installerPassword", pwd);
 });
 api.receive("toggleStatusBar", function () {
-    toggleStatusBar();
     redrawDisplay(currentChannel.running, api.isFullScreen());
 });
 api.receive("toggleECP", function (enable, port) {

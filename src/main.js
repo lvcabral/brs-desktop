@@ -79,8 +79,7 @@ app.on("ready", () => {
     let settings = getSettings(mainWindow);
     let startup = {
         devTools: false,
-        runLastChannel: false,
-        statusBar: false
+        runLastChannel: false
     }
     if (settings.preferences.emulator) {
         if (settings.preferences.emulator.options) {
@@ -89,9 +88,9 @@ app.on("ready", () => {
             app.applicationMenu.getMenuItemById("on-top").checked = onTop;
             mainWindow.setAlwaysOnTop(onTop);
             mainWindow.setFullScreen(argv.fullscreen || options.includes("fullScreen"));
+            app.applicationMenu.getMenuItemById("status-bar").checked = options.includes("statusBar");
             startup.runLastChannel = options.includes("runLastChannel");
             startup.devTools = options.includes("devTools");
-            startup.statusBar = options.includes("statusBar");
         }
         let userTheme = settings.preferences.emulator.theme || "purple";
         app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
