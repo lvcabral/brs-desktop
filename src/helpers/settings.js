@@ -2,6 +2,7 @@ import { app, nativeTheme } from "electron";
 import path from "path";
 import ElectronPreferences from "electron-preferences";
 
+const isMacOS = process.platform === "darwin";
 let settings;
 
 export function getSettings(window) {
@@ -50,7 +51,7 @@ export function getSettings(window) {
             browserWindowOverrides: {
                 title: "Settings",
                 parent: window,
-                modal: true,
+                modal: !isMacOS,
                 icon: __dirname + "/images/icon48x48.ico",
                 width: 800,
                 maxWidth: 800,
