@@ -4,6 +4,7 @@ import { editMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
+import { getSettings } from "../helpers/settings";
 import { loadFile } from "../helpers/files";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
@@ -200,6 +201,17 @@ function rebuildMenu(template = false) {
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         let window = BrowserWindow.fromId(1);
         if (isMacOS && window) {
+            let userTheme = global.sharedObject.theme;
+            if (userTheme === "system") {
+                userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
+            }        
+            app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+            app.applicationMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
+            const options = getSettings().preferences.emulator.options;
+            if (options) {
+                const statusBar = options.includes("statusBar");
+                app.applicationMenu.getMenuItemById("status-bar").checked = statusBar;
+            }            
             window.webContents.send("updateMenu");
         }
     } else {

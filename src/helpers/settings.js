@@ -350,7 +350,7 @@ export function setThemeSource(preferences) {
     return userTheme;
 }
 
-export function setEmulatorOption(key, enable) {
+export function setEmulatorOption(key, enable, menuId) {
     let options = settings.value("emulator.options");
     if (options) {
         if (enable && !options.includes(key)) {
@@ -359,6 +359,9 @@ export function setEmulatorOption(key, enable) {
             options = options.filter(item => item !== key);
         }
         settings.value("emulator.options", options);
+        if (menuId) {
+            app.applicationMenu.getMenuItemById(menuId).checked = enable;
+        }
     }
 }
 

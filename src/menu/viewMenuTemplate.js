@@ -62,9 +62,8 @@ export const viewMenuTemplate = {
             enabled: true,
             click: (item, window) => {
                 const onTop = !window.isAlwaysOnTop();
-                setEmulatorOption("alwaysOnTop", onTop);
+                setEmulatorOption("alwaysOnTop", onTop, item.id);
                 window.setAlwaysOnTop(onTop);
-                item.checked = !item.checked;
             }
         },
         {
@@ -74,8 +73,7 @@ export const viewMenuTemplate = {
             checked: true,
             enabled: true,
             click: (item, window) => {
-                setEmulatorOption("statusBar", item.checked);
-                item.checked = !item.checked;
+                setEmulatorOption("statusBar", item.checked, item.id);
                 window.webContents.send("toggleStatusBar");
             }
         }
