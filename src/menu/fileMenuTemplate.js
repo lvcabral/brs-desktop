@@ -164,6 +164,7 @@ export const fileMenuTemplate = {
             id: "save-screen",
             label: "Save Screenshot...",
             accelerator: "CmdOrCtrl+S",
+            enabled: false,
             click: () => {
                 dialog.saveScreenshot();
             }

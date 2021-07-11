@@ -7,6 +7,7 @@ export const editMenuTemplate = {
             id: "copy-screen",
             label: "Copy Screenshot",
             accelerator: "CmdOrCtrl+C",
+            enabled: false,
             click: (item, window) => {
                 window.webContents.send("copyScreenshot");
             }

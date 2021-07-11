@@ -198,9 +198,6 @@ window.onload = window.onresize = function () {
 };
 // Configure Menu Options
 function setupMenuSwitches() {
-    api.enableMenuItem("close-channel", currentChannel.running);
-    api.enableMenuItem("save-screen", currentChannel.running);
-    api.enableMenuItem("copy-screen", currentChannel.running);
     api.checkMenuItem(`device-${deviceData.displayMode}`,  true);
     api.checkMenuItem(`overscan-${overscanMode}`, true);
     api.checkMenuItem(deviceData.locale, true);
