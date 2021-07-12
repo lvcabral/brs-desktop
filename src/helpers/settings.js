@@ -334,6 +334,13 @@ export function getSettings(window) {
                 window.webContents.send("setTheme", setThemeSource(preferences));
             }
         });
+        nativeTheme.on("updated", () => {
+            if (settings.value("emulator.theme") === "system") {
+                const userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
+                window.webContents.send("setTheme", userTheme);
+                global.sharedObject.theme = userTheme;
+            }
+        });
     }
     return settings;
 }

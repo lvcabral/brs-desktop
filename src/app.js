@@ -139,13 +139,15 @@ api.receive("toggleInstaller", function (enable, port, error) {
     setServerStatus("Web", port, enable);
 });
 api.receive("setTheme", function (theme) {
-    document.documentElement.setAttribute("data-theme", theme);
-    let bg = colorValues.getPropertyValue("--background-color").trim();
-    api.setBackgroundColor(bg);
-    titleColor = colorValues.getPropertyValue("--title-color").trim();
-    titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
-    api.updateTitlebarColor(titleColor, titleBgColor);
-    setStatusColor();
+    if (theme !== document.documentElement.getAttribute("data-theme")) {
+        document.documentElement.setAttribute("data-theme", theme);
+        let bg = colorValues.getPropertyValue("--background-color").trim();
+        api.setBackgroundColor(bg);
+        titleColor = colorValues.getPropertyValue("--title-color").trim();
+        titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
+        api.updateTitlebarColor(titleColor, titleBgColor);
+        setStatusColor();    
+    }
 });
 api.receive("copyScreenshot", function () {
     copyScreenshot();
