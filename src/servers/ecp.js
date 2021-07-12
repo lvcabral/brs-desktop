@@ -1,8 +1,8 @@
 import { app } from "electron";
-import { 
-    getChannelIds, 
-    getPackages, 
-    getRecentPackage, 
+import {
+    getChannelIds,
+    getPackages,
+    getRecentPackage,
     getRecentId,
     getRecentName,
     getRecentVersion
@@ -28,7 +28,7 @@ let ssdp;
 
 export let isECPEnabled = false;
 export function initECP(deviceInfo) {
-    device = deviceInfo;    
+    device = deviceInfo;
 }
 export function enableECP(mainWindow) {
     window = mainWindow;
@@ -39,8 +39,8 @@ export function enableECP(mainWindow) {
     ecp = require("restana")({
         ignoreTrailingSlash: true
     });
-    ecp.getServer().on("error", (error)=>{
-        window.webContents.send("console",`Failed to start ECP server:${error.message}`, true);
+    ecp.getServer().on("error", (error) => {
+        window.webContents.send("console", `Failed to start ECP server:${error.message}`, true);
     });
     ecp.get("/", sendDeviceRoot);
     ecp.get("/device-image.png", sendDeviceImage);
@@ -62,81 +62,83 @@ export function enableECP(mainWindow) {
         });
     }
     ecp.start(ECPPORT)
-    .catch((error)=>{
-        window.webContents.send("console",`ECP server error:${error.message}`, true);
-    })
-    .then((server)=>{
-        // Create SSDP Server
-        ssdp = new SSDP({
-            location: {
-                port: ECPPORT,
-                path: "/",            
-            },
-            adInterval: 120000,
-            ttl: 3600,
-            udn: `uuid:roku:ecp:${device.serialNumber}`,
-            ssdpSig: "Roku UPnP/1.0 Roku/9.1.0",
-            ssdpPort: SSDPPORT,
-            suppressRootDeviceAdvertisements: true,
-            headers: {"device-group.roku.com": "46F5CCE2472F2B14D77"},
-        });
-        ssdp.addUSN("roku:ecp");
-        ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
-        // Start server on all interfaces
-        ssdp.start()
-        .catch((e) => {
-            window.webContents.send("console",`Failed to start SSDP server:${e.message}`, true);
+        .catch((error) => {
+            window.webContents.send("console", `ECP server error:${error.message}`, true);
         })
-        .then(() => {
-            isECPEnabled = true;
-            window.webContents.send("toggleECP", true, ECPPORT);
-        });
-        // Create ECP-2 WebSocket Server
-        const wss = new WebSocket.Server({ noServer: true });
-        wss.on('connection', function connection(ws) {
-            const auth = `{"notify":"authenticate","param-challenge":"jONQirQ3WxSQWdI9Zn0enA==","timestamp":"${process.uptime().toFixed(3)}"}`;
-            if (DEBUG) {console.log("received connection!", auth);}
-            ws.send(auth);
-            ws.on("message", function incoming(message) {
-                processRequest(ws, message);
+        .then((server) => {
+            // Create SSDP Server
+            ssdp = new SSDP({
+                location: {
+                    port: ECPPORT,
+                    path: "/",
+                },
+                adInterval: 120000,
+                ttl: 3600,
+                udn: `uuid:roku:ecp:${device.serialNumber}`,
+                ssdpSig: "Roku UPnP/1.0 Roku/9.1.0",
+                ssdpPort: SSDPPORT,
+                suppressRootDeviceAdvertisements: true,
+                headers: { "device-group.roku.com": "46F5CCE2472F2B14D77" },
             });
-            ws.on('ping', function heartbeat(p) {
-                ws.pong();
-            });
-    	});
-        server.on("upgrade", function upgrade(request, socket, head) {
-            const pathname = url.parse(request.url).pathname;
-            if (pathname === '/ecp-session') {
-                if (DEBUG) {console.log("ecp-2 websocket session started!");}
-                wss.handleUpgrade(request, socket, head, function done(ws) {
-                    wss.emit('connection', ws, request);
+            ssdp.addUSN("roku:ecp");
+            ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
+            // Start server on all interfaces
+            ssdp.start()
+                .catch((e) => {
+                    window.webContents.send("console", `Failed to start SSDP server:${e.message}`, true);
+                })
+                .then(() => {
+                    isECPEnabled = true;
+                    window.webContents.send("toggleECP", true, ECPPORT);
                 });
-            } else {
-              socket.destroy();
-            }
-          });
-    });
+            // Create ECP-2 WebSocket Server
+            const wss = new WebSocket.Server({ noServer: true });
+            wss.on('connection', function connection(ws) {
+                const auth = `{"notify":"authenticate","param-challenge":"jONQirQ3WxSQWdI9Zn0enA==","timestamp":"${process.uptime().toFixed(3)}"}`;
+                if (DEBUG) { console.log("received connection!", auth); }
+                ws.send(auth);
+                ws.on("message", function incoming(message) {
+                    processRequest(ws, message);
+                });
+                ws.on('ping', function heartbeat(p) {
+                    ws.pong();
+                });
+            });
+            server.on("upgrade", function upgrade(request, socket, head) {
+                const pathname = url.parse(request.url).pathname;
+                if (pathname === '/ecp-session') {
+                    if (DEBUG) { console.log("ecp-2 websocket session started!"); }
+                    wss.handleUpgrade(request, socket, head, function done(ws) {
+                        wss.emit('connection', ws, request);
+                    });
+                } else {
+                    socket.destroy();
+                }
+            });
+        });
 }
 
 export function disableECP() {
-    if (ecp) {
-        ecp.close();
+    if (isECPEnabled) {
+        if (ecp) {
+            ecp.close();
+        }
+        if (ssdp) {
+            ssdp.stop();
+        }
+        isECPEnabled = false;
+        window.webContents.send("toggleECP", false);
     }
-    if (ssdp) {
-        ssdp.stop();
-    }
-    isECPEnabled = false;
-    window.webContents.send("toggleECP", false);    
 }
 
 // ECP-2 WebSocket API
 function processRequest(ws, message) {
     if (message) {
-        if (DEBUG) {console.log('received: %s', message);}
+        if (DEBUG) { console.log('received: %s', message); }
         let reply = "";
         let msg;
         try {
-            msg = JSON.parse(message);            
+            msg = JSON.parse(message);
         } catch (error) {
             console.warn("invalid ecp-2 message:", message);
             return;
@@ -175,7 +177,7 @@ function processRequest(ws, message) {
             reply = `{${statusOK}}`;
         }
         if (reply !== "") {
-            if (DEBUG) {console.log(`replying: %s`, reply)}
+            if (DEBUG) { console.log(`replying: %s`, reply) }
             ws.send(reply);
         } else if (DEBUG) {
             console.log(`no reply for: %s`, msg["request-id"]);
@@ -277,7 +279,7 @@ function genDeviceRootXml() {
 function genDeviceInfoXml(encrypt) {
     let xml = xmlbuilder.create("device-info");
     xml.ele("udn", {}, UDN);
-    if (encrypt) {xml.ele("virtual-device-id", {}, device.serialNumber);}
+    if (encrypt) { xml.ele("virtual-device-id", {}, device.serialNumber); }
     xml.ele("serial-number", {}, device.serialNumber);
     xml.ele("device-id", {}, device.serialNumber);
     xml.ele("advertising-id", {}, device.RIDA);
@@ -336,18 +338,18 @@ function genDeviceInfoXml(encrypt) {
 
 function genThemesXml(encrypt) {
     const xml = xmlbuilder.create("themes");
-    xml.ele("theme", {id: "brand", selected: true }, "Roku (default)");
-    xml.ele("theme", {id: "Graphene"}, "Graphene");
-    xml.ele("theme", {id: "Brown"}, "Decaf");
-    xml.ele("theme", {id: "Space"}, "Nebula");
+    xml.ele("theme", { id: "brand", selected: true }, "Roku (default)");
+    xml.ele("theme", { id: "Graphene" }, "Graphene");
+    xml.ele("theme", { id: "Brown" }, "Decaf");
+    xml.ele("theme", { id: "Space" }, "Nebula");
     const strXml = xml.end({ pretty: true });
     return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
 }
 
 function genScrsvXml(encrypt) {
     const xml = xmlbuilder.create("screensavers");
-    xml.ele("screensaver", {default: true, id: "5533", selected: true }, "Roku Digital Clock");
-    xml.ele("screensaver", {id: "5534"}, "Roku Analog Clock");
+    xml.ele("screensaver", { default: true, id: "5533", selected: true }, "Roku Digital Clock");
+    xml.ele("screensaver", { id: "5534" }, "Roku Analog Clock");
     const strXml = xml.end({ pretty: true });
     return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
 }
@@ -356,12 +358,14 @@ function genAppsXml(encrypt) {
     const xml = xmlbuilder.create("apps");
     getPackages().forEach((value, index) => {
         xml.ele(
-            "app", 
-            {id: getRecentId(index), 
-                subtype: "sdka", 
-                type: "appl", 
-                version: getRecentVersion(index)}, 
-                getRecentName(index)
+            "app",
+            {
+                id: getRecentId(index),
+                subtype: "sdka",
+                type: "appl",
+                version: getRecentVersion(index)
+            },
+            getRecentName(index)
         );
     });
     const strXml = xml.end({ pretty: true });
@@ -376,7 +380,7 @@ function genAppIcon(appID, encrypt) {
         if (fs.existsSync(iconPath)) {
             image = fs.readFileSync(iconPath);
         }
-    } 
+    }
     if (image === undefined) {
         image = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
     }
@@ -389,12 +393,14 @@ function genActiveApp(encrypt) {
     const appMenu = app.applicationMenu;
     if (id && appMenu.getMenuItemById("close-channel").enabled) {
         xml.ele(
-            "app", 
-            {id: id, 
-                subtype: "sdka", 
-                type: "appl", 
-                version: getRecentVersion(0)}, 
-                getRecentName(0)
+            "app",
+            {
+                id: id,
+                subtype: "sdka",
+                type: "appl",
+                version: getRecentVersion(0)
+            },
+            getRecentName(0)
         );
     } else {
         xml.ele("app", {}, app.getName());
@@ -410,7 +416,7 @@ function launchApp(appID) {
         let zip = getRecentPackage(index);
         if (zip) {
             loadFile([zip]);
-        }    
+        }
     } else {
         window.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
     }
@@ -424,22 +430,22 @@ function getMacAddress() {
     const os = require('os');
     const ifaces = os.networkInterfaces();
     let mac = "";
-    Object.keys(ifaces).forEach(function (ifname) {   
-        if (mac !== "" ) {
+    Object.keys(ifaces).forEach(function (ifname) {
+        if (mac !== "") {
             return;
         }
         ifaces[ifname].forEach(function (iface) {
-        if ('IPv4' !== iface.family || iface.internal !== false) {
-          // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-          return;
-        } else if (ifname.substr(0, 6).toLowerCase() === "vmware" ||
-        ifname.substr(0, 10).toLowerCase() === "virtualbox") {
+            if ('IPv4' !== iface.family || iface.internal !== false) {
+                // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+                return;
+            } else if (ifname.substr(0, 6).toLowerCase() === "vmware" ||
+                ifname.substr(0, 10).toLowerCase() === "virtualbox") {
+                return;
+            }
+            mac = iface.mac;
             return;
-        }
-        mac = iface.mac;
-        return;
-      });
-    });   
+        });
+    });
     if (mac === "") {
         mac = "87:3e:aa:9f:77:70";
     }

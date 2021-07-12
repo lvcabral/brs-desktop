@@ -13,7 +13,7 @@ export function enableTelnet(window) {
         return;
     }
     server = telnet.createServer();
-    
+
     server.on("connection", (client) => {
         let id = clientId;
         clientId++;
@@ -39,7 +39,7 @@ export function enableTelnet(window) {
             window.webContents.send("console", `Remote console client error: ${e.message}`, true);
             client.destroy();
         });
-        client.on('close', function() {
+        client.on('close', function () {
             clients.delete(id);
         });
         client.write(`Connected to ${app.getName()}\r\n`);
@@ -51,12 +51,12 @@ export function enableTelnet(window) {
     server.on("listening", () => {
         isTelnetEnabled = true;
         window.webContents.send("toggleTelnet", true, PORT);
-        ipcMain.on("telnet", (event, text)=>{
+        ipcMain.on("telnet", (event, text) => {
             if (buffer.length > BUFFER_SIZE) {
                 buffer.shift();
             }
             buffer.push(text);
-            clients.forEach( (client, id) => {
+            clients.forEach((client, id) => {
                 client.write(`${text.replace(/\r?\n/g, '\r\n')}\r\n`);
             });
         });
@@ -68,16 +68,18 @@ export function enableTelnet(window) {
 }
 
 export function disableTelnet(window) {
-    if (server) {
-        server.close();
-        clients.forEach( (client, id) => {
-            client.destroy();
-        });
-        ipcMain.removeAllListeners("telnet");
-        clientId = 0;
-        clients = new Map();
-        buffer = [];
+    if (isTelnetEnabled) {
+        if (server) {
+            server.close();
+            clients.forEach((client, id) => {
+                client.destroy();
+            });
+            ipcMain.removeAllListeners("telnet");
+            clientId = 0;
+            clients = new Map();
+            buffer = [];
+        }
+        isTelnetEnabled = false;
+        window.webContents.send("toggleTelnet", false);
     }
-    isTelnetEnabled = false;
-    window.webContents.send("toggleTelnet", false);
 }

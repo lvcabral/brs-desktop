@@ -1,6 +1,9 @@
 import { app, nativeTheme } from "electron";
 import path from "path";
 import ElectronPreferences from "electron-preferences";
+import { enableECP, disableECP } from "../servers/ecp";
+import { enableTelnet, disableTelnet } from "../servers/telnet";
+import { enableInstaller, disableInstaller, setPort, hasInstaller, setPassword } from "../servers/installer";
 
 const isMacOS = process.platform === "darwin";
 let settings;
@@ -19,9 +22,7 @@ export function getSettings(window) {
                     webPort: 80,
                     password: "rokudev",
                     ecp: ["enabled"],
-                    ecpPort: 8060,
                     telnet: ["enabled"],
-                    telnetPort: 8085
                 },
                 device: {
                     deviceModel: global.sharedObject.deviceInfo.deviceModel,
@@ -115,7 +116,7 @@ export function getSettings(window) {
                                         options: [
                                             { label: "Service Enabled", value: "enabled" },
                                         ],
-                                        help: "This service allows to remotely side load a channel in the emulator"
+                                        help: "This service allows to remotely side load a channel, to change port and password restart the service "
                                     },
                                     {
                                         label: "Port (default: 80)",
@@ -139,12 +140,6 @@ export function getSettings(window) {
                                         help: "ECP service allows the emulator to be controlled over the network"
                                     },
                                     {
-                                        label: "Port (default: 8060)",
-                                        key: "ecpPort",
-                                        type: "text",
-                                        inputType: "number"
-                                    },
-                                    {
                                         label: "BrightScript Remote Console (Telnet)",
                                         key: "telnet",
                                         type: "checkbox",
@@ -152,12 +147,6 @@ export function getSettings(window) {
                                             { label: "Service Enabled", value: "enabled" },
                                         ],
                                         help: "Remote Console can be accessed using an application such as PuTTY or terminal on Mac and Linux"
-                                    },
-                                    {
-                                        label: "Port (default: 8085)",
-                                        key: "telnetPort",
-                                        type: "text",
-                                        inputType: "number"
                                     },
                                 ]
                             }
@@ -320,8 +309,8 @@ export function getSettings(window) {
         });
         setThemeSource(settings.preferences);
         settings.on("save", (preferences) => {
+            const appMenu = app.applicationMenu;               
             if (preferences.emulator) {
-                const appMenu = app.applicationMenu;               
                 const options = preferences.emulator.options;
                 const onTop = options.includes("alwaysOnTop");
                 const statusBar = options.includes("statusBar");
@@ -332,6 +321,28 @@ export function getSettings(window) {
                     window.webContents.send("toggleStatusBar");
                 }
                 window.webContents.send("setTheme", setThemeSource(preferences));
+            }
+            if (preferences.services) {
+                const services = preferences.services;
+                if (services.installer.includes("enabled")) {
+                    if (!hasInstaller) {
+                        setPort(services.webPort);
+                        setPassword(services.password);
+                        enableInstaller(window);    
+                    }
+                } else {
+                    disableInstaller(window);
+                }                
+                if (services.ecp.includes("enabled")) {
+                    enableECP(window);
+                } else {
+                    disableECP(window);
+                }                
+                if (services.telnet.includes("enabled")) {
+                    enableTelnet(window);
+                } else {
+                    disableTelnet(window);
+                }                
             }
         });
         nativeTheme.on("updated", () => {

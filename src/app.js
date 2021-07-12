@@ -24,20 +24,6 @@ let titleColor = colorValues.getPropertyValue("--title-color").trim();
 let titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
 api.setBackgroundColor(colorValues.getPropertyValue("--background-color").trim());
 api.createNewTitleBar(titleColor, titleBgColor);
-// ECP Server 
-let ECPEnabled = storage.getItem("ECPEnabled") || "false";
-api.send("ECPEnabled", ECPEnabled === "true");
-setServerStatus("ECP", 8060, ECPEnabled === "true");
-// Telnet Server
-let telnetEnabled = storage.getItem("telnetEnabled") || "false";
-api.send("telnetEnabled", telnetEnabled === "true");
-setServerStatus("Telnet", 8085, telnetEnabled === "true");
-// Web Installer Server 
-let installerEnabled = storage.getItem("installerEnabled") || "false";
-let installerPassword = storage.getItem("installerPassword") || "rokudev";
-let installerPort = storage.getItem("installerPort") || "80";
-api.send("installerEnabled", installerEnabled === "true", installerPassword, installerPort);
-setServerStatus("Web", installerPort, installerEnabled === "true");
 // Setup Menu
 deviceData.locale = storage.getItem("deviceLocale") || "en_US";
 setLocaleStatus(deviceData.locale)
@@ -95,9 +81,6 @@ api.receive("setLocale", function (locale) {
         setLocaleStatus(locale);
     }
 });
-api.receive("setPassword", function (pwd) {
-    storage.setItem("installerPassword", pwd);
-});
 api.receive("toggleStatusBar", function () {
     redrawDisplay(currentChannel.running, api.isFullScreen());
 });
@@ -108,8 +91,6 @@ api.receive("toggleECP", function (enable, port) {
         console.log("ECP server disabled.");
     }
     api.checkMenuItem("ecp-api", enable);
-    ECPEnabled = enable ? "true" : "false";
-    storage.setItem("ECPEnabled", ECPEnabled);
     setServerStatus("ECP", port, enable);
 });
 api.receive("toggleTelnet", function (enable, port) {
@@ -119,23 +100,17 @@ api.receive("toggleTelnet", function (enable, port) {
         console.log("Remote console server disabled.");
     }
     api.checkMenuItem("telnet", enable);
-    telnetEnabled = enable ? "true" : "false";
-    storage.setItem("telnetEnabled", telnetEnabled);
     setServerStatus("Telnet", port, enable);
 });
 api.receive("toggleInstaller", function (enable, port, error) {
     if (enable) {
         console.log(`Installer server started listening port ${port}`);
-        installerPort = port;
-        storage.setItem("installerPort", port);
     } else if (error) {
         console.error("Installer server error:", error);
     } else {
         console.log("Installer server disabled.");
     }
     api.checkMenuItem("web-installer", enable);
-    installerEnabled = enable ? "true" : "false";
-    storage.setItem("installerEnabled", installerEnabled);
     setServerStatus("Web", port, enable);
 });
 api.receive("setTheme", function (theme) {
@@ -203,7 +178,4 @@ function setupMenuSwitches() {
     api.checkMenuItem(`device-${deviceData.displayMode}`,  true);
     api.checkMenuItem(`overscan-${overscanMode}`, true);
     api.checkMenuItem(deviceData.locale, true);
-    api.checkMenuItem("ecp-api", (ECPEnabled === "true"));
-    api.checkMenuItem("telnet", (telnetEnabled === "true"));
-    api.checkMenuItem("web-installer", (installerEnabled === "true"));
 }

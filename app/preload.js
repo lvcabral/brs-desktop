@@ -96,9 +96,6 @@ contextBridge.exposeInMainWorld("api", {
         // whitelist channels
         let validChannels = [
             "telnet", 
-            "ECPEnabled", 
-            "telnetEnabled", 
-            "installerEnabled", 
             "addRecentSource", 
             "addRecentPackage", 
             "openDevTools",
@@ -125,7 +122,6 @@ contextBridge.exposeInMainWorld("api", {
             "setDisplay",
             "setOverscan",
             "setLocale",
-            "setPassword",
             "toggleStatusBar",
             "toggleECP",
             "toggleTelnet",

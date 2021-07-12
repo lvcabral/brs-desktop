@@ -79,11 +79,14 @@ app.on("ready", () => {
     let settings = getSettings(mainWindow);
     let startup = {
         devTools: false,
-        runLastChannel: false
+        runLastChannel: false,
+        ecpEnabled: false,
+        telnetEnabled: false,
+        installerEnabled: false,
     }
     if (settings.preferences.emulator) {
-        if (settings.preferences.emulator.options) {
-            const options = settings.preferences.emulator.options;
+        if (settings.value("emulator.options")) {
+            const options = settings.value("emulator.options");
             const onTop = options.includes("alwaysOnTop");
             app.applicationMenu.getMenuItemById("on-top").checked = onTop;
             mainWindow.setAlwaysOnTop(onTop);
@@ -92,13 +95,22 @@ app.on("ready", () => {
             startup.runLastChannel = options.includes("runLastChannel");
             startup.devTools = options.includes("devTools");
         }
-        let userTheme = settings.preferences.emulator.theme || "purple";
+        let userTheme = settings.value("emulator.theme") || "purple";
         app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
         if (userTheme === "system") {
             userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
         }
         global.sharedObject.theme = userTheme;
     }
+    if (settings.preferences.services) {
+        startup.ecpEnabled = settings.value("services.ecp").includes("enabled");
+        startup.telnetEnabled = settings.value("services.telnet").includes("enabled");
+        startup.installerEnabled = settings.value("services.installer").includes("enabled");
+        setPassword(settings.value("services.password"));
+        setPort(settings.value("services.webPort"));
+    }
+    // Initialize ECP and SSDP servers
+    initECP(deviceInfo);
     // Load Renderer
     mainWindow.loadURL(
         url.format({
@@ -108,18 +120,24 @@ app.on("ready", () => {
         })
     ).then(() => {
         // CLI Switches
-        if (argv.ecp) {
+        if (argv.ecp || startup.ecpEnabled) {
             enableECP(mainWindow);
+            app.applicationMenu.getMenuItemById("ecp-api").checked = true;
         }
-        if (argv.telnet) {
+        if (argv.telnet || startup.telnetEnabled) {
             enableTelnet(mainWindow);
+            app.applicationMenu.getMenuItemById("telnet").checked = true;
         }
         if (argv.pwd && argv.pwd.trim() !== "") {
             setPassword(argv.pwd.trim());
-            mainWindow.webContents.send("setPassword", argv.pwd.trim());
+            settings.value("services.password", argv.pwd.trim());
         }
         if (argv.web) {
-            enableInstaller(mainWindow, argv.web);
+            setPort(argv.web);
+            settings.value("services.webPort", parseInt(argv.web));
+            enableInstaller(mainWindow);
+        } else if (startup.installerEnabled) {
+            enableInstaller(mainWindow);
         }
         if (argv.mode && argv.mode.trim() !== "") {
             switch (argv.mode.trim().toLowerCase()) {
@@ -142,30 +160,6 @@ app.on("ready", () => {
         }
         if (startup.runLastChannel) {
             loadPackage(mainWindow, 0, true);
-        }
-    });
-    // Initialize ECP and SSDP servers
-    initECP(deviceInfo);
-    ipcMain.once("ECPEnabled", (event, enable) => {
-        if (enable) {
-            enableECP(mainWindow);
-        }
-    });
-    // Initialize Telnet server
-    ipcMain.once("telnetEnabled", (event, enable) => {
-        if (enable) {
-            enableTelnet(mainWindow);
-        }
-    });
-    // Initialize Web Installer server
-    ipcMain.once("installerEnabled", (event, enable, password, port) => {
-        if (password) {
-            setPassword(password);
-        }
-        if (enable) {
-            enableInstaller(mainWindow, port);
-        } else {
-            setPort(port);
         }
     });
     // Open Developer Tools

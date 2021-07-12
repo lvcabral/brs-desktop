@@ -2,6 +2,7 @@ import { setAspectRatio } from "./menuService";
 import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet";
 import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
+import { getSettings } from "../helpers/settings";
 
 export const deviceMenuTemplate = {
     label: "&Device",
@@ -148,11 +149,13 @@ export const deviceMenuTemplate = {
             id: "web-installer",
             label: "Web Application Installer",
             type: "checkbox",
-            checked: true,
+            checked: false,
             click: (item, window) => {
                 if (hasInstaller) {
+                    getSettings(window).value("services.installer", []);
                     disableInstaller(window);
                 } else {
+                    getSettings(window).value("services.installer", ["enabled"]);
                     enableInstaller(window);
                 }
             }
@@ -161,11 +164,13 @@ export const deviceMenuTemplate = {
             id: "ecp-api",
             label: "External Control Protocol",
             type: "checkbox",
-            checked: true,
+            checked: false,
             click: (item, window) => {
                 if (isECPEnabled) {
+                    getSettings(window).value("services.ecp", []);
                     disableECP(window);
                 } else {
+                    getSettings(window).value("services.ecp", ["enabled"]);
                     enableECP(window);
                 }
             }
@@ -174,11 +179,13 @@ export const deviceMenuTemplate = {
             id: "telnet",
             label: "BrightScript Remote Console",
             type: "checkbox",
-            checked: true,
+            checked: false,
             click: (item, window) => {
                 if (isTelnetEnabled) {
+                    getSettings(window).value("services.telnet", []);
                     disableTelnet(window);
                 } else {
+                    getSettings(window).value("services.telnet", ["enabled"]);
                     enableTelnet(window);
                 }
             }

@@ -22,23 +22,17 @@ export function setPassword(password) {
 }
 export function setPort(customPort) {
     if (typeof customPort === "number") {
-        port = customPort;       
+        port = customPort;
     } else if (typeof customPort === "string" && !isNaN(parseInt(customPort))) {
         port = parseInt(customPort);
     }
 }
-export function enableInstaller(window, customPort) {
-    if (hasInstaller && customPort === port) {
+export function enableInstaller(window) {
+    if (hasInstaller) {
         return; // already started do nothing
-    } else if (customPort !== port) {
-        setPort(customPort);
-        if (server) {
-            server.close();
-        }
-        hasInstaller = false;
     }
     hash = cryptoUsingMD5(credentials.realm);
-    server = http.createServer(function(req, res) {
+    server = http.createServer(function (req, res) {
         let authInfo, digestAuthObject = {};
         if (!req.headers.authorization) {
             authenticateUser(res);
@@ -47,7 +41,7 @@ export function enableInstaller(window, customPort) {
         authInfo = req.headers.authorization.replace(/^Digest /, "");
         authInfo = parseAuthenticationInfo(authInfo);
         if (authInfo.username !== credentials.userName) {
-            authenticateUser(res); 
+            authenticateUser(res);
             return;
         }
         digestAuthObject.ha1 = cryptoUsingMD5(`${authInfo.username}:${credentials.realm}:${credentials.password}`);
@@ -55,25 +49,25 @@ export function enableInstaller(window, customPort) {
         let resp = cryptoUsingMD5([digestAuthObject.ha1, authInfo.nonce, authInfo.nc, authInfo.cnonce, authInfo.qop, digestAuthObject.ha2].join(":"));
         digestAuthObject.response = resp;
         if (authInfo.response !== digestAuthObject.response) {
-            authenticateUser(res); 
+            authenticateUser(res);
             return;
         }
         if (req.method === "POST") {
             let done = "";
             const busboy = new Busboy({ headers: req.headers });
-            busboy.on("file", function(fieldname, file, filename, encoding, mimetype) {
+            busboy.on("file", function (fieldname, file, filename, encoding, mimetype) {
                 // console.log(`File [${fieldname}]: filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`);
                 if (filename && filename !== "") {
                     try {
                         let saveTo = path.join(app.getPath("userData"), "dev.zip");
                         file.pipe(fs.createWriteStream(saveTo));
-                        file.on("end", function() {
+                        file.on("end", function () {
                             loadFile([saveTo]);
                             done = "file";
                             if (window.isMinimized()) {
                                 window.restore()
-                            }                            
-                        });        
+                            }
+                        });
                     } catch (error) {
                         res.writeHead(500);
                         res.end("Error 500: Internal Server Error\nCould not write channel file!");
@@ -85,7 +79,7 @@ export function enableInstaller(window, customPort) {
                     return;
                 }
             });
-            busboy.on("field", function (fieldname, value){
+            busboy.on("field", function (fieldname, value) {
                 // console.log("field:", fieldname, value);
                 if (fieldname && value) {
                     if (fieldname === "mysubmit" && value.toLowerCase() === "screenshot") {
@@ -106,10 +100,10 @@ export function enableInstaller(window, customPort) {
                     }
                 }
             });
-            busboy.on("finish", function() {
+            busboy.on("finish", function () {
                 // console.log("method", done);
                 if (done === "screenshot") {
-                    setTimeout(()=>{
+                    setTimeout(() => {
                         let saveTo = path.join(app.getPath("userData"), "dev.png");
                         var s = fs.createReadStream(saveTo);
                         s.on("open", () => {
@@ -121,11 +115,11 @@ export function enableInstaller(window, customPort) {
                             res.end("Error 404: Not Found\nFile not found");
                         });
                     }, 1000);
-                    return;    
-                } else if (done === "file"){
+                    return;
+                } else if (done === "file") {
                     res.writeHead(200, { "Content-Type": "text/plain" });
                     res.write("Channel Installed!");
-                } else if (done === "delete"){
+                } else if (done === "delete") {
                     res.writeHead(200, { "Content-Type": "text/plain" });
                     res.write("File Deleted!");
                 } else {
@@ -160,7 +154,7 @@ export function enableInstaller(window, customPort) {
                     } else {
                         res.writeHead(200, { "Content-Type": contentType });
                         res.write(pgResp);
-                    }                 
+                    }
                     res.end();
                 });
             } else {
@@ -176,7 +170,7 @@ export function enableInstaller(window, customPort) {
     server.on("error", (error) => {
         if (error.code === "EADDRINUSE") {
             hasInstaller = false;
-            window.webContents.send("toggleInstaller", false, port, error.message);    
+            window.webContents.send("toggleInstaller", false, port, error.message);
         } else {
             window.webContents.send("console", error.message, true);
         }
@@ -184,11 +178,13 @@ export function enableInstaller(window, customPort) {
 }
 
 export function disableInstaller(window) {
-    if (server) {
-        server.close();
+    if (hasInstaller) {
+        if (server) {
+            server.close();
+        }
+        hasInstaller = false;
+        window.webContents.send("toggleInstaller", false);
     }
-    hasInstaller = false;
-    window.webContents.send("toggleInstaller", false);
 }
 
 // Helper Functions
