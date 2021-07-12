@@ -367,6 +367,9 @@ export function setEmulatorOption(key, enable, menuId) {
         }
         settings.value("emulator.options", options);
         if (menuId) {
+            if (!isMacOS) {
+                enable = !enable; // For some reason the toolbar has inverted logic in Windows
+            }
             app.applicationMenu.getMenuItemById(menuId).checked = enable;
         }
     }
