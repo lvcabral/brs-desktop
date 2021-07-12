@@ -69,11 +69,11 @@ export function clearRecentFiles() {
 
 export function setAspectRatio(id) {
     const window = BrowserWindow.fromId(1);
-    if (id === "device-480p") {
-        window.setAspectRatio(ASPECT_RATIO_SD);
-    } else {
-        window.setAspectRatio(ASPECT_RATIO_HD);
+    const aspectRatio = id === "device-480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
+    if (isMacOS) {
+        window.setBounds({width: Math.round(window.getBounds().height * aspectRatio) });
     }
+    window.setAspectRatio(aspectRatio);
 }
 
 export function loadPackage(window, id, skipFocus) {
