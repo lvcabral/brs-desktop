@@ -18,7 +18,7 @@ export const editMenuTemplate = {
             label: "Settings...", 
             accelerator: "CmdOrCtrl+,",
             click: (item, window) => {
-                getSettings(window).show();
+                getSettings(window, true).show();
             }
         }
     ]

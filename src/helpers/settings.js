@@ -8,8 +8,13 @@ import { enableInstaller, disableInstaller, setPort, hasInstaller, setPassword }
 const isMacOS = process.platform === "darwin";
 let settings;
 
-export function getSettings(window) {
-    if (settings === undefined) {
+export function getSettings(window, forceNew) {
+    if (settings === undefined || forceNew) {
+        const bounds = window.getBounds();    
+        const w = 800;
+        const h = 630;
+        const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
+        const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);   
         settings = new ElectronPreferences({
             dataStore: path.resolve(app.getPath("userData"), "brs-settings.json"),
             defaults: {
@@ -54,10 +59,12 @@ export function getSettings(window) {
                 parent: window,
                 modal: !isMacOS,
                 icon: __dirname + "/images/icon48x48.ico",
-                width: 800,
-                maxWidth: 800,
-                height: 630,
-                maxHeight: 630,
+                x: x,
+                y: y,
+                width: w,
+                maxWidth: w,
+                height: h,
+                maxHeight: h,
                 minimizable: false,
                 maximizable: false,
             },
@@ -309,7 +316,7 @@ export function getSettings(window) {
         });
         setThemeSource(settings.preferences);
         settings.on("save", (preferences) => {
-            const appMenu = app.applicationMenu;               
+            const appMenu = app.applicationMenu;  
             if (preferences.emulator) {
                 const options = preferences.emulator.options;
                 const onTop = options.includes("alwaysOnTop");
@@ -379,7 +386,7 @@ export function setEmulatorOption(key, enable, menuId) {
         settings.value("emulator.options", options);
         if (menuId) {
             if (!isMacOS) {
-                enable = !enable; // For some reason the toolbar has inverted logic in Windows
+                enable = !enable; // TODO: added to address a bug with electron-toolbar in Windows only
             }
             app.applicationMenu.getMenuItemById(menuId).checked = enable;
         }

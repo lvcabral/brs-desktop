@@ -42,10 +42,11 @@ export const helpMenuTemplate = {
             click: () => {
                 console.log("about click");
                 const window = BrowserWindow.getFocusedWindow();
-                var w = 350;
-                var h = 450;
-                var x = Math.round(window.getPosition()[0] + Math.abs(window.getSize()[0] - w) / 2);
-                var y = Math.round(window.getPosition()[1] + Math.abs(window.getSize()[1] - h + 25) / 2);
+                const bounds = window.getBounds();
+                const w = 350;
+                const h = 450;
+                const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
+                const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
                 const about = openAboutWindow({
                     icon_path: path.join(__dirname, "images/icon512x512.png"),
                     copyright: "Copyright © 2019-2021 Marcelo Lv Cabral",
