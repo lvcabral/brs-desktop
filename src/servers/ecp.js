@@ -31,6 +31,7 @@ export function initECP(deviceInfo) {
     device = deviceInfo;
 }
 export function enableECP(mainWindow) {
+    app.applicationMenu.getMenuItemById("ecp-api").checked = true;
     window = mainWindow;
     if (isECPEnabled) {
         return; // already started do nothing
@@ -119,6 +120,7 @@ export function enableECP(mainWindow) {
 }
 
 export function disableECP() {
+    app.applicationMenu.getMenuItemById("ecp-api").checked = false;
     if (isECPEnabled) {
         if (ecp) {
             ecp.close();

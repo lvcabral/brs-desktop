@@ -28,6 +28,7 @@ export function setPort(customPort) {
     }
 }
 export function enableInstaller(window) {
+    app.applicationMenu.getMenuItemById("web-installer").checked = true;
     if (hasInstaller) {
         return; // already started do nothing
     }
@@ -178,6 +179,7 @@ export function enableInstaller(window) {
 }
 
 export function disableInstaller(window) {
+    app.applicationMenu.getMenuItemById("web-installer").checked = false;
     if (hasInstaller) {
         if (server) {
             server.close();

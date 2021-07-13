@@ -90,7 +90,6 @@ api.receive("toggleECP", function (enable, port) {
     } else {
         console.log("ECP server disabled.");
     }
-    api.checkMenuItem("ecp-api", enable);
     setServerStatus("ECP", port, enable);
 });
 api.receive("toggleTelnet", function (enable, port) {
@@ -99,7 +98,6 @@ api.receive("toggleTelnet", function (enable, port) {
     } else {
         console.log("Remote console server disabled.");
     }
-    api.checkMenuItem("telnet", enable);
     setServerStatus("Telnet", port, enable);
 });
 api.receive("toggleInstaller", function (enable, port, error) {
@@ -110,7 +108,6 @@ api.receive("toggleInstaller", function (enable, port, error) {
     } else {
         console.log("Installer server disabled.");
     }
-    api.checkMenuItem("web-installer", enable);
     setServerStatus("Web", port, enable);
 });
 api.receive("setTheme", function (theme) {

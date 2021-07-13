@@ -122,11 +122,9 @@ app.on("ready", () => {
         // CLI Switches
         if (argv.ecp || startup.ecpEnabled) {
             enableECP(mainWindow);
-            app.applicationMenu.getMenuItemById("ecp-api").checked = true;
         }
         if (argv.telnet || startup.telnetEnabled) {
             enableTelnet(mainWindow);
-            app.applicationMenu.getMenuItemById("telnet").checked = true;
         }
         if (argv.pwd && argv.pwd.trim() !== "") {
             setPassword(argv.pwd.trim());

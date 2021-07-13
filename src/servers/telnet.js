@@ -9,6 +9,7 @@ let buffer = [];
 
 export let isTelnetEnabled = false;
 export function enableTelnet(window) {
+    app.applicationMenu.getMenuItemById("telnet").checked = true;
     if (isTelnetEnabled) {
         return;
     }
@@ -68,6 +69,7 @@ export function enableTelnet(window) {
 }
 
 export function disableTelnet(window) {
+    app.applicationMenu.getMenuItemById("telnet").checked = false;
     if (isTelnetEnabled) {
         if (server) {
             server.close();

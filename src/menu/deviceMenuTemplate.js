@@ -4,6 +4,8 @@ import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet"
 import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
 import { getSettings } from "../helpers/settings";
 
+const isMacOS = process.platform === "darwin";
+
 export const deviceMenuTemplate = {
     label: "&Device",
     submenu: [
@@ -158,6 +160,7 @@ export const deviceMenuTemplate = {
                     getSettings(window).value("services.installer", ["enabled"]);
                     enableInstaller(window);
                 }
+                if (!isMacOS) { item.checked = !item.checked }; // TODO: added to address a bug with electron-toolbar in Windows only
             }
         },
         {
@@ -173,6 +176,7 @@ export const deviceMenuTemplate = {
                     getSettings(window).value("services.ecp", ["enabled"]);
                     enableECP(window);
                 }
+                if (!isMacOS) { item.checked = !item.checked }; // TODO: added to address a bug with electron-toolbar in Windows only
             }
         },
         {
@@ -188,6 +192,7 @@ export const deviceMenuTemplate = {
                     getSettings(window).value("services.telnet", ["enabled"]);
                     enableTelnet(window);
                 }
+                if (!isMacOS) { item.checked = !item.checked }; // TODO: added to address a bug with electron-toolbar in Windows only
             }
         },
         { type: "separator" },
