@@ -385,9 +385,6 @@ export function setEmulatorOption(key, enable, menuId) {
         }
         settings.value("emulator.options", options);
         if (menuId) {
-            if (!isMacOS) {
-                enable = !enable; // TODO: added to address a bug with electron-toolbar in Windows only
-            }
             app.applicationMenu.getMenuItemById(menuId).checked = enable;
         }
     }

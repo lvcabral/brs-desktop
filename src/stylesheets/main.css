@@ -6,6 +6,7 @@
     --link-color: #aa46f7;
     --title-color: #dac7ea;
     --title-background-color: #3d1b56;
+    --item-background-color: #662d91;
     --status-color: #f2f2f2;
     --status-background-color: #662d91;
     --status-hover-color: #7e3ab3;
@@ -21,6 +22,7 @@
     --link-color: #0000ff;
     --title-color: #333333;
     --title-background-color: #dddddd;
+    --item-background-color: #094771;
     --status-color: #f2f2f2;
     --status-background-color: #007acc;
     --status-hover-color: #1f8ad2;
@@ -36,6 +38,7 @@
     --link-color: #3e5763;
     --title-color: #cccccc;
     --title-background-color: #252526;
+    --item-background-color: #094771;
     --status-color: #f2f2f2;
     --status-background-color: #007acc;
     --status-hover-color: #1f8ad2;

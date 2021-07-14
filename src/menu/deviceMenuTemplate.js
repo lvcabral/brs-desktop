@@ -1,4 +1,4 @@
-import { setAspectRatio } from "./menuService";
+import { setAspectRatio, changeLocale } from "./menuService";
 import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet";
 import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
@@ -77,8 +77,8 @@ export const deviceMenuTemplate = {
                     label: "US English (en-US)",
                     type: "radio",
                     checked: true,
-                    click: (event, window) => {
-                        changeLocale(window, "en_US");
+                    click: (item, window) => {
+                        changeLocale(window, item.id);
                     }
                 },
                 {
@@ -86,8 +86,8 @@ export const deviceMenuTemplate = {
                     label: "British English (en-GB)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "en_GB");
+                    click: (item, window) => {
+                        changeLocale(window, item.id);
                     }
                 },
                 {
@@ -95,8 +95,8 @@ export const deviceMenuTemplate = {
                     label: "Canadian French (fr-CA)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "fr_CA");
+                    click: (item, window) => {
+                        changeLocale(window, item.id);
                     }
                 },
                 {
@@ -104,8 +104,8 @@ export const deviceMenuTemplate = {
                     label: "International Spanish (es-ES)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "es_ES");
+                    click: (item, window) => {
+                        changeLocale(window, item.id);
                     }
                 },
                 {
@@ -113,8 +113,8 @@ export const deviceMenuTemplate = {
                     label: "Mexican Spanish (es-MX)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "es_MX");
+                    click: (item, window) => {
+                        changeLocale(window, item.id);
                     }
                 },
                 {
@@ -122,8 +122,8 @@ export const deviceMenuTemplate = {
                     label: "German (de-DE)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "de_DE");
+                    click: (item, window) => {
+                        changeLocale(window, item.id);
                     }
                 },
                 {
@@ -132,7 +132,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
-                        changeLocale(window, "it_IT");
+                        changeLocale(window, item.id);
                     }
                 },
                 {
@@ -141,7 +141,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
-                        changeLocale(window, "pt_BR");
+                        changeLocale(window, item.id);
                     }
                 },
             ]
@@ -160,7 +160,6 @@ export const deviceMenuTemplate = {
                     getSettings(window).value("services.installer", ["enabled"]);
                     enableInstaller(window);
                 }
-                if (!isMacOS) { item.checked = !item.checked }; // TODO: added to address a bug with electron-toolbar in Windows only
             }
         },
         {
@@ -176,7 +175,6 @@ export const deviceMenuTemplate = {
                     getSettings(window).value("services.ecp", ["enabled"]);
                     enableECP(window);
                 }
-                if (!isMacOS) { item.checked = !item.checked }; // TODO: added to address a bug with electron-toolbar in Windows only
             }
         },
         {
@@ -192,7 +190,6 @@ export const deviceMenuTemplate = {
                     getSettings(window).value("services.telnet", ["enabled"]);
                     enableTelnet(window);
                 }
-                if (!isMacOS) { item.checked = !item.checked }; // TODO: added to address a bug with electron-toolbar in Windows only
             }
         },
         { type: "separator" },
@@ -205,9 +202,3 @@ export const deviceMenuTemplate = {
         }
     ]
 };
-
-function changeLocale(window, locale) {
-    window.webContents.send("setLocale", locale);
-    window.blur();
-    window.focus();
-}

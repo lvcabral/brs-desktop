@@ -22,8 +22,9 @@ const storage = window.localStorage;
 const colorValues = getComputedStyle(document.documentElement);
 let titleColor = colorValues.getPropertyValue("--title-color").trim();
 let titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
+let itemBgColor = colorValues.getPropertyValue("--item-background-color").trim();
 api.setBackgroundColor(colorValues.getPropertyValue("--background-color").trim());
-api.createNewTitleBar(titleColor, titleBgColor);
+api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
 // Setup Menu
 deviceData.locale = storage.getItem("deviceLocale") || "en_US";
 setLocaleStatus(deviceData.locale)
@@ -117,7 +118,8 @@ api.receive("setTheme", function (theme) {
         api.setBackgroundColor(bg);
         titleColor = colorValues.getPropertyValue("--title-color").trim();
         titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
-        api.updateTitlebarColor(titleColor, titleBgColor);
+        itemBgColor = colorValues.getPropertyValue("--item-background-color").trim();
+        api.updateTitlebarColor(titleColor, titleBgColor, itemBgColor);
         setStatusColor();    
     }
 });
@@ -146,7 +148,7 @@ api.receive("fileSelected", function (filePath, data) {
 // Subscribe Loader Events
 subscribeLoader("app", (event, data) => {
     if (event === "loaded") {
-        api.updateTitle(defaultTitle + " - " + data.title);
+        api.updateTitle(`${data.title} - ${defaultTitle}`);
         if (data.id === "brs") {
             api.send("addRecentSource", data.file);
         } else {

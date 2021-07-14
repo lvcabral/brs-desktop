@@ -54,27 +54,25 @@ contextBridge.exposeInMainWorld("api", {
     toggleFullScreen: () => {
         mainWindow.setFullScreen(!mainWindow.isFullScreen());
     },
-    createNewTitleBar: (mnColor, bgColor) => {
+    createNewTitleBar: (mnColor, bgColor, itColor) => {
         titleColor = mnColor;
         titleBarConfig = {
             backgroundColor: customTitlebar.Color.fromHex(bgColor),
+            itemBackgroundColor: customTitlebar.Color.fromHex(itColor),
             icon: "./images/icon512x512.png",
             shadow: true
         };
         titleBar = new customTitlebar.Titlebar(titleBarConfig);
         titleBar.titlebar.style.color = titleColor;
-        // Fix text color after focus change
-        titleBar.onBlur = titleBar.onFocus = function() {
-            titleBar.titlebar.style.color = titleColor;
-        };
     },
     updateTitle: (title) => {
         titleBar.updateTitle(title);
     },
-    updateTitlebarColor: (mnColor, bgColor) => {
+    updateTitlebarColor: (mnColor, bgColor, itColor) => {
         titleColor = mnColor;
         titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(bgColor);
         titleBar.updateBackground(titleBarConfig.backgroundColor);
+        titleBar.updateItemBGColor(customTitlebar.Color.fromHex(itColor));
         titleBar.titlebar.style.color = titleColor;
     },
     titleBarRedraw: (fullScreen) => {
@@ -139,6 +137,6 @@ contextBridge.exposeInMainWorld("api", {
     }
 });
 
-ipcRenderer.on('preferencesUpdated', (e, preferences) => {
+ipcRenderer.on("preferencesUpdated", (e, preferences) => {
     onPreferencesChangedHandler(preferences);
 });

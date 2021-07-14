@@ -80,10 +80,6 @@ export function loadPackage(window, id, skipFocus) {
     let pkg = getRecentPackage(id);
     if (pkg) {
         loadFile([pkg]);
-        if (!skipFocus) {
-            window.blur();
-            window.focus();    
-        }
     } else {
         console.log("No recent package to load!");
     }
@@ -93,13 +89,13 @@ export function loadSource(window, id, skipFocus) {
     let brs = getRecentSource(id);
     if (brs) {
         loadFile([brs]);
-        if (!skipFocus) {
-            window.blur();
-            window.focus();
-        }
     } else {
         console.log("No recent file to load!");
     }
+}
+
+export function changeLocale(window, locale) {
+    window.webContents.send("setLocale", locale);
 }
 
 // Events

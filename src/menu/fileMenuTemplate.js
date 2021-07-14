@@ -153,8 +153,6 @@ export const fileMenuTemplate = {
                     enabled: false,
                     click: (item, window) => {
                         clearRecentFiles();
-                        window.blur();
-                        window.focus();
                     }
                 }
             ]
