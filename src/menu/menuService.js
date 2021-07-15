@@ -4,7 +4,7 @@ import { editMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
-import { getEmulatorOption } from "../helpers/settings";
+import { getEmulatorOption, setPreference } from "../helpers/settings";
 import { loadFile } from "../helpers/files";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
@@ -95,6 +95,8 @@ export function loadSource(window, id, skipFocus) {
 }
 
 export function changeLocale(window, locale) {
+    setPreference("localization.locale", locale);
+    global.sharedObject.deviceInfo.locale = locale;
     window.webContents.send("setLocale", locale);
 }
 

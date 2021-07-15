@@ -111,6 +111,13 @@ app.on("ready", () => {
         setPassword(settings.value("services.password"));
         setPort(settings.value("services.webPort"));
     }
+    if (settings.preferences.localization) {
+        const localeId = settings.value("localization.locale");
+        if (localeId) {
+            deviceInfo.locale = localeId;
+            app.applicationMenu.getMenuItemById(localeId).checked = true;    
+        }
+    }
     // Initialize ECP and SSDP servers
     initECP(deviceInfo);
     // Load Renderer

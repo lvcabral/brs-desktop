@@ -18,7 +18,6 @@ import { clientException } from "./frontend/console";
 // App menu and theme configuration
 const defaultTitle = document.title;
 const display = document.getElementById("display");
-const storage = window.localStorage;
 const colorValues = getComputedStyle(document.documentElement);
 let titleColor = colorValues.getPropertyValue("--title-color").trim();
 let titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
@@ -26,8 +25,7 @@ let itemBgColor = colorValues.getPropertyValue("--item-background-color").trim()
 api.setBackgroundColor(colorValues.getPropertyValue("--background-color").trim());
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
 // Setup Menu
-deviceData.locale = storage.getItem("deviceLocale") || "en_US";
-setLocaleStatus(deviceData.locale)
+setLocaleStatus(deviceData.locale);
 setupMenuSwitches();
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {
@@ -78,7 +76,6 @@ api.receive("setOverscan", function (mode) {
 api.receive("setLocale", function (locale) {
     if (locale !== deviceData.locale) {
         deviceData.locale = locale;
-        storage.setItem("deviceLocale", locale);
         setLocaleStatus(locale);
     }
 });
@@ -158,5 +155,4 @@ window.onload = window.onresize = function () {
 function setupMenuSwitches() {
     api.checkMenuItem(`device-${deviceData.displayMode}`,  true);
     api.checkMenuItem(`overscan-${overscanMode}`, true);
-    api.checkMenuItem(deviceData.locale, true);
 }

@@ -7,7 +7,7 @@ import { enableInstaller, disableInstaller, setPort, hasInstaller, setPassword }
 
 const isMacOS = process.platform === "darwin";
 const w = 800;
-const h = 630;
+const h = 650;
 let settings;
 export function getSettings(window) {
     if (settings === undefined) {
@@ -254,7 +254,7 @@ export function getSettings(window) {
                                         type: "slider",
                                         min: 1,
                                         max: 3,
-                                        help: "Maximum number of audio streams that can be mixed together and presented simultaneously"
+                                        help: "Maximum number of audio streams that can be mixed together and played simultaneously"
                                     },
                                     {
                                         label: "Sound Effects Volume",
@@ -262,7 +262,7 @@ export function getSettings(window) {
                                         type: "slider",
                                         min: 0,
                                         max: 100,
-                                        help: "User interface sound effects volume level"
+                                        help: "Volume level of the channel user interface sound effects"
                                     },
                                 ]
                             }
@@ -282,7 +282,7 @@ export function getSettings(window) {
                                         key: "locale",
                                         type: "radio",
                                         options: getLocaleIdArray(),
-                                        help: "Configure channel localization, this setting doesn't affect the emulator UI only channels"
+                                        help: "Configure the localization, this setting only affects channels not the emulator UI"
                                     },
                                     {
                                         label: "Clock Format",
@@ -298,7 +298,7 @@ export function getSettings(window) {
                                         key: "countryCode",
                                         type: "dropdown",
                                         options: getCountryArray(),
-                                        help: "Configure the country store associated with the device"
+                                        help: "Configure the country store associated with the device returned by ifDeviceInfo.GetCountryCode()"
                                     },
                                     {
                                         label: "Time Zone",
@@ -349,6 +349,14 @@ export function getSettings(window) {
                 } else {
                     disableTelnet(window);
                 }                
+            }
+            if (preferences.localization) {
+                const localeId = preferences.localization.locale;
+                if (global.sharedObject.deviceInfo.locale !== localeId) {
+                    global.sharedObject.deviceInfo.locale = localeId;
+                    app.applicationMenu.getMenuItemById(localeId).checked = true;
+                    window.webContents.send("setLocale", localeId);
+                }
             }
         });
         nativeTheme.on("updated", () => {
