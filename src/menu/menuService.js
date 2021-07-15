@@ -4,7 +4,7 @@ import { editMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
-import { getSettings } from "../helpers/settings";
+import { getEmulatorOption } from "../helpers/settings";
 import { loadFile } from "../helpers/files";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
@@ -203,11 +203,7 @@ function rebuildMenu(template = false) {
             }        
             app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
             app.applicationMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
-            const options = getSettings().preferences.emulator.options;
-            if (options) {
-                const statusBar = options.includes("statusBar");
-                app.applicationMenu.getMenuItemById("status-bar").checked = statusBar;
-            }            
+            app.applicationMenu.getMenuItemById("status-bar").checked = getEmulatorOption("statusBar");
             window.webContents.send("updateMenu");
         }
     } else {

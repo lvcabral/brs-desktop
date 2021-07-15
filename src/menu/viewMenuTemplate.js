@@ -1,4 +1,4 @@
-import { getSettings, setThemeSource, setEmulatorOption } from "../helpers/settings";
+import { setThemeSource, setEmulatorOption } from "../helpers/settings";
 
 export const viewMenuTemplate = {
     label: "&View",
@@ -19,8 +19,7 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: true,
             click: (item, window) => {
-                getSettings(window).value("emulator.theme", "purple");
-                window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
+                window.webContents.send("setTheme", setThemeSource("purple"));
             }
         },
         {
@@ -29,8 +28,7 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                getSettings(window).value("emulator.theme", "light");
-                window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
+                window.webContents.send("setTheme", setThemeSource("light"));
             }
         },
         {
@@ -39,8 +37,7 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                getSettings(window).value("emulator.theme", "dark");
-                window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
+                window.webContents.send("setTheme", setThemeSource("dark"));
             }
         },
         {
@@ -49,8 +46,7 @@ export const viewMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                getSettings(window).value("emulator.theme", "system");
-                window.webContents.send("setTheme", setThemeSource(getSettings(window).preferences));
+                window.webContents.send("setTheme", setThemeSource("system"));
             }
         },
         { type: "separator" },

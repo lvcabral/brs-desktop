@@ -1,4 +1,4 @@
-import { getSettings } from "../helpers/settings";
+import { showSettings } from "../helpers/settings";
 
 export const editMenuTemplate = {
     label: "&Edit",
@@ -18,7 +18,7 @@ export const editMenuTemplate = {
             label: "Settings...", 
             accelerator: "CmdOrCtrl+,",
             click: (item, window) => {
-                getSettings(window, true).show();
+                showSettings();
             }
         }
     ]

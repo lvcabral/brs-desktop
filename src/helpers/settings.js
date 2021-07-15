@@ -6,15 +6,14 @@ import { enableTelnet, disableTelnet } from "../servers/telnet";
 import { enableInstaller, disableInstaller, setPort, hasInstaller, setPassword } from "../servers/installer";
 
 const isMacOS = process.platform === "darwin";
+const w = 800;
+const h = 630;
 let settings;
-
-export function getSettings(window, forceNew) {
-    if (settings === undefined || forceNew) {
+export function getSettings(window) {
+    if (settings === undefined) {
         const bounds = window.getBounds();    
-        const w = 800;
-        const h = 630;
         const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
-        const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);   
+        const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
         settings = new ElectronPreferences({
             dataStore: path.resolve(app.getPath("userData"), "brs-settings.json"),
             defaults: {
@@ -314,9 +313,9 @@ export function getSettings(window, forceNew) {
                 },
             ]
         });
-        setThemeSource(settings.preferences);
+        setThemeSource();
         settings.on("save", (preferences) => {
-            const appMenu = app.applicationMenu;  
+            const appMenu = app.applicationMenu;
             if (preferences.emulator) {
                 const options = preferences.emulator.options;
                 const onTop = options.includes("alwaysOnTop");
@@ -327,7 +326,7 @@ export function getSettings(window, forceNew) {
                     appMenu.getMenuItemById("status-bar").checked = statusBar;
                     window.webContents.send("toggleStatusBar");
                 }
-                window.webContents.send("setTheme", setThemeSource(preferences));
+                window.webContents.send("setTheme", setThemeSource());
             }
             if (preferences.services) {
                 const services = preferences.services;
@@ -363,16 +362,38 @@ export function getSettings(window, forceNew) {
     return settings;
 }
 
-export function setThemeSource(preferences) {
-    let userTheme = preferences.emulator.theme || "purple";
-    let systemTheme = userTheme === "purple" ? "system" : userTheme;
+export function showSettings() {
+    if (settings.browserWindowOverrides.parent) {
+        const bounds = settings.browserWindowOverrides.parent.getBounds();    
+        settings.browserWindowOverrides.x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
+        settings.browserWindowOverrides.y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
+    }
+    settings.show();
+}
+
+export function setPreference(key, value) {
+    settings.value(key, value);
+}
+
+export function setThemeSource(userTheme) {
+    if (userTheme) {
+        settings.value("emulator.theme", userTheme);
+    } else {
+        userTheme = settings.value("emulator.theme");
+    }   
     app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+    let systemTheme = userTheme === "purple" ? "system" : userTheme;
     nativeTheme.themeSource = systemTheme;
     if (userTheme === "system") {
         userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
     }
     global.sharedObject.theme = userTheme;
     return userTheme;
+}
+
+export function getEmulatorOption(key) {
+    let options = settings.value("emulator.options");
+    return options ? options.includes(key) : false;
 }
 
 export function setEmulatorOption(key, enable, menuId) {

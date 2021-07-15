@@ -2,7 +2,7 @@ import { setAspectRatio, changeLocale } from "./menuService";
 import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet";
 import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
-import { getSettings } from "../helpers/settings";
+import { setPreference } from "../helpers/settings";
 
 const isMacOS = process.platform === "darwin";
 
@@ -154,10 +154,10 @@ export const deviceMenuTemplate = {
             checked: false,
             click: (item, window) => {
                 if (hasInstaller) {
-                    getSettings(window).value("services.installer", []);
+                    setPreference("services.installer", []);
                     disableInstaller(window);
                 } else {
-                    getSettings(window).value("services.installer", ["enabled"]);
+                    setPreference("services.installer", ["enabled"]);
                     enableInstaller(window);
                 }
             }
@@ -169,10 +169,10 @@ export const deviceMenuTemplate = {
             checked: false,
             click: (item, window) => {
                 if (isECPEnabled) {
-                    getSettings(window).value("services.ecp", []);
+                    setPreference("services.ecp", []);
                     disableECP(window);
                 } else {
-                    getSettings(window).value("services.ecp", ["enabled"]);
+                    setPreference("services.ecp", ["enabled"]);
                     enableECP(window);
                 }
             }
@@ -184,10 +184,10 @@ export const deviceMenuTemplate = {
             checked: false,
             click: (item, window) => {
                 if (isTelnetEnabled) {
-                    getSettings(window).value("services.telnet", []);
+                    setPreference("services.telnet", []);
                     disableTelnet(window);
                 } else {
-                    getSettings(window).value("services.telnet", ["enabled"]);
+                    setPreference("services.telnet", ["enabled"]);
                     enableTelnet(window);
                 }
             }
