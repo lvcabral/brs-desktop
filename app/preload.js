@@ -121,9 +121,7 @@ contextBridge.exposeInMainWorld("api", {
             "setOverscan",
             "setLocale",
             "toggleStatusBar",
-            "toggleECP",
-            "toggleTelnet",
-            "toggleInstaller",
+            "serverStatus",
             "copyScreenshot",
             "saveScreenshot",
             "fileSelected"

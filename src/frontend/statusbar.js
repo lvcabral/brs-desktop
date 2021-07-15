@@ -136,24 +136,24 @@ export function setLocaleStatus(localeId) {
     statusLocale.innerText = localeId.replace("_","-");
 }
 // Update server icons on Status Bar
-export function setServerStatus(name, port, enabled) {
-    if (name === "ECP") {
-        ECPPort = port;
+export function setServerStatus(server, enabled, port) {
+    if (server === "ECP") {
         if (enabled) {
+            ECPPort = port;
             statusECPText.innerText = port.toString();
             statusECP.style.display = "";
         } else {
             statusECP.style.display = "none";
         }
-    } else if (name === "Web") {
-        installerPort = port;
+    } else if (server === "Web") {
         if (enabled) {
+            installerPort = port;
             statusWebText.innerText = port.toString();
             statusWeb.style.display = "";
         } else {
             statusWeb.style.display = "none";
         }    
-    } else if (name ==="Telnet") {
+    } else if (server ==="Telnet") {
         if (enabled) {
             statusTelnetText.innerText = port.toString();
             statusTelnet.style.display = "";

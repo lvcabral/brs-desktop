@@ -5,6 +5,7 @@ import path from "path";
 import http from "http";
 import crypt from "crypto";
 import { loadFile } from "../helpers/files";
+import { setPreference } from "../helpers/settings";
 
 const credentials = {
     userName: "rokudev",
@@ -28,7 +29,6 @@ export function setPort(customPort) {
     }
 }
 export function enableInstaller(window) {
-    app.applicationMenu.getMenuItemById("web-installer").checked = true;
     if (hasInstaller) {
         return; // already started do nothing
     }
@@ -166,12 +166,13 @@ export function enableInstaller(window) {
         }
     }).listen(port, () => {
         hasInstaller = true;
-        window.webContents.send("toggleInstaller", true, port);
+        updateInstallerStatus(hasInstaller, window);
     });
     server.on("error", (error) => {
         if (error.code === "EADDRINUSE") {
+            window.webContents.send("console", `Web Installer server failed:${e.message}`, true);
             hasInstaller = false;
-            window.webContents.send("toggleInstaller", false, port, error.message);
+            updateInstallerStatus(hasInstaller, window);
         } else {
             window.webContents.send("console", error.message, true);
         }
@@ -179,14 +180,19 @@ export function enableInstaller(window) {
 }
 
 export function disableInstaller(window) {
-    app.applicationMenu.getMenuItemById("web-installer").checked = false;
     if (hasInstaller) {
         if (server) {
             server.close();
         }
         hasInstaller = false;
-        window.webContents.send("toggleInstaller", false);
+        updateInstallerStatus(hasInstaller, window);
     }
+}
+
+export function updateInstallerStatus(enabled, window) {
+    setPreference("services.installer", enabled ? ["enabled"] : []);
+    app.applicationMenu.getMenuItemById("web-installer").checked = enabled;
+    window.webContents.send("serverStatus", "Web", enabled, port);
 }
 
 // Helper Functions

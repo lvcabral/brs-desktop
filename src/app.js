@@ -85,31 +85,13 @@ api.receive("setLocale", function (locale) {
 api.receive("toggleStatusBar", function () {
     redrawDisplay(currentChannel.running, api.isFullScreen());
 });
-api.receive("toggleECP", function (enable, port) {
+api.receive("serverStatus", function (server, enable, port) {
     if (enable) {
-        console.log(`ECP server started listening port ${port}`);
+        console.log(`${server} server started listening port ${port}`);
     } else {
-        console.log("ECP server disabled.");
+        console.log(`${server} server was disabled.`);
     }
-    setServerStatus("ECP", port, enable);
-});
-api.receive("toggleTelnet", function (enable, port) {
-    if (enable) {
-        console.log(`Remote console started listening port ${port}`);
-    } else {
-        console.log("Remote console server disabled.");
-    }
-    setServerStatus("Telnet", port, enable);
-});
-api.receive("toggleInstaller", function (enable, port, error) {
-    if (enable) {
-        console.log(`Installer server started listening port ${port}`);
-    } else if (error) {
-        console.error("Installer server error:", error);
-    } else {
-        console.log("Installer server disabled.");
-    }
-    setServerStatus("Web", port, enable);
+    setServerStatus(server, enable, port);
 });
 api.receive("setTheme", function (theme) {
     if (theme !== document.documentElement.getAttribute("data-theme")) {

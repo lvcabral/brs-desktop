@@ -4,7 +4,6 @@
 // instances of it and give each different name.
 
 import { app, BrowserWindow, screen } from "electron";
-import { loadFile } from "./files";
 import path from "path";
 import jetpack from "fs-jetpack";
 
@@ -96,34 +95,6 @@ export default (name, options, argv) => {
             show: false
         })
     );
-
-    win.on("ready-to-show", function() {
-        let openFile;
-        if (argv && argv.o) {
-            openFile = argv.o.trim();
-        } else {
-            try {
-                let index = argv._.length - 1;
-                if (index && argv._[index]) {
-                    if (jetpack.exists(argv._[index])) {
-                        openFile = argv._[index];
-                    }
-                }
-            } catch (error) {
-                console.error("Invalid parameters!", error);
-            }
-        }
-        if (openFile) {
-            const fileExt = path.parse(openFile).ext.toLowerCase();
-            if (fileExt === ".zip" || fileExt === ".brs" ) {
-                loadFile([ openFile ]);
-            } else {
-                console.log("File format not supported: ", fileExt);
-            }
-        }
-        win.show();
-        win.focus();
-    });
 
     win.on("close", saveState);
 

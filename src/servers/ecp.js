@@ -8,6 +8,7 @@ import {
     getRecentVersion
 } from "../menu/menuService";
 import { loadFile } from "../helpers/files";
+import { setPreference } from "../helpers/settings";
 import { Server as SSDP } from "node-ssdp";
 import xmlbuilder from "xmlbuilder";
 import fs from "fs";
@@ -31,7 +32,6 @@ export function initECP(deviceInfo) {
     device = deviceInfo;
 }
 export function enableECP(mainWindow) {
-    app.applicationMenu.getMenuItemById("ecp-api").checked = true;
     window = mainWindow;
     if (isECPEnabled) {
         return; // already started do nothing
@@ -90,7 +90,7 @@ export function enableECP(mainWindow) {
                 })
                 .then(() => {
                     isECPEnabled = true;
-                    window.webContents.send("toggleECP", true, ECPPORT);
+                    updateECPStatus(isECPEnabled, window);
                 });
             // Create ECP-2 WebSocket Server
             const wss = new WebSocket.Server({ noServer: true });
@@ -119,8 +119,8 @@ export function enableECP(mainWindow) {
         });
 }
 
-export function disableECP() {
-    app.applicationMenu.getMenuItemById("ecp-api").checked = false;
+export function disableECP(mainWindow) {
+    window = mainWindow;
     if (isECPEnabled) {
         if (ecp) {
             ecp.close();
@@ -129,8 +129,14 @@ export function disableECP() {
             ssdp.stop();
         }
         isECPEnabled = false;
-        window.webContents.send("toggleECP", false);
+        updateECPStatus(isECPEnabled, window);
     }
+}
+
+export function updateECPStatus(enabled, window) {
+    setPreference("services.ecp", enabled ? ["enabled"] : []);
+    app.applicationMenu.getMenuItemById("ecp-api").checked = enabled;
+    window.webContents.send("serverStatus", "ECP", enabled, ECPPORT);
 }
 
 // ECP-2 WebSocket API

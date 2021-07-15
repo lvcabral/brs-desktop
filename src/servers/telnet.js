@@ -1,5 +1,6 @@
 import { app, ipcMain } from "electron";
 import * as telnet from "net";
+import { setPreference } from "../helpers/settings";
 const PORT = 8085;
 const BUFFER_SIZE = 700;
 let server;
@@ -9,7 +10,6 @@ let buffer = [];
 
 export let isTelnetEnabled = false;
 export function enableTelnet(window) {
-    app.applicationMenu.getMenuItemById("telnet").checked = true;
     if (isTelnetEnabled) {
         return;
     }
@@ -51,7 +51,7 @@ export function enableTelnet(window) {
     });
     server.on("listening", () => {
         isTelnetEnabled = true;
-        window.webContents.send("toggleTelnet", true, PORT);
+        updateTelnetStatus(isTelnetEnabled, window);
         ipcMain.on("telnet", (event, text) => {
             if (buffer.length > BUFFER_SIZE) {
                 buffer.shift();
@@ -69,7 +69,6 @@ export function enableTelnet(window) {
 }
 
 export function disableTelnet(window) {
-    app.applicationMenu.getMenuItemById("telnet").checked = false;
     if (isTelnetEnabled) {
         if (server) {
             server.close();
@@ -82,6 +81,12 @@ export function disableTelnet(window) {
             buffer = [];
         }
         isTelnetEnabled = false;
-        window.webContents.send("toggleTelnet", false);
+        updateTelnetStatus(isTelnetEnabled, window);
     }
+}
+
+export function updateTelnetStatus(enabled, window) {
+    setPreference("services.telnet", enabled ? ["enabled"] : []);
+    app.applicationMenu.getMenuItemById("telnet").checked = enabled;
+    window.webContents.send("serverStatus", "Telnet", enabled, PORT);
 }

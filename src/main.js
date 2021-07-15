@@ -10,12 +10,13 @@ import url from "url";
 import env from "env";
 import os from "os";
 import minimist from "minimist";
+import jetpack from "fs-jetpack";
 import { app, screen, ipcMain, nativeTheme } from "electron";
-import { initECP, enableECP } from "./servers/ecp"
-import { setPassword, setPort, enableInstaller } from "./servers/installer";
-import { enableTelnet } from "./servers/telnet";
+import { initECP, enableECP, updateECPStatus } from "./servers/ecp"
+import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./servers/installer";
+import { enableTelnet, updateTelnetStatus } from "./servers/telnet";
 import { createMenu, loadPackage } from "./menu/menuService"
-import { saveFile } from "./helpers/files";
+import { loadFile, saveFile } from "./helpers/files";
 import { getSettings } from "./helpers/settings";
 import createWindow from "./helpers/window";
 
@@ -72,6 +73,7 @@ app.on("ready", () => {
         argv
     );
     // Configure Window and load content
+    let firstLoad = true;
     let winBounds = mainWindow.getBounds();
     let display = screen.getDisplayNearestPoint({ x: winBounds.x, y: winBounds.y });
     mainWindow.setMinimumSize(Math.min(346, display.size.width), Math.min(264, display.size.height));
@@ -156,8 +158,40 @@ app.on("ready", () => {
         if (startup.devTools || argv.devtools) {
             mainWindow.openDevTools();
         }
-        if (startup.runLastChannel) {
+        let openFile;
+        if (argv && argv.o) {
+            openFile = argv.o.trim();
+        } else {
+            try {
+                let index = argv._.length - 1;
+                if (index && argv._[index]) {
+                    if (jetpack.exists(argv._[index])) {
+                        openFile = argv._[index];
+                    }
+                }
+            } catch (error) {
+                console.error("Invalid parameters!", error);
+            }
+        }
+        if (openFile) {
+            const fileExt = path.parse(openFile).ext.toLowerCase();
+            if (fileExt === ".zip" || fileExt === ".brs") {
+                loadFile([openFile]);
+            } else {
+                console.log("File format not supported: ", fileExt);
+            }
+        } else if (startup.runLastChannel) {
             loadPackage(mainWindow, 0, true);
+        }
+        firstLoad = false;
+        mainWindow.show();
+        mainWindow.focus();
+    });
+    mainWindow.webContents.on('dom-ready', () => {
+        if (!firstLoad) {
+            updateECPStatus(settings.value("services.ecp").includes("enabled"), mainWindow);
+            updateTelnetStatus(settings.value("services.telnet").includes("enabled"), mainWindow);
+            updateInstallerStatus(settings.value("services.installer").includes("enabled"), mainWindow);
         }
     });
     // Open Developer Tools
