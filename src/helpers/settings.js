@@ -384,12 +384,14 @@ export function getSettings(window) {
 }
 
 export function showSettings() {
-    if (settings.browserWindowOverrides.parent) {
-        const bounds = settings.browserWindowOverrides.parent.getBounds();    
-        settings.browserWindowOverrides.x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
-        settings.browserWindowOverrides.y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
+    let prefsWindow = settings.show();
+    let window = prefsWindow.getParentWindow();
+    if (window) {
+        const bounds = window.getBounds();
+        let x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
+        let y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
+        prefsWindow.setBounds({x: x, y: y});
     }
-    settings.show();
 }
 
 export function setPreference(key, value) {
