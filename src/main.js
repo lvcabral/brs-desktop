@@ -18,7 +18,7 @@ import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./
 import { enableTelnet, updateTelnetStatus } from "./servers/telnet";
 import { createMenu, loadPackage } from "./menu/menuService"
 import { loadFile, saveFile } from "./helpers/files";
-import { getSettings, updateTimeZone } from "./helpers/settings";
+import { getSettings, setDeviceInfo, updateTimeZone } from "./helpers/settings";
 import createWindow from "./helpers/window";
 
 // Emulator Device Information Object
@@ -116,15 +116,16 @@ app.on("ready", () => {
         setPassword(settings.value("services.password"));
         setPort(settings.value("services.webPort"));
     }
+    if (settings.preferences.device) {
+        setDeviceInfo("device", "deviceModel");
+        setDeviceInfo("device", "serialNumber");
+        setDeviceInfo("device", "clientId");
+        setDeviceInfo("device", "RIDA");
+        setDeviceInfo("device", "developerId");
+    }
     if (settings.preferences.audio) {
-        const maxSimulStreams = settings.value("audio.maxSimulStreams");
-        if (maxSimulStreams) {
-            deviceInfo.maxSimulStreams = maxSimulStreams;
-        }
-        const audioVolume = settings.value("audio.audioVolume");
-        if (audioVolume) {
-            deviceInfo.audioVolume = audioVolume;
-        }
+        setDeviceInfo("audio", "maxSimulStreams");
+        setDeviceInfo("audio", "audioVolume");
     }
     if (settings.preferences.localization) {
         const localeId = settings.value("localization.locale");
@@ -132,14 +133,8 @@ app.on("ready", () => {
             deviceInfo.locale = localeId;
             app.applicationMenu.getMenuItemById(localeId).checked = true;    
         }
-        const clockFormat  = settings.value("localization.clockFormat");
-        if (clockFormat) {
-            deviceInfo.clockFormat = clockFormat;
-        }
-        const countryCode  = settings.value("localization.countryCode");
-        if (countryCode) {
-            deviceInfo.countryCode = countryCode;
-        }
+        setDeviceInfo("localization", "clockFormat");
+        setDeviceInfo("localization", "countryCode");
         updateTimeZone();
     }
     // Initialize ECP and SSDP servers

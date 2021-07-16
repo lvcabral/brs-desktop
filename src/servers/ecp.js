@@ -8,7 +8,7 @@ import {
     getRecentVersion
 } from "../menu/menuService";
 import { loadFile } from "../helpers/files";
-import { setPreference } from "../helpers/settings";
+import { setPreference, getModelName } from "../helpers/settings";
 import { Server as SSDP } from "node-ssdp";
 import xmlbuilder from "xmlbuilder";
 import fs from "fs";
@@ -428,10 +428,6 @@ function launchApp(appID) {
     } else {
         window.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
     }
-}
-
-function getModelName(model) {
-    return `Roku ${model === "4640X" ? "Ultra" : model === "4200X" ? "3" : "2"}`;
 }
 
 function getMacAddress() {

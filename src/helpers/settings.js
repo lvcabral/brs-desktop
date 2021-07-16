@@ -8,12 +8,13 @@ import { enableInstaller, disableInstaller, setPort, hasInstaller, setPassword }
 
 const isMacOS = process.platform === "darwin";
 const timeZoneLabels = new Map();
+const modelLabels = new Map();
 const w = 800;
 const h = 650;
 let settings;
 export function getSettings(window) {
     if (settings === undefined) {
-        const bounds = window.getBounds();    
+        const bounds = window.getBounds();
         const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
         const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
         settings = new ElectronPreferences({
@@ -336,31 +337,32 @@ export function getSettings(window) {
                     if (!hasInstaller) {
                         setPort(services.webPort);
                         setPassword(services.password);
-                        enableInstaller(window);    
+                        enableInstaller(window);
                     }
                 } else {
                     disableInstaller(window);
-                }                
+                }
                 if (services.ecp.includes("enabled")) {
                     enableECP(window);
                 } else {
                     disableECP(window);
-                }                
+                }
                 if (services.telnet.includes("enabled")) {
                     enableTelnet(window);
                 } else {
                     disableTelnet(window);
-                }                
+                }
+            }
+            if (preferences.device) {
+                setDeviceInfo("device", "deviceModel", window);
+                setDeviceInfo("device", "serialNumber", window);
+                setDeviceInfo("device", "clientId", window);
+                setDeviceInfo("device", "RIDA", window);
+                setDeviceInfo("device", "developerId", window);
             }
             if (preferences.audio) {
-                if (global.sharedObject.deviceInfo.maxSimulStreams !== preferences.audio.maxSimulStreams) {
-                    global.sharedObject.deviceInfo.maxSimulStreams = preferences.audio.maxSimulStreams;
-                    window.webContents.send("setDeviceInfo", "maxSimulStreams", preferences.audio.maxSimulStreams);
-                }
-                if (global.sharedObject.deviceInfo.audioVolume !== preferences.audio.audioVolume) {
-                    global.sharedObject.deviceInfo.audioVolume = preferences.audio.audioVolume;
-                    window.webContents.send("setDeviceInfo", "audioVolume", preferences.audio.audioVolume);
-                }
+                setDeviceInfo("audio", "maxSimulStreams", window);
+                setDeviceInfo("audio", "audioVolume", window);
             }
             if (preferences.localization) {
                 const localeId = preferences.localization.locale;
@@ -369,16 +371,8 @@ export function getSettings(window) {
                     app.applicationMenu.getMenuItemById(localeId).checked = true;
                     window.webContents.send("setLocale", localeId);
                 }
-                const clockFormat = preferences.localization.clockFormat;
-                if (global.sharedObject.deviceInfo.clockFormat !== clockFormat) {
-                    global.sharedObject.deviceInfo.clockFormat = clockFormat;
-                    window.webContents.send("setDeviceInfo", "clockFormat", clockFormat);
-                }
-                const countryCode = preferences.localization.countryCode;
-                if (global.sharedObject.deviceInfo.countryCode !== countryCode) {
-                    global.sharedObject.deviceInfo.countryCode = countryCode;
-                    window.webContents.send("setDeviceInfo", "countryCode", countryCode);
-                }
+                setDeviceInfo("localization", "clockFormat", window);
+                setDeviceInfo("localization", "countryCode", window);
                 updateTimeZone(window);
             }
         });
@@ -400,7 +394,7 @@ export function showSettings() {
         const bounds = window.getBounds();
         let x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
         let y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
-        prefsWindow.setBounds({x: x, y: y});
+        prefsWindow.setBounds({ x: x, y: y });
     }
 }
 
@@ -408,12 +402,23 @@ export function setPreference(key, value) {
     settings.value(key, value);
 }
 
+export function setDeviceInfo(section, key, window) {
+    const oldValue = global.sharedObject.deviceInfo[key];
+    const newValue = settings.value(`${section}.${key}`);
+    if (newValue && newValue !== oldValue) {
+        global.sharedObject.deviceInfo[key] = newValue;
+        if (window) {
+            window.webContents.send("setDeviceInfo", key, newValue);
+        }
+    }
+}
+
 export function setThemeSource(userTheme) {
     if (userTheme) {
         settings.value("emulator.theme", userTheme);
     } else {
         userTheme = settings.value("emulator.theme");
-    }   
+    }
     app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
     let systemTheme = userTheme === "purple" ? "system" : userTheme;
     nativeTheme.themeSource = systemTheme;
@@ -460,74 +465,85 @@ export function updateTimeZone(window) {
             di.timeZoneAuto = timeZone === "system";
             di.timeZoneOffset = dt.offset;
             if (window) {
-                window.webContents.send("setDeviceInfo", "timeZone", di.timeZone); // TODO: Implement the handling of this message
+                window.webContents.send("setDeviceInfo", "timeZone", di.timeZone);
+                window.webContents.send("setDeviceInfo", "timeZoneIANA", di.timeZoneIANA);
+                window.webContents.send("setDeviceInfo", "timeZoneAuto", di.timeZoneAuto);
+                window.webContents.send("setDeviceInfo", "timeZoneOffset", di.timeZoneOffset);
             }
-        }    
+        }
     }
+}
+
+export function getModelName(model) {
+    return modelLabels.get(model).replace(/ *\([^)]*\) */g, "");
 }
 
 // Data Arrays
 
 function getRokuModelArray() {
-    return [
-        { value: "N1050", label: "Roku SD Classic - N1050" },
-        { value: "N1000", label: "Roku DVP Classsic - N1000" },
-        { value: "N1100", label: "Roku HD Classsic - N1100" },
-        { value: "N1101", label: "Roku HD-XR Classic - N1101" },
-        { value: "2050X", label: "Roku XD - 2050X" },
-        { value: "2050N", label: "Roku XD - 2050N" },
-        { value: "2100X", label: "Roku XD|S - 2100X" },
-        { value: "2100N", label: "Roku XD|S - 2100N" },
-        { value: "2000C", label: "Roku HD - 2000C" },
-        { value: "2400X", label: "Roku LT - 2400X" },
-        { value: "2450X", label: "Roku LT - 2450X" },
-        { value: "2500X", label: "Roku HD - 2500X" },
-        { value: "2710X", label: "Roku 1 - 2710X" },
-        { value: "2700X", label: "Roku LT (3d. Gen) - 2700X" },
-        { value: "2710SE", label: "Roku SE - 2710SE" },
-        { value: "2720X", label: "Roku 2 - 2720X" },
-        { value: "3000X", label: "Roku 2 HD - 3000X" },
-        { value: "3050X", label: "Roku 2 XD - 3050X" },
-        { value: "3100X", label: "Roku 2 XS - 3100X" },
-        { value: "4200X", label: "Roku 3 - 4200X" },
-        { value: "4210X", label: "Roku 3 (US) - 4210X" },
-        { value: "4230X", label: "Roku 3 (US) - 4230X" },
-        { value: "4400X", label: "Roku 4 - 4400X" },
-        { value: "4500SK", label: "Sky Now TV (UK) - 4500SK" },
-        { value: "3400X", label: "Roku Stick - 3400X" },
-        { value: "3420X", label: "Roku Stick - 3420X" },
-        { value: "3500X", label: "Roku Stick (HDMI) - 3500X" },
-        { value: "3600X", label: "Roku Stick (2016) - 3600X" },
-        { value: "5000X", label: "Roku TV (MIPS) - 5000X" },
-        { value: "6000X", label: "4K Roku TV - 6000X" },
-        { value: "7000X", label: "4K Roku TV (TCL) - 7000X" },
-        { value: "3700X", label: "Roku Express - 3700X" },
-        { value: "3710X", label: "Roku Express+ - 3710X" },
-        { value: "4620X", label: "Roku Premiere - 4620X" },
-        { value: "4630X", label: "Roku Premiere+ - 4630X" },
-        { value: "3920X", label: "Roku Premiere (2018) - 3920X" },
-        { value: "3921X", label: "Roku Premiere+ (2018) - 3921X" },
-        { value: "3800X", label: "Roku Stick (2017) - 3800X" },
-        { value: "3810X", label: "Roku Stick+ - 3810X" },
-        { value: "3900X", label: "Roku Express (2017) - 3900X" },
-        { value: "3900EU", label: "Roku Express EU (2017) - 3900EU" },
-        { value: "3910X", label: "Roku Express+ (2017) - 3910X" },
-        { value: "3930X", label: "Roku Express (2019) - 3930X" },
-        { value: "3931X", label: "Roku Express+ (2019) - 3931X" },
-        { value: "3940X", label: "Roku Express 4K - 3940X" },
-        { value: "3941X", label: "Roku Express 4K+ - 3941X" },
-        { value: "4640X", label: "Roku Ultra - 4640X" },
-        { value: "4660X", label: "Roku Ultra (2017) - 4660X" },
-        { value: "4661X", label: "Roku Ultra (2018) - 4661X" },
-        { value: "4662X", label: "Roku Ultra LT - 4662X" },
-        { value: "4670X", label: "Roku Ultra (2019) - 4670X" },
-        { value: "4800X", label: "Roku Ultra (2020) - 4800X" },
-        { value: "8000X", label: "Roku TV (ARM) - 8000X" },
-        { value: "9100X", label: "Roku Smart Soundbar - 9100X" },
-        { value: "9102X", label: "Roku Streambar - 9102X" },
-        { value: "A000X", label: "Roku TV 4K - A000X" },
-        { value: "C000X", label: "Roku TV 4K - C000X" },
-    ]    
+    const modelArray = [];
+    modelLabels.set("N1050", "Roku SD Classic");
+    modelLabels.set("N1000", "Roku DVP Classsic");
+    modelLabels.set("N1100", "Roku HD Classsic");
+    modelLabels.set("N1101", "Roku HD-XR Classic");
+    modelLabels.set("2050X", "Roku XD");
+    modelLabels.set("2050N", "Roku XD");
+    modelLabels.set("2100X", "Roku XD|S");
+    modelLabels.set("2100N", "Roku XD|S");
+    modelLabels.set("2000C", "Roku HD");
+    modelLabels.set("2400X", "Roku LT");
+    modelLabels.set("2450X", "Roku LT");
+    modelLabels.set("2500X", "Roku HD");
+    modelLabels.set("2710X", "Roku 1");
+    modelLabels.set("2700X", "Roku LT (3d. Gen)");
+    modelLabels.set("2710SE", "Roku SE");
+    modelLabels.set("2720X", "Roku 2");
+    modelLabels.set("3000X", "Roku 2 HD");
+    modelLabels.set("3050X", "Roku 2 XD");
+    modelLabels.set("3100X", "Roku 2 XS");
+    modelLabels.set("4200X", "Roku 3");
+    modelLabels.set("4210X", "Roku 3 (US)");
+    modelLabels.set("4230X", "Roku 3 (US)");
+    modelLabels.set("4400X", "Roku 4");
+    modelLabels.set("4500SK", "Sky Now TV (UK)");
+    modelLabels.set("3400X", "Roku Stick");
+    modelLabels.set("3420X", "Roku Stick");
+    modelLabels.set("3500X", "Roku Stick (HDMI)");
+    modelLabels.set("3600X", "Roku Stick (2016)");
+    modelLabels.set("5000X", "Roku TV (MIPS)");
+    modelLabels.set("6000X", "4K Roku TV");
+    modelLabels.set("7000X", "4K Roku TV (TCL)");
+    modelLabels.set("3700X", "Roku Express");
+    modelLabels.set("3710X", "Roku Express+");
+    modelLabels.set("4620X", "Roku Premiere");
+    modelLabels.set("4630X", "Roku Premiere+");
+    modelLabels.set("3920X", "Roku Premiere (2018)");
+    modelLabels.set("3921X", "Roku Premiere+ (2018)");
+    modelLabels.set("3800X", "Roku Stick (2017)");
+    modelLabels.set("3810X", "Roku Stick+");
+    modelLabels.set("3900X", "Roku Express (2017)");
+    modelLabels.set("3900EU", "Roku Express EU (2017)");
+    modelLabels.set("3910X", "Roku Express+ (2017)");
+    modelLabels.set("3930X", "Roku Express (2019)");
+    modelLabels.set("3931X", "Roku Express+ (2019)");
+    modelLabels.set("3940X", "Roku Express 4K");
+    modelLabels.set("3941X", "Roku Express 4K+");
+    modelLabels.set("4640X", "Roku Ultra");
+    modelLabels.set("4660X", "Roku Ultra (2017)");
+    modelLabels.set("4661X", "Roku Ultra (2018)");
+    modelLabels.set("4662X", "Roku Ultra LT");
+    modelLabels.set("4670X", "Roku Ultra (2019)");
+    modelLabels.set("4800X", "Roku Ultra (2020)");
+    modelLabels.set("8000X", "Roku TV (ARM)");
+    modelLabels.set("9100X", "Roku Smart Soundbar");
+    modelLabels.set("9102X", "Roku Streambar");
+    modelLabels.set("A000X", "Roku TV 4K");
+    modelLabels.set("C000X", "Roku TV 4K");
+    modelLabels.forEach(function (value, key) {
+        modelArray.push({ label: `${value} - ${key}`, value: key });
+    });
+
+    return modelArray;
 }
 
 function getLocaleIdArray() {
@@ -612,7 +628,7 @@ function getTimezonArray() {
         { label: "America/Sao_Paulo" },
         { label: "Europe/Iceland", value: "Atlantic/Reykjavik" },
         { label: "Europe/Ireland", value: "Europe/Dublin" },
-        { label: "Europe/United Kingdom", value:"Europe/Guernsey" },
+        { label: "Europe/United Kingdom", value: "Europe/Guernsey" },
         { label: "Europe/Portugal", value: "Europe/Lisbon" },
         { label: "Europe/Central European Time", value: "Europe/Amsterdam" },
         { label: "Europe/France", value: "Europe/Paris" },
@@ -638,12 +654,12 @@ function getTimezonArray() {
         { label: "Africa/SAST", value: "Africa/Johannesburg" },
         // { label: "Africa/SCT" },
         // { label: "Africa/WAST" },
-        { label: "Africa/WAT", value: "Africa/Bangui"},
+        { label: "Africa/WAT", value: "Africa/Bangui" },
         { label: "Africa/WEST", value: "Atlantic/Madeira" },
         { label: "Africa/WET", value: "Africa/Casablanca" },
         // { label: "Africa/WST" },
         // { label: "Africa/WT" },
-        { label: "Asia/Arabia", value:"Asia/Aden" },
+        { label: "Asia/Arabia", value: "Asia/Aden" },
         { label: "Asia/Afghanistan", value: "Asia/Kabul" },
         { label: "Asia/Alma-Ata", value: "Asia/Almaty" },
         { label: "Asia/Anadyr" },
@@ -721,7 +737,7 @@ function getTimezonArray() {
         { label: "Other/UTC+13" },
         { label: "Other/UTC+14" },
     ]
-    tzArray.forEach(function(item) {
+    tzArray.forEach(function (item) {
         timeZoneLabels.set(item.value || item.label, item.label);
     });
     return tzArray;

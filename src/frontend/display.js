@@ -126,7 +126,6 @@ export function copyScreenshot() {
 // Set Display Mode
 export function setDisplayMode(mode, save) {
     deviceData.displayMode = mode;
-    deviceData.deviceModel = mode === "720p" ? "4200X" : mode === "1080p" ? "4640X" : "2720X";
     aspectRatio = mode === "480p" ? 4 / 3 : 16 / 9;
     if (save) {
         storage.setItem("displayMode", mode);
