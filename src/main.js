@@ -116,6 +116,16 @@ app.on("ready", () => {
         setPassword(settings.value("services.password"));
         setPort(settings.value("services.webPort"));
     }
+    if (settings.preferences.audio) {
+        const maxSimulStreams = settings.value("audio.maxSimulStreams");
+        if (maxSimulStreams) {
+            deviceInfo.maxSimulStreams = maxSimulStreams;
+        }
+        const audioVolume = settings.value("audio.audioVolume");
+        if (audioVolume) {
+            deviceInfo.audioVolume = audioVolume;
+        }
+    }
     if (settings.preferences.localization) {
         const localeId = settings.value("localization.locale");
         if (localeId) {

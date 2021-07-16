@@ -352,6 +352,16 @@ export function getSettings(window) {
                     disableTelnet(window);
                 }                
             }
+            if (preferences.audio) {
+                if (global.sharedObject.deviceInfo.maxSimulStreams !== preferences.audio.maxSimulStreams) {
+                    global.sharedObject.deviceInfo.maxSimulStreams = preferences.audio.maxSimulStreams;
+                    window.webContents.send("setDeviceInfo", "maxSimulStreams", preferences.audio.maxSimulStreams);
+                }
+                if (global.sharedObject.deviceInfo.audioVolume !== preferences.audio.audioVolume) {
+                    global.sharedObject.deviceInfo.audioVolume = preferences.audio.audioVolume;
+                    window.webContents.send("setDeviceInfo", "audioVolume", preferences.audio.audioVolume);
+                }
+            }
             if (preferences.localization) {
                 const localeId = preferences.localization.locale;
                 if (global.sharedObject.deviceInfo.locale !== localeId) {
@@ -384,8 +394,8 @@ export function getSettings(window) {
 }
 
 export function showSettings() {
-    let prefsWindow = settings.show();
-    let window = prefsWindow.getParentWindow();
+    const prefsWindow = settings.show();
+    const window = prefsWindow.getParentWindow();
     if (window) {
         const bounds = window.getBounds();
         let x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
