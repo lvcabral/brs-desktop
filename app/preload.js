@@ -120,6 +120,7 @@ contextBridge.exposeInMainWorld("api", {
             "setDisplay",
             "setOverscan",
             "setLocale",
+            "setDeviceInfo",
             "toggleStatusBar",
             "serverStatus",
             "copyScreenshot",

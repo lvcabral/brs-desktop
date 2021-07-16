@@ -12,15 +12,17 @@ import os from "os";
 import minimist from "minimist";
 import jetpack from "fs-jetpack";
 import { app, screen, ipcMain, nativeTheme } from "electron";
+import { DateTime } from "luxon";
 import { initECP, enableECP, updateECPStatus } from "./servers/ecp"
 import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./servers/installer";
 import { enableTelnet, updateTelnetStatus } from "./servers/telnet";
 import { createMenu, loadPackage } from "./menu/menuService"
 import { loadFile, saveFile } from "./helpers/files";
-import { getSettings } from "./helpers/settings";
+import { getSettings, updateTimeZone } from "./helpers/settings";
 import createWindow from "./helpers/window";
 
 // Emulator Device Information Object
+const dt = DateTime.now().setZone("system");
 const deviceInfo = {
     developerId: "emulator-dev-id", // Unique id to segregate registry among channels
     friendlyName: "BrightScript Emulator",
@@ -30,7 +32,10 @@ const deviceInfo = {
     clientId: "810e74d8-f387-49c2-8644-c72bd0e8e2a1", // Unique identifier of the device
     RIDA: "fad884dd-583f-4753-b694-fd0748152064", // Unique identifier for advertisement tracking
     countryCode: "US",
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZone: dt.zoneName,
+    timeZoneIANA: dt.zoneName,
+    timeZoneAuto: true,
+    timeZoneOffset: dt.offset,
     locale: "en_US",
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
@@ -117,6 +122,15 @@ app.on("ready", () => {
             deviceInfo.locale = localeId;
             app.applicationMenu.getMenuItemById(localeId).checked = true;    
         }
+        const clockFormat  = settings.value("localization.clockFormat");
+        if (clockFormat) {
+            deviceInfo.clockFormat = clockFormat;
+        }
+        const countryCode  = settings.value("localization.countryCode");
+        if (countryCode) {
+            deviceInfo.countryCode = countryCode;
+        }
+        updateTimeZone();
     }
     // Initialize ECP and SSDP servers
     initECP(deviceInfo);

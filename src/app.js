@@ -73,6 +73,12 @@ api.receive("setOverscan", function (mode) {
     setOverscanMode(mode);
     redrawDisplay(currentChannel.running, api.isFullScreen());
 });
+api.receive("setDeviceInfo", function (key, value) {
+    if (key in deviceData) {
+        deviceData[key] = value;
+    }
+});
+
 api.receive("setLocale", function (locale) {
     if (locale !== deviceData.locale) {
         deviceData.locale = locale;

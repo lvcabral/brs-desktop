@@ -311,13 +311,13 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("software-build", {}, "4209");
     xml.ele("secure-device", {}, true);
     xml.ele("language", {}, device.locale.split("_")[0]);
-    xml.ele("country", {}, device.locale.split("_")[1]);
+    xml.ele("country", {}, device.countryCode);
     xml.ele("locale", {}, device.locale);
-    xml.ele("time-zone-auto", {}, true);
+    xml.ele("time-zone-auto", {}, device.timeZoneAuto);
     xml.ele("time-zone", {}, device.timeZone);
     xml.ele("time-zone-name", {}, device.timeZone);
-    xml.ele("time-zone-tz", {}, device.timeZone);
-    xml.ele("time-zone-offset", {}, -(new Date().getTimezoneOffset()));
+    xml.ele("time-zone-tz", {}, device.timeZoneIANA);
+    xml.ele("time-zone-offset", {}, device.timeZoneOffset);
     xml.ele("clock-format", {}, device.clockFormat);
     xml.ele("uptime", {}, Math.round(process.uptime()));
     xml.ele("power-mode", {}, "PowerOn");

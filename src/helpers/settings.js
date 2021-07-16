@@ -1,4 +1,5 @@
 import { app, nativeTheme } from "electron";
+import { DateTime } from "luxon";
 import path from "path";
 import ElectronPreferences from "electron-preferences";
 import { enableECP, disableECP } from "../servers/ecp";
@@ -6,6 +7,7 @@ import { enableTelnet, disableTelnet } from "../servers/telnet";
 import { enableInstaller, disableInstaller, setPort, hasInstaller, setPassword } from "../servers/installer";
 
 const isMacOS = process.platform === "darwin";
+const timeZoneLabels = new Map();
 const w = 800;
 const h = 650;
 let settings;
@@ -47,7 +49,7 @@ export function getSettings(window) {
                     locale: global.sharedObject.deviceInfo.locale,
                     countryCode: global.sharedObject.deviceInfo.countryCode,
                     clockFormat: global.sharedObject.deviceInfo.clockFormat,
-                    timeZone: "detected"
+                    timeZone: "system"
                 },
             },
             webPreferences: {
@@ -357,6 +359,17 @@ export function getSettings(window) {
                     app.applicationMenu.getMenuItemById(localeId).checked = true;
                     window.webContents.send("setLocale", localeId);
                 }
+                const clockFormat = preferences.localization.clockFormat;
+                if (global.sharedObject.deviceInfo.clockFormat !== clockFormat) {
+                    global.sharedObject.deviceInfo.clockFormat = clockFormat;
+                    window.webContents.send("setDeviceInfo", "clockFormat", clockFormat);
+                }
+                const countryCode = preferences.localization.countryCode;
+                if (global.sharedObject.deviceInfo.countryCode !== countryCode) {
+                    global.sharedObject.deviceInfo.countryCode = countryCode;
+                    window.webContents.send("setDeviceInfo", "countryCode", countryCode);
+                }
+                updateTimeZone(window);
             }
         });
         nativeTheme.on("updated", () => {
@@ -416,6 +429,28 @@ export function setEmulatorOption(key, enable, menuId) {
         if (menuId) {
             app.applicationMenu.getMenuItemById(menuId).checked = enable;
         }
+    }
+}
+
+export function updateTimeZone(window) {
+    let timeZone = settings.value("localization.timeZone");
+    if (timeZone) {
+        const di = global.sharedObject.deviceInfo;
+        const dt = DateTime.now().setZone(timeZone.replace("Other/", ""));
+        if (dt.invalidReason) {
+            console.warn(`Warning: ${dt.invalidReason} - ${dt.invalidExplanation}`);
+            return;
+        }
+        const timeZoneIANA = timeZone === "system" ? dt.zoneName : timeZone;
+        if (di.timeZoneIANA !== timeZoneIANA) {
+            di.timeZone = timeZoneLabels.get(timeZoneIANA) || timeZoneIANA;
+            di.timeZoneIANA = timeZoneIANA;
+            di.timeZoneAuto = timeZone === "system";
+            di.timeZoneOffset = dt.offset;
+            if (window) {
+                window.webContents.send("setDeviceInfo", "timeZone", di.timeZone); // TODO: Implement the handling of this message
+            }
+        }    
     }
 }
 
@@ -521,16 +556,17 @@ function getCountryArray() {
 }
 
 function getTimezonArray() {
-    return [
-        { label: `Detected: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`, value: "detected" },
-        { label: "US/Puerto Rico-Virgin Islands" },
-        { label: "US/Guam" },
-        { label: "US/Samoa " },
+    const dt = DateTime.now().setZone("system");
+    const tzArray = [
+        { label: `System: ${dt.zoneName}`, value: "system" },
+        { label: "US/Puerto Rico-Virgin Islands", value: "America/Antigua" },
+        { label: "US/Guam", value: "Pacific/Truk" },
+        { label: "US/Samoa ", value: "Pacific/Pago_Pago" },
         { label: "US/Hawaii" },
         { label: "US/Aleutian" },
         { label: "US/Alaska" },
         { label: "US/Pacific" },
-        { label: "US/Arizona" },
+        { label: "US/Arizona", value: "America/Phoenix" },
         { label: "US/Mountain" },
         { label: "US/Central" },
         { label: "US/Eastern" },
@@ -538,14 +574,14 @@ function getTimezonArray() {
         { label: "Canada/Mountain" },
         { label: "Canada/Central" },
         { label: "Canada/Eastern" },
-        { label: "Canada/Mountain Standard" },
-        { label: "Canada/Central Standard" },
+        { label: "Canada/Mountain Standard", value: "America/Creston" },
+        { label: "Canada/Central Standard", value: "America/Regina" },
         { label: "Canada/Atlantic" },
         { label: "Canada/Newfoundland" },
-        { label: "Mexico/Pacific" },
-        { label: "Mexico/Mountain" },
-        { label: "Mexico/Central" },
-        { label: "Mexico/Eastern" },
+        { label: "Mexico/Pacific", value: "America/Santa_Isabel" },
+        { label: "Mexico/Mountain", value: "America/Chihuahua" },
+        { label: "Mexico/Central", value: "America/Bahia_Banderas" },
+        { label: "Mexico/Eastern", value: "America/Cancun" },
         { label: "America/Argentina/Buenos_Aires" },
         { label: "America/Santiago" },
         { label: "America/Bogota" },
@@ -562,90 +598,90 @@ function getTimezonArray() {
         { label: "America/Noronha" },
         { label: "America/Rio_Branco" },
         { label: "America/Sao_Paulo" },
-        { label: "Europe/Iceland" },
-        { label: "Europe/Ireland" },
-        { label: "Europe/United Kingdom" },
-        { label: "Europe/Portugal" },
-        { label: "Europe/Central European Time" },
-        { label: "Europe/France" },
-        { label: "Europe/Greece/Finland" },
-        { label: "Australia/WA" },
+        { label: "Europe/Iceland", value: "Atlantic/Reykjavik" },
+        { label: "Europe/Ireland", value: "Europe/Dublin" },
+        { label: "Europe/United Kingdom", value:"Europe/Guernsey" },
+        { label: "Europe/Portugal", value: "Europe/Lisbon" },
+        { label: "Europe/Central European Time", value: "Europe/Amsterdam" },
+        { label: "Europe/France", value: "Europe/Paris" },
+        { label: "Europe/Greece/Finland", value: "Europe/Athens" },
+        { label: "Australia/WA", value: "Australia/Perth" },
         { label: "Australia/Eucla" },
-        { label: "Australia/NT" },
-        { label: "Australia/SA" },
-        { label: "Australia/QLD" },
-        { label: "Australia/Lord Howe" },
+        { label: "Australia/NT", value: "Australia/Darwin" },
+        { label: "Australia/SA", value: "Australia/Adelaide" },
+        { label: "Australia/QLD", value: "Australia/Brisbane" },
+        { label: "Australia/Lord Howe", value: "Australia/LHI" },
         { label: "Australia/NSW" },
-        { label: "Australia/VIC" },
-        { label: "Australia/TAS" },
+        { label: "Australia/VIC", value: "Australia/Melbourne" },
+        { label: "Australia/TAS", value: "Australia/Currie" },
         { label: "Australia/ACT" },
-        { label: "Asia/Arabia" },
-        { label: "Asia/Afghanistan" },
-        { label: "Asia/Alma-Ata" },
+        { label: "Africa/CAT", value: "Africa/Bujumbura" },
+        { label: "Africa/CET", value: "Africa/Algiers" },
+        //{ label: "Africa/CVT" },
+        { label: "Africa/EAT", value: "Africa/Asmera" },
+        { label: "Africa/EET", value: "Africa/Cairo" },
+        { label: "Africa/GMT", value: "Africa/Abidjan" },
+        { label: "Africa/MUT", value: "Indian/Mauritius" },
+        { label: "Africa/RET", value: "Indian/Reunion" },
+        { label: "Africa/SAST", value: "Africa/Johannesburg" },
+        // { label: "Africa/SCT" },
+        // { label: "Africa/WAST" },
+        { label: "Africa/WAT", value: "Africa/Bangui"},
+        { label: "Africa/WEST", value: "Atlantic/Madeira" },
+        { label: "Africa/WET", value: "Africa/Casablanca" },
+        // { label: "Africa/WST" },
+        // { label: "Africa/WT" },
+        { label: "Asia/Arabia", value:"Asia/Aden" },
+        { label: "Asia/Afghanistan", value: "Asia/Kabul" },
+        { label: "Asia/Alma-Ata", value: "Asia/Almaty" },
         { label: "Asia/Anadyr" },
         { label: "Asia/Aqtobe" },
-        { label: "Asia/Armenia" },
-        { label: "Asia/Azerbaijan" },
-        { label: "Asia/Bangladesh" },
-        { label: "Asia/Bhutan" },
+        { label: "Asia/Armenia", value: "Asia/Yerevan" },
+        { label: "Asia/Azerbaijan", value: "Asia/Baku" },
+        { label: "Asia/Bangladesh", value: "Asia/Dhaka" },
+        { label: "Asia/Bhutan", value: "Asia/Thimphu" },
         { label: "Asia/Brunei" },
-        { label: "Asia/China" },
+        { label: "Asia/China", value: "Asia/Chongqing" },
         { label: "Asia/Choibalsan" },
-        { label: "Asia/EastTimor" },
-        { label: "Asia/Georgia" },
-        { label: "Asia/Gulf" },
-        { label: "Asia/Hong Kong" },
+        { label: "Asia/EastTimor", value: "Asia/Dili" },
+        { label: "Asia/Georgia", value: "Asia/Tbilisi" },
+        { label: "Asia/Gulf", value: "Asia/Dubai" },
+        { label: "Asia/Hong_Kong" },
         { label: "Asia/Hovd" },
-        { label: "Asia/India" },
-        { label: "Asia/Indochina" },
+        { label: "Asia/India", value: "Asia/Calcutta" },
+        { label: "Asia/Indochina", value: "Asia/Bangkok" },
         { label: "Asia/Irkutsk" },
-        { label: "Asia/Japan" },
+        { label: "Asia/Japan", value: "Asia/Tokyo" },
         { label: "Asia/Kamchatka" },
-        { label: "Asia/Korea" },
+        { label: "Asia/Korea", value: "Asia/Pyongyang" },
         { label: "Asia/Krasnoyarsk" },
-        { label: "Asia/Kyrgyzstan" },
-        { label: "Asia/Malaysia" },
+        { label: "Asia/Kyrgyzstan", value: "Asia/Bishkek" },
+        { label: "Asia/Malaysia", value: "Asia/Kuala_Lumpur" },
         { label: "Asia/Magadan" },
-        { label: "Asia/Myanmar" },
-        { label: "Asia/Nepal" },
+        { label: "Asia/Myanmar", value: "Asia/Rangoon" },
+        { label: "Asia/Nepal", value: "Asia/Kathmandu" },
         { label: "Asia/Novosibirsk" },
         { label: "Asia/Omsk" },
         { label: "Asia/Oral" },
-        { label: "Asia/Pakistan" },
-        { label: "Asia/Philippines" },
+        { label: "Asia/Pakistan", value: "Asia/Karachi" },
+        { label: "Asia/Philippines", value: "Asia/Manila" },
         { label: "Asia/Qyzylorda" },
         { label: "Asia/Sakhalin" },
         { label: "Asia/Singapore" },
-        { label: "Asia/Tajikistan" },
-        { label: "Asia/Turkmenistan" },
-        { label: "Asia/Uzbekistan" },
+        { label: "Asia/Tajikistan", value: "Asia/Dushanbe" },
+        { label: "Asia/Turkmenistan", value: "Asia/Ashgabat" },
+        { label: "Asia/Uzbekistan", value: "Asia/Samarkand" },
         { label: "Asia/Ulaanbaatar" },
         { label: "Asia/Vladivostok" },
         { label: "Asia/Yakutsk" },
         { label: "Asia/Yekaterinburg" },
-        { label: "Asia/Eastern Indonesia" },
-        { label: "Asia/Central Indonesia" },
-        { label: "Asia/Western Indonesia" },
+        { label: "Asia/Eastern Indonesia", value: "Asia/Jayapura" },
+        { label: "Asia/Central Indonesia", value: "Asia/Makassar" },
+        { label: "Asia/Western Indonesia", value: "Asia/Jakarta" },
         { label: "Asia/Beirut" },
         { label: "Asia/Damascus" },
         { label: "Asia/Gaza" },
         { label: "Asia/Nicosia" },
-        { label: "Africa/CAT" },
-        { label: "Africa/CET" },
-        { label: "Africa/CVT" },
-        { label: "Africa/EAT" },
-        { label: "Africa/EET" },
-        { label: "Africa/GMT" },
-        { label: "Africa/MUT" },
-        { label: "Africa/RET" },
-        { label: "Africa/SAST" },
-        { label: "Africa/SCT" },
-        { label: "Africa/WAST" },
-        { label: "Africa/WAT" },
-        { label: "Africa/WEST" },
-        { label: "Africa/WET" },
-        { label: "Africa/WST" },
-        { label: "Africa/WT" },
         { label: "Other/UTC-11" },
         { label: "Other/UTC-10" },
         { label: "Other/UTC-9" },
@@ -673,4 +709,8 @@ function getTimezonArray() {
         { label: "Other/UTC+13" },
         { label: "Other/UTC+14" },
     ]
+    tzArray.forEach(function(item) {
+        timeZoneLabels.set(item.value || item.label, item.label);
+    });
+    return tzArray;
 }
