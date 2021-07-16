@@ -200,7 +200,7 @@ export function getSettings(window) {
                                         label: "Developer Id",
                                         key: "developerId",
                                         type: "text",
-                                        help: "Unique id to segregate registry among channels"
+                                        help: "Unique id to segregate registry among channels, the registry only changes after a reset or restart"
                                     },
                                 ]
                             }
@@ -358,7 +358,7 @@ export function getSettings(window) {
                 setDeviceInfo("device", "serialNumber", window);
                 setDeviceInfo("device", "clientId", window);
                 setDeviceInfo("device", "RIDA", window);
-                setDeviceInfo("device", "developerId", window);
+                setDeviceInfo("device", "developerId"); // Do not send window to avoid change registry without reset
             }
             if (preferences.audio) {
                 setDeviceInfo("audio", "maxSimulStreams", window);
