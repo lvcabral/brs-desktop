@@ -27,7 +27,7 @@
         ],
         "directories": {
             "buildResources": "resources",
-            "output": "F:\\Releases\\brs-emu-app\\${version}"
+            "output": "dist/${version}"
         },
         "nsis": {
             "oneClick": false,
