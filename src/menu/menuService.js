@@ -1,4 +1,5 @@
 import { app, BrowserWindow, Menu, ipcMain } from "electron";
+import { macOSMenuTemplate } from "./macOSMenuTemplate";
 import { fileMenuTemplate } from "./fileMenuTemplate";
 import { editMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
@@ -26,7 +27,7 @@ export function createMenu() {
     if (isMacOS) {
         const fileMenu = menuTemplate[0].submenu;
         fileMenu.splice(fileMenu.length - 2, 2);
-        menuTemplate.unshift({ role: "appMenu" });
+        menuTemplate.unshift(macOSMenuTemplate);
         fileMenuIndex = 1;
     }
     restoreRecentFiles();
@@ -62,7 +63,7 @@ export function getRecentSource(index) {
 }
 
 export function clearRecentFiles() {
-    recentFiles = { ids: [], zip: [], names:[], versions:[], brs: [] };
+    recentFiles = { ids: [], zip: [], names: [], versions: [], brs: [] };
     saveRecentFiles();
     rebuildMenu();
 }
@@ -71,7 +72,7 @@ export function setAspectRatio(id) {
     const window = BrowserWindow.fromId(1);
     const aspectRatio = id === "device-480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
     if (isMacOS) {
-        window.setBounds({width: Math.round(window.getBounds().height * aspectRatio) });
+        window.setBounds({ width: Math.round(window.getBounds().height * aspectRatio) });
     }
     window.setAspectRatio(aspectRatio);
 }
@@ -79,7 +80,7 @@ export function setAspectRatio(id) {
 export function loadPackage(window, id, skipFocus) {
     let pkg = getRecentPackage(id);
     if (pkg) {
-        loadFile([pkg]);
+        loadFile([ pkg ]);
     } else {
         console.log("No recent package to load!");
     }
@@ -88,7 +89,7 @@ export function loadPackage(window, id, skipFocus) {
 export function loadSource(window, id, skipFocus) {
     let brs = getRecentSource(id);
     if (brs) {
-        loadFile([brs]);
+        loadFile([ brs ]);
     } else {
         console.log("No recent file to load!");
     }
@@ -117,7 +118,7 @@ ipcMain.on("addRecentPackage", (event, currentChannel) => {
     rebuildMenu();
 });
 
-ipcMain.on("addRecentSource" , (event, filePath) => {
+ipcMain.on("addRecentSource", (event, filePath) => {
     let idx = recentFiles.brs.indexOf(filePath);
     if (idx >= 0) {
         recentFiles.brs.splice(idx, 1);
@@ -127,14 +128,14 @@ ipcMain.on("addRecentSource" , (event, filePath) => {
     rebuildMenu();
 });
 
-ipcMain.on("checkMenuItem" , (event, id, enable) => {
+ipcMain.on("checkMenuItem", (event, id, enable) => {
     app.applicationMenu.getMenuItemById(id).checked = enable;
-    if (id.substr(0,6) === "device") {
+    if (id.substr(0, 6) === "device") {
         setAspectRatio(id);
     }
 });
 
-ipcMain.on("enableMenuItem" , (event, id, enable) => {
+ipcMain.on("enableMenuItem", (event, id, enable) => {
     app.applicationMenu.getMenuItemById(id).enabled = enable;
 });
 
@@ -148,18 +149,18 @@ function restoreRecentFiles() {
     }
     recentFiles = recentFiles || recentFilesDefault;
     if (!recentFiles.ids) {
-        Object.assign(recentFiles, {ids: new Array(recentFiles.zip.length)});
-        recentFiles.zip.forEach( (value, index) => {
+        Object.assign(recentFiles, { ids: new Array(recentFiles.zip.length) });
+        recentFiles.zip.forEach((value, index) => {
             recentFiles.ids[index] = value.hashCode();
         });
     }
     if (!recentFiles.names) {
         const names = new Array(recentFiles.zip.length).fill("No Title");
-        Object.assign(recentFiles, {names: names});
+        Object.assign(recentFiles, { names: names });
     }
     if (!recentFiles.versions) {
         const versions = new Array(recentFiles.zip.length).fill("v0.0.0");
-        Object.assign(recentFiles, {versions: versions});
+        Object.assign(recentFiles, { versions: versions });
     }
 }
 
@@ -202,7 +203,7 @@ function rebuildMenu(template = false) {
             let userTheme = global.sharedObject.theme;
             if (userTheme === "system") {
                 userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
-            }        
+            }
             app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
             app.applicationMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
             app.applicationMenu.getMenuItemById("status-bar").checked = getEmulatorOption("statusBar");

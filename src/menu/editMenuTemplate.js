@@ -1,4 +1,5 @@
 import { showSettings } from "../helpers/settings";
+const isMacOS = process.platform === "darwin";
 
 export const editMenuTemplate = {
     label: "&Edit",
@@ -16,6 +17,7 @@ export const editMenuTemplate = {
         { 
             id: "settings",
             label: "Settings...", 
+            visible: !isMacOS,
             accelerator: "CmdOrCtrl+,",
             click: (item, window) => {
                 showSettings();
