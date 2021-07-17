@@ -26,7 +26,6 @@ api.setBackgroundColor(colorValues.getPropertyValue("--background-color").trim()
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
 // Setup Menu
 setLocaleStatus(deviceData.locale);
-setupMenuSwitches();
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {
     api.toggleFullScreen();
@@ -55,9 +54,6 @@ api.receive("closeChannel", function (source) {
         closeChannel(source);
     }
 });
-api.receive("updateMenu", function () {
-    setupMenuSwitches();
-});
 api.receive("saveScreenshot", function (file) {
     const img = display.toDataURL("image/png");
     const data = img.replace(/^data:image\/\w+;base64,/, "");
@@ -65,20 +61,21 @@ api.receive("saveScreenshot", function (file) {
 });
 api.receive("setDisplay", function (mode) {
     if (mode !== deviceData.displayMode) {
-        setDisplayMode(mode, true);
+        setDisplayMode(mode);
         redrawDisplay(currentChannel.running, api.isFullScreen());
     }
 });
 api.receive("setOverscan", function (mode) {
-    setOverscanMode(mode);
-    redrawDisplay(currentChannel.running, api.isFullScreen());
+    if (mode !== overscanMode) {
+        setOverscanMode(mode);
+        redrawDisplay(currentChannel.running, api.isFullScreen());    
+    }
 });
 api.receive("setDeviceInfo", function (key, value) {
     if (key in deviceData) {
         deviceData[key] = value;
     }
 });
-
 api.receive("setLocale", function (locale) {
     if (locale !== deviceData.locale) {
         deviceData.locale = locale;
@@ -157,8 +154,3 @@ subscribeLoader("app", (event, data) => {
 window.onload = window.onresize = function () {
     redrawDisplay(currentChannel.running, api.isFullScreen());
 };
-// Configure Menu Options
-function setupMenuSwitches() {
-    api.checkMenuItem(`device-${deviceData.displayMode}`,  true);
-    api.checkMenuItem(`overscan-${overscanMode}`, true);
-}

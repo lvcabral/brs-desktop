@@ -2,6 +2,7 @@ import { setAspectRatio, changeLocale } from "./menuService";
 import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet";
 import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
+import { getSettings, setDisplayOption } from "../helpers/settings";
 
 const isMacOS = process.platform === "darwin";
 
@@ -9,33 +10,33 @@ export const deviceMenuTemplate = {
     label: "&Device",
     submenu: [
         {
-            id: "device-480p",
+            id: "480p",
             label: "Display Mode: SD 480p (4:3)",
             type: "radio",
             checked: false,
             click: (item, window) => {
-                window.webContents.send("setDisplay", "480p");
-                setAspectRatio(item.id);
+                setDisplayOption("displayMode", item.id, window);
+                setAspectRatio(item.id, window);
             }
         },
         {
-            id: "device-720p",
+            id: "720p",
             label: "Display Mode: HD 720p (16:9)",
             type: "radio",
             checked: true,
             click: (item, window) => {
-                window.webContents.send("setDisplay", "720p");
-                setAspectRatio(item.id);
+                setDisplayOption("displayMode", item.id, window);
+                setAspectRatio(item.id, window);
             }
         },
         {
-            id: "device-1080p",
+            id: "1080p",
             label: "Display Mode: FHD 1080p (16:9)",
             type: "radio",
             checked: false,
             click: (item, window) => {
-                window.webContents.send("setDisplay", "1080p");
-                setAspectRatio(item.id);
+                setDisplayOption("displayMode", item.id, window);
+                setAspectRatio(item.id, window);
             }
         },
         { type: "separator" },
@@ -45,16 +46,18 @@ export const deviceMenuTemplate = {
             type: "radio",
             checked: true,
             click: (item, window) => {
+                getSettings().value("display.overscan", "disabled");
                 window.webContents.send("setOverscan", "disabled");
             }
         },
         {
-            id: "overscan-guide-lines",
+            id: "overscan-guidelines",
             label: "TV Overscan: Guide Lines",
             type: "radio",
             checked: false,
             click: (item, window) => {
-                window.webContents.send("setOverscan", "guide-lines");
+                getSettings().value("display.overscan", "guidelines");
+                window.webContents.send("setOverscan", "guidelines");
             }
         },
         {
@@ -63,6 +66,7 @@ export const deviceMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
+                getSettings().value("display.overscan", "enabled");
                 window.webContents.send("setOverscan", "enabled");
             }
         },

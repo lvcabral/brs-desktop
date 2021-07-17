@@ -1,22 +1,25 @@
 import { deviceData } from "./device";
 
 // Emulator Display
-const storage = window.localStorage;
 const display = document.getElementById("display");
 const ctx = display.getContext("2d", { alpha: false });
 const screenSize = { width: 1280, height: 720 };
 const bufferCanvas = new OffscreenCanvas(screenSize.width, screenSize.height);
 const bufferCtx = bufferCanvas.getContext("2d");
-let aspectRatio;
-setDisplayMode(storage.getItem("displayMode") || "720p");
+let aspectRatio = 16 / 9;
 if (deviceData.displayMode === "1080p") {
     screenSize.width = 1920;
     screenSize.height = 1080;
 } else if (deviceData.displayMode === "480p") {
     screenSize.width = 720;
     screenSize.height = 480;
+    aspectRatio = 4 / 3;
 }
-export let overscanMode = storage.getItem("overscanMode") || "disabled";
+export let overscanMode = "disabled";
+let prefs = api.getPreferences();
+if (prefs && prefs.display && prefs.display.overscan) {
+    overscanMode = prefs.display.overscan;
+}
 // Observers Handling
 const observers = new Map();
 export function subscribeDisplay(observerId, observerCallback) {
@@ -91,7 +94,7 @@ export function drawBufferImage(buffer) {
     } else {
         ctx.drawImage(bufferCanvas, 0, 0, screenSize.width, screenSize.height);
     }
-    if (overscanMode === "guide-lines") {
+    if (overscanMode === "guidelines") {
         let x = Math.round(screenSize.width * overscan);
         let y = Math.round(screenSize.height * overscan);
         let w = screenSize.width - x * 2;
@@ -127,13 +130,9 @@ export function copyScreenshot() {
 export function setDisplayMode(mode, save) {
     deviceData.displayMode = mode;
     aspectRatio = mode === "480p" ? 4 / 3 : 16 / 9;
-    if (save) {
-        storage.setItem("displayMode", mode);
-        notifyAll("mode", mode);    
-    }
+    notifyAll("mode", mode);    
 }
 // Set Overscan Mode
 export function setOverscanMode(mode) {
-    storage.setItem("overscanMode", mode);
     overscanMode = mode;
 }

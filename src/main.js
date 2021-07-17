@@ -16,9 +16,9 @@ import { DateTime } from "luxon";
 import { initECP, enableECP, updateECPStatus } from "./servers/ecp"
 import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./servers/installer";
 import { enableTelnet, updateTelnetStatus } from "./servers/telnet";
-import { createMenu, loadPackage } from "./menu/menuService"
+import { createMenu, loadPackage, setAspectRatio } from "./menu/menuService"
 import { loadFile, saveFile } from "./helpers/files";
-import { getSettings, setDeviceInfo, updateTimeZone } from "./helpers/settings";
+import { getSettings, setDeviceInfo, setDisplayOption, updateTimeZone } from "./helpers/settings";
 import createWindow from "./helpers/window";
 
 // Emulator Device Information Object
@@ -123,6 +123,12 @@ app.on("ready", () => {
         setDeviceInfo("device", "RIDA");
         setDeviceInfo("device", "developerId");
     }
+    if (settings.preferences.display) {
+        setDisplayOption("displayMode");
+        setAspectRatio(settings.value("display.displayMode"), mainWindow);
+        const overscan = settings.value("display.overscan");
+        app.applicationMenu.getMenuItemById(`overscan-${overscan}`).checked = true;
+    }
     if (settings.preferences.audio) {
         setDeviceInfo("audio", "maxSimulStreams");
         setDeviceInfo("audio", "audioVolume");
@@ -166,22 +172,20 @@ app.on("ready", () => {
             enableInstaller(mainWindow);
         }
         if (argv.mode && argv.mode.trim() !== "") {
+            let displayMode = "720p";
             switch (argv.mode.trim().toLowerCase()) {
                 case "sd":
-                    mainWindow.webContents.send("setDisplay", "480p");
-                    break;
-                case "hd":
-                    mainWindow.webContents.send("setDisplay", "720p");
+                    displayMode = "480p";
                     break;
                 case "fhd":
-                    mainWindow.webContents.send("setDisplay", "1080p");
+                    displayMode = "1080p";
                     break;
                 default:
                     break;
             }
-            mainWindow.webContents.send("updateMenu");
+            setDisplayOption("displayMode", displayMode, mainWindow);
         }
-        if (startup.devTools || argv.devtools) {
+        if (true ||startup.devTools || argv.devtools) {
             mainWindow.openDevTools();
         }
         let openFile;

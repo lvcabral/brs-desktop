@@ -5,6 +5,7 @@ import ElectronPreferences from "electron-preferences";
 import { enableECP, disableECP } from "../servers/ecp";
 import { enableTelnet, disableTelnet } from "../servers/telnet";
 import { enableInstaller, disableInstaller, setPort, hasInstaller, setPassword } from "../servers/installer";
+import { setAspectRatio } from "../menu/menuService";
 
 const isMacOS = process.platform === "darwin";
 const timeZoneLabels = new Map();
@@ -232,7 +233,7 @@ export function getSettings(window) {
                                         type: "radio",
                                         options: [
                                             { label: "Overscan Disabled", value: "disabled" },
-                                            { label: "Show Overscan Guide Lines", value: "guideLines" },
+                                            { label: "Show Overscan Guide Lines", value: "guidelines" },
                                             { label: "Enable Overscan Effect", value: "enabled" },
                                         ],
                                         help: "Enable overscan to verify potential cuts of the UI on the TV borders"
@@ -316,7 +317,6 @@ export function getSettings(window) {
                 },
             ]
         });
-        setThemeSource();
         settings.on("save", (preferences) => {
             const appMenu = app.applicationMenu;
             if (preferences.emulator) {
@@ -359,6 +359,20 @@ export function getSettings(window) {
                 setDeviceInfo("device", "clientId", window);
                 setDeviceInfo("device", "RIDA", window);
                 setDeviceInfo("device", "developerId"); // Do not send window to avoid change registry without reset
+            }
+            if (settings.preferences.display) {
+                const oldValue = global.sharedObject.deviceInfo.displayMode;
+                const newValue = settings.value("display.displayMode");
+                if (newValue && newValue !== oldValue) {
+                    setDisplayOption("displayMode", undefined, window);
+                    setAspectRatio(newValue, window);
+                }
+                const overscan = settings.value("display.overscan");
+                const menuItem = app.applicationMenu.getMenuItemById(`overscan-${overscan}`);
+                if (!menuItem.checked) {
+                    menuItem.checked = true;
+                    window.webContents.send("setOverscan", overscan);    
+                }
             }
             if (preferences.audio) {
                 setDeviceInfo("audio", "maxSimulStreams", window);
@@ -410,6 +424,19 @@ export function setDeviceInfo(section, key, window) {
         if (window) {
             window.webContents.send("setDeviceInfo", key, newValue);
         }
+    }
+}
+
+export function setDisplayOption(option, mode, window) {
+    if (mode) {
+        settings.value(`display.${option}`, mode);
+    } else {
+        mode = settings.value(`display.${option}`);
+    }
+    global.sharedObject.deviceInfo[option] = mode;
+    app.applicationMenu.getMenuItemById(mode).checked = true;
+    if (window) {
+        window.webContents.send("setDisplay", mode);
     }
 }
 

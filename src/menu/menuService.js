@@ -4,7 +4,7 @@ import { editMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
-import { getEmulatorOption, setPreference } from "../helpers/settings";
+import { getEmulatorOption, setDisplayOption, setPreference } from "../helpers/settings";
 import { loadFile } from "../helpers/files";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
@@ -67,9 +67,8 @@ export function clearRecentFiles() {
     rebuildMenu();
 }
 
-export function setAspectRatio(id) {
-    const window = BrowserWindow.fromId(1);
-    const aspectRatio = id === "device-480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
+export function setAspectRatio(id, window) {
+    const aspectRatio = id === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
     if (isMacOS) {
         window.setBounds({width: Math.round(window.getBounds().height * aspectRatio) });
     }
@@ -125,13 +124,6 @@ ipcMain.on("addRecentSource" , (event, filePath) => {
     recentFiles.brs.unshift(filePath);
     saveRecentFiles();
     rebuildMenu();
-});
-
-ipcMain.on("checkMenuItem" , (event, id, enable) => {
-    app.applicationMenu.getMenuItemById(id).checked = enable;
-    if (id.substr(0,6) === "device") {
-        setAspectRatio(id);
-    }
 });
 
 ipcMain.on("enableMenuItem" , (event, id, enable) => {
@@ -206,7 +198,7 @@ function rebuildMenu(template = false) {
             app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
             app.applicationMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
             app.applicationMenu.getMenuItemById("status-bar").checked = getEmulatorOption("statusBar");
-            window.webContents.send("updateMenu");
+            setDisplayOption("displayMode");
         }
     } else {
         const appMenu = app.applicationMenu;
