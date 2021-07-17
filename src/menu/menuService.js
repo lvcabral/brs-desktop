@@ -5,6 +5,9 @@ import { editMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
+import { isInstallerEnabled } from "../servers/installer";
+import { isECPEnabled } from "../servers/ecp";
+import { isTelnetEnabled } from "../servers/telnet";
 import { getEmulatorOption, setDisplayOption, setPreference } from "../helpers/settings";
 import { loadFile } from "../helpers/files";
 import jetpack from "fs-jetpack";
@@ -200,6 +203,9 @@ function rebuildMenu(template = false) {
             app.applicationMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
             app.applicationMenu.getMenuItemById("status-bar").checked = getEmulatorOption("statusBar");
             setDisplayOption("displayMode");
+            app.applicationMenu.getMenuItemById("web-installer").checked = isInstallerEnabled;
+            app.applicationMenu.getMenuItemById("ecp-api").checked = isECPEnabled;
+            app.applicationMenu.getMenuItemById("telnet").checked = isTelnetEnabled;
         }
     } else {
         const appMenu = app.applicationMenu;

@@ -5,6 +5,11 @@ import path from "path";
 export function loadFile(file) {
     let window = BrowserWindow.fromId(1);
     if (file == undefined) return;
+    if (window.isMinimized()) {
+        window.restore();
+    } else if (!window.isVisible()) {
+        window.show();
+    }
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
         filePath = file[0];

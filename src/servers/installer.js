@@ -15,7 +15,7 @@ const credentials = {
 let port = 80;
 let server;
 let hash;
-export let hasInstaller = false;
+export let isInstallerEnabled = false;
 export function setPassword(password) {
     if (password && password !== "") {
         credentials.password = password;
@@ -29,7 +29,7 @@ export function setPort(customPort) {
     }
 }
 export function enableInstaller(window) {
-    if (hasInstaller) {
+    if (isInstallerEnabled) {
         return; // already started do nothing
     }
     hash = cryptoUsingMD5(credentials.realm);
@@ -64,9 +64,6 @@ export function enableInstaller(window) {
                         file.on("end", function () {
                             loadFile([saveTo]);
                             done = "file";
-                            if (window.isMinimized()) {
-                                window.restore()
-                            }
                         });
                     } catch (error) {
                         res.writeHead(500);
@@ -162,14 +159,14 @@ export function enableInstaller(window) {
             }
         }
     }).listen(port, () => {
-        hasInstaller = true;
-        updateInstallerStatus(hasInstaller, window);
+        isInstallerEnabled = true;
+        updateInstallerStatus(isInstallerEnabled, window);
     });
     server.on("error", (error) => {
         if (error.code === "EADDRINUSE") {
             window.webContents.send("console", `Web Installer server failed:${e.message}`, true);
-            hasInstaller = false;
-            updateInstallerStatus(hasInstaller, window);
+            isInstallerEnabled = false;
+            updateInstallerStatus(isInstallerEnabled, window);
         } else {
             window.webContents.send("console", error.message, true);
         }
@@ -177,12 +174,12 @@ export function enableInstaller(window) {
 }
 
 export function disableInstaller(window) {
-    if (hasInstaller) {
+    if (isInstallerEnabled) {
         if (server) {
             server.close();
         }
-        hasInstaller = false;
-        updateInstallerStatus(hasInstaller, window);
+        isInstallerEnabled = false;
+        updateInstallerStatus(isInstallerEnabled, window);
     }
 }
 
