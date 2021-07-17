@@ -57,7 +57,6 @@ export function enableInstaller(window) {
             let done = "";
             const busboy = new Busboy({ headers: req.headers });
             busboy.on("file", function (fieldname, file, filename, encoding, mimetype) {
-                // console.log(`File [${fieldname}]: filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`);
                 if (filename && filename !== "") {
                     try {
                         let saveTo = path.join(app.getPath("userData"), "dev.zip");
@@ -81,7 +80,6 @@ export function enableInstaller(window) {
                 }
             });
             busboy.on("field", function (fieldname, value) {
-                // console.log("field:", fieldname, value);
                 if (fieldname && value) {
                     if (fieldname === "mysubmit" && value.toLowerCase() === "screenshot") {
                         let saveTo = path.join(app.getPath("userData"), "dev.png");
@@ -102,7 +100,6 @@ export function enableInstaller(window) {
                 }
             });
             busboy.on("finish", function () {
-                // console.log("method", done);
                 if (done === "screenshot") {
                     setTimeout(() => {
                         let saveTo = path.join(app.getPath("userData"), "dev.png");
@@ -211,6 +208,5 @@ function parseAuthenticationInfo(authData) {
         d = d.split("=");
         authenticationObj[d[0]] = d[1].replace(/"/g, "");
     });
-    //console.log(JSON.stringify(authenticationObj));
     return authenticationObj;
 }

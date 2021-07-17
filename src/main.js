@@ -185,7 +185,7 @@ app.on("ready", () => {
             }
             setDisplayOption("displayMode", displayMode, mainWindow);
         }
-        if (true ||startup.devTools || argv.devtools) {
+        if (startup.devTools || argv.devtools) {
             mainWindow.openDevTools();
         }
         let openFile;

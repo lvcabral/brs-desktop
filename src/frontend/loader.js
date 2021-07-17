@@ -266,7 +266,6 @@ function runChannel() {
     };
     brsWorker.postMessage(sharedBuffer);
     brsWorker.postMessage(payload, bins);
-    console.log(deviceData);
 }
 
 // Receive Messages from Web Worker

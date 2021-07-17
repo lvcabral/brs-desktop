@@ -27,5 +27,4 @@ export function loadFile(file) {
 
 export function saveFile(file, data) {
     fs.writeFileSync(file, new Buffer.from(data, "base64"));
-    console.log(`file saved: ${file}`);
 }

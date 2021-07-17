@@ -40,7 +40,6 @@ export const helpMenuTemplate = {
             label: "About",
             visible: !isMacOS,
             click: () => {
-                console.log("about click");
                 const window = BrowserWindow.getFocusedWindow();
                 const bounds = window.getBounds();
                 const w = 350;
