@@ -1,4 +1,5 @@
 import { showSettings } from "../helpers/settings";
+import { copyScreenshot } from "../helpers/window";
 const isMacOS = process.platform === "darwin";
 
 export const editMenuTemplate = {
@@ -9,8 +10,8 @@ export const editMenuTemplate = {
             label: "Copy Screenshot",
             accelerator: "CmdOrCtrl+C",
             enabled: false,
-            click: (item, window) => {
-                window.webContents.send("copyScreenshot");
+            click: () => {
+                copyScreenshot();
             }
         },
         { type: "separator" },
@@ -19,7 +20,7 @@ export const editMenuTemplate = {
             label: "Settings...", 
             visible: !isMacOS,
             accelerator: "CmdOrCtrl+,",
-            click: (item, window) => {
+            click: () => {
                 showSettings();
             }
         }

@@ -17,8 +17,8 @@ if (deviceData.displayMode === "1080p") {
 }
 export let overscanMode = "disabled";
 let prefs = api.getPreferences();
-if (prefs && prefs.display && prefs.display.overscan) {
-    overscanMode = prefs.display.overscan;
+if (prefs && prefs.display && prefs.display.overscanMode) {
+    overscanMode = prefs.display.overscanMode;
 }
 // Observers Handling
 const observers = new Map();
@@ -85,7 +85,7 @@ export function drawBufferImage(buffer) {
         bufferCtx.putImageData(buffer, 0, 0);
     }
     let overscan = 0.04;
-    if (overscanMode === "enabled") {
+    if (overscanMode === "overscan") {
         let x = Math.round(bufferCanvas.width * overscan);
         let y = Math.round(bufferCanvas.height * overscan);
         let w = bufferCanvas.width - x * 2;

@@ -1,4 +1,5 @@
 import * as dialog from "../helpers/dialog";
+import { closeChannel } from "../helpers/window";
 import { loadPackage, loadSource, clearRecentFiles } from "./menuService";
 
 export const fileMenuTemplate = {
@@ -28,7 +29,7 @@ export const fileMenuTemplate = {
                     accelerator: "CmdOrCtrl+R",
                     visible: false,
                     click: (item, window) => {
-                        loadPackage(window, 0);
+                        loadPackage(0);
                     }
                 },
                 {
@@ -36,7 +37,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadPackage(window, 1);
+                        loadPackage(1);
                     }
                 },
                 {
@@ -44,7 +45,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadPackage(window, 2);
+                        loadPackage(2);
                     }
                 },
                 {
@@ -52,7 +53,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadPackage(window, 3);
+                        loadPackage(3);
                     }
                 },
                 {
@@ -60,7 +61,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadPackage(window, 4);
+                        loadPackage(4);
                     }
                 },
                 {
@@ -68,7 +69,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadPackage(window, 5);
+                        loadPackage(5);
                     }
                 },
                 {
@@ -76,7 +77,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadPackage(window, 6);
+                        loadPackage(6);
                     }
                 },
                 {
@@ -90,7 +91,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadSource(window, 0);
+                        loadSource(0);
                     }
                 },
                 {
@@ -98,7 +99,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadSource(window, 1);
+                        loadSource(1);
                     }
                 },
                 {
@@ -106,7 +107,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadSource(window, 2);
+                        loadSource(2);
                     }
                 },
                 {
@@ -114,7 +115,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadSource(window, 3);
+                        loadSource(3);
                     }
                 },
                 {
@@ -122,7 +123,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadSource(window, 4);
+                        loadSource(4);
                     }
                 },
                 {
@@ -130,7 +131,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadSource(window, 5);
+                        loadSource(5);
                     }
                 },
                 {
@@ -138,7 +139,7 @@ export const fileMenuTemplate = {
                     label: "",
                     visible: false,
                     click: (item, window) => {
-                        loadSource(window, 6);
+                        loadSource(6);
                     }
                 },
                 {
@@ -173,8 +174,8 @@ export const fileMenuTemplate = {
             label: "Close Channel",
             accelerator: "CmdOrCtrl+W",
             enabled: false,
-            click: (item, window) => {
-                window.webContents.send("closeChannel", "Menu");
+            click: () => {
+                closeChannel();
             }
         },
         { type: "separator" },

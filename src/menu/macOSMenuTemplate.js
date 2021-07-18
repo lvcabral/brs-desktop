@@ -12,7 +12,7 @@ export const macOSMenuTemplate = {
             id: "settings",
             label: "Settings...",
             accelerator: "CmdOrCtrl+,",
-            click: (item, window) => {
+            click: () => {
                 showSettings();
             }
         },

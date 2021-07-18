@@ -8,7 +8,7 @@ import { helpMenuTemplate } from "./helpMenuTemplate";
 import { isInstallerEnabled } from "../servers/installer";
 import { isECPEnabled } from "../servers/ecp";
 import { isTelnetEnabled } from "../servers/telnet";
-import { getEmulatorOption, setDisplayOption, setPreference } from "../helpers/settings";
+import { getEmulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile } from "../helpers/files";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
@@ -17,8 +17,6 @@ const isMacOS = process.platform === "darwin";
 const maxFiles = 7;
 const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
-const ASPECT_RATIO_SD = 1.27;
-const ASPECT_RATIO_HD = 1.67;
 
 let fileMenuIndex = 0;
 let recentMenuIndex = 2;
@@ -71,15 +69,7 @@ export function clearRecentFiles() {
     rebuildMenu();
 }
 
-export function setAspectRatio(id, window) {
-    const aspectRatio = id === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
-    if (isMacOS) {
-        window.setBounds({ width: Math.round(window.getBounds().height * aspectRatio) });
-    }
-    window.setAspectRatio(aspectRatio);
-}
-
-export function loadPackage(window, id, skipFocus) {
+export function loadPackage(id) {
     let pkg = getRecentPackage(id);
     if (pkg) {
         loadFile([ pkg ]);
@@ -88,7 +78,7 @@ export function loadPackage(window, id, skipFocus) {
     }
 }
 
-export function loadSource(window, id, skipFocus) {
+export function loadSource(id) {
     let brs = getRecentSource(id);
     if (brs) {
         loadFile([ brs ]);
@@ -97,10 +87,16 @@ export function loadSource(window, id, skipFocus) {
     }
 }
 
-export function changeLocale(window, locale) {
-    setPreference("localization.locale", locale);
-    global.sharedObject.deviceInfo.locale = locale;
-    window.webContents.send("setLocale", locale);
+export function enableMenuItem(id, enabled) {
+    const item = app.applicationMenu.getMenuItemById(id);
+    if (item) {
+        item.enabled = enabled;
+    }
+}
+
+export function isMenuItemEnabled(id) {
+    const item = app.applicationMenu.getMenuItemById(id);
+    return item ? item.enabled : false;
 }
 
 // Events
@@ -130,8 +126,8 @@ ipcMain.on("addRecentSource", (event, filePath) => {
     rebuildMenu();
 });
 
-ipcMain.on("enableMenuItem" , (event, id, enable) => {
-    app.applicationMenu.getMenuItemById(id).enabled = enable;
+ipcMain.on("enableMenuItem", (event, id, enable) => {
+    enableMenuItem(id, enable);
 });
 
 // Internal functions
@@ -193,7 +189,7 @@ function rebuildMenu(template = false) {
         recentMenu[brsEnd].visible = recentFiles.brs.length === 0;
         recentMenu[recentMenu.length - 1].enabled = recentFiles.zip.length + recentFiles.brs.length > 0;
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
-        let window = BrowserWindow.fromId(1);
+        const window = BrowserWindow.fromId(1);
         if (isMacOS && window) {
             let userTheme = global.sharedObject.theme;
             if (userTheme === "system") {
@@ -203,6 +199,7 @@ function rebuildMenu(template = false) {
             app.applicationMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
             app.applicationMenu.getMenuItemById("status-bar").checked = getEmulatorOption("statusBar");
             setDisplayOption("displayMode");
+            setDisplayOption("overscanMode");
             app.applicationMenu.getMenuItemById("web-installer").checked = isInstallerEnabled;
             app.applicationMenu.getMenuItemById("ecp-api").checked = isECPEnabled;
             app.applicationMenu.getMenuItemById("telnet").checked = isTelnetEnabled;

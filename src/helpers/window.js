@@ -7,7 +7,9 @@ import { app, BrowserWindow, screen } from "electron";
 import path from "path";
 import jetpack from "fs-jetpack";
 
-export default (name, options, argv) => {
+const isMacOS = process.platform === "darwin";
+
+export function createWindow(name, options) {
     const userDataDir = jetpack.cwd(app.getPath("userData"));
     const stateStoreFile = `window-state-${name}.json`;
     const defaultSize = {
@@ -38,9 +40,9 @@ export default (name, options, argv) => {
             y: position[1],
             width: size[0],
             height: size[1],
-            backgroundColor: global.sharedObject.backgroundColor,
-        };
-    };
+            backgroundColor: global.sharedObject.backgroundColor
+        }
+    }
 
     const windowWithinBounds = (windowState, bounds) => {
         return (
@@ -48,8 +50,8 @@ export default (name, options, argv) => {
             windowState.y >= bounds.y &&
             windowState.x + windowState.width <= bounds.x + bounds.width &&
             windowState.y + windowState.height <= bounds.y + bounds.height
-        );
-    };
+        )
+    }
 
     const resetToDefaults = () => {
         const bounds = screen.getPrimaryDisplay().bounds;
@@ -57,7 +59,7 @@ export default (name, options, argv) => {
             x: (bounds.width - defaultSize.width) / 2,
             y: (bounds.height - defaultSize.height) / 2
         });
-    };
+    }
 
     const ensureVisibleOnSomeDisplay = (windowState) => {
         const visible = screen.getAllDisplays().some((display) => {
@@ -69,21 +71,21 @@ export default (name, options, argv) => {
             return resetToDefaults();
         }
         return windowState;
-    };
+    }
 
     const saveState = () => {
         if (!win.isMinimized() && !win.isMaximized() && !win.isFullScreen()) {
             Object.assign(state, getWindowState());
         }
         userDataDir.write(stateStoreFile, state, { atomic: true });
-    };
+    }
 
     state = ensureVisibleOnSomeDisplay(restore());
 
     win = new BrowserWindow(
         Object.assign(options, state, {
             webPreferences: {
-                preload: path.join(__dirname, './preload.js'),
+                preload: path.join(__dirname, "./preload.js"),
                 contextIsolation: true,
                 enableRemoteModule: true,
                 nodeIntegration: true,
@@ -103,4 +105,52 @@ export default (name, options, argv) => {
         win.setWindowButtonVisibility(true);
     }
     return win;
-};
+}
+
+export function setAspectRatio(displayMode) {
+    const ASPECT_RATIO_SD = 1.27;
+    const ASPECT_RATIO_HD = 1.67;
+    const window = BrowserWindow.fromId(1);
+    const aspectRatio = displayMode === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
+    if (window) {
+        if (isMacOS) {
+            window.setBounds({ width: Math.round(window.getBounds().height * aspectRatio) });
+        }
+        window.setAspectRatio(aspectRatio);
+    }
+}
+
+export function setAlwaysOnTop(enabled) {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.setAlwaysOnTop(enabled);
+    }
+}
+
+export function setStatusBar() {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.webContents.send("toggleStatusBar");
+    }
+}
+
+export function copyScreenshot() {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.webContents.send("copyScreenshot");
+    }
+}
+
+export function closeChannel() {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.webContents.send("closeChannel", "Menu");
+    }
+}
+
+export function reloadApp() {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.webContents.reloadIgnoringCache();
+    }
+}

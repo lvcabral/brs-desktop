@@ -1,4 +1,4 @@
-import { dialog, BrowserWindow } from "electron";
+import { BrowserWindow, dialog } from "electron";
 import { loadFile } from "./files";
 /*
  * Show open dialog to open a .zip or .brs file.
@@ -9,7 +9,7 @@ export function openChannelPackage() {
         filters: [ { name: "Channel Packages", extensions: [ "zip" ] }, { name: "All Files", extensions: [ "*" ] } ],
         properties: [ "openFile" ]
     };
-    const window = BrowserWindow.getFocusedWindow();
+    const window = BrowserWindow.fromId(1);
     dialog
         .showOpenDialog(window, opts)
         .then((result) => {
@@ -30,7 +30,7 @@ export function openBrightScriptFile() {
         filters: [ { name: "BrightScript source files", extensions: [ "brs" ] }, { name: "All Files", extensions: [ "*" ] } ],
         properties: [ "openFile" ]
     };
-    const window = BrowserWindow.getFocusedWindow();
+    const window = BrowserWindow.fromId(1);
     dialog
         .showOpenDialog(window, opts)
         .then((result) => {
@@ -50,7 +50,7 @@ export function saveScreenshot() {
         title: "Save the Screenshot as",
         filters: [ { name: "PNG Image", extensions: [ "png" ] }, { name: "All Files", extensions: [ "*" ] } ]
     };
-    const window = BrowserWindow.getFocusedWindow();
+    const window = BrowserWindow.fromId(1);
     dialog
         .showSaveDialog(window, opts)
         .then((result) => {

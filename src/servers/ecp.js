@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app, BrowserWindow } from "electron";
 import {
     getChannelIds,
     getPackages,
@@ -31,8 +31,8 @@ export let isECPEnabled = false;
 export function initECP(deviceInfo) {
     device = deviceInfo;
 }
-export function enableECP(mainWindow) {
-    window = mainWindow;
+export function enableECP() {
+    window = BrowserWindow.fromId(1);
     if (isECPEnabled) {
         return; // already started do nothing
     }
@@ -90,7 +90,7 @@ export function enableECP(mainWindow) {
                 })
                 .then(() => {
                     isECPEnabled = true;
-                    updateECPStatus(isECPEnabled, window);
+                    updateECPStatus(isECPEnabled);
                 });
             // Create ECP-2 WebSocket Server
             const wss = new WebSocket.Server({ noServer: true });
@@ -119,8 +119,7 @@ export function enableECP(mainWindow) {
         });
 }
 
-export function disableECP(mainWindow) {
-    window = mainWindow;
+export function disableECP() {
     if (isECPEnabled) {
         if (ecp) {
             ecp.close();
@@ -129,13 +128,14 @@ export function disableECP(mainWindow) {
             ssdp.stop();
         }
         isECPEnabled = false;
-        updateECPStatus(isECPEnabled, window);
+        updateECPStatus(isECPEnabled);
     }
 }
 
-export function updateECPStatus(enabled, window) {
+export function updateECPStatus(enabled) {
     setPreference("services.ecp", enabled ? ["enabled"] : []);
     app.applicationMenu.getMenuItemById("ecp-api").checked = enabled;
+    window = BrowserWindow.fromId(1);
     window.webContents.send("serverStatus", "ECP", enabled, ECPPORT);
 }
 

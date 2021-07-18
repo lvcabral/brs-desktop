@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app, BrowserWindow } from "electron";
 import Busboy from "busboy";
 import fs from "fs";
 import path from "path";
@@ -28,10 +28,11 @@ export function setPort(customPort) {
         port = parseInt(customPort);
     }
 }
-export function enableInstaller(window) {
+export function enableInstaller() {
     if (isInstallerEnabled) {
         return; // already started do nothing
     }
+    const window = BrowserWindow.fromId(1);
     hash = cryptoUsingMD5(credentials.realm);
     server = http.createServer(function (req, res) {
         let authInfo, digestAuthObject = {};
@@ -173,19 +174,20 @@ export function enableInstaller(window) {
     })
 }
 
-export function disableInstaller(window) {
+export function disableInstaller() {
     if (isInstallerEnabled) {
         if (server) {
             server.close();
         }
         isInstallerEnabled = false;
-        updateInstallerStatus(isInstallerEnabled, window);
+        updateInstallerStatus(isInstallerEnabled);
     }
 }
 
-export function updateInstallerStatus(enabled, window) {
+export function updateInstallerStatus(enabled) {
     setPreference("services.installer", enabled ? ["enabled"] : []);
     app.applicationMenu.getMenuItemById("web-installer").checked = enabled;
+    const window = BrowserWindow.fromId(1);
     window.webContents.send("serverStatus", "Web", enabled, port);
 }
 

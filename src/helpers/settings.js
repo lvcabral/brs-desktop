@@ -1,17 +1,17 @@
-import { app, nativeTheme } from "electron";
+import { app, BrowserWindow, nativeTheme } from "electron";
 import { DateTime } from "luxon";
 import path from "path";
 import ElectronPreferences from "electron-preferences";
+import { setAspectRatio } from "./window";
 import { enableECP, disableECP } from "../servers/ecp";
 import { enableTelnet, disableTelnet } from "../servers/telnet";
-import { enableInstaller, disableInstaller, setPort, hasInstaller, setPassword } from "../servers/installer";
-import { setAspectRatio } from "../menu/menuService";
+import { enableInstaller, disableInstaller, setPort, isInstallerEnabled, setPassword } from "../servers/installer";
 
 const isMacOS = process.platform === "darwin";
 const timeZoneLabels = new Map();
 const modelLabels = new Map();
 const w = 800;
-const h = 650;
+const h = isMacOS ? 610 : 650;
 let settings;
 export function getSettings(window) {
     if (settings === undefined) {
@@ -41,7 +41,7 @@ export function getSettings(window) {
                 },
                 display: {
                     displayMode: "720p",
-                    overscan: "disabled"
+                    overscanMode: "disabled"
                 },
                 audio: {
                     maxSimulStreams: global.sharedObject.deviceInfo.maxSimulStreams,
@@ -201,7 +201,7 @@ export function getSettings(window) {
                                         label: "Developer Id",
                                         key: "developerId",
                                         type: "text",
-                                        help: "Unique id to segregate registry among channels, the registry only changes after a reset or restart"
+                                        help: "Unique id to segregate registry among channels, the registry only changes after a reset or app restart"
                                     },
                                 ]
                             }
@@ -229,12 +229,12 @@ export function getSettings(window) {
                                     },
                                     {
                                         label: "TV Overscan",
-                                        key: "overscan",
+                                        key: "overscanMode",
                                         type: "radio",
                                         options: [
                                             { label: "Overscan Disabled", value: "disabled" },
                                             { label: "Show Overscan Guide Lines", value: "guidelines" },
-                                            { label: "Enable Overscan Effect", value: "enabled" },
+                                            { label: "Enable Overscan Effect", value: "overscan" },
                                         ],
                                         help: "Enable overscan to verify potential cuts of the UI on the TV borders"
                                     },
@@ -329,12 +329,12 @@ export function getSettings(window) {
                     appMenu.getMenuItemById("status-bar").checked = statusBar;
                     window.webContents.send("toggleStatusBar");
                 }
-                window.webContents.send("setTheme", setThemeSource());
+                setThemeSource();
             }
             if (preferences.services) {
                 const services = preferences.services;
                 if (services.installer.includes("enabled")) {
-                    if (!hasInstaller) {
+                    if (!isInstallerEnabled) {
                         setPort(services.webPort);
                         setPassword(services.password);
                         enableInstaller(window);
@@ -354,29 +354,29 @@ export function getSettings(window) {
                 }
             }
             if (preferences.device) {
-                setDeviceInfo("device", "deviceModel", window);
-                setDeviceInfo("device", "serialNumber", window);
-                setDeviceInfo("device", "clientId", window);
-                setDeviceInfo("device", "RIDA", window);
-                setDeviceInfo("device", "developerId"); // Do not send window to avoid change registry without reset
+                setDeviceInfo("device", "deviceModel", true);
+                setDeviceInfo("device", "serialNumber", true);
+                setDeviceInfo("device", "clientId", true);
+                setDeviceInfo("device", "RIDA", true);
+                setDeviceInfo("device", "developerId"); // Do not notify app to avoid change registry without reset
             }
             if (settings.preferences.display) {
                 const oldValue = global.sharedObject.deviceInfo.displayMode;
                 const newValue = settings.value("display.displayMode");
                 if (newValue && newValue !== oldValue) {
-                    setDisplayOption("displayMode", undefined, window);
-                    setAspectRatio(newValue, window);
+                    setDisplayOption("displayMode", undefined, true);
+                    setAspectRatio(newValue);
                 }
-                const overscan = settings.value("display.overscan");
-                const menuItem = app.applicationMenu.getMenuItemById(`overscan-${overscan}`);
+                const overscanMode = settings.value("display.overscanMode");
+                const menuItem = app.applicationMenu.getMenuItemById(overscanMode);
                 if (!menuItem.checked) {
                     menuItem.checked = true;
-                    window.webContents.send("setOverscan", overscan);    
+                    window.webContents.send("setOverscan", overscanMode);    
                 }
             }
             if (preferences.audio) {
-                setDeviceInfo("audio", "maxSimulStreams", window);
-                setDeviceInfo("audio", "audioVolume", window);
+                setDeviceInfo("audio", "maxSimulStreams", true);
+                setDeviceInfo("audio", "audioVolume", true);
             }
             if (preferences.localization) {
                 const localeId = preferences.localization.locale;
@@ -385,9 +385,9 @@ export function getSettings(window) {
                     app.applicationMenu.getMenuItemById(localeId).checked = true;
                     window.webContents.send("setLocale", localeId);
                 }
-                setDeviceInfo("localization", "clockFormat", window);
-                setDeviceInfo("localization", "countryCode", window);
-                updateTimeZone(window);
+                setDeviceInfo("localization", "clockFormat", true);
+                setDeviceInfo("localization", "countryCode", true);
+                setTimeZone(true);
             }
         });
         nativeTheme.on("updated", () => {
@@ -402,41 +402,51 @@ export function getSettings(window) {
 }
 
 export function showSettings() {
-    const prefsWindow = settings.show();
-    const window = prefsWindow.getParentWindow();
-    if (window) {
-        const bounds = window.getBounds();
-        let x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
-        let y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
-        prefsWindow.setBounds({ x: x, y: y });
+    const window = BrowserWindow.fromId(1);
+    if (window.isFullScreen()) {
+        window.setFullScreen(false);
+    } else if (window.isMinimized()) {
+        window.restore();
+    } else if (!window.isVisible()) {
+        window.show();
     }
+    const bounds = window.getBounds();
+    let x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
+    let y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
+    const prefsWindow = settings.show();
+    prefsWindow.setBounds({ x: x, y: y });
 }
 
 export function setPreference(key, value) {
     settings.value(key, value);
 }
 
-export function setDeviceInfo(section, key, window) {
+export function setDeviceInfo(section, key, notifyApp) {
     const oldValue = global.sharedObject.deviceInfo[key];
     const newValue = settings.value(`${section}.${key}`);
     if (newValue && newValue !== oldValue) {
         global.sharedObject.deviceInfo[key] = newValue;
-        if (window) {
+        if (notifyApp) {
+            const window = BrowserWindow.fromId(1);
             window.webContents.send("setDeviceInfo", key, newValue);
         }
     }
 }
 
-export function setDisplayOption(option, mode, window) {
+export function setDisplayOption(option, mode, notifyApp) {
     if (mode) {
         settings.value(`display.${option}`, mode);
     } else {
         mode = settings.value(`display.${option}`);
     }
-    global.sharedObject.deviceInfo[option] = mode;
+    if (option in global.sharedObject.deviceInfo) {
+        global.sharedObject.deviceInfo[option] = mode;
+    }
     app.applicationMenu.getMenuItemById(mode).checked = true;
-    if (window) {
-        window.webContents.send("setDisplay", mode);
+    if (notifyApp) {
+        const window = BrowserWindow.fromId(1);
+        const msg = option === "displayMode" ? "setDisplay" : "setOverscan";
+        window.webContents.send(msg, mode);
     }
 }
 
@@ -453,6 +463,8 @@ export function setThemeSource(userTheme) {
         userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
     }
     global.sharedObject.theme = userTheme;
+    const window = BrowserWindow.fromId(1);
+    window.webContents.send("setTheme", userTheme);
     return userTheme;
 }
 
@@ -476,7 +488,14 @@ export function setEmulatorOption(key, enable, menuId) {
     }
 }
 
-export function updateTimeZone(window) {
+export function setLocaleId(locale) {
+    const window = BrowserWindow.fromId(1);
+    setPreference("localization.locale", locale);
+    global.sharedObject.deviceInfo.locale = locale;
+    window.webContents.send("setLocale", locale);
+}
+
+export function setTimeZone(notifyApp) {
     let timeZone = settings.value("localization.timeZone");
     if (timeZone) {
         const di = global.sharedObject.deviceInfo;
@@ -491,7 +510,8 @@ export function updateTimeZone(window) {
             di.timeZoneIANA = timeZoneIANA;
             di.timeZoneAuto = timeZone === "system";
             di.timeZoneOffset = dt.offset;
-            if (window) {
+            if (notifyApp) {
+                const window = BrowserWindow.fromId(1);    
                 window.webContents.send("setDeviceInfo", "timeZone", di.timeZone);
                 window.webContents.send("setDeviceInfo", "timeZoneIANA", di.timeZoneIANA);
                 window.webContents.send("setDeviceInfo", "timeZoneAuto", di.timeZoneAuto);

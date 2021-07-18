@@ -13,13 +13,15 @@ import minimist from "minimist";
 import jetpack from "fs-jetpack";
 import { app, screen, ipcMain, nativeTheme } from "electron";
 import { DateTime } from "luxon";
-import { initECP, enableECP, updateECPStatus } from "./servers/ecp"
 import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./servers/installer";
+import { initECP, enableECP, updateECPStatus } from "./servers/ecp"
 import { enableTelnet, updateTelnetStatus } from "./servers/telnet";
-import { createMenu, loadPackage, setAspectRatio } from "./menu/menuService"
+import { createMenu, enableMenuItem, isMenuItemEnabled, loadPackage } from "./menu/menuService"
 import { loadFile, saveFile } from "./helpers/files";
-import { getSettings, setDeviceInfo, setDisplayOption, updateTimeZone } from "./helpers/settings";
-import createWindow from "./helpers/window";
+import { getSettings, setDeviceInfo, setDisplayOption, setTimeZone } from "./helpers/settings";
+import { createWindow, setAspectRatio } from "./helpers/window";
+
+const isMacOS = process.platform === "darwin";
 
 // Emulator Device Information Object
 const dt = DateTime.now().setZone("system");
@@ -68,14 +70,13 @@ app.on("ready", () => {
         deviceInfo: deviceInfo
     };
     // Create Main Window
-    const mainWindow = createWindow(
+    let mainWindow = createWindow(
         "main",
         {
             width: 1280,
             height: 770,
             backgroundColor: global.sharedObject.backgroundColor
-        },
-        argv
+        }
     );
     // Configure Window and load content
     let firstLoad = true;
@@ -125,9 +126,9 @@ app.on("ready", () => {
     }
     if (settings.preferences.display) {
         setDisplayOption("displayMode");
-        setAspectRatio(settings.value("display.displayMode"), mainWindow);
-        const overscan = settings.value("display.overscan");
-        app.applicationMenu.getMenuItemById(`overscan-${overscan}`).checked = true;
+        setAspectRatio(settings.value("display.displayMode"));
+        const overscanMode = settings.value("display.overscanMode");
+        app.applicationMenu.getMenuItemById(overscanMode).checked = true;
     }
     if (settings.preferences.audio) {
         setDeviceInfo("audio", "maxSimulStreams");
@@ -141,7 +142,7 @@ app.on("ready", () => {
         }
         setDeviceInfo("localization", "clockFormat");
         setDeviceInfo("localization", "countryCode");
-        updateTimeZone();
+        setTimeZone();
     }
     // Initialize ECP and SSDP servers
     initECP(deviceInfo);
@@ -183,7 +184,7 @@ app.on("ready", () => {
                 default:
                     break;
             }
-            setDisplayOption("displayMode", displayMode, mainWindow);
+            setDisplayOption("displayMode", displayMode, true);
         }
         if (startup.devTools || argv.devtools) {
             mainWindow.openDevTools();
@@ -211,7 +212,7 @@ app.on("ready", () => {
                 console.log("File format not supported: ", fileExt);
             }
         } else if (startup.runLastChannel) {
-            loadPackage(mainWindow, 0, true);
+            loadPackage(0);
         }
         firstLoad = false;
         mainWindow.show();
@@ -219,11 +220,49 @@ app.on("ready", () => {
     });
     mainWindow.webContents.on('dom-ready', () => {
         if (!firstLoad) {
-            updateECPStatus(settings.value("services.ecp").includes("enabled"), mainWindow);
-            updateTelnetStatus(settings.value("services.telnet").includes("enabled"), mainWindow);
-            updateInstallerStatus(settings.value("services.installer").includes("enabled"), mainWindow);
+            updateECPStatus(settings.value("services.ecp").includes("enabled"));
+            updateTelnetStatus(settings.value("services.telnet").includes("enabled"));
+            updateInstallerStatus(settings.value("services.installer").includes("enabled"));
         }
     });
+    if (isMacOS) {
+        app.on("before-quit", function (evt) {
+            app.quitting = true;
+        });
+        app.on("activate", function() {
+            mainWindow.show();
+        });
+        mainWindow.on("close", function (evt) {
+            if (app.quitting) {
+                mainWindow = null;
+            } else {
+                evt.preventDefault();
+                if (mainWindow.isFullScreen()) {
+                    mainWindow.once("leave-full-screen", () => mainWindow.hide());
+                    mainWindow.setFullScreen(false);
+                }
+                mainWindow.hide();
+            }
+        });    
+        mainWindow.on("minimize", function () {
+            enableMenuItem("copy-screen", false);
+            enableMenuItem("on-top", false);
+        });
+        mainWindow.on("hide", function () {
+            enableMenuItem("copy-screen", false);
+        });
+        mainWindow.on("restore", function () {
+            enableMenuItem("copy-screen", isMenuItemEnabled("save-screen"));
+            enableMenuItem("on-top", true);
+        });
+        mainWindow.on("show", function () {
+            enableMenuItem("copy-screen", isMenuItemEnabled("save-screen"));
+        });
+    } else {
+        app.on("window-all-closed", () => {
+            app.quit();
+        });
+    }
     // Open Developer Tools
     ipcMain.on("openDevTools", (event, data) => {
         mainWindow.openDevTools();
@@ -243,10 +282,6 @@ app.on("ready", () => {
     ipcMain.on("reset", () => {
         mainWindow.reload();
     });
-});
-// Quit the Application
-app.on("window-all-closed", () => {
-    app.quit();
 });
 
 // Helper Functions

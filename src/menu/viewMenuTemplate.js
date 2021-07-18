@@ -1,4 +1,5 @@
 import { setThemeSource, setEmulatorOption } from "../helpers/settings";
+import { setAlwaysOnTop, setStatusBar } from "../helpers/window";
 
 export const viewMenuTemplate = {
     label: "&View",
@@ -9,7 +10,6 @@ export const viewMenuTemplate = {
         },
         {
             label: "Developer Tools",
-            accelerator: "CmdOrCtrl+Shift+I",
             role: "toggleDevTools"
         },
         { type: "separator" },
@@ -18,8 +18,8 @@ export const viewMenuTemplate = {
             label: "Purple Theme",
             type: "radio",
             checked: true,
-            click: (item, window) => {
-                window.webContents.send("setTheme", setThemeSource("purple"));
+            click: (item) => {
+                setThemeSource(item.id.substr(6), true);
             }
         },
         {
@@ -27,8 +27,8 @@ export const viewMenuTemplate = {
             label: "Light Theme",
             type: "radio",
             checked: false,
-            click: (item, window) => {
-                window.webContents.send("setTheme", setThemeSource("light"));
+            click: (item) => {
+                setThemeSource(item.id.substr(6), true);
             }
         },
         {
@@ -36,8 +36,8 @@ export const viewMenuTemplate = {
             label: "Dark Theme",
             type: "radio",
             checked: false,
-            click: (item, window) => {
-                window.webContents.send("setTheme", setThemeSource("dark"));
+            click: (item) => {
+                setThemeSource(item.id.substr(6), true);
             }
         },
         {
@@ -45,8 +45,8 @@ export const viewMenuTemplate = {
             label: "System Theme",
             type: "radio",
             checked: false,
-            click: (item, window) => {
-                window.webContents.send("setTheme", setThemeSource("system"));
+            click: (item) => {
+                setThemeSource(item.id.substr(6), true);
             }
         },
         { type: "separator" },
@@ -56,10 +56,9 @@ export const viewMenuTemplate = {
             type: "checkbox",
             checked: false,
             enabled: true,
-            click: (item, window) => {
-                const onTop = !window.isAlwaysOnTop();
-                setEmulatorOption("alwaysOnTop", onTop, item.id);
-                window.setAlwaysOnTop(onTop);
+            click: (item) => {
+                setEmulatorOption("alwaysOnTop", item.checked, item.id);
+                setAlwaysOnTop(item.checked);
             }
         },
         {
@@ -68,9 +67,9 @@ export const viewMenuTemplate = {
             type: "checkbox",
             checked: true,
             enabled: true,
-            click: (item, window) => {
+            click: (item) => {
                 setEmulatorOption("statusBar", item.checked, item.id);
-                window.webContents.send("toggleStatusBar");
+                setStatusBar();
             }
         }
     ]

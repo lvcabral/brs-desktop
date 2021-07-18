@@ -1,10 +1,8 @@
-import { setAspectRatio, changeLocale } from "./menuService";
 import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet";
-import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
-import { getSettings, setDisplayOption } from "../helpers/settings";
-
-const isMacOS = process.platform === "darwin";
+import { isInstallerEnabled, enableInstaller, disableInstaller } from "../servers/installer";
+import { setLocaleId, setDisplayOption } from "../helpers/settings";
+import { reloadApp, setAspectRatio } from "../helpers/window";
 
 export const deviceMenuTemplate = {
     label: "&Device",
@@ -15,8 +13,8 @@ export const deviceMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                setDisplayOption("displayMode", item.id, window);
-                setAspectRatio(item.id, window);
+                setDisplayOption("displayMode", item.id, true);
+                setAspectRatio(item.id);
             }
         },
         {
@@ -25,8 +23,8 @@ export const deviceMenuTemplate = {
             type: "radio",
             checked: true,
             click: (item, window) => {
-                setDisplayOption("displayMode", item.id, window);
-                setAspectRatio(item.id, window);
+                setDisplayOption("displayMode", item.id, true);
+                setAspectRatio(item.id);
             }
         },
         {
@@ -35,39 +33,36 @@ export const deviceMenuTemplate = {
             type: "radio",
             checked: false,
             click: (item, window) => {
-                setDisplayOption("displayMode", item.id, window);
-                setAspectRatio(item.id, window);
+                setDisplayOption("displayMode", item.id, true);
+                setAspectRatio(item.id);
             }
         },
         { type: "separator" },
         {
-            id: "overscan-disabled",
+            id: "disabled",
             label: "TV Overscan: Disabled",
             type: "radio",
             checked: true,
             click: (item, window) => {
-                getSettings().value("display.overscan", "disabled");
-                window.webContents.send("setOverscan", "disabled");
+                setDisplayOption("overscanMode", item.id, true);
             }
         },
         {
-            id: "overscan-guidelines",
+            id: "guidelines",
             label: "TV Overscan: Guide Lines",
             type: "radio",
             checked: false,
             click: (item, window) => {
-                getSettings().value("display.overscan", "guidelines");
-                window.webContents.send("setOverscan", "guidelines");
+                setDisplayOption("overscanMode", item.id, true);
             }
         },
         {
-            id: "overscan-enabled",
+            id: "overscan",
             label: "TV Overscan: Enabled",
             type: "radio",
             checked: false,
             click: (item, window) => {
-                getSettings().value("display.overscan", "enabled");
-                window.webContents.send("setOverscan", "enabled");
+                setDisplayOption("overscanMode", item.id, true);
             }
         },
         { type: "separator" },
@@ -81,7 +76,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: true,
                     click: (item, window) => {
-                        changeLocale(window, item.id);
+                        setLocaleId(item.id);
                     }
                 },
                 {
@@ -90,7 +85,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
-                        changeLocale(window, item.id);
+                        setLocaleId(item.id);
                     }
                 },
                 {
@@ -99,7 +94,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
-                        changeLocale(window, item.id);
+                        setLocaleId(item.id);
                     }
                 },
                 {
@@ -108,7 +103,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
-                        changeLocale(window, item.id);
+                        setLocaleId(item.id);
                     }
                 },
                 {
@@ -117,7 +112,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
-                        changeLocale(window, item.id);
+                        setLocaleId(item.id);
                     }
                 },
                 {
@@ -126,7 +121,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
-                        changeLocale(window, item.id);
+                        setLocaleId(item.id);
                     }
                 },
                 {
@@ -135,7 +130,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
-                        changeLocale(window, item.id);
+                        setLocaleId(item.id);
                     }
                 },
                 {
@@ -144,7 +139,7 @@ export const deviceMenuTemplate = {
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
-                        changeLocale(window, item.id);
+                        setLocaleId(item.id);
                     }
                 },
             ]
@@ -156,10 +151,10 @@ export const deviceMenuTemplate = {
             type: "checkbox",
             checked: false,
             click: (item, window) => {
-                if (hasInstaller) {
-                    disableInstaller(window);
+                if (isInstallerEnabled) {
+                    disableInstaller();
                 } else {
-                    enableInstaller(window);
+                    enableInstaller();
                 }
             }
         },
@@ -170,9 +165,9 @@ export const deviceMenuTemplate = {
             checked: false,
             click: (item, window) => {
                 if (isECPEnabled) {
-                    disableECP(window);
+                    disableECP();
                 } else {
-                    enableECP(window);
+                    enableECP();
                 }
             }
         },
@@ -183,9 +178,9 @@ export const deviceMenuTemplate = {
             checked: false,
             click: (item, window) => {
                 if (isTelnetEnabled) {
-                    disableTelnet(window);
+                    disableTelnet();
                 } else {
-                    enableTelnet(window);
+                    enableTelnet();
                 }
             }
         },
@@ -194,7 +189,7 @@ export const deviceMenuTemplate = {
             label: "Reset Device",
             accelerator: "CmdOrCtrl+Shift+R",
             click: (item, window) => {
-                window.webContents.reloadIgnoringCache();
+                reloadApp();
             }
         }
     ]

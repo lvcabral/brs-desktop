@@ -1,6 +1,7 @@
 import path from "path";
-import { BrowserWindow, shell } from "electron";
+import { shell } from "electron";
 import openAboutWindow from "electron-about-window";
+
 const isMacOS = process.platform === "darwin";
 
 export const helpMenuTemplate = {
@@ -39,8 +40,7 @@ export const helpMenuTemplate = {
         {
             label: "About",
             visible: !isMacOS,
-            click: () => {
-                const window = BrowserWindow.getFocusedWindow();
+            click: (item, window) => {
                 const bounds = window.getBounds();
                 const w = 350;
                 const h = 450;
