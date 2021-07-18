@@ -83,7 +83,9 @@ api.receive("setLocale", function (locale) {
     }
 });
 api.receive("toggleStatusBar", function () {
-    redrawDisplay(currentChannel.running, api.isFullScreen());
+    if (!api.isFullScreen()) {
+        redrawDisplay(currentChannel.running, false);
+    }
 });
 api.receive("serverStatus", function (server, enable, port) {
     if (enable) {

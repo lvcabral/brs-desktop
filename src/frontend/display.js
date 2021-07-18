@@ -63,6 +63,8 @@ export function redrawDisplay(running, fullScreen) {
     display.style.height = screenSize.height;
     if (running) {
         drawBufferImage();
+    } else {
+        clearDisplay();
     }
 }
 // Draw Channel Splash 

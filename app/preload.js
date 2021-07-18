@@ -4,7 +4,6 @@ const Mousetrap = require("mousetrap");
 const path = require("path");
 
 const mainWindow = remote.getCurrentWindow();
-const appMenu = remote.Menu.getApplicationMenu();
 
 let onPreferencesChangedHandler = (preferences) => { };
 let titleBar;
@@ -30,6 +29,7 @@ contextBridge.exposeInMainWorld("api", {
         onPreferencesChangedHandler = handler;
     },
     isStatusEnabled: () => {
+        const appMenu = remote.Menu.getApplicationMenu();
         return appMenu.getMenuItemById("status-bar").checked;
     },
     getDeviceInfo: () => {
