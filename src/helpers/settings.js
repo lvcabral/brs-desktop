@@ -3,9 +3,9 @@ import { DateTime } from "luxon";
 import path from "path";
 import ElectronPreferences from "electron-preferences";
 import { setAspectRatio } from "./window";
-import { enableECP, disableECP } from "../servers/ecp";
-import { enableTelnet, disableTelnet } from "../servers/telnet";
-import { enableInstaller, disableInstaller, setPort, isInstallerEnabled, setPassword } from "../servers/installer";
+import { enableECP, disableECP } from "../server/ecp";
+import { enableTelnet, disableTelnet } from "../server/telnet";
+import { enableInstaller, disableInstaller, setPort, isInstallerEnabled, setPassword } from "../server/installer";
 
 const isMacOS = process.platform === "darwin";
 const timeZoneLabels = new Map();

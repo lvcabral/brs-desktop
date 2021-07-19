@@ -5,15 +5,15 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import "./stylesheets/main.css";
-import "./stylesheets/fontawesome.min.css";
+import "./css/main.css";
+import "./css/fontawesome.min.css";
 import "./helpers/hash";
-import { handleKey } from "./frontend/control";
-import { deviceData } from "./frontend/device";
-import { subscribeLoader, loadFile, closeChannel, currentChannel } from "./frontend/loader";
-import { setServerStatus, setLocaleStatus, setStatusColor, clearCounters } from "./frontend/statusbar";
-import { setDisplayMode, setOverscanMode, redrawDisplay, copyScreenshot, overscanMode } from "./frontend/display";
-import { clientException } from "./frontend/console";
+import { handleKey } from "./app/control";
+import { deviceData } from "./app/device";
+import { subscribeLoader, loadFile, closeChannel, currentChannel } from "./app/loader";
+import { setServerStatus, setLocaleStatus, setStatusColor, clearCounters } from "./app/statusbar";
+import { setDisplayMode, setOverscanMode, redrawDisplay, copyScreenshot, overscanMode } from "./app/display";
+import { clientException } from "./app/console";
 
 // App menu and theme configuration
 const defaultTitle = document.title;

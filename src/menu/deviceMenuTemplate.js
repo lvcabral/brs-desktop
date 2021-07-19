@@ -1,6 +1,6 @@
-import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
-import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet";
-import { isInstallerEnabled, enableInstaller, disableInstaller } from "../servers/installer";
+import { isECPEnabled, enableECP, disableECP } from "../server/ecp";
+import { isTelnetEnabled, enableTelnet, disableTelnet } from "../server/telnet";
+import { isInstallerEnabled, enableInstaller, disableInstaller } from "../server/installer";
 import { setLocaleId, setDisplayOption } from "../helpers/settings";
 import { reloadApp, setAspectRatio } from "../helpers/window";
 

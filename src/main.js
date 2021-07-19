@@ -13,9 +13,9 @@ import minimist from "minimist";
 import jetpack from "fs-jetpack";
 import { app, screen, ipcMain, nativeTheme } from "electron";
 import { DateTime } from "luxon";
-import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./servers/installer";
-import { initECP, enableECP, updateECPStatus } from "./servers/ecp"
-import { enableTelnet, updateTelnetStatus } from "./servers/telnet";
+import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./server/installer";
+import { initECP, enableECP, updateECPStatus } from "./server/ecp"
+import { enableTelnet, updateTelnetStatus } from "./server/telnet";
 import { createMenu, enableMenuItem, isMenuItemEnabled, loadPackage } from "./menu/menuService"
 import { loadFile, saveFile } from "./helpers/files";
 import { getSettings, setDeviceInfo, setDisplayOption, setThemeSource, setTimeZone } from "./helpers/settings";
