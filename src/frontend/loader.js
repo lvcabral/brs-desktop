@@ -1,6 +1,8 @@
 import { subscribeDisplay, drawBufferImage, drawSplashScreen, showDisplay, clearDisplay } from "./display";
-import { initSoundModule, addSound, resetSounds, playSound, stopSound, 
-         pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist } from "./sound";
+import {
+    initSoundModule, addSound, resetSounds, playSound, stopSound,
+    pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist
+} from "./sound";
 import { clientLog, clientWarning, clientException } from "./console";
 import { deviceData } from "./device";
 const storage = window.localStorage;
@@ -11,7 +13,7 @@ let paths = [];
 let txts = [];
 let bins = [];
 // Channel Data
-export const currentChannel = {id: "", file: "", title: "", version: "", running: false};
+export const currentChannel = { id: "", file: "", title: "", version: "", running: false };
 // Shared buffer (Keys and Sounds)
 const length = 7;
 const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length);
@@ -47,7 +49,7 @@ export function loadFile(filePath, fileData) {
     const fileName = api.pathParse(filePath).base;
     const fileExt = api.pathParse(filePath).ext.toLowerCase();
     const reader = new FileReader();
-    reader.onload = function(progressEvent) {
+    reader.onload = function (progressEvent) {
         currentChannel.id = "brs";
         currentChannel.title = fileName;
         paths = [];
@@ -70,23 +72,23 @@ export function loadFile(filePath, fileData) {
         sharedArray[dataType.IDX] = -1;
         resetSounds();
     }
-    clientLog(`Loading ${fileName}...`);    
+    clientLog(`Loading ${fileName}...`);
     if (fileExt === ".zip") {
         openChannelZip(fileData);
     } else {
         reader.readAsText(new Blob([fileData], { type: "text/plain" }));
-    }   
+    }
 }
 // Uncompress Zip and execute
 function openChannelZip(f) {
     JSZip.loadAsync(f).then(
-        function(zip) {
+        function (zip) {
             const manifest = zip.file("manifest");
             if (manifest) {
                 manifest.async("string").then(
                     function success(content) {
                         const manifestMap = new Map();
-                        content.match(/[^\r\n]+/g).map(function(ln) {
+                        content.match(/[^\r\n]+/g).map(function (ln) {
                             const line = ln.split("=");
                             manifestMap.set(line[0].toLowerCase(), line[1]);
                         });
@@ -175,7 +177,7 @@ function openChannelZip(f) {
             let txtId = 0;
             let srcId = 0;
             let audId = 0;
-            zip.forEach(function(relativePath, zipEntry) {
+            zip.forEach(function (relativePath, zipEntry) {
                 const lcasePath = relativePath.toLowerCase();
                 const ext = lcasePath.split(".").pop();
                 if (!zipEntry.dir && lcasePath.substr(0, 6) === "source" && ext === "brs") {
@@ -184,7 +186,7 @@ function openChannelZip(f) {
                     srcId++;
                 } else if (
                     !zipEntry.dir &&
-                    (lcasePath === "manifest" || ext === "csv" || ext === "xml" 
+                    (lcasePath === "manifest" || ext === "csv" || ext === "xml"
                         || ext === "json" || ext === "txt" || ext == "ts")
                 ) {
                     assetPaths.push({ url: relativePath, id: txtId, type: "text" });
@@ -207,7 +209,7 @@ function openChannelZip(f) {
                     assetPaths.push({ url: relativePath, id: audId, type: "audio", format: ext });
                     assetsEvents.push(zipEntry.async("blob"));
                     audId++;
-                } else if ( !zipEntry.dir ) {
+                } else if (!zipEntry.dir) {
                     assetPaths.push({ url: relativePath, id: binId, type: "binary" });
                     assetsEvents.push(zipEntry.async("arraybuffer"));
                     binId++;
@@ -237,14 +239,14 @@ function openChannelZip(f) {
                 }
             );
         },
-        function(e) {
+        function (e) {
             clientException(`Error reading ${f.name}: ${e.message}`, true);
             currentChannel.running = false;
         }
     );
 }
 // Execute Emulator Web Worker
-function runChannel() {    
+function runChannel() {
     showDisplay()
     if (currentChannel.running || brsWorker != undefined) {
         brsWorker.terminate();
@@ -274,7 +276,7 @@ function workerCallback(event) {
         drawBufferImage(event.data);
     } else if (event.data instanceof Map) {
         deviceData.registry = event.data;
-        deviceData.registry.forEach(function(value, key) {
+        deviceData.registry.forEach(function (value, key) {
             storage.setItem(key, value);
         });
     } else if (event.data instanceof Array) {

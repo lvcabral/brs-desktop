@@ -4547,7 +4547,7 @@
     line-height: 30px;
     position: relative;
     top: -40px;
-    display: inline-block;
+    display: block;
     cursor: pointer; }
   @media (max-width: 767px) {
     .Roku-Nav .nav-header-cart {

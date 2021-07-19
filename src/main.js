@@ -18,7 +18,7 @@ import { initECP, enableECP, updateECPStatus } from "./servers/ecp"
 import { enableTelnet, updateTelnetStatus } from "./servers/telnet";
 import { createMenu, enableMenuItem, isMenuItemEnabled, loadPackage } from "./menu/menuService"
 import { loadFile, saveFile } from "./helpers/files";
-import { getSettings, setDeviceInfo, setDisplayOption, setTimeZone } from "./helpers/settings";
+import { getSettings, setDeviceInfo, setDisplayOption, setThemeSource, setTimeZone } from "./helpers/settings";
 import { createWindow, setAspectRatio } from "./helpers/window";
 
 const isMacOS = process.platform === "darwin";
@@ -103,12 +103,7 @@ app.on("ready", () => {
             startup.runLastChannel = options.includes("runLastChannel");
             startup.devTools = options.includes("devTools");
         }
-        let userTheme = settings.value("emulator.theme") || "purple";
-        app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
-        if (userTheme === "system") {
-            userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
-        }
-        global.sharedObject.theme = userTheme;
+        setThemeSource();
     }
     if (settings.preferences.services) {
         startup.ecpEnabled = settings.value("services.ecp").includes("enabled");

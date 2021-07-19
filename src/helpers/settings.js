@@ -19,6 +19,7 @@ export function getSettings(window) {
         const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
         const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
         settings = new ElectronPreferences({
+            css: "app/css/settings.css",
             dataStore: path.resolve(app.getPath("userData"), "brs-settings.json"),
             defaults: {
                 emulator: {
@@ -329,7 +330,7 @@ export function getSettings(window) {
                     appMenu.getMenuItemById("status-bar").checked = statusBar;
                     window.webContents.send("toggleStatusBar");
                 }
-                setThemeSource();
+                setThemeSource(undefined, true);
             }
             if (preferences.services) {
                 const services = preferences.services;
@@ -371,7 +372,7 @@ export function getSettings(window) {
                 const menuItem = app.applicationMenu.getMenuItemById(overscanMode);
                 if (!menuItem.checked) {
                     menuItem.checked = true;
-                    window.webContents.send("setOverscan", overscanMode);    
+                    window.webContents.send("setOverscan", overscanMode);
                 }
             }
             if (preferences.audio) {
@@ -450,7 +451,7 @@ export function setDisplayOption(option, mode, notifyApp) {
     }
 }
 
-export function setThemeSource(userTheme) {
+export function setThemeSource(userTheme, notifyApp) {
     if (userTheme) {
         settings.value("emulator.theme", userTheme);
     } else {
@@ -463,8 +464,10 @@ export function setThemeSource(userTheme) {
         userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
     }
     global.sharedObject.theme = userTheme;
-    const window = BrowserWindow.fromId(1);
-    window.webContents.send("setTheme", userTheme);
+    if (notifyApp) {
+        const window = BrowserWindow.fromId(1);
+        window.webContents.send("setTheme", userTheme);
+    }
     return userTheme;
 }
 
@@ -511,7 +514,7 @@ export function setTimeZone(notifyApp) {
             di.timeZoneAuto = timeZone === "system";
             di.timeZoneOffset = dt.offset;
             if (notifyApp) {
-                const window = BrowserWindow.fromId(1);    
+                const window = BrowserWindow.fromId(1);
                 window.webContents.send("setDeviceInfo", "timeZone", di.timeZone);
                 window.webContents.send("setDeviceInfo", "timeZoneIANA", di.timeZoneIANA);
                 window.webContents.send("setDeviceInfo", "timeZoneAuto", di.timeZoneAuto);

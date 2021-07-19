@@ -32,7 +32,6 @@ export function createWindow(name, options) {
     };
 
     const getWindowState = () => {
-        const appMenu = app.applicationMenu;
         const position = win.getPosition();
         const size = win.getSize();
         return {
