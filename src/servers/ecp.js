@@ -253,11 +253,11 @@ function sendKeyPress(req, res) {
 
 // Content Generation Functions
 function genDeviceRootXml() {
-    let xml = xmlbuilder.create("root").att("xmlns", "urn:schemas-upnp-org:device-1-0");
-    let spec = xml.ele("specVersion");
+    const xml = xmlbuilder.create("root").att("xmlns", "urn:schemas-upnp-org:device-1-0");
+    const spec = xml.ele("specVersion");
     spec.ele("major", {}, 1);
     spec.ele("minor", {}, 0);
-    let xmlDevice = xml.ele("device");
+    const xmlDevice = xml.ele("device");
     xmlDevice.ele("deviceType", {}, "urn:roku-com:device:player:1-0");
     xmlDevice.ele("friendlyName", {}, device.friendlyName);
     xmlDevice.ele("manufacturer", {}, "Roku");
@@ -268,14 +268,14 @@ function genDeviceRootXml() {
     xmlDevice.ele("modelURL", {}, "http://www.lvcabral.com/brs/");
     xmlDevice.ele("serialNumber", {}, device.serialNumber);
     xmlDevice.ele("UDN", {}, `uuid:${UDN}`);
-    let xmlList = xmlDevice.ele("serviceList");
-    let xmlService = xmlList.ele("service");
+    const xmlList = xmlDevice.ele("serviceList");
+    const xmlService = xmlList.ele("service");
     xmlService.ele("serviceType", {}, "urn:roku-com:service:ecp:1");
     xmlService.ele("serviceId", {}, "urn:roku-com:serviceId:ecp1-0");
     xmlService.ele("controlURL");
     xmlService.ele("eventSubURL");
     xmlService.ele("SCPDURL", {}, "ecp_SCPD.xml");
-    let xmlDial = xmlList.ele("service");
+    const xmlDial = xmlList.ele("service");
     xmlDial.ele("serviceType", {}, "urn:dial-multiscreen-org:service:dial:1");
     xmlDial.ele("serviceId", {}, "urn:dial-multiscreen-org:serviceId:dial1-0");
     xmlDial.ele("controlURL");
@@ -285,25 +285,26 @@ function genDeviceRootXml() {
 }
 
 function genDeviceInfoXml(encrypt) {
-    let xml = xmlbuilder.create("device-info");
+    const xml = xmlbuilder.create("device-info");
+    const modelName = getModelName(device.deviceModel);
     xml.ele("udn", {}, UDN);
     if (encrypt) { xml.ele("virtual-device-id", {}, device.serialNumber); }
     xml.ele("serial-number", {}, device.serialNumber);
     xml.ele("device-id", {}, device.serialNumber);
     xml.ele("advertising-id", {}, device.RIDA);
     xml.ele("vendor-name", {}, "Roku");
-    xml.ele("model-name", {}, getModelName(device.deviceModel));
+    xml.ele("model-name", {}, modelName);
     xml.ele("model-number", {}, device.deviceModel);
     xml.ele("model-region", {}, device.countryCode);
-    xml.ele("is-tv", {}, false);
-    xml.ele("is-stick", {}, false);
+    xml.ele("is-tv", {}, modelName.toLowerCase().includes("tv"));
+    xml.ele("is-stick", {}, modelName.toLowerCase().includes("stick"));
     xml.ele("ui-resolution", {}, device.displayMode);
     xml.ele("wifi-mac", {}, MAC);
     xml.ele("ethernet-mac", {}, MAC);
     xml.ele("network-type", {}, "wifi");
     xml.ele("network-name", {}, "Local");
     xml.ele("friendly-device-name", {}, device.friendlyName);
-    xml.ele("friendly-model-name", {}, getModelName(device.deviceModel));
+    xml.ele("friendly-model-name", {}, modelName);
     xml.ele("default-device-name", {}, `${device.friendlyName} - ${device.serialNumber}`);
     xml.ele("user-device-name", {}, device.friendlyName);
     xml.ele("build-number", {}, device.firmwareVersion);
