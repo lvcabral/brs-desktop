@@ -1,9 +1,14 @@
-﻿const { contextBridge, ipcRenderer, remote, shell } = require("electron");
+﻿/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const { contextBridge, ipcRenderer, remote, shell } = require("electron");
 const customTitlebar = require("custom-electron-titlebar");
 const Mousetrap = require("mousetrap");
 const path = require("path");
-
-const mainWindow = remote.getCurrentWindow();
 
 let onPreferencesChangedHandler = (preferences) => { };
 let titleBar;
@@ -13,17 +18,17 @@ let titleColor;
 window.addEventListener('DOMContentLoaded', () => {
     // Detect Clipboard Copy to create Screenshot
     Mousetrap.bind(["command+c", "ctrl+c"], function () {
-        mainWindow.webContents.send("copyScreenshot");
+        remote.getCurrentWebContents().send("copyScreenshot");
         return false;
     });
 });
 
 contextBridge.exposeInMainWorld("api", {
     showPreferences: () => {
-        ipcRenderer.send('showPreferences');
+        ipcRenderer.send("showPreferences");
     },
     getPreferences: () => {
-        return ipcRenderer.sendSync('getPreferences');
+        return ipcRenderer.sendSync("getPreferences");
     },
     onPreferencesChanged: (handler) => {
         onPreferencesChangedHandler = handler;
@@ -39,8 +44,7 @@ contextBridge.exposeInMainWorld("api", {
         return remote.getGlobal("sharedObject").theme;
     },
     setBackgroundColor: (color) => {
-        mainWindow.setBackgroundColor(color);
-        remote.getGlobal("sharedObject").backgroundColor = color;
+        ipcRenderer.send("setBackgroundColor", color);
     },
     openExternal: (url) => {
         shell.openExternal(url);
@@ -49,10 +53,10 @@ contextBridge.exposeInMainWorld("api", {
         return path.parse(fullPath);
     },
     isFullScreen: () => {
-        return mainWindow.isFullScreen();
+        return ipcRenderer.sendSync("isFullScreen");
     },
     toggleFullScreen: () => {
-        mainWindow.setFullScreen(!mainWindow.isFullScreen());
+        ipcRenderer.send("toggleFullScreen");
     },
     createNewTitleBar: (mnColor, bgColor, itColor) => {
         titleColor = mnColor;

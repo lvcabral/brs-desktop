@@ -1,4 +1,11 @@
-import { BrowserWindow } from "electron";
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+import { app, BrowserWindow, ipcMain } from "electron";
 import fs from "fs";
 import path from "path";
 
@@ -33,3 +40,15 @@ export function loadFile(file) {
 export function saveFile(file, data) {
     fs.writeFileSync(file, new Buffer.from(data, "base64"));
 }
+
+// App Renderer Events
+ipcMain.on("saveFile", (event, data) => {
+    saveFile(data[0], data[1]);
+});
+ipcMain.on("saveIcon", (event, data) => {
+    const iconPath = path.join(
+        app.getPath("userData"),
+        data[0] + ".png"
+    );
+    saveFile(iconPath, data[1]);
+});

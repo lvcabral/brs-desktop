@@ -11,13 +11,13 @@ import env from "env";
 import os from "os";
 import minimist from "minimist";
 import jetpack from "fs-jetpack";
-import { app, screen, ipcMain, nativeTheme } from "electron";
+import { app, screen } from "electron";
 import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./server/installer";
 import { initECP, enableECP, updateECPStatus } from "./server/ecp"
 import { enableTelnet, updateTelnetStatus } from "./server/telnet";
 import { createMenu, enableMenuItem, isMenuItemEnabled, loadPackage } from "./menu/menuService"
-import { loadFile, saveFile } from "./helpers/files";
+import { loadFile } from "./helpers/files";
 import { getSettings, setDeviceInfo, setDisplayOption, setThemeSource, setTimeZone } from "./helpers/settings";
 import { createWindow, setAspectRatio } from "./helpers/window";
 
@@ -133,7 +133,7 @@ app.on("ready", () => {
         const localeId = settings.value("localization.locale");
         if (localeId) {
             deviceInfo.locale = localeId;
-            app.applicationMenu.getMenuItemById(localeId).checked = true;    
+            app.applicationMenu.getMenuItemById(localeId).checked = true;
         }
         setDeviceInfo("localization", "clockFormat");
         setDeviceInfo("localization", "countryCode");
@@ -224,7 +224,7 @@ app.on("ready", () => {
         app.on("before-quit", function (evt) {
             app.quitting = true;
         });
-        app.on("activate", function() {
+        app.on("activate", function () {
             mainWindow.show();
         });
         mainWindow.on("close", function (evt) {
@@ -238,7 +238,7 @@ app.on("ready", () => {
                 }
                 mainWindow.hide();
             }
-        });    
+        });
         mainWindow.on("minimize", function () {
             enableMenuItem("copy-screen", false);
             enableMenuItem("on-top", false);
@@ -258,25 +258,6 @@ app.on("ready", () => {
             app.quit();
         });
     }
-    // Open Developer Tools
-    ipcMain.on("openDevTools", (event, data) => {
-        mainWindow.openDevTools();
-    });
-    // Save Files
-    ipcMain.on("saveFile", (event, data) => {
-        saveFile(data[0], data[1]);
-    });
-    ipcMain.on("saveIcon", (event, data) => {
-        const iconPath = path.join(
-            app.getPath("userData"),
-            data[0] + ".png"
-        );
-        saveFile(iconPath, data[1]);
-    });
-    // Reset device
-    ipcMain.on("reset", () => {
-        mainWindow.reload();
-    });
 });
 
 // Helper Functions

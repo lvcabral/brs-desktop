@@ -1,3 +1,11 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 // Observers Handling
 const observers = new Map();
 export function subscribeConsole(observerId, observerCallback) {
@@ -26,3 +34,14 @@ export function clientException(msg) {
     console.error(msg);
     notifyAll("error");
 }
+// Events from Main process
+api.receive("console", function (text, error) {
+    if (error) {
+        console.error(text);
+    } else {
+        console.log(text);
+    }
+});
+api.receive("clientException", function (msg) {
+    clientException(msg);
+});

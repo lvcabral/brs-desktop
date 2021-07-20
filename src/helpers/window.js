@@ -1,9 +1,11 @@
-// This helper remembers the size and position of your windows (and restores
-// them in that place after app relaunch).
-// Can be used for more than one window, just construct many
-// instances of it and give each different name.
-
-import { app, BrowserWindow, screen } from "electron";
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+import { app, BrowserWindow, ipcMain, screen } from "electron";
 import path from "path";
 import jetpack from "fs-jetpack";
 
@@ -32,13 +34,12 @@ export function createWindow(name, options) {
     };
 
     const getWindowState = () => {
-        const position = win.getPosition();
-        const size = win.getSize();
+        const bounds = win.getBounds();
         return {
-            x: position[0],
-            y: position[1],
-            width: size[0],
-            height: size[1],
+            x: bounds.x,
+            y: bounds.y,
+            width: bounds.width,
+            height: bounds.height,
             backgroundColor: global.sharedObject.backgroundColor
         }
     }
@@ -96,10 +97,26 @@ export function createWindow(name, options) {
             show: false
         })
     );
-
     win.on("close", saveState);
-
-    if (process.platform === "darwin") {
+    // App Renderer Events
+    ipcMain.on("openDevTools", (event, data) => {
+        win.openDevTools();
+    });
+    ipcMain.on("setBackgroundColor", (event, color) => {
+        win.setBackgroundColor(color);
+        global.sharedObject.backgroundColor = color;
+    });
+    ipcMain.on('isFullScreen', (event) => {
+        event.returnValue = win.isFullScreen();
+    });
+    ipcMain.on("toggleFullScreen", () => {
+        win.setFullScreen(!win.isFullScreen());
+    });
+    ipcMain.on("reset", () => {
+        win.reload();
+    });
+    // macOS windows flags
+    if (isMacOS) {
         win.setMaximizable(true);
         win.setWindowButtonVisibility(true);
     }

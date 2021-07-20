@@ -1,6 +1,14 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import { subscribeDisplay, drawBufferImage, drawSplashScreen, showDisplay, clearDisplay } from "./display";
+import { subscribeControl, initControlModule } from "./control";
 import {
-    initSoundModule, addSound, resetSounds, playSound, stopSound,
+    initSoundModule, addSound, resetSounds, playSound, stopSound, playWav,
     pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist
 } from "./sound";
 import { clientLog, clientWarning, clientException } from "./console";
@@ -20,14 +28,15 @@ const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length
 export const sharedArray = new Int32Array(sharedBuffer);
 export const dataType = { KEY: 0, MOD: 1, SND: 2, IDX: 3, WAV: 4 };
 Object.freeze(dataType);
-// Initialize Sound Module
+// Initialize Control and Sound Modules
+initControlModule(sharedArray, dataType);
 initSoundModule(sharedArray, dataType, deviceData.maxSimulStreams);
 // Observers Handling
 const observers = new Map();
-export function subscribeLoader(observerId, observerCallback) {
+export function subscribeChannel(observerId, observerCallback) {
     observers.set(observerId, observerCallback);
 }
-export function unsubscribeLoader(observerId) {
+export function unsubscribeChannel(observerId) {
     observers.delete(observerId);
 }
 function notifyAll(eventName, eventData) {
@@ -36,13 +45,21 @@ function notifyAll(eventName, eventData) {
     });
 }
 // Subscribe Events
-subscribeDisplay("loader", (event, data) => {
+subscribeDisplay("channel", (event, data) => {
     if (event === "mode") {
         if (currentChannel.running) {
             closeChannel("DisplayMode");
         }
     }
 });
+subscribeControl("channel", (event) => {
+    if (event === "home") {
+        if (currentChannel.running) {
+            closeChannel("Home Button");
+            playWav(0);
+        }   
+    }
+})
 
 // Open File
 export function loadFile(filePath, fileData) {
@@ -162,13 +179,13 @@ function openChannelZip(f) {
                     },
                     function error(e) {
                         clientException(`Error uncompressing manifest: ${e.message}`);
-                        currentChannel.running = false;
+                        setChannelState(false);
                         return;
                     }
                 );
             } else {
                 clientException("Invalid Channel Package: missing manifest.");
-                currentChannel.running = false;
+                setChannelState(false);
                 return;
             }
             let assetPaths = [];
@@ -241,7 +258,7 @@ function openChannelZip(f) {
         },
         function (e) {
             clientException(`Error reading ${f.name}: ${e.message}`, true);
-            currentChannel.running = false;
+            setChannelState(false);
         }
     );
 }
@@ -255,7 +272,7 @@ function runChannel() {
         sharedArray[dataType.SND] = -1;
         sharedArray[dataType.IDX] = -1;
     }
-    currentChannel.running = true;
+    setChannelState(true);
     brsWorker = new Worker("../node_modules/brs-emu/app/lib/brsEmu.js");
     brsWorker.addEventListener("message", workerCallback);
     const payload = {
@@ -334,6 +351,12 @@ function workerCallback(event) {
     }
 }
 
+// Set the flags of running channel state
+function setChannelState(running) {
+    currentChannel.running = running;
+    deviceData.channelRunning = running;
+}
+
 // Restore emulator menu and terminate Worker
 export function closeChannel(reason) {
     clientLog(`------ Finished '${currentChannel.title}' execution [${reason}] ------`);
@@ -348,6 +371,20 @@ export function closeChannel(reason) {
     currentChannel.file = "";
     currentChannel.title = "";
     currentChannel.version = "";
-    currentChannel.running = false;
+    setChannelState(false);
     notifyAll("closed", currentChannel);
 }
+
+// Events from Main process
+api.receive("fileSelected", function (filePath, data) {
+    try {
+        loadFile(filePath, data);
+    } catch (error) {
+        clientException(`Error opening ${filePath}:${error.message}`);
+    }
+});
+api.receive("closeChannel", function (source) {
+    if (currentChannel.running) {
+        closeChannel(source);
+    }
+});

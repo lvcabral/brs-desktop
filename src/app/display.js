@@ -1,3 +1,10 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import { deviceData } from "./device";
 
 // Emulator Display
@@ -15,6 +22,7 @@ if (deviceData.displayMode === "1080p") {
     screenSize.height = 480;
     aspectRatio = 4 / 3;
 }
+export let displayMode = deviceData.displayMode;
 export let overscanMode = "disabled";
 let prefs = api.getPreferences();
 if (prefs && prefs.display && prefs.display.overscanMode) {
@@ -121,20 +129,46 @@ export function clearDisplay() {
     ctx.fillRect(0, 0, display.width, display.height);
 }
 
-// Copy Screenshot to the Clipboard
-export function copyScreenshot() {
-    display.toBlob(function(blob) {
-        const item = new ClipboardItem({ "image/png": blob });
-        navigator.clipboard.write([ item ]);
-    });
-}
 // Set Display Mode
-export function setDisplayMode(mode, save) {
+export function setDisplayMode(mode) {
+    displayMode = mode;
     deviceData.displayMode = mode;
     aspectRatio = mode === "480p" ? 4 / 3 : 16 / 9;
-    notifyAll("mode", mode);    
+    notifyAll("mode", mode); 
 }
 // Set Overscan Mode
 export function setOverscanMode(mode) {
     overscanMode = mode;
 }
+// Window Resize Event
+window.onload = window.onresize = function () {
+    redrawDisplay(deviceData.channelRunning, api.isFullScreen());
+};
+// Toggle Full Screen when Double Click
+display.ondblclick = function () {
+    api.toggleFullScreen();
+};
+// Events from Main process
+api.receive("setDisplay", function (mode) {
+    if (mode !== deviceData.displayMode) {
+        setDisplayMode(mode);
+        redrawDisplay(deviceData.channelRunning, api.isFullScreen());
+    }
+});
+api.receive("setOverscan", function (mode) {
+    if (mode !== overscanMode) {
+        setOverscanMode(mode);
+        redrawDisplay(deviceData.channelRunning, api.isFullScreen());    
+    }
+});
+api.receive("copyScreenshot", function () {
+    display.toBlob(function(blob) {
+        const item = new ClipboardItem({ "image/png": blob });
+        navigator.clipboard.write([ item ]);
+    });
+});
+api.receive("saveScreenshot", function (file) {
+    const img = display.toDataURL("image/png");
+    const data = img.replace(/^data:image\/\w+;base64,/, "");
+    api.send("saveFile", [file, data])
+});

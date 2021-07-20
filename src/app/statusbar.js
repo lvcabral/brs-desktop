@@ -1,7 +1,13 @@
-import { deviceData } from "./device";
-import { subscribeLoader } from "./loader";
-import { subscribeDisplay } from "./display";
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+import { subscribeChannel, currentChannel } from "./channel";
 import { subscribeConsole } from "./console";
+import { displayMode, subscribeDisplay, redrawDisplay } from "./display";
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
@@ -35,29 +41,23 @@ let errorCount = 0;
 let warnCount = 0;
 let ECPPort = 8060;
 statusECP.onclick = function() {
-    api.openExternal(`http://${getLocalIp()}:${ECPPort}/query/device-info`);
+    api.openExternal(`http://localhost:${ECPPort}/query/device-info`);
 };
 let installerPort = 80;
 statusWeb.onclick = function() {
-    api.openExternal(`http://${getLocalIp()}:${installerPort}/`);
+    api.openExternal(`http://localhost:${installerPort}/`);
 };
-function getLocalIp() {
-    let localIp = "127.0.0.1";
-    if (deviceData.localIps.length > 0) {
-        localIp = deviceData.localIps[0].split(",")[1];
-    }
-    return localIp;    
-}
-let mode = deviceData.displayMode;
-let ui = mode == "720p" ? "HD" : mode == "1080p" ? "FHD" : "SD";
-statusDisplay.innerText = `${ui} (${mode})`;    
+let ui = displayMode == "720p" ? "HD" : displayMode == "1080p" ? "FHD" : "SD";
+statusDisplay.innerText = `${ui} (${displayMode})`;    
 const MIN_PATH_SIZE = 30;
 const PATH_SIZE_FACTOR = 0.045;
 let filePath = "";
 
 // Subscribe Events
-subscribeLoader("statusbar", (event, data) => {
+subscribeChannel("statusbar", (event, data) => {
     if (event === "loaded") {
+        clearCounters();
+        setStatusColor();    
         statusIconFile.innerHTML = data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
         statusFile.innerText = shortenPath(data.file, 
             Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR));
@@ -194,3 +194,18 @@ function shortenPath(bigPath, maxLen) {
     path = path + fileName; 
     return path;
 }
+
+// Events from Main process
+api.receive("toggleStatusBar", function () {
+    if (!api.isFullScreen()) {
+        redrawDisplay(currentChannel.running, false);
+    }
+});
+api.receive("serverStatus", function (server, enable, port) {
+    if (enable) {
+        console.log(`${server} server started listening port ${port}`);
+    } else {
+        console.log(`${server} server was disabled.`);
+    }
+    setServerStatus(server, enable, port);
+});

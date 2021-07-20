@@ -1,5 +1,10 @@
-import { closeChannel, sharedArray, dataType, currentChannel } from "./loader";
-import { playWav } from "./sound";
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 // Keyboard Mapping
 const preventDefault = new Set(["Enter", "Space", "ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"]);
@@ -20,6 +25,29 @@ keys.set("Comma", "rev");
 keys.set("Period", "fwd");
 keys.set("KeyA", "a");
 keys.set("KeyZ", "b");
+
+let sharedArray;
+let dataType;
+
+// Initialize Control Module
+export function initControlModule(array, types) {
+    sharedArray = array;
+    dataType = types;
+}
+
+// Observers Handling
+const observers = new Map();
+export function subscribeControl(observerId, observerCallback) {
+    observers.set(observerId, observerCallback);
+}
+export function unsubscribeControl(observerId) {
+    observers.delete(observerId);
+}
+function notifyAll(eventName, eventData) {
+    observers.forEach((callback, id) => {
+        callback(eventName, eventData);
+    });
+}
 
 // Keyboard handlers
 document.addEventListener("keydown", function (event) {    
@@ -74,13 +102,24 @@ export function handleKey(key, mod) {
     } else if (key.toLowerCase() == "b") {
         sharedArray[dataType.KEY] = 18 + mod;
     } else if (key.toLowerCase() == "home" && mod == 0) {
-        if (currentChannel.running) {
-            closeChannel("Home Button");
-            playWav(0);
-        }
+        notifyAll("home");
     } else if (key.substr(0,4).toLowerCase() === "lit_") {
         if (key.substr(4).length == 1 && key.charCodeAt(4) >= 32 && key.charCodeAt(4) < 255) {
             sharedArray[dataType.KEY] = key.charCodeAt(4) + mod; 
         }
     }
 }
+
+// Events from Main process
+api.receive("postKeyDown", function (key) {
+    handleKey(key, 0);
+});
+api.receive("postKeyUp", function (key) {
+    handleKey(key, 100);
+});
+api.receive("postKeyPress", function (key) {
+    setTimeout(function () {
+        handleKey(key, 100);
+    }, 300);
+    handleKey(key, 0);
+});
