@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { subscribeChannel, currentChannel } from "./channel";
+import { subscribeDevice, deviceData, currentChannel } from "./device";
 import { subscribeConsole } from "./console";
 import { displayMode, subscribeDisplay, redrawDisplay } from "./display";
 
@@ -34,9 +34,6 @@ statusIconRes.style.display = "none";
 statusSepRes.style.display = "none";
 statusError.innerText = "0";
 statusWarn.innerText = "0";
-statusDevTools.onclick = function() {
-    api.send("openDevTools");
-};
 let errorCount = 0;
 let warnCount = 0;
 let ECPPort = 8060;
@@ -47,14 +44,18 @@ let installerPort = 80;
 statusWeb.onclick = function() {
     api.openExternal(`http://localhost:${installerPort}/`);
 };
+statusDevTools.onclick = function() {
+    api.send("openDevTools");
+};
 let ui = displayMode == "720p" ? "HD" : displayMode == "1080p" ? "FHD" : "SD";
 statusDisplay.innerText = `${ui} (${displayMode})`;    
 const MIN_PATH_SIZE = 30;
 const PATH_SIZE_FACTOR = 0.045;
 let filePath = "";
-
+// Locale on StatusBar
+setLocaleStatus(deviceData.locale);
 // Subscribe Events
-subscribeChannel("statusbar", (event, data) => {
+subscribeDevice("statusbar", (event, data) => {
     if (event === "loaded") {
         clearCounters();
         setStatusColor();    
@@ -80,6 +81,7 @@ subscribeChannel("statusbar", (event, data) => {
 });
 subscribeDisplay("statusbar", (event, data) => {
     if (event === "redraw") {
+        api.titleBarRedraw();
         if (!data && api.isStatusEnabled()) {
             display.style.bottom = "20px";
             statusBar.style.visibility = "visible";
@@ -100,6 +102,8 @@ subscribeDisplay("statusbar", (event, data) => {
     } else if (event === "mode") {
         let ui = data == "720p" ? "HD" : data == "1080p" ? "FHD" : "SD";
         statusDisplay.innerText = `${ui} (${data})`;    
+    } else if (event === "dblclick") {
+        api.toggleFullScreen();
     }
 });
 subscribeConsole("statusbar", (event, data) => {
@@ -208,4 +212,10 @@ api.receive("serverStatus", function (server, enable, port) {
         console.log(`${server} server was disabled.`);
     }
     setServerStatus(server, enable, port);
+});
+api.receive("setLocale", function (locale) {
+    if (locale !== deviceData.locale) {
+        deviceData.locale = locale;
+        setLocaleStatus(locale);
+    }
 });

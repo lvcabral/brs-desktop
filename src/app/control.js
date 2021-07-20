@@ -25,16 +25,14 @@ keys.set("Comma", "rev");
 keys.set("Period", "fwd");
 keys.set("KeyA", "a");
 keys.set("KeyZ", "b");
-
+// Control array
 let sharedArray;
 let dataType;
-
 // Initialize Control Module
 export function initControlModule(array, types) {
     sharedArray = array;
     dataType = types;
 }
-
 // Observers Handling
 const observers = new Map();
 export function subscribeControl(observerId, observerCallback) {
@@ -48,7 +46,6 @@ function notifyAll(eventName, eventData) {
         callback(eventName, eventData);
     });
 }
-
 // Keyboard handlers
 document.addEventListener("keydown", function (event) {    
     if (keys.has(event.code)) {
@@ -63,7 +60,6 @@ document.addEventListener("keyup", function keyUpHandler(event) {
         handleKey(keys.get(event.code), 100);
     }
 });
-
 // Keyboard Handler
 export function handleKey(key, mod) {
     sharedArray[dataType.MOD] = mod;
@@ -109,17 +105,3 @@ export function handleKey(key, mod) {
         }
     }
 }
-
-// Events from Main process
-api.receive("postKeyDown", function (key) {
-    handleKey(key, 0);
-});
-api.receive("postKeyUp", function (key) {
-    handleKey(key, 100);
-});
-api.receive("postKeyPress", function (key) {
-    setTimeout(function () {
-        handleKey(key, 100);
-    }, 300);
-    handleKey(key, 0);
-});

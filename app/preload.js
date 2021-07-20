@@ -79,8 +79,8 @@ contextBridge.exposeInMainWorld("api", {
         titleBar.updateItemBGColor(customTitlebar.Color.fromHex(itColor));
         titleBar.titlebar.style.color = titleColor;
     },
-    titleBarRedraw: (fullScreen) => {
-        if (fullScreen) {
+    titleBarRedraw: () => {
+        if (ipcRenderer.sendSync("isFullScreen")) {
             titleBar.titlebar.style.display = "none";
             titleBar.container.style.top = "0px";   
         } else {
