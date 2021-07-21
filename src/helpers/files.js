@@ -21,7 +21,7 @@ export function loadFile(file) {
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
         filePath = file[0];
     } else {
-        window.webContents.send("clientException",`Invalid file: ${file[0]}`);
+        window.webContents.send("console",`Invalid file: ${file[0]}`, true);
         return;
     }
     const fileName = path.parse(filePath).base;
@@ -30,10 +30,10 @@ export function loadFile(file) {
         try {
             window.webContents.send("fileSelected", filePath, fs.readFileSync(filePath));
         } catch (error) {
-            window.webContents.send("clientException",`Error opening ${fileName}:${error.message}`);
+            window.webContents.send("console",`Error opening ${fileName}:${error.message}`, true);
         }
     } else {
-        window.webContents.send("clientException",`File format not supported: ${fileExt}`);
+        window.webContents.send("console",`File format not supported: ${fileExt}`, true);
     }
 }
 

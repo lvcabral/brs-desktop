@@ -11,7 +11,6 @@ import {
     initSoundModule, addSound, resetSounds, playSound, stopSound, playWav,
     pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist
 } from "./sound";
-import { clientLog, clientWarning, clientException } from "./console";
 // Load Device Info and Registry
 const storage = window.localStorage;
 export let deviceData = { channelRunning: false };
@@ -29,7 +28,7 @@ let paths = [];
 let txts = [];
 let bins = [];
 // Channel Data
-export const currentChannel = { id: "", file: "", title: "", version: "", running: false };
+export const currentChannel = { id: "", file: "", title: "", subtitle: "", version: "", running: false };
 // Shared buffer (Keys and Sounds)
 const length = 7;
 const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length);
@@ -99,7 +98,7 @@ export function loadFile(filePath, fileData) {
         sharedArray[dataType.IDX] = -1;
         resetSounds();
     }
-    clientLog(`Loading ${fileName}...`);
+    console.log(`Loading ${fileName}...`);
     if (fileExt === ".zip") {
         openChannelZip(fileData);
     } else {
@@ -172,6 +171,11 @@ function openChannelZip(f) {
                         } else {
                             currentChannel.title = "No Title";
                         }
+                        currentChannel.subtitle = "";
+                        const subtitle = manifestMap.get("subtitle");
+                        if (subtitle) {
+                            currentChannel.subtitle = subtitle;
+                        }
                         currentChannel.version = "";
                         const majorVersion = manifestMap.get("major_version");
                         if (majorVersion) {
@@ -188,13 +192,13 @@ function openChannelZip(f) {
                         notifyAll("loaded", currentChannel);
                     },
                     function error(e) {
-                        clientException(`Error uncompressing manifest: ${e.message}`);
+                        console.error(`Error uncompressing manifest: ${e.message}`);
                         setChannelState(false);
                         return;
                     }
                 );
             } else {
-                clientException("Invalid Channel Package: missing manifest.");
+                console.error("Invalid Channel Package: missing manifest.");
                 setChannelState(false);
                 return;
             }
@@ -262,12 +266,12 @@ function openChannelZip(f) {
                     setTimeout(runChannel, splashTimeout);
                 },
                 function error(e) {
-                    clientException(`Error uncompressing file ${e.message}`);
+                    console.error(`Error uncompressing file ${e.message}`);
                 }
             );
         },
         function (e) {
-            clientException(`Error reading ${f.name}: ${e.message}`, true);
+            console.error(`Error reading ${f.name}: ${e.message}`);
             setChannelState(false);
         }
     );
@@ -323,37 +327,37 @@ function workerCallback(event) {
         if (loop) {
             setLoop(loop === "true");
         } else {
-            clientWarning(`Missing loop parameter: ${event.data}`);
+            console.warn(`Missing loop parameter: ${event.data}`);
         }
     } else if (event.data.substr(0, 4) === "next") {
         const newIndex = event.data.split(",")[1];
         if (newIndex && !isNaN(parseInt(newIndex))) {
             setNext(parseInt(newIndex));
         } else {
-            clientWarning(`Invalid next index: ${event.data}`);
+            console.warn(`Invalid next index: ${event.data}`);
         }
     } else if (event.data.substr(0, 4) === "seek") {
         const position = event.data.split(",")[1];
         if (position && !isNaN(parseInt(position))) {
             seekSound(parseInt(position));
         } else {
-            clientWarning(`Invalid seek position: ${event.data}`);
+            console.warn(`Invalid seek position: ${event.data}`);
         }
     } else if (event.data.substr(0, 7) === "trigger") {
         const trigger = event.data.split(",");
         if (trigger.length >= 4) {
             triggerWav(trigger[1], parseInt(trigger[2]), parseInt(trigger[3]));
         } else {
-            clientWarning(`Missing Trigger parameters: ${event.data}`);
+            console.warn(`Missing Trigger parameters: ${event.data}`);
         }
     } else if (event.data.substr(0, 5) === "stop,") {
         stopWav(event.data.split(",")[1])
     } else if (event.data.substr(0, 4) === "log,") {
-        clientLog(event.data.substr(4));
+        console.log(event.data.substr(4));
     } else if (event.data.substr(0, 8) === "warning,") {
-        clientWarning(event.data.substr(8));
+        console.warn(event.data.substr(8));
     } else if (event.data.substr(0, 6) === "error,") {
-        clientException(event.data.substr(6));
+        console.error(event.data.substr(6));
     } else if (event.data === "end") {
         closeChannel("Normal");
     } else if (event.data === "reset") {
@@ -369,7 +373,7 @@ function setChannelState(running) {
 
 // Restore emulator menu and terminate Worker
 export function closeChannel(reason) {
-    clientLog(`------ Finished '${currentChannel.title}' execution [${reason}] ------`);
+    console.log(`------ Finished '${currentChannel.title}' execution [${reason}] ------`);
     clearDisplay();
     brsWorker.terminate();
     sharedArray[dataType.KEY] = 0;

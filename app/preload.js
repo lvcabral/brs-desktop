@@ -111,7 +111,6 @@ contextBridge.exposeInMainWorld("api", {
     receive: (channel, func) => {
         let validChannels = [
             "console",
-            "clientException",
             "postKeyDown",
             "postKeyUp",
             "postKeyPress",

@@ -5,7 +5,24 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-
+// Capture Console Events
+const exLog = console.log;
+console.log = function(msg) {
+    exLog.apply(this, arguments);
+    api.send("telnet", msg);
+}
+const exWarn = console.warn;
+console.warn = function(msg) {
+    exWarn.apply(this, arguments);
+    api.send("telnet", msg);
+    notifyAll("warning");
+}
+const exError = console.error;
+console.error = function(msg) {
+    exError.apply(this, arguments);
+    api.send("telnet", msg);
+    notifyAll("error");
+}
 // Observers Handling
 const observers = new Map();
 export function subscribeConsole(observerId, observerCallback) {
@@ -19,21 +36,6 @@ function notifyAll(eventName, eventData) {
         callback(eventName, eventData);
     });
 }
-// Log to Telnet Server and Console
-export function clientLog(msg) {
-    api.send("telnet", msg);
-    console.log(msg);
-}
-export function clientWarning(msg) {
-    api.send("telnet", msg);
-    console.warn(msg);
-    notifyAll("warning");
-}
-export function clientException(msg) {
-    api.send("telnet", msg);
-    console.error(msg);
-    notifyAll("error");
-}
 // Events from Main process
 api.receive("console", function (text, error) {
     if (error) {
@@ -41,7 +43,4 @@ api.receive("console", function (text, error) {
     } else {
         console.log(text);
     }
-});
-api.receive("clientException", function (msg) {
-    clientException(msg);
 });

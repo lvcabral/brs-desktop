@@ -37,7 +37,7 @@ export function enableTelnet() {
         });
         // Handle exceptions from the client
         client.on("error", (e) => {
-            window.webContents.send("console", `Remote console client error: ${e.message}`, true);
+            console.error(`Remote console client error: ${e.message}`);
             client.destroy();
         });
         client.on('close', function () {
@@ -63,6 +63,7 @@ export function enableTelnet() {
         });
     });
     server.on("error", (error) => {
+        ipcMain.removeAllListeners("telnet");
         window.webContents.send("console", `Remote console server error: ${error.message}`, true);
     });
     server.listen(PORT);

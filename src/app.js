@@ -10,8 +10,7 @@ import "./css/fontawesome.min.css";
 import "./helpers/hash";
 import { subscribeDevice, deviceData, currentChannel, loadFile } from "./app/device";
 import { setDisplayMode, setOverscanMode, overscanMode, redrawDisplay } from "./app/display";
-import { setLocaleStatus, setStatusColor } from "./app/statusbar";
-import { clientException } from "./app/console";
+import { setStatusColor } from "./app/statusbar";
 import { handleKey } from "./app/control"
 
 // Emulator display
@@ -68,7 +67,7 @@ api.receive("fileSelected", function (filePath, data) {
     try {
         loadFile(filePath, data);
     } catch (error) {
-        clientException(`Error opening ${filePath}:${error.message}`);
+        console.error(`Error opening ${filePath}:${error.message}`);
     }
 });
 api.receive("closeChannel", function (source) {
