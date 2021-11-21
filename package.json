@@ -63,7 +63,7 @@
         "electron-about-window": "^1.14.0",
         "fs-jetpack": "^4.1.0",
         "howler": "^2.2.1",
-        "jszip": "^3.6.0",
+        "jszip": "^3.7.0",
         "minimist": "^1.2.5",
         "mousetrap": "^1.6.5",
         "node-ssdp": "^4.0.1",
