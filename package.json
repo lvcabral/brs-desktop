@@ -64,7 +64,7 @@
         "fs-jetpack": "^4.1.0",
         "howler": "^2.2.1",
         "jszip": "^3.6.0",
-        "minimist": "^1.2.5",
+        "minimist": "^1.2.6",
         "mousetrap": "^1.6.5",
         "node-ssdp": "^4.0.1",
         "restana": "^3.4.2",
