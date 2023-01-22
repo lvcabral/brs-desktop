@@ -6,39 +6,98 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { subscribeDisplay, initDisplayModule, drawBufferImage, drawSplashScreen, showDisplay, clearDisplay } from "./display";
-import { subscribeControl, initControlModule } from "./control";
+import { subscribeControl, initControlModule, handleKey } from "./control";
 import {
     initSoundModule, addSound, resetSounds, playSound, stopSound, playWav,
     pauseSound, resumeSound, setLoop, setNext, triggerWav, stopWav, addPlaylist
 } from "./sound";
-// Load Device Info and Registry
-const storage = window.localStorage;
-export let deviceData = { channelRunning: false };
-Object.assign(deviceData, api.getDeviceInfo(), { registry: new Map() });
-for (let index = 0; index < storage.length; index++) {
-    const key = storage.key(index);
-    if (key.substr(0, deviceData.developerId.length) === deviceData.developerId) {
-        deviceData.registry.set(key, storage.getItem(key));
-    }
-}
 let brsWorker;
+const brsEmuLib = "../node_modules/brs-emu/app/lib/brsEmu.js";
+const storage = window.localStorage;
+export const deviceData = {
+    developerId: "UniqueDeveloperId",
+    friendlyName: "BrightScript Emulator",
+    serialNumber: "BRSEMUAPP092",
+    deviceModel: "8000X",
+    firmwareVersion: "049.10E04111A",
+    clientId: "6c5bf3a5-b2a5-4918-824d-7691d5c85364",
+    RIDA: "f51ac698-bc60-4409-aae3-8fc3abc025c4", // Unique identifier for advertisement tracking
+    countryCode: "US",
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    locale: "en_US",
+    clockFormat: "12h",
+    displayMode: "720p", // Supported modes: 480p (SD), 720p (HD) and 1080p (FHD)
+    defaultFont: "Asap",
+    maxSimulStreams: 2, // Max number of audio resource streams
+    connectionType: "WiFiConnection", // Options: "WiFiConnection", "WiredConnection", ""
+    localIps: ["eth1,127.0.0.1"], // Running on the Browser is not possible to get a real IP
+    startTime: Date.now(),
+    audioVolume: 40,
+    channelRunning: false,
+    registry: new Map()
+};
+
+// Channel Data
 let splashTimeout = 1600;
 let source = [];
 let paths = [];
 let txts = [];
 let bins = [];
-// Channel Data
+let sharedBuffer = [0, 0, 0, 0, 0, 0, 0];
+let sharedArray = new Int32Array(sharedBuffer);
+
 export const currentChannel = { id: "", file: "", title: "", subtitle: "", version: "", running: false };
-// Shared buffer (Keys and Sounds)
-const length = 7;
-const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length);
-export const sharedArray = new Int32Array(sharedBuffer);
 export const dataType = { KEY: 0, MOD: 1, SND: 2, IDX: 3, WAV: 4 };
 Object.freeze(dataType);
-// Initialize Display, Control and Sound Modules
-initDisplayModule(deviceData.displayMode)
-initControlModule(sharedArray, dataType);
-initSoundModule(sharedArray, dataType, deviceData.maxSimulStreams);
+
+export function initDevice(deviceInfo, supportSharedArray, disableKeys, keysMap) {
+    Object.assign(deviceData, deviceInfo);
+    console.log(deviceData.friendlyName)
+    // Load Registry 
+    for (let index = 0; index < storage.length; index++) {
+        const key = storage.key(index);
+        if (key.slice(0, deviceData.developerId.length) === deviceData.developerId) {
+            deviceData.registry.set(key, storage.getItem(key));
+        }
+    }
+    // Shared buffer (Keys and Sounds)
+    const length = 7;
+    if (supportSharedArray) {
+        sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * length);
+    } else {
+        console.warn(
+            `Remote control emulation will not work as SharedArrayBuffer is not enabled, to know more visit https://developer.chrome.com/blog/enabling-shared-array-buffer/`
+        );
+    }
+    sharedArray = new Int32Array(sharedBuffer);
+
+    // Initialize Display, Control and Sound Modules
+    initDisplayModule(deviceData.displayMode);
+    initControlModule(sharedArray, dataType, disableKeys, keysMap);
+    initSoundModule(sharedArray, dataType, deviceData.maxSimulStreams);
+    // Subscribe Events
+    subscribeDisplay("channel", (event, data) => {
+        if (event === "mode") {
+            deviceData.displayMode = data;
+            if (currentChannel.running) {
+                closeChannel("DisplayMode");
+            }
+        }
+    });
+    subscribeControl("channel", (event) => {
+        if (event === "home") {
+            if (currentChannel.running) {
+                closeChannel("Home Button");
+                playWav(0);
+            }
+        }
+    })
+    // Initialize Worker
+    brsWorker = new Worker(brsEmuLib);
+    brsWorker.addEventListener("message", workerCallback);
+    brsWorker.postMessage("getVersion");
+}
+
 // Observers Handling
 const observers = new Map();
 export function subscribeDevice(observerId, observerCallback) {
@@ -52,23 +111,6 @@ function notifyAll(eventName, eventData) {
         callback(eventName, eventData);
     });
 }
-// Subscribe Events
-subscribeDisplay("channel", (event, data) => {
-    if (event === "mode") {
-        deviceData.displayMode = data;
-        if (currentChannel.running) {
-            closeChannel("DisplayMode");
-        }
-    }
-});
-subscribeControl("channel", (event) => {
-    if (event === "home") {
-        if (currentChannel.running) {
-            closeChannel("Home Button");
-            playWav(0);
-        }
-    }
-})
 
 // Open File
 export function loadFile(filePath, fileData) {
@@ -90,7 +132,7 @@ export function loadFile(filePath, fileData) {
     source = [];
     currentChannel.id = filePath.hashCode();
     currentChannel.file = filePath;
-    if (brsWorker != undefined) {
+    if (typeof brsWorker !== 'undefined') {
         brsWorker.terminate();
         sharedArray[dataType.KEY] = 0;
         sharedArray[dataType.MOD] = 0;
@@ -141,8 +183,8 @@ function openChannelZip(f) {
                             }
                         }
                         clearDisplay()
-                        if (splash && splash.substr(0, 5) === "pkg:/") {
-                            const splashFile = zip.file(splash.substr(5));
+                        if (splash && splash.slice(0, 5) === "pkg:/") {
+                            const splashFile = zip.file(splash.slice(5));
                             if (splashFile) {
                                 splashFile.async("blob").then((blob) => {
                                     createImageBitmap(blob).then(drawSplashScreen);
@@ -157,8 +199,8 @@ function openChannelZip(f) {
                                 icon = manifestMap.get("mm_icon_focus_sd");
                             }
                         }
-                        if (icon && icon.substr(0, 5) === "pkg:/") {
-                            const iconFile = zip.file(icon.substr(5));
+                        if (icon && icon.slice(0, 5) === "pkg:/") {
+                            const iconFile = zip.file(icon.slice(5));
                             if (iconFile) {
                                 iconFile.async("base64").then((content) => {
                                     notifyAll("icon", content);
@@ -211,7 +253,7 @@ function openChannelZip(f) {
             zip.forEach(function (relativePath, zipEntry) {
                 const lcasePath = relativePath.toLowerCase();
                 const ext = lcasePath.split(".").pop();
-                if (!zipEntry.dir && lcasePath.substr(0, 6) === "source" && ext === "brs") {
+                if (!zipEntry.dir && lcasePath.slice(0, 6) === "source" && ext === "brs") {
                     assetPaths.push({ url: relativePath, id: srcId, type: "source" });
                     assetsEvents.push(zipEntry.async("string"));
                     srcId++;
@@ -279,7 +321,7 @@ function openChannelZip(f) {
 // Execute Emulator Web Worker
 function runChannel() {
     showDisplay()
-    if (currentChannel.running || brsWorker != undefined) {
+    if (currentChannel.running || typeof brsWorker !== 'undefined') {
         brsWorker.terminate();
         sharedArray[dataType.KEY] = 0;
         sharedArray[dataType.MOD] = 0;
@@ -287,7 +329,7 @@ function runChannel() {
         sharedArray[dataType.IDX] = -1;
     }
     setChannelState(true);
-    brsWorker = new Worker("../node_modules/brs-emu/app/lib/brsEmu.js");
+    brsWorker = new Worker(brsEmuLib);
     brsWorker.addEventListener("message", workerCallback);
     const payload = {
         device: deviceData,
@@ -322,46 +364,48 @@ function workerCallback(event) {
         pauseSound();
     } else if (event.data === "resume") {
         resumeSound();
-    } else if (event.data.substr(0, 4) === "loop") {
+    } else if (event.data.slice(0, 4) === "loop") {
         const loop = event.data.split(",")[1];
         if (loop) {
             setLoop(loop === "true");
         } else {
             console.warn(`Missing loop parameter: ${event.data}`);
         }
-    } else if (event.data.substr(0, 4) === "next") {
+    } else if (event.data.slice(0, 4) === "next") {
         const newIndex = event.data.split(",")[1];
         if (newIndex && !isNaN(parseInt(newIndex))) {
             setNext(parseInt(newIndex));
         } else {
             console.warn(`Invalid next index: ${event.data}`);
         }
-    } else if (event.data.substr(0, 4) === "seek") {
+    } else if (event.data.slice(0, 4) === "seek") {
         const position = event.data.split(",")[1];
         if (position && !isNaN(parseInt(position))) {
             seekSound(parseInt(position));
         } else {
             console.warn(`Invalid seek position: ${event.data}`);
         }
-    } else if (event.data.substr(0, 7) === "trigger") {
+    } else if (event.data.slice(0, 7) === "trigger") {
         const trigger = event.data.split(",");
         if (trigger.length >= 4) {
             triggerWav(trigger[1], parseInt(trigger[2]), parseInt(trigger[3]));
         } else {
             console.warn(`Missing Trigger parameters: ${event.data}`);
         }
-    } else if (event.data.substr(0, 5) === "stop,") {
+    } else if (event.data.slice(0, 5) === "stop,") {
         stopWav(event.data.split(",")[1])
-    } else if (event.data.substr(0, 4) === "log,") {
-        console.log(event.data.substr(4));
-    } else if (event.data.substr(0, 8) === "warning,") {
-        console.warn(event.data.substr(8));
-    } else if (event.data.substr(0, 6) === "error,") {
-        console.error(event.data.substr(6));
+    } else if (event.data.slice(0, 4) === "log,") {
+        console.log(event.data.slice(4));
+    } else if (event.data.slice(0, 8) === "warning,") {
+        console.warn(event.data.slice(8));
+    } else if (event.data.slice(0, 6) === "error,") {
+        console.error(event.data.slice(6));
     } else if (event.data === "end") {
         closeChannel("Normal");
     } else if (event.data === "reset") {
         notifyAll("reset");
+    } else if (event.data.slice(0, 8) === "version:") {
+        notifyAll("version", event.data.slice(8));
     }
 }
 
@@ -388,3 +432,17 @@ export function closeChannel(reason) {
     setChannelState(false);
     notifyAll("closed", currentChannel);
 }
+
+// Remote Control Emulation
+export function keyDown(key) {
+    handleKey(key, 0);
+};
+export function keyUp(key) {
+    handleKey(key, 100);
+};
+export function keyPress(key) {
+    setTimeout(function () {
+        handleKey(key, 100);
+    }, 300);
+    handleKey(key, 0);
+};

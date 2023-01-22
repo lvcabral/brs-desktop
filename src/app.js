@@ -8,10 +8,9 @@
 import "./css/main.css";
 import "./css/fontawesome.min.css";
 import "./helpers/hash";
-import { subscribeDevice, deviceData, currentChannel, loadFile } from "./app/device";
+import { initDevice, subscribeDevice, deviceData, currentChannel, loadFile, keyDown, keyUp, keyPress } from "./app/device";
 import { setDisplayMode, setOverscanMode, overscanMode, redrawDisplay } from "./app/display";
 import { setStatusColor } from "./app/statusbar";
-import { handleKey } from "./app/control"
 
 // Emulator display
 const display = document.getElementById("display");
@@ -23,7 +22,9 @@ let titleBgColor = colorValues.getPropertyValue("--title-background-color").trim
 let itemBgColor = colorValues.getPropertyValue("--item-background-color").trim();
 api.setBackgroundColor(colorValues.getPropertyValue("--background-color").trim());
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
-// Subscribe Loader Events
+// Initialize Device Emulator and subscribe to events
+initDevice(api.getDeviceInfo(), true)
+
 subscribeDevice("app", (event, data) => {
     if (event === "loaded") {
         let prefs = api.getPreferences();
@@ -76,16 +77,13 @@ api.receive("closeChannel", function (source) {
     }
 });
 api.receive("postKeyDown", function (key) {
-    handleKey(key, 0);
+    keyDown(key);
 });
 api.receive("postKeyUp", function (key) {
-    handleKey(key, 100);
+    keyUp(key);
 });
 api.receive("postKeyPress", function (key) {
-    setTimeout(function () {
-        handleKey(key, 100);
-    }, 300);
-    handleKey(key, 0);
+    keyPress(key);
 });
 api.receive("copyScreenshot", function () {
     display.toBlob(function (blob) {

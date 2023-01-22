@@ -17,20 +17,28 @@ export let displayMode = "720p";
 export let overscanMode = "disabled";
 let aspectRatio = 16 / 9;
 // Initialize Display Module
-export function initDisplayModule(mode) {
+export function initDisplayModule(mode, lowRes) {
     displayMode = mode;
-    if (displayMode === "1080p") {
-        screenSize.width = 1920;
-        screenSize.height = 1080;
-        aspectRatio = 16 / 9;
-    } else if (displayMode === "480p") {
-        screenSize.width = 720;
+    // Display Aspect Ratio
+    if (lowRes) {
+        const isSD = displayMode === "480p";
+        aspectRatio = isSD ? 4 / 3 : 16 / 9;
+        screenSize.width = isSD ? 640 : 854;
         screenSize.height = 480;
-        aspectRatio = 4 / 3;
     } else {
-        screenSize.width = 1280;
-        screenSize.height = 720;
-        aspectRatio = 16 / 9;
+        if (displayMode === "1080p") {
+            screenSize.width = 1920;
+            screenSize.height = 1080;
+            aspectRatio = 16 / 9;
+        } else if (displayMode === "480p") {
+            screenSize.width = 720;
+            screenSize.height = 480;
+            aspectRatio = 4 / 3;
+        } else {
+            screenSize.width = 1280;
+            screenSize.height = 720;
+            aspectRatio = 16 / 9;
+        }   
     }
 }
 // Observers Handling
@@ -127,8 +135,7 @@ export function showDisplay() {
 }
 //Clear Display
 export function clearDisplay() {
-    ctx.fillStyle = "rgba(0, 0, 0, 1)";
-    ctx.fillRect(0, 0, display.width, display.height);
+    ctx.clearRect(0, 0, display.width, display.height);
 }
 // Set Display Mode
 export function setDisplayMode(mode) {

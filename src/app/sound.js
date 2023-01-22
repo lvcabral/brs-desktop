@@ -33,7 +33,7 @@ export function playSound() {
         let sound;
         if (soundsIdx.has(audio.toLowerCase())) {
             sound = soundsDat[soundsIdx.get(audio.toLowerCase())];
-        } else if (audio.substr(0, 4).toLowerCase() === "http") {
+        } else if (audio.slice(0, 4).toLowerCase() === "http") {
             sound = addWebSound(audio);
         } else {
             console.warn(`[playSound] Can't find audio data: ${audio}`);
@@ -103,7 +103,7 @@ export function resumeSound() {
         sound.play();
         sharedArray[dataType.SND] = audioEvent.RESUMED;
     } else {
-        console.warn(`[message:resume]Can't find audio data: ${playIndex} - ${audio}`);
+        console.warn(`[message:resume] Can't find audio data: ${playIndex} - ${audio}`);
     }
 }
 
@@ -189,14 +189,10 @@ export function addSound(path, format, data) {
             format: format,
             preload: format === "wav",
             onloaderror: function(id, message) {
-                console.warn(
-                    `Error loading ${path}: ${message}`
-                );
+                console.warn(`Error loading ${path}: ${message}`);
             },
             onplayerror: function(id, message) {
-                console.warn(
-                    `Error playing ${path}: ${message}`
-                );
+                console.warn(`Error playing ${path}: ${message}`);
             },
         })
     );
@@ -232,14 +228,10 @@ function addWebSound(url) {
         src: [url],
         preload: true,
         onloaderror: function(id, message) {
-            console.warn(
-                `Error loading ${path}: ${message}`
-            );
+            console.warn(`Error loading ${path}: ${message}`);
         },
         onplayerror: function(id, message) {
-            console.warn(
-                `Error playing ${path}: ${message}`
-            );
+            console.warn(`Error playing ${path}: ${message}`);
         },
     })
     soundsDat.push(sound);
