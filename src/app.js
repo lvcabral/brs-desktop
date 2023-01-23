@@ -8,7 +8,7 @@
 import "./css/main.css";
 import "./css/fontawesome.min.css";
 import "./helpers/hash";
-import { initDevice, subscribeDevice, deviceData, currentChannel, loadFile, keyDown, keyUp, keyPress } from "./app/device";
+import { initDevice, subscribeDevice, closeChannel, deviceData, currentChannel, loadFile, keyDown, keyUp, keyPress } from "./app/device";
 import { setDisplayMode, setOverscanMode, overscanMode, redrawDisplay } from "./app/display";
 import { setStatusColor } from "./app/statusbar";
 
@@ -49,6 +49,8 @@ subscribeDevice("app", (event, data) => {
         api.send("saveIcon", [currentChannel.id, data]);
     } else if (event === "reset") {
         api.send("reset");
+    } else {
+        console.log(`Unhandled event from device emulator: ${event}`);
     }
 });
 // Events from Main process

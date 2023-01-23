@@ -33,6 +33,7 @@ export const deviceData = {
     localIps: ["eth1,127.0.0.1"], // Running on the Browser is not possible to get a real IP
     startTime: Date.now(),
     audioVolume: 40,
+    lowResolutionCanvas: false,
     channelRunning: false,
     registry: new Map()
 };
@@ -72,7 +73,7 @@ export function initDevice(deviceInfo, supportSharedArray, disableKeys, keysMap)
     sharedArray = new Int32Array(sharedBuffer);
 
     // Initialize Display, Control and Sound Modules
-    initDisplayModule(deviceData.displayMode);
+    initDisplayModule(deviceData.displayMode, deviceData.lowResolutionCanvas);
     initControlModule(sharedArray, dataType, disableKeys, keysMap);
     initSoundModule(sharedArray, dataType, deviceData.maxSimulStreams);
     // Subscribe Events
@@ -114,8 +115,8 @@ function notifyAll(eventName, eventData) {
 
 // Open File
 export function loadFile(filePath, fileData) {
-    const fileName = api.pathParse(filePath).base;
-    const fileExt = api.pathParse(filePath).ext.toLowerCase();
+    const fileName = filePath.split('.').slice(0, -1).join('.');
+    const fileExt = filePath.split(".").pop();
     const reader = new FileReader();
     reader.onload = function (progressEvent) {
         currentChannel.id = "brs";
@@ -141,7 +142,7 @@ export function loadFile(filePath, fileData) {
         resetSounds();
     }
     console.log(`Loading ${fileName}...`);
-    if (fileExt === ".zip") {
+    if (fileExt === "zip") {
         openChannelZip(fileData);
     } else {
         reader.readAsText(new Blob([fileData], { type: "text/plain" }));
@@ -234,14 +235,18 @@ function openChannelZip(f) {
                         notifyAll("loaded", currentChannel);
                     },
                     function error(e) {
-                        console.error(`Error uncompressing manifest: ${e.message}`);
+                        const msg = `Error uncompressing manifest: ${e.message}`;
+                        console.error(msg);
                         setChannelState(false);
+                        notifyAll("error", msg);
                         return;
                     }
                 );
             } else {
-                console.error("Invalid Channel Package: missing manifest.");
+                const msg = "Invalid Channel Package: missing manifest.";
+                console.error(msg);
                 setChannelState(false);
+                notifyAll("error", msg);
                 return;
             }
             let assetPaths = [];
@@ -308,12 +313,16 @@ function openChannelZip(f) {
                     setTimeout(runChannel, splashTimeout);
                 },
                 function error(e) {
-                    console.error(`Error uncompressing file ${e.message}`);
+                    const msg = `Error uncompressing file ${e.message}`;
+                    console.error(msg);
+                    notifyAll("error", msg);
                 }
             );
         },
         function (e) {
-            console.error(`Error reading ${f.name}: ${e.message}`);
+            const msg = `Error reading ${f.name}: ${e.message}`;
+            console.error(msg);
+            notifyAll("error", msg);
             setChannelState(false);
         }
     );
@@ -341,6 +350,7 @@ function runChannel() {
     };
     brsWorker.postMessage(sharedBuffer);
     brsWorker.postMessage(payload, bins);
+    notifyAll("running", currentChannel);
 }
 
 // Receive Messages from Web Worker
