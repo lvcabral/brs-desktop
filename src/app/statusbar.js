@@ -1,13 +1,11 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { subscribeDevice, deviceData, currentChannel } from "./device";
 import { subscribeConsole } from "./console";
-import { displayMode, subscribeDisplay, redrawDisplay } from "./display";
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
@@ -37,30 +35,32 @@ statusWarn.innerText = "0";
 let errorCount = 0;
 let warnCount = 0;
 let ECPPort = 8060;
-statusECP.onclick = function() {
+statusECP.onclick = function () {
     api.openExternal(`http://localhost:${ECPPort}/query/device-info`);
-};
+}
 let installerPort = 80;
-statusWeb.onclick = function() {
+statusWeb.onclick = function () {
     api.openExternal(`http://localhost:${installerPort}/`);
-};
-statusDevTools.onclick = function() {
+}
+statusDevTools.onclick = function () {
     api.send("openDevTools");
-};
+}
+let displayMode = api.getDeviceInfo().displayMode;
 let ui = displayMode == "720p" ? "HD" : displayMode == "1080p" ? "FHD" : "SD";
-statusDisplay.innerText = `${ui} (${displayMode})`;    
+statusDisplay.innerText = `${ui} (${displayMode})`;
 const MIN_PATH_SIZE = 30;
 const PATH_SIZE_FACTOR = 0.045;
 let filePath = "";
 // Locale on StatusBar
-setLocaleStatus(deviceData.locale);
+let currentLocale = api.getDeviceInfo().locale;
+setLocaleStatus(currentLocale);
 // Subscribe Events
-subscribeDevice("statusbar", (event, data) => {
+brsEmu.subscribe("statusbar", (event, data) => {
     if (event === "loaded") {
         clearCounters();
-        setStatusColor();    
+        setStatusColor();
         statusIconFile.innerHTML = data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
-        statusFile.innerText = shortenPath(data.file, 
+        statusFile.innerText = shortenPath(data.file,
             Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR));
         filePath = data.file;
         if (data.version !== "") {
@@ -77,16 +77,13 @@ subscribeDevice("statusbar", (event, data) => {
         statusResolution.style.display = "none";
         statusIconRes.style.display = "none";
         statusSepRes.style.display = "none";
-    }
-});
-subscribeDisplay("statusbar", (event, data) => {
-    if (event === "redraw") {
+    } else if (event === "redraw") {
         api.titleBarRedraw();
         if (!data && api.isStatusEnabled()) {
             display.style.bottom = "20px";
             statusBar.style.visibility = "visible";
             if (filePath !== "") {
-                statusFile.innerText = shortenPath(filePath, 
+                statusFile.innerText = shortenPath(filePath,
                     Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR));
             }
         } else {
@@ -98,12 +95,10 @@ subscribeDisplay("statusbar", (event, data) => {
         statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
         statusResolution.style.display = "";
         statusIconRes.style.display = "";
-        statusSepRes.style.display = "";    
-    } else if (event === "mode") {
+        statusSepRes.style.display = "";
+    } else if (event === "display") {
         let ui = data == "720p" ? "HD" : data == "1080p" ? "FHD" : "SD";
-        statusDisplay.innerText = `${ui} (${data})`;    
-    } else if (event === "dblclick") {
-        api.toggleFullScreen();
+        statusDisplay.innerText = `${ui} (${data})`;
     }
 });
 subscribeConsole("statusbar", (event, data) => {
@@ -137,7 +132,7 @@ export function setStatusColor() {
 }
 // Update locale id on Status Bar
 export function setLocaleStatus(localeId) {
-    statusLocale.innerText = localeId.replace("_","-");
+    statusLocale.innerText = localeId.replace("_", "-");
 }
 // Update server icons on Status Bar
 export function setServerStatus(server, enabled, port) {
@@ -156,14 +151,14 @@ export function setServerStatus(server, enabled, port) {
             statusWeb.style.display = "";
         } else {
             statusWeb.style.display = "none";
-        }    
-    } else if (server ==="Telnet") {
+        }
+    } else if (server === "Telnet") {
         if (enabled) {
             statusTelnetText.innerText = port.toString();
             statusTelnet.style.display = "";
         } else {
             statusTelnet.style.display = "none";
-        }    
+        }
     }
 }
 // Clear error and warning counters
@@ -171,18 +166,17 @@ export function clearCounters() {
     errorCount = 0;
     warnCount = 0;
 }
-
 // Function that shortens a path (based on code by https://stackoverflow.com/users/2149492/johnpan)
 function shortenPath(bigPath, maxLen) {
     if (bigPath.length <= maxLen) return bigPath;
-    var splitter = bigPath.indexOf('/')>-1 ? '/' : "\\",
-        tokens = bigPath.split(splitter), 
+    var splitter = bigPath.indexOf('/') > -1 ? '/' : "\\",
+        tokens = bigPath.split(splitter),
         maxLen = maxLen || 25,
-        drive = bigPath.indexOf(':')>-1 ? tokens[0] : "",  
+        drive = bigPath.indexOf(':') > -1 ? tokens[0] : "",
         fileName = tokens[tokens.length - 1],
-        len = drive.length + fileName.length,    
+        len = drive.length + fileName.length,
         remLen = maxLen - len - 3, // remove the current length and also space for ellipsis char and 2 slashes
-        path, lenA, lenB, pathA, pathB;    
+        path, lenA, lenB, pathA, pathB;
     //remove first and last elements from the array
     tokens.splice(0, 1);
     tokens.splice(tokens.length - 1, 1);
@@ -194,15 +188,14 @@ function shortenPath(bigPath, maxLen) {
     //rebuild the path from beginning and end
     pathA = path.substring(0, lenA);
     pathB = path.substring(path.length - lenB);
-    path = drive + splitter + pathA + "…" + pathB + splitter ;
-    path = path + fileName; 
+    path = drive + splitter + pathA + "…" + pathB + splitter;
+    path = path + fileName;
     return path;
 }
-
 // Events from Main process
 api.receive("toggleStatusBar", function () {
     if (!api.isFullScreen()) {
-        redrawDisplay(currentChannel.running, false);
+        brsEmu.redraw(false);
     }
 });
 api.receive("serverStatus", function (server, enable, port) {
@@ -214,8 +207,8 @@ api.receive("serverStatus", function (server, enable, port) {
     setServerStatus(server, enable, port);
 });
 api.receive("setLocale", function (locale) {
-    if (locale !== deviceData.locale) {
-        deviceData.locale = locale;
+    if (locale !== currentLocale) {
+        currentLocale = locale;
         setLocaleStatus(locale);
     }
 });

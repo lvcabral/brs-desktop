@@ -1,15 +1,13 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import "./css/main.css";
 import "./css/fontawesome.min.css";
 import "./helpers/hash";
-import { initDevice, subscribeDevice, closeChannel, deviceData, currentChannel, loadFile, keyDown, keyUp, keyPress } from "./app/device";
-import { setDisplayMode, setOverscanMode, overscanMode, redrawDisplay } from "./app/display";
 import { setStatusColor } from "./app/statusbar";
 
 // Emulator display
@@ -23,13 +21,17 @@ let itemBgColor = colorValues.getPropertyValue("--item-background-color").trim()
 api.setBackgroundColor(colorValues.getPropertyValue("--background-color").trim());
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
 // Initialize Device Emulator and subscribe to events
-initDevice(api.getDeviceInfo(), true)
-
-subscribeDevice("app", (event, data) => {
+let currentChannel = { id: "", running: false }
+let workerPath = "../node_modules/brs-emu/app/lib/brsEmu.worker.js";
+const customKeys = new Map();
+customKeys.set("Home", "home");
+brsEmu.initialize(api.getDeviceInfo(), true, false, customKeys, workerPath)
+brsEmu.subscribe("app", (event, data) => {
     if (event === "loaded") {
+        currentChannel = data;
         let prefs = api.getPreferences();
         if (prefs && prefs.display && prefs.display.overscanMode) {
-            setOverscanMode(prefs.display.overscanMode);
+            brsEmu.setOverscanMode(prefs.display.overscanMode);
         }
         api.updateTitle(`${data.title} - ${defaultTitle}`);
         if (data.id === "brs") {
@@ -40,7 +42,10 @@ subscribeDevice("app", (event, data) => {
         api.enableMenuItem("close-channel", true);
         api.enableMenuItem("save-screen", true);
         api.enableMenuItem("copy-screen", true);
-    } else if (event === "closed") {
+    } else if (event === "started") {
+        currentChannel = data;
+    } else if (event === "closed" || event === "error") {
+        currentChannel = { id: "", running: false };
         api.updateTitle(defaultTitle);
         api.enableMenuItem("close-channel", false);
         api.enableMenuItem("save-screen", false);
@@ -49,8 +54,6 @@ subscribeDevice("app", (event, data) => {
         api.send("saveIcon", [currentChannel.id, data]);
     } else if (event === "reset") {
         api.send("reset");
-    } else {
-        console.log(`Unhandled event from device emulator: ${event}`);
     }
 });
 // Events from Main process
@@ -63,29 +66,29 @@ api.receive("setTheme", function (theme) {
         titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
         itemBgColor = colorValues.getPropertyValue("--item-background-color").trim();
         api.updateTitlebarColor(titleColor, titleBgColor, itemBgColor);
-        setStatusColor();    
+        setStatusColor();
     }
 });
 api.receive("fileSelected", function (filePath, data) {
     try {
-        loadFile(filePath, data);
+        brsEmu.execute(filePath, data);
     } catch (error) {
         console.error(`Error opening ${filePath}:${error.message}`);
     }
 });
 api.receive("closeChannel", function (source) {
     if (currentChannel.running) {
-        closeChannel(source);
+        brsEmu.terminate(source);
     }
 });
 api.receive("postKeyDown", function (key) {
-    keyDown(key);
+    brsEmu.sendKeyDown(key);
 });
 api.receive("postKeyUp", function (key) {
-    keyUp(key);
+    brsEmu.sendKeyUp(key);
 });
 api.receive("postKeyPress", function (key) {
-    keyPress(key);
+    brsEmu.sendKeyPress(key);
 });
 api.receive("copyScreenshot", function () {
     display.toBlob(function (blob) {
@@ -99,18 +102,22 @@ api.receive("saveScreenshot", function (file) {
     api.send("saveFile", [file, data])
 });
 api.receive("setDisplay", function (mode) {
-    if (mode !== deviceData.displayMode) {
-        setDisplayMode(mode);
-        redrawDisplay(deviceData.channelRunning, api.isFullScreen());
+    if (mode !== brsEmu.getDisplayMode()) {
+        brsEmu.setDisplayMode(mode);
+        brsEmu.redraw(api.isFullScreen());
     }
 });
 api.receive("setOverscan", function (mode) {
-    if (mode !== overscanMode) {
-        setOverscanMode(mode);
-        redrawDisplay(deviceData.channelRunning, api.isFullScreen());
+    if (mode !== brsEmu.getOverscanMode()) {
+        brsEmu.setOverscanMode(mode);
+        brsEmu.redraw(api.isFullScreen());
     }
 });
 // Window Resize Event
 window.onload = window.onresize = function () {
-    redrawDisplay(deviceData.channelRunning, api.isFullScreen());
-};
+    brsEmu.redraw(api.isFullScreen());
+}
+// Toggle Full Screen when Double Click
+display.ondblclick = function () {
+    api.toggleFullScreen();
+}
