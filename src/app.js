@@ -22,10 +22,12 @@ api.setBackgroundColor(colorValues.getPropertyValue("--background-color").trim()
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
 // Initialize Device Emulator and subscribe to events
 let currentChannel = { id: "", running: false }
-let workerPath = "../node_modules/brs-emu/app/lib/brsEmu.worker.js";
 const customKeys = new Map();
-customKeys.set("Home", "home");
-brsEmu.initialize(api.getDeviceInfo(), true, false, customKeys, workerPath)
+customKeys.set("Comma", "rev"); // Keep consistency with older versions
+customKeys.set("Period", "fwd"); // Keep consistency with older versions
+customKeys.set("Space", "play"); // Keep consistency with older versions
+brsEmu.initialize(api.getDeviceInfo(), true, false, customKeys)
+brsEmu.showDisplayFps(true);
 brsEmu.subscribe("app", (event, data) => {
     if (event === "loaded") {
         currentChannel = data;

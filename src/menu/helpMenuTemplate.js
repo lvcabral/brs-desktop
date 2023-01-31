@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -55,7 +55,7 @@ export const helpMenuTemplate = {
                 const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
                 const about = openAboutWindow({
                     icon_path: path.join(__dirname, "images/icon512x512.png"),
-                    copyright: "Copyright © 2019-2021 Marcelo Lv Cabral",
+                    copyright: "Copyright © 2019-2023 Marcelo Lv Cabral",
                     win_options: {
                         parent: window,
                         x: x,
