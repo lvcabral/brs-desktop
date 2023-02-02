@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -78,7 +78,6 @@ brsEmu.subscribe("statusbar", (event, data) => {
         statusIconRes.style.display = "none";
         statusSepRes.style.display = "none";
     } else if (event === "redraw") {
-        api.titleBarRedraw();
         if (!data && api.isStatusEnabled()) {
             display.style.bottom = "20px";
             statusBar.style.visibility = "visible";

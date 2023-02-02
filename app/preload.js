@@ -1,11 +1,12 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-const { contextBridge, ipcRenderer, remote, shell } = require("electron");
+const { contextBridge, ipcRenderer, shell } = require("electron");
+const { BrowserWindow, Menu, getCurrentWebContents, getGlobal } = require('@electron/remote')
 const customTitlebar = require("custom-electron-titlebar");
 const Mousetrap = require("mousetrap");
 const path = require("path");
@@ -18,7 +19,7 @@ let titleColor;
 window.addEventListener('DOMContentLoaded', () => {
     // Detect Clipboard Copy to create Screenshot
     Mousetrap.bind(["command+c", "ctrl+c"], function () {
-        remote.getCurrentWebContents().send("copyScreenshot");
+        getCurrentWebContents().send("copyScreenshot");
         return false;
     });
 });
@@ -34,14 +35,14 @@ contextBridge.exposeInMainWorld("api", {
         onPreferencesChangedHandler = handler;
     },
     isStatusEnabled: () => {
-        const appMenu = remote.Menu.getApplicationMenu();
+        const appMenu = Menu.getApplicationMenu();
         return appMenu.getMenuItemById("status-bar").checked;
     },
     getDeviceInfo: () => {
-        return remote.getGlobal("sharedObject").deviceInfo;
+        return getGlobal("sharedObject").deviceInfo;
     },
     getTheme: () => {
-        return remote.getGlobal("sharedObject").theme;
+        return getGlobal("sharedObject").theme;
     },
     setBackgroundColor: (color) => {
         ipcRenderer.send("setBackgroundColor", color);
@@ -67,7 +68,7 @@ contextBridge.exposeInMainWorld("api", {
             shadow: true
         };
         titleBar = new customTitlebar.Titlebar(titleBarConfig);
-        titleBar.titlebar.style.color = titleColor;
+        // titleBar.titlebar.style.color = titleColor;
     },
     updateTitle: (title) => {
         titleBar.updateTitle(title);
@@ -77,16 +78,7 @@ contextBridge.exposeInMainWorld("api", {
         titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(bgColor);
         titleBar.updateBackground(titleBarConfig.backgroundColor);
         titleBar.updateItemBGColor(customTitlebar.Color.fromHex(itColor));
-        titleBar.titlebar.style.color = titleColor;
-    },
-    titleBarRedraw: () => {
-        if (ipcRenderer.sendSync("isFullScreen")) {
-            titleBar.titlebar.style.display = "none";
-            titleBar.container.style.top = "0px";   
-        } else {
-            titleBar.titlebar.style.display = "";
-            titleBar.container.style.top = "30px";    
-        }
+        //titleBar.titlebar.style.color = titleColor;
     },
     enableMenuItem: (id, enable) => {
         ipcRenderer.send("enableMenuItem", id, enable);

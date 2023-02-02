@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -18,7 +18,8 @@ const colorValues = getComputedStyle(document.documentElement);
 let titleColor = colorValues.getPropertyValue("--title-color").trim();
 let titleBgColor = colorValues.getPropertyValue("--title-background-color").trim();
 let itemBgColor = colorValues.getPropertyValue("--item-background-color").trim();
-api.setBackgroundColor(colorValues.getPropertyValue("--background-color").trim());
+let backColor = colorValues.getPropertyValue("--background-color").trim();
+api.setBackgroundColor(backColor);
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
 // Initialize Device Emulator and subscribe to events
 let currentChannel = { id: "", running: false }
@@ -26,8 +27,8 @@ const customKeys = new Map();
 customKeys.set("Comma", "rev"); // Keep consistency with older versions
 customKeys.set("Period", "fwd"); // Keep consistency with older versions
 customKeys.set("Space", "play"); // Keep consistency with older versions
-brsEmu.initialize(api.getDeviceInfo(), true, false, customKeys)
-brsEmu.showDisplayFps(true);
+
+brsEmu.initialize(api.getDeviceInfo(), { debugToConsole: true, customKeys: customKeys });
 brsEmu.subscribe("app", (event, data) => {
     if (event === "loaded") {
         currentChannel = data;
@@ -35,6 +36,7 @@ brsEmu.subscribe("app", (event, data) => {
         if (prefs && prefs.display && prefs.display.overscanMode) {
             brsEmu.setOverscanMode(prefs.display.overscanMode);
         }
+        brsEmu.showDisplayFps(true);
         api.updateTitle(`${data.title} - ${defaultTitle}`);
         if (data.id === "brs") {
             api.send("addRecentSource", data.file);

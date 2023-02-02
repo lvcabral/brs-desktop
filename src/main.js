@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -20,6 +20,7 @@ import { createMenu, enableMenuItem, isMenuItemEnabled, loadPackage } from "./me
 import { loadFile } from "./helpers/files";
 import { getSettings, setDeviceInfo, setDisplayOption, setThemeSource, setTimeZone } from "./helpers/settings";
 import { createWindow, setAspectRatio } from "./helpers/window";
+import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 
 const isMacOS = process.platform === "darwin";
 
@@ -48,6 +49,11 @@ const deviceInfo = {
     audioVolume: 40
 }
 
+// Enable SharedArrayBuffer
+// app.commandLine.appendSwitch('enable-features','SharedArrayBuffer');
+
+require('@electron/remote/main').initialize();
+
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
     string: ["o", "p", "m"],
@@ -62,6 +68,8 @@ if (env.name !== "production") {
 }
 
 app.on("ready", () => {
+    // setup the titlebar main process
+    setupTitlebar();
     createMenu();
     // Shared Object with Front End
     global.sharedObject = {
@@ -210,6 +218,7 @@ app.on("ready", () => {
             loadPackage(0);
         }
         firstLoad = false;
+        attachTitlebarToWindow(mainWindow);
         mainWindow.show();
         mainWindow.focus();
     });
