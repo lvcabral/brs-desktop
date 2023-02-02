@@ -171,6 +171,7 @@ function saveRecentFiles() {
 }
 
 function rebuildMenu(template = false) {
+    const window = BrowserWindow.fromId(1);
     if (isMacOS || template) {
         const recentMenu = menuTemplate[fileMenuIndex].submenu[recentMenuIndex].submenu;
         for (let index = 0; index < maxFiles; index++) {
@@ -196,7 +197,6 @@ function rebuildMenu(template = false) {
         recentMenu[brsEnd].visible = recentFiles.brs.length === 0;
         recentMenu[recentMenu.length - 1].enabled = recentFiles.zip.length + recentFiles.brs.length > 0;
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
-        const window = BrowserWindow.fromId(1);
         if (isMacOS && window) {
             let userTheme = global.sharedObject.theme;
             if (userTheme === "system") {
@@ -235,5 +235,8 @@ function rebuildMenu(template = false) {
         recentMenu.getMenuItemById("zip-empty").visible = recentFiles.zip.length === 0;
         recentMenu.getMenuItemById("brs-empty").visible = recentFiles.brs.length === 0;
         recentMenu.getMenuItemById("file-clear").enabled = recentFiles.zip.length + recentFiles.brs.length > 0;
+    }
+    if (window) {
+        window.webContents.send("refreshMenu");   
     }
 }

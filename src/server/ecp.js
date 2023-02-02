@@ -137,6 +137,7 @@ export function updateECPStatus(enabled) {
     app.applicationMenu.getMenuItemById("ecp-api").checked = enabled;
     window = BrowserWindow.fromId(1);
     window.webContents.send("serverStatus", "ECP", enabled, ECPPORT);
+    window.webContents.send("refreshMenu");
 }
 
 // ECP-2 WebSocket API

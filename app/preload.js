@@ -68,7 +68,6 @@ contextBridge.exposeInMainWorld("api", {
             shadow: true
         };
         titleBar = new customTitlebar.Titlebar(titleBarConfig);
-        // titleBar.titlebar.style.color = titleColor;
     },
     updateTitle: (title) => {
         titleBar.updateTitle(title);
@@ -78,7 +77,6 @@ contextBridge.exposeInMainWorld("api", {
         titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(bgColor);
         titleBar.updateBackground(titleBarConfig.backgroundColor);
         titleBar.updateItemBGColor(customTitlebar.Color.fromHex(itColor));
-        //titleBar.titlebar.style.color = titleColor;
     },
     enableMenuItem: (id, enable) => {
         ipcRenderer.send("enableMenuItem", id, enable);
@@ -124,6 +122,12 @@ contextBridge.exposeInMainWorld("api", {
         } else {
             console.warn(`api.receive() - invalid channel: ${channel}`);
         }
+    }
+});
+
+ipcRenderer.on("refreshMenu", (e) => {
+    if (titleBar) {
+        titleBar.refreshMenu();
     }
 });
 

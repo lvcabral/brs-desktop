@@ -91,4 +91,5 @@ export function updateTelnetStatus(enabled) {
     app.applicationMenu.getMenuItemById("telnet").checked = enabled;
     const window = BrowserWindow.fromId(1);
     window.webContents.send("serverStatus", "Telnet", enabled, PORT);
+    window.webContents.send("refreshMenu");
 }

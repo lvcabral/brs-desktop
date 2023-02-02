@@ -189,6 +189,7 @@ export function updateInstallerStatus(enabled) {
     app.applicationMenu.getMenuItemById("web-installer").checked = enabled;
     const window = BrowserWindow.fromId(1);
     window.webContents.send("serverStatus", "Web", enabled, port);
+    window.webContents.send("refreshMenu");
 }
 
 // Helper Functions
