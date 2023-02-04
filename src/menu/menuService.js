@@ -119,6 +119,12 @@ ipcMain.on("addRecentPackage", (event, currentChannel) => {
     recentFiles.zip.unshift(currentChannel.file);
     recentFiles.names.unshift(currentChannel.title);
     recentFiles.versions.unshift(currentChannel.version);
+    if (recentFiles.ids.length > maxFiles) {
+        recentFiles.ids.length = maxFiles;
+        recentFiles.zip.length = maxFiles;
+        recentFiles.names.length = maxFiles;
+        recentFiles.versions.length = maxFiles;
+    }
     saveRecentFiles();
     rebuildMenu();
 });
@@ -129,6 +135,9 @@ ipcMain.on("addRecentSource", (event, filePath) => {
         recentFiles.brs.splice(idx, 1);
     }
     recentFiles.brs.unshift(filePath);
+    if (recentFiles.brs.length > maxFiles) {
+        recentFiles.brs.length = maxFiles;
+    }
     saveRecentFiles();
     rebuildMenu();
 });
