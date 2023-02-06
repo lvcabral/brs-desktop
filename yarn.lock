@@ -2381,10 +2381,10 @@ browserslist@^4.16.6, browserslist@^4.21.3, browserslist@^4.21.4:
     node-releases "^2.0.6"
     update-browserslist-db "^1.0.9"
 
-brs-emu@^0.10.2-dev:
-  version "0.10.2-dev"
-  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.10.2-dev.tgz#dc1014b2687b1c7ea396e5ec5f0b2ed411679a2a"
-  integrity sha512-qFmLhKZrVhggx6Ma1V9kJh7mfadNvQUXYw1XEGJS72H7hoFHgR6TOidt9+bCShQlb2ccJwNauWQiz1E/TKq6Ew==
+brs-emu@^0.10.3-dev:
+  version "0.10.3-dev"
+  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.10.3-dev.tgz#f2f344ecccfcb9dc7248e783b1769acffd452329"
+  integrity sha512-L7KOCb+aylufQwHRIzOIKSRibnAxX3VKEwY3+6Qz+Lv5vR6A8RF6PGHMj8UTQIs9S64fkFTCKccDSc511UhmzA==
   dependencies:
     babel-loader "^8.3.0"
     bowser "^2.11.0"
