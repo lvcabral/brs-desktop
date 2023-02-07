@@ -36,7 +36,6 @@ brsEmu.subscribe("app", (event, data) => {
         if (prefs && prefs.display && prefs.display.overscanMode) {
             brsEmu.setOverscanMode(prefs.display.overscanMode);
         }
-        brsEmu.showDisplayFps(true);
         api.updateTitle(`${data.title} - ${defaultTitle}`);
         if (data.id === "brs") {
             api.send("addRecentSource", data.file);

@@ -65,6 +65,7 @@ contextBridge.exposeInMainWorld("api", {
             backgroundColor: customTitlebar.Color.fromHex(bgColor),
             itemBackgroundColor: customTitlebar.Color.fromHex(itColor),
             icon: "./images/icon512x512.png",
+            enableMnemonics: true,
             shadow: true
         };
         titleBar = new customTitlebar.Titlebar(titleBarConfig);
@@ -80,6 +81,9 @@ contextBridge.exposeInMainWorld("api", {
     },
     enableMenuItem: (id, enable) => {
         ipcRenderer.send("enableMenuItem", id, enable);
+        if (titleBar) {
+            titleBar.refreshMenu();
+        }    
     },
     send: (channel, data) => {
         // whitelist channels
