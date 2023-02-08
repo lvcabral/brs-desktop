@@ -64,8 +64,6 @@
         "electron-about-window": "^1.14.0",
         "electron-preferences": "^2.4.1",
         "fs-jetpack": "^4.1.0",
-        "howler": "^2.2.1",
-        "jszip": "^3.6.0",
         "luxon": "^2.0.1",
         "minimist": "^1.2.5",
         "mousetrap": "^1.6.5",
