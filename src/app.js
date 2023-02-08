@@ -53,6 +53,18 @@ brsEmu.subscribe("app", (event, data) => {
         api.enableMenuItem("close-channel", false);
         api.enableMenuItem("save-screen", false);
         api.enableMenuItem("copy-screen", false);
+    } else if (event === "redraw") {
+        const windowTitleBar = document.querySelector("body > div.cet-titlebar.cet-mac.cet-shadow");
+        const windowContainer = document.querySelector("body > div.cet-container");
+        if (windowTitleBar && windowContainer) {
+            if (data) {
+                windowTitleBar.style.visibility = "hidden";
+                windowContainer.style.top = "0px";
+            } else if (windowTitleBar.style.visibility !== "visible") {
+                windowTitleBar.style.visibility = "visible";
+                windowContainer.style.top = "28px";
+            }
+        }
     } else if (event === "icon") {
         api.send("saveIcon", [currentChannel.id, data]);
     } else if (event === "reset") {

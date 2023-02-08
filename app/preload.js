@@ -65,6 +65,7 @@ contextBridge.exposeInMainWorld("api", {
             backgroundColor: customTitlebar.Color.fromHex(bgColor),
             itemBackgroundColor: customTitlebar.Color.fromHex(itColor),
             icon: "./images/icon512x512.png",
+            containerOverflow: "hidden",
             enableMnemonics: true,
             shadow: true
         };
@@ -83,14 +84,14 @@ contextBridge.exposeInMainWorld("api", {
         ipcRenderer.send("enableMenuItem", id, enable);
         if (titleBar) {
             titleBar.refreshMenu();
-        }    
+        }
     },
     send: (channel, data) => {
         // whitelist channels
         let validChannels = [
-            "telnet", 
-            "addRecentSource", 
-            "addRecentPackage", 
+            "telnet",
+            "addRecentSource",
+            "addRecentPackage",
             "openDevTools",
             "saveFile",
             "saveIcon",
