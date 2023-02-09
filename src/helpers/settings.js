@@ -67,6 +67,13 @@ export function getSettings(window) {
             },
             browserWindowOverrides: {
                 title: "Settings",
+                titleBarStyle: 'hidden',
+                titleBarOverlay: {
+                    color: '#3d1b56',
+                    symbolColor: '#dac7ea',
+                    height: 28,
+                },
+                frame: false,
                 parent: window,
                 modal: !isMacOS,
                 icon: __dirname + "/images/icon48x48.ico",
@@ -82,7 +89,7 @@ export function getSettings(window) {
             sections: [
                 {
                     id: "emulator",
-                    label: "Emulator",
+                    label: "General",
                     icon: "settings-gear-63",
                     form: {
                         groups: [
@@ -121,7 +128,7 @@ export function getSettings(window) {
                 {
                     id: "services",
                     label: "Services",
-                    icon: "layers-3",
+                    icon: "app-terminal",
                     form: {
                         groups: [
                             {
@@ -174,7 +181,7 @@ export function getSettings(window) {
                 {
                     id: "device",
                     label: "Device",
-                    icon: "spaceship",
+                    icon: "roku-box",
                     form: {
                         groups: [
                             {
@@ -217,9 +224,47 @@ export function getSettings(window) {
                     }
                 },
                 {
+                    id: "remote",
+                    label: "Remote",
+                    icon: "roku-remote",
+                    form: {
+                        groups: [
+                            {
+                                label: "Remote Controle Emulation",
+                                fields: [
+                                    {
+                                        label: "Serial Number",
+                                        key: "key1",
+                                        type: "text",
+                                        help: "Device serial number, must be 12 characters long, only letters and numbers"
+                                    },
+                                    {
+                                        label: "Channel Client Id",
+                                        key: "key2",
+                                        type: "text",
+                                        help: "Unique device identifier returned by ifDeviceInfo.GetChannelClientId()"
+                                    },
+                                    {
+                                        label: "RIDA",
+                                        key: "key3",
+                                        type: "text",
+                                        help: "Unique identifier for advertisement tracking returned by ifDevideInfo.GetRIDA()"
+                                    },
+                                    {
+                                        label: "Developer Id",
+                                        key: "key4",
+                                        type: "text",
+                                        help: "Unique id to segregate registry among channels, the registry only changes after a reset or app restart"
+                                    },
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
                     id: "display",
                     label: "Display",
-                    icon: "image",
+                    icon: "tv-screen",
                     form: {
                         groups: [
                             {
@@ -254,7 +299,7 @@ export function getSettings(window) {
                 {
                     id: "audio",
                     label: "Audio",
-                    icon: "preferences",
+                    icon: "speaker",
                     form: {
                         groups: [
                             {

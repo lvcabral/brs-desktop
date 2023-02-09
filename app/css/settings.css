@@ -2,10 +2,11 @@
     --main-color: #dac7ea;
     --background-color: #251135;
     --title-color: #dac7ea;
+    --title-background-color: #3d1b56;
     --help-color: #6A3AA5;
-    --sidebar-background-color: #3d1b56;
-    --icon-active-color: #c090fa;
-    --icon-hover-color: #A35EFF;
+    --sidebar-background-color: #220d31;
+    --icon-active-color: #dac7ea;
+    --icon-hover-color: #c090fa;
     --icon-background-color: #6A3AA5;
     --control-background-color: #3d1b56;
     --control-border-color: #3d1b56;
@@ -15,13 +16,46 @@
     --main-color: #d4d4d4;
     --background-color: #1e1e1e;
     --title-color: #cccccc;
+    --title-background-color: #252526;
     --help-color: #5d5d5d;
     --control-background-color: #252526;
-    --sidebar-background-color: #252526;
+    --sidebar-background-color: #141414;
     --icon-active-color: #0084ff;
     --icon-hover-color: #006dd9;
     --icon-background-color: #787878;
     --control-border-color: #0e0e0e;
+}
+
+#titlebar {
+    padding: 4px;
+    height: 28px; 
+    background-color: var(--title-background-color);
+}
+
+#drag-region {
+    width: 100%; 
+    height: 100%; 
+    -webkit-app-region: drag;
+}
+
+#window-title {
+    width: 100%;
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-size: 13px;
+    text-align: center;
+}
+  
+#window-title span {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -43,6 +77,12 @@
     }
     .sidebar .sidebar-section.active {
         color: var(--icon-active-color);
+    }
+    .sidebar .sidebar-section:focus {
+        border: 2px solid  var(--icon-hover-color);
+    }
+    .sidebar .sidebar-section:hover {
+        background-color: rgba(0,0,0,0.3);
     }
     .sidebar .sidebar-section.active .section-icon {
         background-color: var(--icon-active-color);
