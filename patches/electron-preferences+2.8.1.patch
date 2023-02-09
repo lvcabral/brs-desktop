@@ -1,18 +1,15 @@
 diff --git a/node_modules/electron-preferences/build/index.html b/node_modules/electron-preferences/build/index.html
-index 279f85c..e2ac474 100644
+index 3699e18..dc13a0f 100644
 --- a/node_modules/electron-preferences/build/index.html
 +++ b/node_modules/electron-preferences/build/index.html
-@@ -1,10 +1,25 @@
+@@ -1,11 +1,23 @@
  <!DOCTYPE html>
  <html>
--    <head>
--        <meta charset="UTF-8">
--    </head>
--    <body>
--        <div class="window noselect" id="window"></div>
--        <script src="app.js"></script>
--    </body>
-+
+-  <head>
+-    <meta charset="UTF-8" />
+-    <title>Preferences</title>
+-  </head>
+-  <body>
 +<head>
 +    <meta charset="UTF-8">
 +    <script>
@@ -30,32 +27,33 @@ index 279f85c..e2ac474 100644
 +</head>
 +
 +<body>
-+    <div class="window noselect" id="window"></div>
-+    <script src="app.js"></script>
+     <div class="window noselect" id="window"></div>
+     <script src="app.js"></script>
+-  </body>
 +</body>
-+
  </html>
-\ No newline at end of file
 diff --git a/node_modules/electron-preferences/preload.js b/node_modules/electron-preferences/preload.js
-index 49c4a44..731aea0 100644
+index 0c91968..984ecbf 100644
 --- a/node_modules/electron-preferences/preload.js
 +++ b/node_modules/electron-preferences/preload.js
-@@ -3,6 +3,7 @@
- const electron = require('electron');
- const { contextBridge } = electron;
+@@ -6,6 +6,7 @@ const { contextBridge } = electron;
  const { ipcRenderer } = electron;
+ 
+ const deserializeJson = (serializedJavascript) => eval('(' + serializedJavascript + ')'); //deserialize function for 'serialize-javascript' library
 +let onPreferencesChangedHandler = () => {};
  
  contextBridge.exposeInMainWorld('api', {
- 	getSections: () => ipcRenderer.sendSync('getSections'),
-@@ -10,4 +11,10 @@ contextBridge.exposeInMainWorld('api', {
- 	getDefaults: () => ipcRenderer.sendSync('getDefaults'),
+ 	getSections: () => deserializeJson(ipcRenderer.sendSync('getSections')),
+@@ -14,5 +15,10 @@ contextBridge.exposeInMainWorld('api', {
  	setPreferences: preferences => ipcRenderer.send('setPreferences', preferences),
  	showOpenDialog: dialogOptions => ipcRenderer.sendSync('showOpenDialog', dialogOptions),
+ 	sendButtonClick: channel => ipcRenderer.send('sendButtonClick', channel),
+-  encrypt: secret => ipcRenderer.sendSync('encrypt', secret),
++  	encrypt: secret => ipcRenderer.sendSync('encrypt', secret),
 +	onPreferencesChanged: handler => { onPreferencesChangedHandler = handler; },
 +});
++
 +ipcRenderer.on('preferencesUpdated', (e, preferences) => {
-+
 +	onPreferencesChangedHandler(preferences);
-+
  });
+\ No newline at end of file
