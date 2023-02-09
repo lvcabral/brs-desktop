@@ -519,6 +519,7 @@ export function setThemeSource(userTheme, notifyApp) {
     if (notifyApp) {
         const window = BrowserWindow.fromId(1);
         window.webContents.send("setTheme", userTheme);
+        window.webContents.send("refreshMenu");  
     }
     return userTheme;
 }
