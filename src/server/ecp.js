@@ -1,3 +1,10 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow } from "electron";
 import {
     getChannelIds,
@@ -444,8 +451,8 @@ function getMacAddress() {
             if ('IPv4' !== iface.family || iface.internal !== false) {
                 // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
                 return;
-            } else if (ifname.substr(0, 6).toLowerCase() === "vmware" ||
-                ifname.substr(0, 10).toLowerCase() === "virtualbox") {
+            } else if (ifname.slice(0, 6).toLowerCase() === "vmware" ||
+                ifname.slice(0, 10).toLowerCase() === "virtualbox") {
                 return;
             }
             mac = iface.mac;
