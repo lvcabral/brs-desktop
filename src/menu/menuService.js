@@ -246,6 +246,6 @@ function rebuildMenu(template = false) {
         recentMenu.getMenuItemById("file-clear").enabled = recentFiles.zip.length + recentFiles.brs.length > 0;
     }
     if (window) {
-        window.webContents.send("refreshMenu");   
+        window.webContents.send("refreshMenu");
     }
 }

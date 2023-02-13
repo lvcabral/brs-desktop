@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { app, BrowserWindow, nativeTheme } from "electron";
+import { app, BrowserWindow, nativeTheme, ipcMain } from "electron";
 import { DateTime } from "luxon";
 import path from "path";
 import ElectronPreferences from "electron-preferences";
@@ -53,7 +53,8 @@ export function getSettings(window) {
                 },
                 audio: {
                     maxSimulStreams: global.sharedObject.deviceInfo.maxSimulStreams,
-                    audioVolume: global.sharedObject.deviceInfo.audioVolume
+                    audioVolume: global.sharedObject.deviceInfo.audioVolume,
+                    muted: [false],
                 },
                 localization: {
                     locale: global.sharedObject.deviceInfo.locale,
@@ -321,6 +322,13 @@ export function getSettings(window) {
                                         max: 100,
                                         help: "Volume level of the channel user interface sound effects"
                                     },
+                                    {
+                                        key: "muted",
+                                        type: "checkbox",
+                                        options: [
+                                            { label: "Mute Music and Sound Effects", value: true },
+                                        ],
+                                    },
                                 ]
                             }
                         ]
@@ -430,6 +438,7 @@ export function getSettings(window) {
             if (preferences.audio) {
                 setDeviceInfo("audio", "maxSimulStreams", true);
                 setDeviceInfo("audio", "audioVolume", true);
+                window.webContents.send("setAudioMute", preferences.audio.muted[0]);
             }
             if (preferences.localization) {
                 const localeId = preferences.localization.locale;
@@ -576,6 +585,15 @@ export function setTimeZone(notifyApp) {
         }
     }
 }
+
+export function getAudioMuted() {
+    let muted = settings.value("audio.muted");
+    return muted[0] ? muted[0] : false;
+}
+
+ipcMain.on("setAudioMute", (event, mute) => {
+    settings.value("audio.muted", mute ? mute : []);
+});
 
 export function getModelName(model) {
     return modelLabels.get(model).replace(/ *\([^)]*\) */g, "");

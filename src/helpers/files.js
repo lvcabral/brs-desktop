@@ -6,6 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
+import { getAudioMuted } from "./settings";
 import fs from "fs";
 import path from "path";
 
@@ -28,7 +29,7 @@ export function loadFile(file) {
     const fileExt = path.parse(filePath).ext.toLowerCase();
     if (fileExt === ".zip" || fileExt === ".brs") {
         try {
-            window.webContents.send("fileSelected", filePath, fs.readFileSync(filePath));
+            window.webContents.send("fileSelected", filePath, fs.readFileSync(filePath), true, getAudioMuted());
         } catch (error) {
             window.webContents.send("console",`Error opening ${fileName}:${error.message}`, true);
         }

@@ -8,7 +8,7 @@
 import "./css/main.css";
 import "./css/fontawesome.min.css";
 import "./helpers/hash";
-import { setStatusColor } from "./app/statusbar";
+import { setStatusColor, setAudioStatus } from "./app/statusbar";
 
 // Emulator display
 const display = document.getElementById("display");
@@ -86,9 +86,9 @@ api.receive("setTheme", function (theme) {
         setStatusColor();
     }
 });
-api.receive("fileSelected", function (filePath, data) {
+api.receive("fileSelected", function (filePath, data, clear, mute) {
     try {
-        brsEmu.execute(filePath, data);
+        brsEmu.execute(filePath, data, clear, mute);
     } catch (error) {
         console.error(`Error opening ${filePath}:${error.message}`);
     }
@@ -140,6 +140,11 @@ api.receive("setOverscan", function (mode) {
         brsEmu.redraw(api.isFullScreen());
     }
 });
+api.receive("setAudioMute", function (mute) {
+    brsEmu.setAudioMute(mute);
+    setAudioStatus(mute);
+});
+
 // Window Resize Event
 window.onload = window.onresize = function () {
     brsEmu.redraw(api.isFullScreen());

@@ -93,6 +93,7 @@ contextBridge.exposeInMainWorld("api", {
             "addRecentSource",
             "addRecentPackage",
             "openDevTools",
+            "setAudioMute",
             "saveFile",
             "saveIcon",
             "reset"
@@ -116,6 +117,7 @@ contextBridge.exposeInMainWorld("api", {
             "setOverscan",
             "setLocale",
             "setDeviceInfo",
+            "setAudioMute",
             "toggleStatusBar",
             "serverStatus",
             "copyScreenshot",

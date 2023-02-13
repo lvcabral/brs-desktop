@@ -14,6 +14,8 @@ const statusWarn = document.getElementById("statusWarn");
 const statusIconFile = document.getElementById("statusIconFile");
 const statusFile = document.getElementById("statusFile");
 const statusIconVersion = document.getElementById("statusIconVersion");
+const statusAudio = document.getElementById("statusAudio");
+const statusIconAudio = document.getElementById("statusIconAudio");
 const statusVersion = document.getElementById("statusVersion");
 const statusDisplay = document.getElementById("statusDisplay");
 const statusLocale = document.getElementById("statusLocale");
@@ -44,6 +46,13 @@ statusWeb.onclick = function () {
 statusDevTools.onclick = function () {
     api.send("openDevTools");
 }
+statusAudio.onclick = function () {
+    let muted = !brsEmu.getAudioMute();
+    brsEmu.setAudioMute(muted);
+    api.send("setAudioMute", muted);
+    setAudioStatus(muted);
+}
+
 let displayMode = api.getDeviceInfo().displayMode;
 let ui = displayMode == "720p" ? "HD" : displayMode == "1080p" ? "FHD" : "SD";
 statusDisplay.innerText = `${ui} (${displayMode})`;
@@ -67,12 +76,15 @@ brsEmu.subscribe("statusbar", (event, data) => {
             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
             statusIconVersion.style.display = "";
         }
+        setAudioStatus(brsEmu.getAudioMute());
+        statusAudio.style.display = "";
     } else if (event === "closed") {
         statusIconFile.innerText = "";
         statusFile.innerText = "";
         filePath = "";
         statusVersion.innerText = "";
         statusIconVersion.style.display = "none";
+        statusAudio.style.display = "none";
         statusResolution.style.display = "none";
         statusIconRes.style.display = "none";
         statusSepRes.style.display = "none";
@@ -112,21 +124,34 @@ export function setStatusColor() {
     statusWarn.innerText = warnCount.toString();
     if (errorCount > 0) {
         statusBar.className = "statusbarError";
+        statusAudio.className = "statusIconsError";
         statusWeb.className = "statusIconsError";
         statusECP.className = "statusIconsError";
         statusDevTools.className = "statusIconsError";
     } else if (warnCount > 0) {
         statusBar.className = "statusbarWarn";
+        statusAudio.className = "statusIconsWarn";
         statusWeb.className = "statusIconsWarn";
         statusECP.className = "statusIconsWarn";
         statusDevTools.className = "statusIconsWarn";
     } else {
         statusBar.className = "statusbar";
+        statusAudio.className = "statusIcons";
         statusWeb.className = "statusIcons";
         statusECP.className = "statusIcons";
         statusDevTools.className = "statusIcons";
     }
 }
+
+// Update Audio icon on Status Bar
+export function setAudioStatus(mute) {
+    if (mute) {
+        statusIconAudio.innerHTML = "<i class='fa fa-volume-off'></i>";
+    } else {
+        statusIconAudio.innerHTML = "<i class='fa fa-volume-up'></i>";
+    }
+}
+
 // Update locale id on Status Bar
 export function setLocaleStatus(localeId) {
     statusLocale.innerText = localeId.replace("_", "-");

@@ -10,7 +10,7 @@
         }
         __setTheme();
     </script>
-    <link href="./css/solid.min.css" rel="stylesheet"> 
+    <link href="./css/solid.min.css" rel="stylesheet">
 </head>
 <body>
     <canvas id="display" width="100%" height="100%"></canvas>
@@ -30,7 +30,13 @@
         <span style="float:left"></span>
         <span id="statusIconVersion" style="float:left"></span>
         <span id="statusVersion" style="float:left"></span>
-        
+
+        <a href="#" tabindex="-2" title="Mute on/off"><span id="statusAudio" class="statusIcons" style="float:left; display:none">
+            <span style="float:left"></span>
+            <span id="statusIconAudio" style="float:left"></span>
+            <span style="float:left"></span>
+        </span></a>
+
         <span style="float:right"></span>
         <span id="statusDisplay" style="float:right"></span>
         <span style="float:right"><i class="fa fa-desktop"></i></span>
@@ -48,7 +54,7 @@
             <span id="statusTelnetText" style="float:right"></span>
             <span style="float:right"><i class='fa fa-terminal'></i></span>
         </span>
-        <a href="#" tabindex="-2" title="Show Device Info XML"><span id="statusECP"  class="statusIcons" style="float:right; display:none">
+        <a href="#" tabindex="-2" title="Show Device Info XML"><span id="statusECP" class="statusIcons" style="float:right; display:none">
             <span style="float:right"></span>
             <span id="statusECPText" style="float:right"></span>
             <span style="float:right"><i class='fa fa-server'></i></span>

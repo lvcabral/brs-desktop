@@ -75,7 +75,7 @@ export const deviceMenuTemplate = {
         { type: "separator" },
         {
             id: "locale-menu",
-            label: "Localization",
+            label: "Channel Localization",
             submenu: [
                 {
                     id: "en_US",
