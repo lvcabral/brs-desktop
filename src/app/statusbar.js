@@ -5,7 +5,6 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { subscribeConsole } from "./console";
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
@@ -98,15 +97,14 @@ brsEmu.subscribe("statusbar", (event, data) => {
     } else if (event === "display") {
         let ui = data == "720p" ? "HD" : data == "1080p" ? "FHD" : "SD";
         statusDisplay.innerText = `${ui} (${data})`;
+    } else if (event === "debug") {
+        if (data.level === "error") {
+            errorCount++;
+        } else if (data.level === "warning") {
+            warnCount++;
+        }
+        setStatusColor();
     }
-});
-subscribeConsole("statusbar", (event, data) => {
-    if (event === "error") {
-        errorCount++;
-    } else if (event === "warning") {
-        warnCount++;
-    }
-    setStatusColor();
 });
 // Set status bar colors
 export function setStatusColor() {
@@ -199,9 +197,9 @@ api.receive("toggleStatusBar", function () {
 });
 api.receive("serverStatus", function (server, enable, port) {
     if (enable) {
-        console.log(`${server} server started listening port ${port}`);
+        console.info(`${server} server started listening port ${port}`);
     } else {
-        console.log(`${server} server was disabled.`);
+        console.info(`${server} server was disabled.`);
     }
     setServerStatus(server, enable, port);
 });

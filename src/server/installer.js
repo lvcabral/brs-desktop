@@ -1,3 +1,10 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow } from "electron";
 import Busboy from "busboy";
 import fs from "fs";

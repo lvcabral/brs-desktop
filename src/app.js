@@ -65,6 +65,8 @@ brsEmu.subscribe("app", (event, data) => {
                 windowContainer.style.top = "28px";
             }
         }
+    } else if (event === "debug") {
+        api.send("telnet", data.content);
     } else if (event === "icon") {
         api.send("saveIcon", [currentChannel.id, data]);
     } else if (event === "reset") {
@@ -95,6 +97,16 @@ api.receive("closeChannel", function (source) {
     if (currentChannel.running) {
         brsEmu.terminate(source);
     }
+});
+api.receive("console", function (text, error) {
+    if (error) {
+        console.error(text);
+    } else {
+        console.log(text);
+    }
+});
+api.receive("debugCommand", function (cmd) {
+    brsEmu.debug(cmd);
 });
 api.receive("postKeyDown", function (key) {
     brsEmu.sendKeyDown(key);

@@ -1,3 +1,10 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import * as telnet from "net";
 import { setPreference } from "../helpers/settings";
@@ -20,19 +27,22 @@ export function enableTelnet() {
         clientId++;
         // listen for the actual data from the client
         client.on("data", (data) => {
-            // TODO: Handle debug commands
-            let cmd = data.toString().toLowerCase();
-            if (cmd.toLowerCase() === "close\r\n") {
-                client.destroy();
-            } else if (cmd === "exit\r\n" || cmd === "quit\r\n") {
-                window.webContents.send("closeChannel", "Remote");
-            } else if (cmd === "\x03\r\n" || cmd === "help\r\n") {
-                client.write("BrightScript Emulator Remote Console");
-                client.write("\r\nDebug features are not implemented yet.\r\n");
-                client.write("\r\nCommands available are:\r\nhelp - show this commands list");
-                client.write("\r\nclose - disconnects the console\r\nexit or quit - finish current channel execution\r\n>");
-            } else {
-                client.write(">");
+            if (data !== undefined && data.length > 0) {
+                let expr = data.toString().trim().split(/(?<=^\S+)\s/);
+                let cmd = expr[0].toLowerCase();
+                if (cmd.toLowerCase() === "close") {
+                    client.write("bye!\r\n");
+                    client.destroy();
+                } else if (cmd === "quit") {
+                    window.webContents.send("closeChannel", "EXIT_BRIGHTSCRIPT_STOP");
+                } else if (cmd === "\x03" || cmd === "help") {
+                    client.write("BrightScript Emulator Remote Console");
+                    client.write("\r\nDebug features are partially implemented.\r\n");
+                    client.write("\r\nCommands available are:\r\nhelp - show this commands list");
+                    client.write("\r\nclose - disconnects the console\r\nexit or quit - finish current channel execution\r\n>");
+                } else {
+                    window.webContents.send("debugCommand", expr.join(" "));
+                }
             }
         });
         // Handle exceptions from the client
@@ -45,7 +55,7 @@ export function enableTelnet() {
         });
         client.write(`Connected to ${app.getName()}\r\n`);
         buffer.map((value) => {
-            client.write(`${value.replace(/\r?\n/g, '\r\n')}\r\n`);
+            client.write(value);
         });
         clients.set(id, client);
     });
@@ -53,13 +63,15 @@ export function enableTelnet() {
         isTelnetEnabled = true;
         updateTelnetStatus(isTelnetEnabled);
         ipcMain.on("telnet", (event, text) => {
-            if (buffer.length > BUFFER_SIZE) {
-                buffer.shift();
+            if (text !== undefined) {
+                if (buffer.length > BUFFER_SIZE) {
+                    buffer.shift();
+                }
+                buffer.push(text);
+                clients.forEach((client, id) => {
+                    client.write(text);
+                });
             }
-            buffer.push(text);
-            clients.forEach((client, id) => {
-                client.write(`${text.replace(/\r?\n/g, '\r\n')}\r\n`);
-            });
         });
     });
     server.on("error", (error) => {

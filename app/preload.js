@@ -110,6 +110,7 @@ contextBridge.exposeInMainWorld("api", {
             "postKeyUp",
             "postKeyPress",
             "closeChannel",
+            "debugCommand",
             "setTheme",
             "setDisplay",
             "setOverscan",
