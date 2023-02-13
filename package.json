@@ -80,7 +80,7 @@
         "chai": "^4.1.0",
         "css-loader": "^5.2.6",
         "electron": "^20.0.0",
-        "electron-builder": "^22.11.7",
+        "electron-builder": "^23.6.0",
         "electron-mocha": "^8.2.2",
         "friendly-errors-webpack-plugin": "^1.7.0",
         "mocha": "^6.2.3",
