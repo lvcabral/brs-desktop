@@ -76,7 +76,7 @@ export function getSettings(window) {
                 frame: false,
                 parent: window,
                 modal: !isMacOS,
-                icon: __dirname + "/images/icon48x48.ico",
+                icon: __dirname + "/images/icon.ico",
                 x: x,
                 y: y,
                 width: w,

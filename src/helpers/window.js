@@ -92,7 +92,7 @@ export function createWindow(name, options) {
                 nodeIntegrationInWorker: true,
                 webSecurity: true
             },
-            icon: __dirname + "/images/icon48x48.ico",
+            icon: __dirname + "/images/icon.ico",
             frame: false,
             show: false
         })

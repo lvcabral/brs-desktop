@@ -54,7 +54,7 @@ export const helpMenuTemplate = {
                 const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
                 const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
                 const about = openAboutWindow({
-                    icon_path: path.join(__dirname, "images/icon512x512.png"),
+                    icon_path: path.join(__dirname, "images/icon.png"),
                     copyright: "Copyright © 2019-2023 Marcelo Lv Cabral",
                     win_options: {
                         parent: window,

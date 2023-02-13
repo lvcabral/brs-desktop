@@ -64,7 +64,7 @@ contextBridge.exposeInMainWorld("api", {
         titleBarConfig = {
             backgroundColor: customTitlebar.Color.fromHex(bgColor),
             itemBackgroundColor: customTitlebar.Color.fromHex(itColor),
-            icon: "./images/icon512x512.png",
+            icon: "./images/icon.png",
             containerOverflow: "hidden",
             enableMnemonics: true,
             shadow: true
