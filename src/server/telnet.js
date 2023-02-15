@@ -54,7 +54,7 @@ export function enableTelnet() {
             clients.delete(id);
         });
         client.write(`Connected to ${app.getName()}\r\n`);
-        buffer.map((value) => {
+        buffer.forEach((value) => {
             client.write(value);
         });
         clients.set(id, client);
