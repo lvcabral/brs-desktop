@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -9,7 +9,7 @@ import { isECPEnabled, enableECP, disableECP } from "../server/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../server/telnet";
 import { isInstallerEnabled, enableInstaller, disableInstaller } from "../server/installer";
 import { setLocaleId, setDisplayOption } from "../helpers/settings";
-import { reloadApp, setAspectRatio } from "../helpers/window";
+import { reloadApp } from "../helpers/window";
 
 export const deviceMenuTemplate = {
     label: "&Device",
@@ -21,8 +21,7 @@ export const deviceMenuTemplate = {
             checked: false,
             click: (item, window) => {
                 setDisplayOption("displayMode", item.id, true);
-                setAspectRatio(item.id);
-            }
+            },
         },
         {
             id: "720p",
@@ -31,8 +30,7 @@ export const deviceMenuTemplate = {
             checked: true,
             click: (item, window) => {
                 setDisplayOption("displayMode", item.id, true);
-                setAspectRatio(item.id);
-            }
+            },
         },
         {
             id: "1080p",
@@ -41,8 +39,7 @@ export const deviceMenuTemplate = {
             checked: false,
             click: (item, window) => {
                 setDisplayOption("displayMode", item.id, true);
-                setAspectRatio(item.id);
-            }
+            },
         },
         { type: "separator" },
         {
@@ -52,7 +49,7 @@ export const deviceMenuTemplate = {
             checked: true,
             click: (item, window) => {
                 setDisplayOption("overscanMode", item.id, true);
-            }
+            },
         },
         {
             id: "guidelines",
@@ -61,7 +58,7 @@ export const deviceMenuTemplate = {
             checked: false,
             click: (item, window) => {
                 setDisplayOption("overscanMode", item.id, true);
-            }
+            },
         },
         {
             id: "overscan",
@@ -70,7 +67,7 @@ export const deviceMenuTemplate = {
             checked: false,
             click: (item, window) => {
                 setDisplayOption("overscanMode", item.id, true);
-            }
+            },
         },
         { type: "separator" },
         {
@@ -84,7 +81,7 @@ export const deviceMenuTemplate = {
                     checked: true,
                     click: (item, window) => {
                         setLocaleId(item.id);
-                    }
+                    },
                 },
                 {
                     id: "en_GB",
@@ -93,7 +90,7 @@ export const deviceMenuTemplate = {
                     checked: false,
                     click: (item, window) => {
                         setLocaleId(item.id);
-                    }
+                    },
                 },
                 {
                     id: "fr_CA",
@@ -102,7 +99,7 @@ export const deviceMenuTemplate = {
                     checked: false,
                     click: (item, window) => {
                         setLocaleId(item.id);
-                    }
+                    },
                 },
                 {
                     id: "es_ES",
@@ -111,7 +108,7 @@ export const deviceMenuTemplate = {
                     checked: false,
                     click: (item, window) => {
                         setLocaleId(item.id);
-                    }
+                    },
                 },
                 {
                     id: "es_MX",
@@ -120,7 +117,7 @@ export const deviceMenuTemplate = {
                     checked: false,
                     click: (item, window) => {
                         setLocaleId(item.id);
-                    }
+                    },
                 },
                 {
                     id: "de_DE",
@@ -129,7 +126,7 @@ export const deviceMenuTemplate = {
                     checked: false,
                     click: (item, window) => {
                         setLocaleId(item.id);
-                    }
+                    },
                 },
                 {
                     id: "it_IT",
@@ -138,7 +135,7 @@ export const deviceMenuTemplate = {
                     checked: false,
                     click: (item, window) => {
                         setLocaleId(item.id);
-                    }
+                    },
                 },
                 {
                     id: "pt_BR",
@@ -147,9 +144,9 @@ export const deviceMenuTemplate = {
                     checked: false,
                     click: (item, window) => {
                         setLocaleId(item.id);
-                    }
+                    },
                 },
-            ]
+            ],
         },
         { type: "separator" },
         {
@@ -163,7 +160,7 @@ export const deviceMenuTemplate = {
                 } else {
                     enableInstaller();
                 }
-            }
+            },
         },
         {
             id: "ecp-api",
@@ -176,7 +173,7 @@ export const deviceMenuTemplate = {
                 } else {
                     enableECP();
                 }
-            }
+            },
         },
         {
             id: "telnet",
@@ -189,7 +186,7 @@ export const deviceMenuTemplate = {
                 } else {
                     enableTelnet();
                 }
-            }
+            },
         },
         { type: "separator" },
         {
@@ -197,7 +194,7 @@ export const deviceMenuTemplate = {
             accelerator: "CmdOrCtrl+Shift+R",
             click: (item, window) => {
                 reloadApp();
-            }
-        }
-    ]
+            },
+        },
+    ],
 };

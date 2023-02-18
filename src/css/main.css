@@ -146,8 +146,17 @@ a {
 #display {
     position: absolute;
     top: 0;
-    bottom: 20px;
     left: 0;
     right: 0;
-    margin: auto;
+    margin: 0;
+}
+
+#stats{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+	z-index:60;
+	opacity: 0.5;
+	visibility: hidden;
 }

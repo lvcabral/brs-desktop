@@ -8,10 +8,14 @@
 import "./css/main.css";
 import "./css/fontawesome.min.css";
 import "./helpers/hash";
-import { setStatusColor, setAudioStatus } from "./app/statusbar";
+import { statusBar, setStatusColor, setAudioStatus } from "./app/statusbar";
 
 // Emulator display
 const display = document.getElementById("display");
+
+// Stats overlay
+const stats = document.getElementById("stats");
+
 // App menu and theme configuration
 const defaultTitle = document.title;
 const colorValues = getComputedStyle(document.documentElement);
@@ -22,13 +26,16 @@ let backColor = colorValues.getPropertyValue("--background-color").trim();
 api.setBackgroundColor(backColor);
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
 // Initialize Device Emulator and subscribe to events
-let currentChannel = { id: "", running: false }
+let currentChannel = { id: "", running: false };
 const customKeys = new Map();
 customKeys.set("Comma", "rev"); // Keep consistency with older versions
 customKeys.set("Period", "fwd"); // Keep consistency with older versions
 customKeys.set("Space", "play"); // Keep consistency with older versions
 
-brsEmu.initialize(api.getDeviceInfo(), { debugToConsole: true, customKeys: customKeys });
+brsEmu.initialize(api.getDeviceInfo(), {
+    debugToConsole: true,
+    customKeys: customKeys,
+});
 brsEmu.subscribe("app", (event, data) => {
     if (event === "loaded") {
         currentChannel = data;
@@ -47,8 +54,10 @@ brsEmu.subscribe("app", (event, data) => {
         api.enableMenuItem("copy-screen", true);
     } else if (event === "started") {
         currentChannel = data;
+        stats.style.visibility = "visible";
     } else if (event === "closed" || event === "error") {
         currentChannel = { id: "", running: false };
+        stats.style.visibility = "hidden";
         api.updateTitle(defaultTitle);
         api.enableMenuItem("close-channel", false);
         api.enableMenuItem("save-screen", false);
@@ -126,18 +135,20 @@ api.receive("copyScreenshot", function () {
 api.receive("saveScreenshot", function (file) {
     const img = display.toDataURL("image/png");
     const data = img.replace(/^data:image\/\w+;base64,/, "");
-    api.send("saveFile", [file, data])
+    api.send("saveFile", [file, data]);
 });
 api.receive("setDisplay", function (mode) {
     if (mode !== brsEmu.getDisplayMode()) {
         brsEmu.setDisplayMode(mode);
-        brsEmu.redraw(api.isFullScreen());
+        const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
+        brsEmu.redraw(api.isFullScreen(), 0, offset + 25);
     }
 });
 api.receive("setOverscan", function (mode) {
     if (mode !== brsEmu.getOverscanMode()) {
         brsEmu.setOverscanMode(mode);
-        brsEmu.redraw(api.isFullScreen());
+        const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
+        brsEmu.redraw(api.isFullScreen(), 0, offset + 25);
     }
 });
 api.receive("setAudioMute", function (mute) {
@@ -147,9 +158,10 @@ api.receive("setAudioMute", function (mute) {
 
 // Window Resize Event
 window.onload = window.onresize = function () {
-    brsEmu.redraw(api.isFullScreen());
-}
+    const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
+    brsEmu.redraw(api.isFullScreen(), 0, offset + 25);
+};
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {
     api.toggleFullScreen();
-}
+};

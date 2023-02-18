@@ -14,11 +14,17 @@ import jetpack from "fs-jetpack";
 import { app, screen } from "electron";
 import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./server/installer";
-import { initECP, enableECP, updateECPStatus } from "./server/ecp"
+import { initECP, enableECP, updateECPStatus } from "./server/ecp";
 import { enableTelnet, updateTelnetStatus } from "./server/telnet";
-import { createMenu, enableMenuItem, isMenuItemEnabled, loadPackage } from "./menu/menuService"
+import { createMenu, enableMenuItem, isMenuItemEnabled, loadPackage } from "./menu/menuService";
 import { loadFile } from "./helpers/files";
-import { getSettings, setDeviceInfo, setDisplayOption, setThemeSource, setTimeZone } from "./helpers/settings";
+import {
+    getSettings,
+    setDeviceInfo,
+    setDisplayOption,
+    setThemeSource,
+    setTimeZone,
+} from "./helpers/settings";
 import { createWindow, setAspectRatio } from "./helpers/window";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 
@@ -46,19 +52,19 @@ const deviceInfo = {
     localIps: getLocalIps(),
     startTime: Date.now(),
     maxSimulStreams: 2,
-    audioVolume: 40
-}
+    audioVolume: 40,
+};
 
 // Enable SharedArrayBuffer
 // app.commandLine.appendSwitch('enable-features','SharedArrayBuffer');
 
-require('@electron/remote/main').initialize();
+require("@electron/remote/main").initialize();
 
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
     string: ["o", "p", "m"],
     boolean: ["d", "e", "f", "r"],
-    alias: { d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" }
+    alias: { d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" },
 });
 
 // Save userData in separate folders for each environment.
@@ -75,22 +81,22 @@ app.on("ready", () => {
     global.sharedObject = {
         theme: "purple",
         backgroundColor: "#251135",
-        deviceInfo: deviceInfo
+        deviceInfo: deviceInfo,
     };
     // Create Main Window
-    let mainWindow = createWindow(
-        "main",
-        {
-            width: 1280,
-            height: 770,
-            backgroundColor: global.sharedObject.backgroundColor
-        }
-    );
+    let mainWindow = createWindow("main", {
+        width: 1280,
+        height: 770,
+        backgroundColor: global.sharedObject.backgroundColor,
+    });
     // Configure Window and load content
     let firstLoad = true;
     let winBounds = mainWindow.getBounds();
     let display = screen.getDisplayNearestPoint({ x: winBounds.x, y: winBounds.y });
-    mainWindow.setMinimumSize(Math.min(346, display.size.width), Math.min(264, display.size.height));
+    mainWindow.setMinimumSize(
+        Math.min(346, display.size.width),
+        Math.min(264, display.size.height)
+    );
     // Load Emulator Settings
     let settings = getSettings(mainWindow);
     let startup = {
@@ -99,7 +105,7 @@ app.on("ready", () => {
         ecpEnabled: false,
         telnetEnabled: false,
         installerEnabled: false,
-    }
+    };
     if (settings.preferences.emulator) {
         if (settings.value("emulator.options")) {
             const options = settings.value("emulator.options");
@@ -107,7 +113,8 @@ app.on("ready", () => {
             app.applicationMenu.getMenuItemById("on-top").checked = onTop;
             mainWindow.setAlwaysOnTop(onTop);
             mainWindow.setFullScreen(argv.fullscreen || options.includes("fullScreen"));
-            app.applicationMenu.getMenuItemById("status-bar").checked = options.includes("statusBar");
+            app.applicationMenu.getMenuItemById("status-bar").checked =
+                options.includes("statusBar");
             startup.runLastChannel = options.includes("runLastChannel");
             startup.devTools = options.includes("devTools");
         }
@@ -129,7 +136,7 @@ app.on("ready", () => {
     }
     if (settings.preferences.display) {
         setDisplayOption("displayMode");
-        setAspectRatio(settings.value("display.displayMode"));
+        setAspectRatio(settings.value("display.displayMode"), false);
         const overscanMode = settings.value("display.overscanMode");
         app.applicationMenu.getMenuItemById(overscanMode).checked = true;
     }
@@ -150,79 +157,81 @@ app.on("ready", () => {
     // Initialize ECP and SSDP servers
     initECP(deviceInfo);
     // Load Renderer
-    mainWindow.loadURL(
-        url.format({
-            pathname: path.join(__dirname, "index.html"),
-            protocol: "file:",
-            slashes: true
-        })
-    ).then(() => {
-        // CLI Switches
-        if (argv.ecp || startup.ecpEnabled) {
-            enableECP(mainWindow);
-        }
-        if (argv.telnet || startup.telnetEnabled) {
-            enableTelnet(mainWindow);
-        }
-        if (argv.pwd && argv.pwd.trim() !== "") {
-            setPassword(argv.pwd.trim());
-            settings.value("services.password", argv.pwd.trim());
-        }
-        if (argv.web) {
-            setPort(argv.web);
-            settings.value("services.webPort", parseInt(argv.web));
-            enableInstaller(mainWindow);
-        } else if (startup.installerEnabled) {
-            enableInstaller(mainWindow);
-        }
-        if (argv.mode && argv.mode.trim() !== "") {
-            let displayMode = "720p";
-            switch (argv.mode.trim().toLowerCase()) {
-                case "sd":
-                    displayMode = "480p";
-                    break;
-                case "fhd":
-                    displayMode = "1080p";
-                    break;
-                default:
-                    break;
+    mainWindow
+        .loadURL(
+            url.format({
+                pathname: path.join(__dirname, "index.html"),
+                protocol: "file:",
+                slashes: true,
+            })
+        )
+        .then(() => {
+            // CLI Switches
+            if (argv.ecp || startup.ecpEnabled) {
+                enableECP(mainWindow);
             }
-            setDisplayOption("displayMode", displayMode, true);
-        }
-        if (startup.devTools || argv.devtools) {
-            mainWindow.openDevTools();
-        }
-        let openFile;
-        if (argv && argv.o) {
-            openFile = argv.o.trim();
-        } else {
-            try {
-                let index = argv._.length - 1;
-                if (index && argv._[index]) {
-                    if (jetpack.exists(argv._[index])) {
-                        openFile = argv._[index];
-                    }
+            if (argv.telnet || startup.telnetEnabled) {
+                enableTelnet(mainWindow);
+            }
+            if (argv.pwd && argv.pwd.trim() !== "") {
+                setPassword(argv.pwd.trim());
+                settings.value("services.password", argv.pwd.trim());
+            }
+            if (argv.web) {
+                setPort(argv.web);
+                settings.value("services.webPort", parseInt(argv.web));
+                enableInstaller(mainWindow);
+            } else if (startup.installerEnabled) {
+                enableInstaller(mainWindow);
+            }
+            if (argv.mode && argv.mode.trim() !== "") {
+                let displayMode = "720p";
+                switch (argv.mode.trim().toLowerCase()) {
+                    case "sd":
+                        displayMode = "480p";
+                        break;
+                    case "fhd":
+                        displayMode = "1080p";
+                        break;
+                    default:
+                        break;
                 }
-            } catch (error) {
-                console.error("Invalid parameters!", error);
+                setDisplayOption("displayMode", displayMode, true);
             }
-        }
-        if (openFile) {
-            const fileExt = path.parse(openFile).ext.toLowerCase();
-            if (fileExt === ".zip" || fileExt === ".brs") {
-                loadFile([openFile]);
+            if (startup.devTools || argv.devtools) {
+                mainWindow.openDevTools();
+            }
+            let openFile;
+            if (argv && argv.o) {
+                openFile = argv.o.trim();
             } else {
-                console.log("File format not supported: ", fileExt);
+                try {
+                    let index = argv._.length - 1;
+                    if (index && argv._[index]) {
+                        if (jetpack.exists(argv._[index])) {
+                            openFile = argv._[index];
+                        }
+                    }
+                } catch (error) {
+                    console.error("Invalid parameters!", error);
+                }
             }
-        } else if (startup.runLastChannel) {
-            loadPackage(0);
-        }
-        firstLoad = false;
-        attachTitlebarToWindow(mainWindow);
-        mainWindow.show();
-        mainWindow.focus();
-    });
-    mainWindow.webContents.on('dom-ready', () => {
+            if (openFile) {
+                const fileExt = path.parse(openFile).ext.toLowerCase();
+                if (fileExt === ".zip" || fileExt === ".brs") {
+                    loadFile([openFile]);
+                } else {
+                    console.log("File format not supported: ", fileExt);
+                }
+            } else if (startup.runLastChannel) {
+                loadPackage(0);
+            }
+            firstLoad = false;
+            attachTitlebarToWindow(mainWindow);
+            mainWindow.show();
+            mainWindow.focus();
+        });
+    mainWindow.webContents.on("dom-ready", () => {
         if (!firstLoad) {
             updateECPStatus(settings.value("services.ecp").includes("enabled"));
             updateTelnetStatus(settings.value("services.telnet").includes("enabled"));
@@ -276,7 +285,7 @@ function getLocalIps() {
     Object.keys(ifaces).forEach(function (ifname) {
         let alias = 0;
         ifaces[ifname].forEach(function (iface) {
-            if ('IPv4' !== iface.family || iface.internal !== false) {
+            if ("IPv4" !== iface.family || iface.internal !== false) {
                 // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
                 return;
             }

@@ -12,7 +12,13 @@ import ElectronPreferences from "electron-preferences";
 import { setAspectRatio } from "./window";
 import { enableECP, disableECP } from "../server/ecp";
 import { enableTelnet, disableTelnet } from "../server/telnet";
-import { enableInstaller, disableInstaller, setPort, isInstallerEnabled, setPassword } from "../server/installer";
+import {
+    enableInstaller,
+    disableInstaller,
+    setPort,
+    isInstallerEnabled,
+    setPassword,
+} from "../server/installer";
 
 const isMacOS = process.platform === "darwin";
 const timeZoneLabels = new Map();
@@ -31,7 +37,7 @@ export function getSettings(window) {
             defaults: {
                 emulator: {
                     options: ["statusBar"],
-                    theme: "purple"
+                    theme: "purple",
                 },
                 services: {
                     installer: ["enabled"],
@@ -49,7 +55,7 @@ export function getSettings(window) {
                 },
                 display: {
                     displayMode: "720p",
-                    overscanMode: "disabled"
+                    overscanMode: "disabled",
                 },
                 audio: {
                     maxSimulStreams: global.sharedObject.deviceInfo.maxSimulStreams,
@@ -60,18 +66,18 @@ export function getSettings(window) {
                     locale: global.sharedObject.deviceInfo.locale,
                     countryCode: global.sharedObject.deviceInfo.countryCode,
                     clockFormat: global.sharedObject.deviceInfo.clockFormat,
-                    timeZone: "system"
+                    timeZone: "system",
                 },
             },
             webPreferences: {
-                devTools: true
+                devTools: true,
             },
             browserWindowOverrides: {
                 title: "Settings",
-                titleBarStyle: 'hidden',
+                titleBarStyle: "hidden",
                 titleBarOverlay: {
-                    color: '#3d1b56',
-                    symbolColor: '#dac7ea',
+                    color: "#3d1b56",
+                    symbolColor: "#dac7ea",
                     height: 28,
                 },
                 frame: false,
@@ -101,30 +107,51 @@ export function getSettings(window) {
                                         key: "options",
                                         type: "checkbox",
                                         options: [
-                                            { label: "Enter Fullscreen Mode on Startup", value: "fullScreen" },
-                                            { label: "Run last channel on Startup", value: "runLastChannel" },
-                                            { label: "Open Developer Tools on Startup", value: "devTools" },
-                                            { label: "Enable Always on Top Mode", value: "alwaysOnTop" },
-                                            { label: "Show Status Bar", value: "statusBar" },
+                                            {
+                                                label: "Enter Fullscreen Mode on Startup",
+                                                value: "fullScreen",
+                                            },
+                                            {
+                                                label: "Run last channel on Startup",
+                                                value: "runLastChannel",
+                                            },
+                                            {
+                                                label: "Open Developer Tools on Startup",
+                                                value: "devTools",
+                                            },
+                                            {
+                                                label: "Enable Always on Top Mode",
+                                                value: "alwaysOnTop",
+                                            },
+                                            {
+                                                label: "Show Status Bar",
+                                                value: "statusBar",
+                                            },
                                         ],
-                                        help: "Select one or more configuration options."
+                                        help: "Select one or more configuration options.",
                                     },
                                     {
                                         label: "App UI Theme",
                                         key: "theme",
                                         type: "radio",
                                         options: [
-                                            { label: "Purple (default)", value: "purple" },
+                                            {
+                                                label: "Purple (default)",
+                                                value: "purple",
+                                            },
                                             { label: "Light", value: "light" },
                                             { label: "Dark", value: "dark" },
-                                            { label: "System", value: "system" },
+                                            {
+                                                label: "System",
+                                                value: "system",
+                                            },
                                         ],
-                                        help: "Select the application theme, 'System' will follow your OS configuration"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
+                                        help: "Select the application theme, 'System' will follow your OS configuration",
+                                    },
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
                     id: "services",
@@ -140,44 +167,53 @@ export function getSettings(window) {
                                         key: "installer",
                                         type: "checkbox",
                                         options: [
-                                            { label: "Service Enabled", value: "enabled" },
+                                            {
+                                                label: "Service Enabled",
+                                                value: "enabled",
+                                            },
                                         ],
-                                        help: "This service allows to remotely side load a channel, to change port and password restart the service "
+                                        help: "This service allows to remotely side load a channel, to change port and password restart the service ",
                                     },
                                     {
                                         label: "Port (default: 80)",
                                         key: "webPort",
                                         type: "text",
-                                        inputType: "number"
+                                        inputType: "number",
                                     },
                                     {
                                         label: "Password (default: rokudev)",
                                         key: "password",
                                         type: "text",
-                                        inputType: "password"
+                                        inputType: "password",
                                     },
                                     {
                                         label: "External Control Protocol (ECP)",
                                         key: "ecp",
                                         type: "checkbox",
                                         options: [
-                                            { label: "Service Enabled", value: "enabled" },
+                                            {
+                                                label: "Service Enabled",
+                                                value: "enabled",
+                                            },
                                         ],
-                                        help: "ECP service allows the emulator to be controlled over the network"
+                                        help: "ECP service allows the emulator to be controlled over the network",
                                     },
                                     {
                                         label: "BrightScript Remote Console (Telnet)",
                                         key: "telnet",
                                         type: "checkbox",
                                         options: [
-                                            { label: "Service Enabled", value: "enabled" },
+                                            {
+                                                label: "Service Enabled",
+                                                value: "enabled",
+                                            },
                                         ],
-                                        help: "Remote Console can be accessed using an application such as PuTTY or terminal on Mac and Linux"
+                                        help: "Remote Console can be accessed using an application such as PuTTY or terminal on Mac and Linux",
                                     },
-                                ]
-                            }
-                        ]
-                    }
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
                     id: "device",
@@ -193,36 +229,36 @@ export function getSettings(window) {
                                         key: "deviceModel",
                                         type: "dropdown",
                                         options: getRokuModelArray(),
-                                        help: "Device model returned by ifDeviceInfo.GetModel(). This setting doesn't affect any behavior of the emulator"
+                                        help: "Device model returned by ifDeviceInfo.GetModel(). This setting doesn't affect any behavior of the emulator",
                                     },
                                     {
                                         label: "Serial Number",
                                         key: "serialNumber",
                                         type: "text",
-                                        help: "Device serial number, must be 12 characters long, only letters and numbers"
+                                        help: "Device serial number, must be 12 characters long, only letters and numbers",
                                     },
                                     {
                                         label: "Channel Client Id",
                                         key: "clientId",
                                         type: "text",
-                                        help: "Unique device identifier returned by ifDeviceInfo.GetChannelClientId()"
+                                        help: "Unique device identifier returned by ifDeviceInfo.GetChannelClientId()",
                                     },
                                     {
                                         label: "RIDA",
                                         key: "RIDA",
                                         type: "text",
-                                        help: "Unique identifier for advertisement tracking returned by ifDevideInfo.GetRIDA()"
+                                        help: "Unique identifier for advertisement tracking returned by ifDevideInfo.GetRIDA()",
                                     },
                                     {
                                         label: "Developer Id",
                                         key: "developerId",
                                         type: "text",
-                                        help: "Unique id to segregate registry among channels, the registry only changes after a reset or app restart"
+                                        help: "Unique id to segregate registry among channels, the registry only changes after a reset or app restart",
                                     },
-                                ]
-                            }
-                        ]
-                    }
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
                     id: "remote",
@@ -237,30 +273,30 @@ export function getSettings(window) {
                                         label: "Serial Number",
                                         key: "key1",
                                         type: "text",
-                                        help: "Device serial number, must be 12 characters long, only letters and numbers"
+                                        help: "Device serial number, must be 12 characters long, only letters and numbers",
                                     },
                                     {
                                         label: "Channel Client Id",
                                         key: "key2",
                                         type: "text",
-                                        help: "Unique device identifier returned by ifDeviceInfo.GetChannelClientId()"
+                                        help: "Unique device identifier returned by ifDeviceInfo.GetChannelClientId()",
                                     },
                                     {
                                         label: "RIDA",
                                         key: "key3",
                                         type: "text",
-                                        help: "Unique identifier for advertisement tracking returned by ifDevideInfo.GetRIDA()"
+                                        help: "Unique identifier for advertisement tracking returned by ifDevideInfo.GetRIDA()",
                                     },
                                     {
                                         label: "Developer Id",
                                         key: "key4",
                                         type: "text",
-                                        help: "Unique id to segregate registry among channels, the registry only changes after a reset or app restart"
+                                        help: "Unique id to segregate registry among channels, the registry only changes after a reset or app restart",
                                     },
-                                ]
-                            }
-                        ]
-                    }
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
                     id: "display",
@@ -275,27 +311,45 @@ export function getSettings(window) {
                                         key: "displayMode",
                                         type: "radio",
                                         options: [
-                                            { label: "SD 480p (4:3)", value: "480p" },
-                                            { label: "HD 720p (16:9)", value: "720p" },
-                                            { label: "FHD 1080p (16:9)", value: "1080p" },
+                                            {
+                                                label: "SD 480p (4:3)",
+                                                value: "480p",
+                                            },
+                                            {
+                                                label: "HD 720p (16:9)",
+                                                value: "720p",
+                                            },
+                                            {
+                                                label: "FHD 1080p (16:9)",
+                                                value: "1080p",
+                                            },
                                         ],
-                                        help: "Device display mode. Changing this setting will close any running channel"
+                                        help: "Device display mode. Changing this setting will close any running channel",
                                     },
                                     {
                                         label: "TV Overscan",
                                         key: "overscanMode",
                                         type: "radio",
                                         options: [
-                                            { label: "Overscan Disabled", value: "disabled" },
-                                            { label: "Show Overscan Guide Lines", value: "guidelines" },
-                                            { label: "Enable Overscan Effect", value: "overscan" },
+                                            {
+                                                label: "Overscan Disabled",
+                                                value: "disabled",
+                                            },
+                                            {
+                                                label: "Show Overscan Guide Lines",
+                                                value: "guidelines",
+                                            },
+                                            {
+                                                label: "Enable Overscan Effect",
+                                                value: "overscan",
+                                            },
                                         ],
-                                        help: "Enable overscan to verify potential cuts of the UI on the TV borders"
+                                        help: "Enable overscan to verify potential cuts of the UI on the TV borders",
                                     },
-                                ]
-                            }
-                        ]
-                    }
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
                     id: "audio",
@@ -312,7 +366,7 @@ export function getSettings(window) {
                                         type: "slider",
                                         min: 1,
                                         max: 3,
-                                        help: "Maximum number of audio streams that can be mixed together and played simultaneously"
+                                        help: "Maximum number of audio streams that can be mixed together and played simultaneously",
                                     },
                                     {
                                         label: "Sound Effects Volume",
@@ -320,19 +374,22 @@ export function getSettings(window) {
                                         type: "slider",
                                         min: 0,
                                         max: 100,
-                                        help: "Volume level of the channel user interface sound effects"
+                                        help: "Volume level of the channel user interface sound effects",
                                     },
                                     {
                                         key: "muted",
                                         type: "checkbox",
                                         options: [
-                                            { label: "Mute Music and Sound Effects", value: true },
+                                            {
+                                                label: "Mute Music and Sound Effects",
+                                                value: true,
+                                            },
                                         ],
                                     },
-                                ]
-                            }
-                        ]
-                    }
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
                     id: "localization",
@@ -347,15 +404,21 @@ export function getSettings(window) {
                                         key: "locale",
                                         type: "radio",
                                         options: getLocaleIdArray(),
-                                        help: "Configure the localization, this setting only affects channels not the emulator UI"
+                                        help: "Configure the localization, this setting only affects channels not the emulator UI",
                                     },
                                     {
                                         label: "Clock Format",
                                         key: "clockFormat",
                                         type: "radio",
                                         options: [
-                                            { value: "12h", label: "12-hour AM/PM format" },
-                                            { value: "24h", label: "24-hour format" },
+                                            {
+                                                value: "12h",
+                                                label: "12-hour AM/PM format",
+                                            },
+                                            {
+                                                value: "24h",
+                                                label: "24-hour format",
+                                            },
                                         ],
                                     },
                                     {
@@ -363,7 +426,7 @@ export function getSettings(window) {
                                         key: "countryCode",
                                         type: "dropdown",
                                         options: getCountryArray(),
-                                        help: "Configure the country store associated with the device returned by ifDeviceInfo.GetCountryCode()"
+                                        help: "Configure the country store associated with the device returned by ifDeviceInfo.GetCountryCode()",
                                     },
                                     {
                                         label: "Time Zone",
@@ -371,12 +434,12 @@ export function getSettings(window) {
                                         type: "dropdown",
                                         options: getTimezonArray(),
                                     },
-                                ]
-                            }
-                        ]
-                    }
+                                ],
+                            },
+                        ],
+                    },
                 },
-            ]
+            ],
         });
         settings.on("save", (preferences) => {
             const appMenu = app.applicationMenu;
@@ -388,7 +451,7 @@ export function getSettings(window) {
                 window.setAlwaysOnTop(onTop);
                 if (appMenu.getMenuItemById("status-bar").checked != statusBar) {
                     appMenu.getMenuItemById("status-bar").checked = statusBar;
-                    window.webContents.send("toggleStatusBar");
+                    setStatusBar(statusBar);
                 }
                 setThemeSource(undefined, true);
             }
@@ -426,7 +489,9 @@ export function getSettings(window) {
                 const newValue = settings.value("display.displayMode");
                 if (newValue && newValue !== oldValue) {
                     setDisplayOption("displayMode", undefined, true);
-                    setAspectRatio(newValue);
+                    if (newValue === "480p" || oldValue === "480p") {
+                        setAspectRatio(newValue);
+                    }
                 }
                 const overscanMode = settings.value("display.overscanMode");
                 const menuItem = app.applicationMenu.getMenuItemById(overscanMode);
@@ -495,11 +560,31 @@ export function setDeviceInfo(section, key, notifyApp) {
     }
 }
 
+export function setStatusBar(enabled) {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        const displayMode = app.applicationMenu.getMenuItemById("480p").checked ? "480p" : "";
+        setAspectRatio(displayMode, false);
+        if (isMacOS) {
+            if (enabled) {
+                window.setBounds({ height: window.getBounds().height + 20 });
+            } else {
+                window.setBounds({ height: window.getBounds().height - 20 });
+            }
+        }
+        window.webContents.send("toggleStatusBar");
+    }
+}
+
 export function setDisplayOption(option, mode, notifyApp) {
+    const current = settings.value(`display.${option}`);
     if (mode) {
+        if ((mode !== current) & (mode === "480p" || current === "480p")) {
+            setAspectRatio(mode);
+        }
         settings.value(`display.${option}`, mode);
     } else {
-        mode = settings.value(`display.${option}`);
+        mode = current;
     }
     if (option in global.sharedObject.deviceInfo) {
         global.sharedObject.deviceInfo[option] = mode;
@@ -544,7 +629,7 @@ export function setEmulatorOption(key, enable, menuId) {
         if (enable && !options.includes(key)) {
             options.push(key);
         } else if (!enable && options.includes(key)) {
-            options = options.filter(item => item !== key);
+            options = options.filter((item) => item !== key);
         }
         settings.value("emulator.options", options);
         if (menuId) {
@@ -701,7 +786,7 @@ function getCountryArray() {
         { label: "Peru (PE)", value: "PE" },
         { label: "United Kingdom (GB)", value: "GB" },
         { label: "Rest of the World (OT)", value: "OT" },
-    ]
+    ];
 }
 
 function getTimezonArray() {
@@ -857,7 +942,7 @@ function getTimezonArray() {
         { label: "Other/UTC+12" },
         { label: "Other/UTC+13" },
         { label: "Other/UTC+14" },
-    ]
+    ];
     tzArray.forEach(function (item) {
         timeZoneLabels.set(item.value || item.label, item.label);
     });

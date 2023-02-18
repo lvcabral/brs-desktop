@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 // Status Bar Objects
-const statusBar = document.getElementById("status");
+export const statusBar = document.getElementById("status");
 const statusDevTools = document.getElementById("statusDevTools");
 const statusError = document.getElementById("statusError");
 const statusWarn = document.getElementById("statusWarn");
@@ -38,20 +38,20 @@ let warnCount = 0;
 let ECPPort = 8060;
 statusECP.onclick = function () {
     api.openExternal(`http://localhost:${ECPPort}/query/device-info`);
-}
+};
 let installerPort = 80;
 statusWeb.onclick = function () {
     api.openExternal(`http://localhost:${installerPort}/`);
-}
+};
 statusDevTools.onclick = function () {
     api.send("openDevTools");
-}
+};
 statusAudio.onclick = function () {
     let muted = !brsEmu.getAudioMute();
     brsEmu.setAudioMute(muted);
     api.send("setAudioMute", muted);
     setAudioStatus(muted);
-}
+};
 
 let displayMode = api.getDeviceInfo().displayMode;
 let ui = displayMode == "720p" ? "HD" : displayMode == "1080p" ? "FHD" : "SD";
@@ -67,9 +67,12 @@ brsEmu.subscribe("statusbar", (event, data) => {
     if (event === "loaded") {
         clearCounters();
         setStatusColor();
-        statusIconFile.innerHTML = data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
-        statusFile.innerText = shortenPath(data.file,
-            Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR));
+        statusIconFile.innerHTML =
+            data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
+        statusFile.innerText = shortenPath(
+            data.file,
+            Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+        );
         filePath = data.file;
         if (data.version !== "") {
             statusVersion.innerText = data.version;
@@ -90,14 +93,16 @@ brsEmu.subscribe("statusbar", (event, data) => {
         statusSepRes.style.display = "none";
     } else if (event === "redraw") {
         if (!data && api.isStatusEnabled()) {
-            display.style.bottom = "20px";
+            // display.style.bottom = "20px";
             statusBar.style.visibility = "visible";
             if (filePath !== "") {
-                statusFile.innerText = shortenPath(filePath,
-                    Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR));
+                statusFile.innerText = shortenPath(
+                    filePath,
+                    Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+                );
             }
         } else {
-            display.style.bottom = "0px";
+            // display.style.bottom = "0px";
             statusBar.style.visibility = "hidden";
         }
     } else if (event === "resolution") {
@@ -191,10 +196,10 @@ export function clearCounters() {
 // Function that shortens a path (based on code by https://stackoverflow.com/users/2149492/johnpan)
 function shortenPath(bigPath, maxLen) {
     if (bigPath.length <= maxLen) return bigPath;
-    var splitter = bigPath.indexOf('/') > -1 ? '/' : "\\",
+    var splitter = bigPath.indexOf("/") > -1 ? "/" : "\\",
         tokens = bigPath.split(splitter),
         maxLen = maxLen || 25,
-        drive = bigPath.indexOf(':') > -1 ? tokens[0] : "",
+        drive = bigPath.indexOf(":") > -1 ? tokens[0] : "",
         fileName = tokens[tokens.length - 1],
         len = drive.length + fileName.length,
         remLen = maxLen - len - 3, // remove the current length and also space for ellipsis char and 2 slashes
@@ -217,7 +222,8 @@ function shortenPath(bigPath, maxLen) {
 // Events from Main process
 api.receive("toggleStatusBar", function () {
     if (!api.isFullScreen()) {
-        brsEmu.redraw(false);
+        const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
+        brsEmu.redraw(false, 0, offset + 25);
     }
 });
 api.receive("serverStatus", function (server, enable, port) {

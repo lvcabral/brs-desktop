@@ -5,19 +5,19 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { setThemeSource, setEmulatorOption } from "../helpers/settings";
-import { setAlwaysOnTop, setStatusBar } from "../helpers/window";
+import { setThemeSource, setEmulatorOption, setStatusBar } from "../helpers/settings";
+import { setAlwaysOnTop } from "../helpers/window";
 
 export const viewMenuTemplate = {
     label: "&View",
     submenu: [
         {
             label: "Full Screen",
-            role: "togglefullscreen"
+            role: "togglefullscreen",
         },
         {
             label: "Developer Tools",
-            role: "toggleDevTools"
+            role: "toggleDevTools",
         },
         { type: "separator" },
         {
@@ -27,7 +27,7 @@ export const viewMenuTemplate = {
             checked: true,
             click: (item) => {
                 setThemeSource(item.id.slice(6), true);
-            }
+            },
         },
         {
             id: "theme-light",
@@ -36,7 +36,7 @@ export const viewMenuTemplate = {
             checked: false,
             click: (item) => {
                 setThemeSource(item.id.slice(6), true);
-            }
+            },
         },
         {
             id: "theme-dark",
@@ -45,7 +45,7 @@ export const viewMenuTemplate = {
             checked: false,
             click: (item) => {
                 setThemeSource(item.id.slice(6), true);
-            }
+            },
         },
         {
             id: "theme-system",
@@ -54,7 +54,7 @@ export const viewMenuTemplate = {
             checked: false,
             click: (item) => {
                 setThemeSource(item.id.slice(6), true);
-            }
+            },
         },
         { type: "separator" },
         {
@@ -66,7 +66,7 @@ export const viewMenuTemplate = {
             click: (item) => {
                 setEmulatorOption("alwaysOnTop", item.checked, item.id);
                 setAlwaysOnTop(item.checked);
-            }
+            },
         },
         {
             id: "status-bar",
@@ -76,8 +76,8 @@ export const viewMenuTemplate = {
             enabled: true,
             click: (item) => {
                 setEmulatorOption("statusBar", item.checked, item.id);
-                setStatusBar();
-            }
-        }
-    ]
+                setStatusBar(item.checked);
+            },
+        },
+    ],
 };
