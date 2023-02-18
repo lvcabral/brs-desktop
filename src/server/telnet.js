@@ -28,7 +28,10 @@ export function enableTelnet() {
         // listen for the actual data from the client
         client.on("data", (data) => {
             if (data !== undefined && data.length > 0) {
-                let expr = data.toString().trim().split(/(?<=^\S+)\s/);
+                let expr = data
+                    .toString()
+                    .trim()
+                    .split(/(?<=^\S+)\s/);
                 let cmd = expr[0].toLowerCase();
                 if (cmd.toLowerCase() === "close") {
                     client.write("bye!\r\n");
@@ -39,7 +42,9 @@ export function enableTelnet() {
                     client.write("BrightScript Emulator Remote Console");
                     client.write("\r\nDebug features are partially implemented.\r\n");
                     client.write("\r\nCommands available are:\r\nhelp - show this commands list");
-                    client.write("\r\nclose - disconnects the console\r\nexit or quit - finish current channel execution\r\n>");
+                    client.write(
+                        "\r\nclose - disconnects the console\r\nexit or quit - finish current channel execution\r\n>"
+                    );
                 } else {
                     window.webContents.send("debugCommand", expr.join(" "));
                 }
@@ -50,7 +55,7 @@ export function enableTelnet() {
             console.error(`Remote console client error: ${e.message}`);
             client.destroy();
         });
-        client.on('close', function () {
+        client.on("close", function () {
             clients.delete(id);
         });
         client.write(`Connected to ${app.getName()}\r\n`);

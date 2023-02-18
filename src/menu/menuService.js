@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -31,7 +31,13 @@ let recentFiles;
 let menuTemplate;
 // External Functions
 export function createMenu() {
-    menuTemplate = [ fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate ];
+    menuTemplate = [
+        fileMenuTemplate,
+        editMenuTemplate,
+        deviceMenuTemplate,
+        viewMenuTemplate,
+        helpMenuTemplate,
+    ];
     if (isMacOS) {
         const fileMenu = menuTemplate[0].submenu;
         fileMenu.splice(fileMenu.length - 2, 2);
@@ -79,7 +85,7 @@ export function clearRecentFiles() {
 export function loadPackage(id) {
     let pkg = getRecentPackage(id);
     if (pkg) {
-        loadFile([ pkg ]);
+        loadFile([pkg]);
     } else {
         console.log("No recent package to load!");
     }
@@ -88,7 +94,7 @@ export function loadPackage(id) {
 export function loadSource(id) {
     let brs = getRecentSource(id);
     if (brs) {
-        loadFile([ brs ]);
+        loadFile([brs]);
     } else {
         console.log("No recent file to load!");
     }
@@ -204,7 +210,8 @@ function rebuildMenu(template = false) {
         const brsEnd = maxFiles * 2 + 2;
         recentMenu[maxFiles].visible = recentFiles.zip.length === 0;
         recentMenu[brsEnd].visible = recentFiles.brs.length === 0;
-        recentMenu[recentMenu.length - 1].enabled = recentFiles.zip.length + recentFiles.brs.length > 0;
+        recentMenu[recentMenu.length - 1].enabled =
+            recentFiles.zip.length + recentFiles.brs.length > 0;
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         if (isMacOS && window) {
             let userTheme = global.sharedObject.theme;
@@ -213,7 +220,8 @@ function rebuildMenu(template = false) {
             }
             app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
             app.applicationMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
-            app.applicationMenu.getMenuItemById("status-bar").checked = getEmulatorOption("statusBar");
+            app.applicationMenu.getMenuItemById("status-bar").checked =
+                getEmulatorOption("statusBar");
             setDisplayOption("displayMode");
             setDisplayOption("overscanMode");
             app.applicationMenu.getMenuItemById("web-installer").checked = isInstallerEnabled;
@@ -243,7 +251,8 @@ function rebuildMenu(template = false) {
         }
         recentMenu.getMenuItemById("zip-empty").visible = recentFiles.zip.length === 0;
         recentMenu.getMenuItemById("brs-empty").visible = recentFiles.brs.length === 0;
-        recentMenu.getMenuItemById("file-clear").enabled = recentFiles.zip.length + recentFiles.brs.length > 0;
+        recentMenu.getMenuItemById("file-clear").enabled =
+            recentFiles.zip.length + recentFiles.brs.length > 0;
     }
     if (window) {
         window.webContents.send("refreshMenu");

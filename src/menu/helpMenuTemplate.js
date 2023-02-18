@@ -19,27 +19,29 @@ export const helpMenuTemplate = {
             accelerator: "F1",
             click: () => {
                 shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/README.md");
-            }
+            },
         },
         {
             label: "Control Keyboard Reference",
             accelerator: "CmdOrCtrl+F1",
             click: () => {
-                shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/docs/control-reference.md");
-            }
+                shell.openExternal(
+                    "https://github.com/lvcabral/brs-emu-app/blob/master/docs/control-reference.md"
+                );
+            },
         },
         { type: "separator" },
         {
             label: "Release Notes",
             click: () => {
                 shell.openExternal("https://github.com/lvcabral/brs-emu/releases");
-            }
+            },
         },
         {
             label: "View License",
             click: () => {
                 shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE");
-            }
+            },
         },
         // { type: "separator" },
         // { label: "Check for Updates...", enabled: false },
@@ -63,12 +65,12 @@ export const helpMenuTemplate = {
                         width: w,
                         height: h,
                         opacity: 0.9,
-                        modal: true
-                    }
+                        modal: true,
+                    },
                 });
                 about.setMenuBarVisibility(false);
                 about.setResizable(false);
-            }
-        }
-    ]
+            },
+        },
+    ],
 };

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -17,14 +17,14 @@ export const fileMenuTemplate = {
             accelerator: "CmdOrCtrl+O",
             click: () => {
                 dialog.openChannelPackage();
-            }
+            },
         },
         {
             label: "Open Source File...",
             accelerator: "CmdOrCtrl+Shift+O",
             click: () => {
                 dialog.openBrightScriptFile();
-            }
+            },
         },
         {
             id: "file-open-recent",
@@ -37,7 +37,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadPackage(0);
-                    }
+                    },
                 },
                 {
                     id: "zip-1",
@@ -45,7 +45,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadPackage(1);
-                    }
+                    },
                 },
                 {
                     id: "zip-2",
@@ -53,7 +53,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadPackage(2);
-                    }
+                    },
                 },
                 {
                     id: "zip-3",
@@ -61,7 +61,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadPackage(3);
-                    }
+                    },
                 },
                 {
                     id: "zip-4",
@@ -69,7 +69,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadPackage(4);
-                    }
+                    },
                 },
                 {
                     id: "zip-5",
@@ -77,7 +77,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadPackage(5);
-                    }
+                    },
                 },
                 {
                     id: "zip-6",
@@ -85,12 +85,12 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadPackage(6);
-                    }
+                    },
                 },
                 {
                     id: "zip-empty",
                     label: "No Channel .zip Package Recently Opened",
-                    enabled: false
+                    enabled: false,
                 },
                 { type: "separator" },
                 {
@@ -99,7 +99,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadSource(0);
-                    }
+                    },
                 },
                 {
                     id: "brs-1",
@@ -107,7 +107,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadSource(1);
-                    }
+                    },
                 },
                 {
                     id: "brs-2",
@@ -115,7 +115,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadSource(2);
-                    }
+                    },
                 },
                 {
                     id: "brs-3",
@@ -123,7 +123,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadSource(3);
-                    }
+                    },
                 },
                 {
                     id: "brs-4",
@@ -131,7 +131,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadSource(4);
-                    }
+                    },
                 },
                 {
                     id: "brs-5",
@@ -139,7 +139,7 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadSource(5);
-                    }
+                    },
                 },
                 {
                     id: "brs-6",
@@ -147,12 +147,12 @@ export const fileMenuTemplate = {
                     visible: false,
                     click: (item, window) => {
                         loadSource(6);
-                    }
+                    },
                 },
                 {
                     id: "brs-empty",
                     label: "No Source .brs File Recently Opened",
-                    enabled: false
+                    enabled: false,
                 },
                 { type: "separator" },
                 {
@@ -161,9 +161,9 @@ export const fileMenuTemplate = {
                     enabled: false,
                     click: (item, window) => {
                         clearRecentFiles();
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         },
         { type: "separator" },
         {
@@ -173,7 +173,7 @@ export const fileMenuTemplate = {
             enabled: false,
             click: () => {
                 dialog.saveScreenshot();
-            }
+            },
         },
         { type: "separator" },
         {
@@ -183,11 +183,11 @@ export const fileMenuTemplate = {
             enabled: false,
             click: () => {
                 closeChannel();
-            }
+            },
         },
         { type: "separator" },
         {
-            role: "quit"
-        }
-    ]
+            role: "quit",
+        },
+    ],
 };

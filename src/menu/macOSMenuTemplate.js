@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
  *
- *  Copyright (c) 2019-2021 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -12,7 +12,7 @@ export const macOSMenuTemplate = {
     submenu: [
         {
             label: "About BrightScript Emulator",
-            role: "about"
+            role: "about",
         },
         { type: "separator" },
         {
@@ -21,35 +21,35 @@ export const macOSMenuTemplate = {
             accelerator: "CmdOrCtrl+,",
             click: () => {
                 showSettings();
-            }
+            },
         },
         { type: "separator" },
         {
             label: "Services",
             role: "services",
-            submenu: []
+            submenu: [],
         },
         {
-            type: "separator"
+            type: "separator",
         },
         {
             label: "Hide BrightScript Emulator",
-            role: "hide"
+            role: "hide",
         },
         {
             label: "Hide Others",
-            role: "hideothers"
+            role: "hideothers",
         },
         {
             label: "Show All",
-            role: "unhide"
+            role: "unhide",
         },
         {
-            type: "separator"
+            type: "separator",
         },
         {
             label: "Quit BrightScript Emulator",
-            role: "quit"
-        }
-    ]
-}
+            role: "quit",
+        },
+    ],
+};

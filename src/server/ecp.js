@@ -12,7 +12,7 @@ import {
     getRecentPackage,
     getRecentId,
     getRecentName,
-    getRecentVersion
+    getRecentVersion,
 } from "../menu/menuService";
 import { loadFile } from "../helpers/files";
 import { setPreference, getModelName } from "../helpers/settings";
@@ -21,8 +21,8 @@ import xmlbuilder from "xmlbuilder";
 import fs from "fs";
 import path from "path";
 
-const WebSocket = require('ws');
-const url = require('url');
+const WebSocket = require("ws");
+const url = require("url");
 
 const DEBUG = false;
 const ECPPORT = 8060;
@@ -45,15 +45,15 @@ export function enableECP() {
     }
     // Create ECP Server
     ecp = require("restana")({
-        ignoreTrailingSlash: true
+        ignoreTrailingSlash: true,
     });
     ecp.getServer().on("error", (error) => {
         window.webContents.send("console", `Failed to start ECP server:${error.message}`, true);
     });
     ecp.get("/", sendDeviceRoot);
     ecp.get("/device-image.png", sendDeviceImage);
-    ecp.get("/ecp_SCPD.xml", sendScpdXML)
-    ecp.get("/dial_SCPD.xml", sendScpdXML)
+    ecp.get("/ecp_SCPD.xml", sendScpdXML);
+    ecp.get("/dial_SCPD.xml", sendScpdXML);
     ecp.get("/query/device-info", sendDeviceInfo);
     ecp.get("//query/device-info", sendDeviceInfo);
     ecp.get("/query/apps", sendApps);
@@ -93,7 +93,11 @@ export function enableECP() {
             // Start server on all interfaces
             ssdp.start()
                 .catch((e) => {
-                    window.webContents.send("console", `Failed to start SSDP server:${e.message}`, true);
+                    window.webContents.send(
+                        "console",
+                        `Failed to start SSDP server:${e.message}`,
+                        true
+                    );
                 })
                 .then(() => {
                     isECPEnabled = true;
@@ -101,23 +105,29 @@ export function enableECP() {
                 });
             // Create ECP-2 WebSocket Server
             const wss = new WebSocket.Server({ noServer: true });
-            wss.on('connection', function connection(ws) {
-                const auth = `{"notify":"authenticate","param-challenge":"jONQirQ3WxSQWdI9Zn0enA==","timestamp":"${process.uptime().toFixed(3)}"}`;
-                if (DEBUG) { console.log("received connection!", auth); }
+            wss.on("connection", function connection(ws) {
+                const auth = `{"notify":"authenticate","param-challenge":"jONQirQ3WxSQWdI9Zn0enA==","timestamp":"${process
+                    .uptime()
+                    .toFixed(3)}"}`;
+                if (DEBUG) {
+                    console.log("received connection!", auth);
+                }
                 ws.send(auth);
                 ws.on("message", function incoming(message) {
                     processRequest(ws, message);
                 });
-                ws.on('ping', function heartbeat(p) {
+                ws.on("ping", function heartbeat(p) {
                     ws.pong();
                 });
             });
             server.on("upgrade", function upgrade(request, socket, head) {
                 const pathname = url.parse(request.url).pathname;
-                if (pathname === '/ecp-session') {
-                    if (DEBUG) { console.log("ecp-2 websocket session started!"); }
+                if (pathname === "/ecp-session") {
+                    if (DEBUG) {
+                        console.log("ecp-2 websocket session started!");
+                    }
                     wss.handleUpgrade(request, socket, head, function done(ws) {
-                        wss.emit('connection', ws, request);
+                        wss.emit("connection", ws, request);
                     });
                 } else {
                     socket.destroy();
@@ -150,7 +160,9 @@ export function updateECPStatus(enabled) {
 // ECP-2 WebSocket API
 function processRequest(ws, message) {
     if (message) {
-        if (DEBUG) { console.log('received: %s', message); }
+        if (DEBUG) {
+            console.log("received: %s", message);
+        }
         let reply = "";
         let msg;
         try {
@@ -163,37 +175,58 @@ function processRequest(ws, message) {
         if (msg["request"] == "authenticate" && msg["param-response"]) {
             reply = `{${statusOK}}`;
         } else if (msg["request"] == "query-device-info") {
-            reply = `{"content-data":"${genDeviceInfoXml(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+            reply = `{"content-data":"${genDeviceInfoXml(
+                true
+            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
         } else if (msg["request"] == "query-themes") {
-            reply = `{"content-data":"${genThemesXml(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+            reply = `{"content-data":"${genThemesXml(
+                true
+            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
         } else if (msg["request"] == "query-screensavers") {
-            reply = `{"content-data":"${genScrsvXml(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+            reply = `{"content-data":"${genScrsvXml(
+                true
+            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
         } else if (msg["request"] == "query-apps") {
-            reply = `{"content-data":"${genAppsXml(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+            reply = `{"content-data":"${genAppsXml(
+                true
+            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
         } else if (msg["request"] == "query-icon") {
-            reply = `{"content-data":"${genAppIcon(msg["param-channel-id"], true)}","content-type":"image/png",${statusOK}}`;
+            reply = `{"content-data":"${genAppIcon(
+                msg["param-channel-id"],
+                true
+            )}","content-type":"image/png",${statusOK}}`;
         } else if (msg["request"] == "query-tv-active-channel") {
-            reply = `{"content-data":"${genActiveApp(true)}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+            reply = `{"content-data":"${genActiveApp(
+                true
+            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
         } else if (msg["request"] == "launch") {
             launchApp(msg["param-channel-id"]);
             reply = `{${statusOK}}`;
         } else if (msg["request"] == "request-events") {
             reply = `{${statusOK}}`;
         } else if (msg["request"] == "query-media-player") {
-            const content = Buffer.from(`<?xml version="1.0" encoding="UTF-8" ?>`).toString('base64');
+            const content = Buffer.from(`<?xml version="1.0" encoding="UTF-8" ?>`).toString(
+                "base64"
+            );
             reply = `{"content-data":"${content}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
         } else if (msg["request"] == "query-audio-device") {
-            const content = Buffer.from(`<?xml version="1.0" encoding="UTF-8" ?>`).toString('base64');
+            const content = Buffer.from(`<?xml version="1.0" encoding="UTF-8" ?>`).toString(
+                "base64"
+            );
             reply = `{"content-data":"${content}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
         } else if (msg["request"] == "query-textedit-state") {
-            const content = Buffer.from(`{"textedit-state":{"textedit-id":"none"}}`).toString('base64');
+            const content = Buffer.from(`{"textedit-state":{"textedit-id":"none"}}`).toString(
+                "base64"
+            );
             reply = `{"content-data":"${content}","content-type":"application/json",${statusOK}}`;
         } else if (msg["request"] == "key-press") {
             window.webContents.send("postKeyPress", msg["param-key"]);
             reply = `{${statusOK}}`;
         }
         if (reply !== "") {
-            if (DEBUG) { console.log(`replying: %s`, reply) }
+            if (DEBUG) {
+                console.log(`replying: %s`, reply);
+            }
             ws.send(reply);
         } else if (DEBUG) {
             console.log(`no reply for: %s`, msg["request-id"]);
@@ -296,7 +329,9 @@ function genDeviceInfoXml(encrypt) {
     const xml = xmlbuilder.create("device-info");
     const modelName = getModelName(device.deviceModel);
     xml.ele("udn", {}, UDN);
-    if (encrypt) { xml.ele("virtual-device-id", {}, device.serialNumber); }
+    if (encrypt) {
+        xml.ele("virtual-device-id", {}, device.serialNumber);
+    }
     xml.ele("serial-number", {}, device.serialNumber);
     xml.ele("device-id", {}, device.serialNumber);
     xml.ele("advertising-id", {}, device.RIDA);
@@ -350,7 +385,7 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("has-mobile-screensaver", {}, false);
     xml.ele("support-url", {}, "roku.com/support");
     const strXml = xml.end({ pretty: true });
-    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
+    return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
 
 function genThemesXml(encrypt) {
@@ -360,7 +395,7 @@ function genThemesXml(encrypt) {
     xml.ele("theme", { id: "Brown" }, "Decaf");
     xml.ele("theme", { id: "Space" }, "Nebula");
     const strXml = xml.end({ pretty: true });
-    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
+    return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
 
 function genScrsvXml(encrypt) {
@@ -368,7 +403,7 @@ function genScrsvXml(encrypt) {
     xml.ele("screensaver", { default: true, id: "5533", selected: true }, "Roku Digital Clock");
     xml.ele("screensaver", { id: "5534" }, "Roku Analog Clock");
     const strXml = xml.end({ pretty: true });
-    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
+    return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
 
 function genAppsXml(encrypt) {
@@ -380,13 +415,13 @@ function genAppsXml(encrypt) {
                 id: getRecentId(index),
                 subtype: "sdka",
                 type: "appl",
-                version: getRecentVersion(index)
+                version: getRecentVersion(index),
             },
             getRecentName(index)
         );
     });
     const strXml = xml.end({ pretty: true });
-    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
+    return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
 
 function genAppIcon(appID, encrypt) {
@@ -401,7 +436,7 @@ function genAppIcon(appID, encrypt) {
     if (image === undefined) {
         image = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
     }
-    return encrypt ? image.toString('base64') : image;
+    return encrypt ? image.toString("base64") : image;
 }
 
 function genActiveApp(encrypt) {
@@ -415,7 +450,7 @@ function genActiveApp(encrypt) {
                 id: id,
                 subtype: "sdka",
                 type: "appl",
-                version: getRecentVersion(0)
+                version: getRecentVersion(0),
             },
             getRecentName(0)
         );
@@ -423,7 +458,7 @@ function genActiveApp(encrypt) {
         xml.ele("app", {}, app.getName());
     }
     const strXml = xml.end({ pretty: true });
-    return encrypt ? Buffer.from(strXml).toString('base64') : strXml;
+    return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
 
 // Helper Functions
@@ -440,7 +475,7 @@ function launchApp(appID) {
 }
 
 function getMacAddress() {
-    const os = require('os');
+    const os = require("os");
     const ifaces = os.networkInterfaces();
     let mac = "";
     Object.keys(ifaces).forEach(function (ifname) {
@@ -448,11 +483,13 @@ function getMacAddress() {
             return;
         }
         ifaces[ifname].forEach(function (iface) {
-            if ('IPv4' !== iface.family || iface.internal !== false) {
+            if ("IPv4" !== iface.family || iface.internal !== false) {
                 // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
                 return;
-            } else if (ifname.slice(0, 6).toLowerCase() === "vmware" ||
-                ifname.slice(0, 10).toLowerCase() === "virtualbox") {
+            } else if (
+                ifname.slice(0, 6).toLowerCase() === "vmware" ||
+                ifname.slice(0, 10).toLowerCase() === "virtualbox"
+            ) {
                 return;
             }
             mac = iface.mac;
