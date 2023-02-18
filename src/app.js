@@ -141,14 +141,14 @@ api.receive("setDisplay", function (mode) {
     if (mode !== brsEmu.getDisplayMode()) {
         brsEmu.setDisplayMode(mode);
         const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
-        brsEmu.redraw(api.isFullScreen(), 0, offset + 25);
+        brsEmu.redraw(api.isFullScreen(), {width: 0, height: offset + 25});
     }
 });
 api.receive("setOverscan", function (mode) {
     if (mode !== brsEmu.getOverscanMode()) {
         brsEmu.setOverscanMode(mode);
         const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
-        brsEmu.redraw(api.isFullScreen(), 0, offset + 25);
+        brsEmu.redraw(api.isFullScreen(), {width: 0, height: offset + 25});
     }
 });
 api.receive("setAudioMute", function (mute) {
@@ -159,7 +159,7 @@ api.receive("setAudioMute", function (mute) {
 // Window Resize Event
 window.onload = window.onresize = function () {
     const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
-    brsEmu.redraw(api.isFullScreen(), 0, offset + 25);
+    brsEmu.redraw(api.isFullScreen(), {width: 0, height: offset + 25});
 };
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {
