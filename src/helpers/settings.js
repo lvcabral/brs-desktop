@@ -541,6 +541,9 @@ export function showSettings() {
     let x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
     let y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
     const prefsWindow = settings.show();
+    if (window.isAlwaysOnTop()) {
+        prefsWindow.setAlwaysOnTop(true);
+    }
     prefsWindow.setBounds({ x: x, y: y });
 }
 
