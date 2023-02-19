@@ -540,11 +540,11 @@ export function showSettings() {
     const bounds = window.getBounds();
     let x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
     let y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
-    const prefsWindow = settings.show();
+    const settingsWindow = settings.show();
     if (window.isAlwaysOnTop()) {
-        prefsWindow.setAlwaysOnTop(true);
+        settingsWindow.setAlwaysOnTop(true);
     }
-    prefsWindow.setBounds({ x: x, y: y });
+    settingsWindow.setBounds({ x: x, y: y });
 }
 
 export function setPreference(key, value) {
@@ -680,7 +680,7 @@ export function getAudioMuted() {
 }
 
 ipcMain.on("setAudioMute", (event, mute) => {
-    settings.value("audio.muted", mute ? mute : []);
+    settings.value("audio.muted", mute ? [mute] : []);
 });
 
 export function getModelName(model) {
@@ -692,8 +692,8 @@ export function getModelName(model) {
 function getRokuModelArray() {
     const modelArray = [];
     modelLabels.set("N1050", "Roku SD Classic");
-    modelLabels.set("N1000", "Roku DVP Classsic");
-    modelLabels.set("N1100", "Roku HD Classsic");
+    modelLabels.set("N1000", "Roku DVP Classic");
+    modelLabels.set("N1100", "Roku HD Classic");
     modelLabels.set("N1101", "Roku HD-XR Classic");
     modelLabels.set("2050X", "Roku XD");
     modelLabels.set("2050N", "Roku XD");
