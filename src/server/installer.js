@@ -151,8 +151,8 @@ export function enableInstaller() {
             } else if (req.method === "GET") {
                 let filePath = "";
                 let contentType = "";
-                if (req.url === "/css/global.css") {
-                    filePath = path.join(__dirname, "css", "global.css");
+                if (req.url === "/css/styles.min.css") {
+                    filePath = path.join(__dirname, "css", "styles.min.css");
                     contentType = "text/css";
                 } else if (
                     req.url === "/" ||

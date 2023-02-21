@@ -2,7 +2,7 @@
     "name": "brs-emu-app",
     "productName": "BrightScript Emulator",
     "description": "Desktop Application",
-    "version": "0.10.7-dev",
+    "version": "0.10.8-dev",
     "private": true,
     "author": {
         "name": "Marcelo Lv Cabral",
@@ -58,7 +58,7 @@
     },
     "dependencies": {
         "@electron/remote": "^2.0.9",
-        "brs-emu": "^0.10.7-dev",
+        "brs-emu": "^0.10.8-dev",
         "busboy": "^0.3.1",
         "custom-electron-titlebar": "^4.0.0",
         "electron-about-window": "^1.14.0",
