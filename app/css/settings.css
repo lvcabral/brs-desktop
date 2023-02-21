@@ -26,6 +26,19 @@
     --control-border-color: #0e0e0e;
 }
 
+[data-theme^="light"], [data-theme] [data-theme^="light"] {
+    --main-color: #000000;
+    --background-color: #ffffff;
+    --title-color: #333333;
+    --title-background-color: #dddddd;
+    --help-color: #5d5d5d;
+    --item-background-color: #094771;
+    --icon-active-color: #007acc;
+    --icon-hover-color: #1f8ad2;
+    --icon-background-color: #787878;
+    --control-border-color: #f2f2f2;
+}
+
 #titlebar {
     padding: 4px;
     height: 28px; 

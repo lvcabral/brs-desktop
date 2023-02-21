@@ -26,6 +26,7 @@ const modelLabels = new Map();
 const w = 800;
 const h = isMacOS ? 610 : 650;
 let settings;
+let settingsWindow;
 export function getSettings(window) {
     if (settings === undefined) {
         const bounds = window.getBounds();
@@ -75,11 +76,7 @@ export function getSettings(window) {
             browserWindowOverrides: {
                 title: "Settings",
                 titleBarStyle: "hidden",
-                titleBarOverlay: {
-                    color: "#3d1b56",
-                    symbolColor: "#dac7ea",
-                    height: 28,
-                },
+                titleBarOverlay: getTitleOverlayTheme("purple"),
                 frame: false,
                 parent: window,
                 modal: !isMacOS,
@@ -540,11 +537,20 @@ export function showSettings() {
     const bounds = window.getBounds();
     let x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
     let y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
-    const settingsWindow = settings.show();
+
+    if (!isMacOS) {
+        const userTheme = global.sharedObject.theme;
+        settings.browserWindowOverrides.titleBarOverlay = getTitleOverlayTheme(userTheme);
+    }
+
+    settingsWindow = settings.show();
     if (window.isAlwaysOnTop()) {
         settingsWindow.setAlwaysOnTop(true);
     }
     settingsWindow.setBounds({ x: x, y: y });
+    settingsWindow.on('closed', () => {
+        settingsWindow = null;
+    });
 }
 
 export function setPreference(key, value) {
@@ -616,6 +622,10 @@ export function setThemeSource(userTheme, notifyApp) {
         const window = BrowserWindow.fromId(1);
         window.webContents.send("setTheme", userTheme);
         window.webContents.send("refreshMenu");
+
+        if (!isMacOS && settingsWindow) {
+            settingsWindow.setTitleBarOverlay(getTitleOverlayTheme(userTheme));
+        }
     }
     return userTheme;
 }
@@ -685,6 +695,19 @@ ipcMain.on("setAudioMute", (event, mute) => {
 export function getModelName(model) {
     return modelLabels.get(model).replace(/ *\([^)]*\) */g, "");
 }
+
+// Title Overlay Theme
+
+function getTitleOverlayTheme(userTheme) {
+    if (userTheme === "purple") {
+        return { color: "#3d1b56", symbolColor: "#dac7ea", height: 28 };
+    } else if (userTheme === "dark") {
+        return { color: "#252526", symbolColor: "#cccccc", height: 28  };
+    } else {
+        return { color: "#dddddd", symbolColor: "#333333", height: 28 };
+    }
+}
+
 
 // Data Arrays
 

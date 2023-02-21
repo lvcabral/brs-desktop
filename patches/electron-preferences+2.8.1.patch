@@ -195,37 +195,42 @@ index 0000000..31c7781
 \ No newline at end of file
 diff --git a/node_modules/electron-preferences/build/svg/tv-screen.svg b/node_modules/electron-preferences/build/svg/tv-screen.svg
 new file mode 100644
-index 0000000..78dd4e8
+index 0000000..ef81f28
 --- /dev/null
 +++ b/node_modules/electron-preferences/build/svg/tv-screen.svg
-@@ -0,0 +1,26 @@
-+<?xml version="1.0" encoding="iso-8859-1"?>
-+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-+<svg fill="#000000" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-+	 viewBox="0 0 512 512" xml:space="preserve">
-+<g>
-+	<g>
-+		<polygon points="76.043,116.419 76.043,312.017 271.641,116.419 		"/>
-+	</g>
-+</g>
-+<g>
-+	<g>
-+		<polygon points="314.657,116.419 97.551,333.525 197.343,333.525 414.449,116.419 		"/>
-+	</g>
-+</g>
-+<g>
-+	<g>
-+		<polygon points="240.359,333.525 435.957,333.525 435.957,137.927 		"/>
-+	</g>
-+</g>
-+<g>
-+	<g>
-+		<path d="M512,409.567V40.376H0v369.191h173.282v31.64h-51.393v30.417h51.393h165.435h51.393v-30.417h-51.393v-31.64H512z
-+			 M45.626,363.942V86.002h420.748v277.94H45.626z"/>
-+	</g>
+@@ -0,0 +1,32 @@
++<?xml version="1.0" standalone="no"?>
++<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
++ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
++<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
++ width="218.000000pt" height="184.000000pt" viewBox="0 0 218.000000 184.000000"
++ preserveAspectRatio="xMidYMid meet">
++<metadata>
++Created by potrace 1.16, written by Peter Selinger 2001-2019
++</metadata>
++<g transform="translate(0.000000,184.000000) scale(0.100000,-0.100000)"
++fill="#000000" stroke="none">
++<path d="M57 1732 c-16 -17 -17 -79 -17 -688 0 -590 2 -672 16 -692 l15 -22
++440 0 439 0 0 -45 0 -45 -170 0 -170 0 0 -25 0 -25 485 0 485 0 0 25 0 25
++-170 0 -170 0 0 45 0 45 439 0 440 0 15 22 c14 20 16 102 16 688 0 586 -2 668
++-16 688 l-15 22 -1023 0 c-978 0 -1024 -1 -1039 -18z m2023 -692 l0 -640 -985
++0 -985 0 0 640 0 640 985 0 985 0 0 -640z"/>
++<path d="M790 1375 l0 -145 180 0 180 0 0 145 0 145 -180 0 -180 0 0 -145z"/>
++<path d="M1200 1375 l0 -145 180 0 180 0 0 145 0 145 -180 0 -180 0 0 -145z"/>
++<path d="M1620 1375 l0 -145 175 0 175 0 0 145 0 145 -175 0 -175 0 0 -145z"/>
++<path d="M242 1438 l3 -73 230 0 230 0 3 73 3 72 -236 0 -236 0 3 -72z"/>
++<path d="M240 1255 l0 -35 170 0 170 0 0 35 0 35 -170 0 -170 0 0 -35z"/>
++<path d="M790 1035 l0 -145 180 0 181 0 -3 143 -3 142 -177 3 -178 2 0 -145z"/>
++<path d="M1207 1173 c-4 -3 -7 -69 -7 -145 l0 -138 180 0 180 0 0 145 0 145
++-173 0 c-96 0 -177 -3 -180 -7z"/>
++<path d="M1620 1035 l0 -145 175 0 175 0 0 145 0 145 -175 0 -175 0 0 -145z"/>
++<path d="M247 1023 c-4 -3 -7 -19 -7 -35 l0 -28 150 0 150 0 0 35 0 35 -143 0
++c-79 0 -147 -3 -150 -7z"/>
++<path d="M790 685 l0 -145 180 0 180 0 0 145 0 145 -180 0 -180 0 0 -145z"/>
++<path d="M1200 685 l0 -145 180 0 180 0 0 145 0 145 -180 0 -180 0 0 -145z"/>
++<path d="M1620 685 l0 -145 175 0 175 0 0 145 0 145 -175 0 -175 0 0 -145z"/>
 +</g>
 +</svg>
-\ No newline at end of file
 diff --git a/node_modules/electron-preferences/preload.js b/node_modules/electron-preferences/preload.js
 index 0c91968..835c5bb 100644
 --- a/node_modules/electron-preferences/preload.js
