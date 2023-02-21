@@ -38,13 +38,8 @@ export function enableTelnet() {
                     client.destroy();
                 } else if (cmd === "quit") {
                     window.webContents.send("closeChannel", "EXIT_BRIGHTSCRIPT_STOP");
-                } else if (cmd === "\x03" || cmd === "help") {
-                    client.write("BrightScript Emulator Remote Console");
-                    client.write("\r\nDebug features are partially implemented.\r\n");
-                    client.write("\r\nCommands available are:\r\nhelp - show this commands list");
-                    client.write(
-                        "\r\nclose - disconnects the console\r\nexit or quit - finish current channel execution\r\n>"
-                    );
+                } else if (cmd === "\x03") {
+                    window.webContents.send("debugCommand", "break");
                 } else {
                     window.webContents.send("debugCommand", expr.join(" "));
                 }
