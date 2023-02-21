@@ -490,7 +490,7 @@ export function getSettings(window) {
                 if (newValue && newValue !== oldValue) {
                     setDisplayOption("displayMode", undefined, true);
                     if (newValue === "480p" || oldValue === "480p") {
-                        setAspectRatio(newValue);
+                        setAspectRatio();
                     }
                 }
                 const overscanMode = settings.value("display.overscanMode");
@@ -566,8 +566,7 @@ export function setDeviceInfo(section, key, notifyApp) {
 export function setStatusBar(enabled) {
     const window = BrowserWindow.fromId(1);
     if (window) {
-        const displayMode = app.applicationMenu.getMenuItemById("480p").checked ? "480p" : "";
-        setAspectRatio(displayMode, false);
+        setAspectRatio(false);
         if (isMacOS) {
             if (enabled) {
                 window.setBounds({ height: window.getBounds().height + 20 });
@@ -582,15 +581,15 @@ export function setStatusBar(enabled) {
 export function setDisplayOption(option, mode, notifyApp) {
     const current = settings.value(`display.${option}`);
     if (mode) {
-        if ((mode !== current) & (mode === "480p" || current === "480p")) {
-            setAspectRatio(mode);
-        }
         settings.value(`display.${option}`, mode);
     } else {
         mode = current;
     }
     if (option in global.sharedObject.deviceInfo) {
         global.sharedObject.deviceInfo[option] = mode;
+    }
+    if ((mode !== current) & (mode === "480p" || current === "480p")) {
+        setAspectRatio();
     }
     app.applicationMenu.getMenuItemById(mode).checked = true;
     if (notifyApp) {

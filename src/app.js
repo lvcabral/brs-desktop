@@ -8,7 +8,7 @@
 import "./css/main.css";
 import "./css/fontawesome.min.css";
 import "./helpers/hash";
-import { statusBar, setStatusColor, setAudioStatus } from "./app/statusbar";
+import { setStatusColor, setAudioStatus } from "./app/statusbar";
 
 // Emulator display
 const display = document.getElementById("display");
@@ -140,15 +140,13 @@ api.receive("saveScreenshot", function (file) {
 api.receive("setDisplay", function (mode) {
     if (mode !== brsEmu.getDisplayMode()) {
         brsEmu.setDisplayMode(mode);
-        const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
-        brsEmu.redraw(api.isFullScreen(), {width: 0, height: offset + 25});
+        brsEmu.redraw(api.isFullScreen());
     }
 });
 api.receive("setOverscan", function (mode) {
     if (mode !== brsEmu.getOverscanMode()) {
         brsEmu.setOverscanMode(mode);
-        const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
-        brsEmu.redraw(api.isFullScreen(), {width: 0, height: offset + 25});
+        brsEmu.redraw(api.isFullScreen());
     }
 });
 api.receive("setAudioMute", function (mute) {
@@ -158,8 +156,7 @@ api.receive("setAudioMute", function (mute) {
 
 // Window Resize Event
 window.onload = window.onresize = function () {
-    const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
-    brsEmu.redraw(api.isFullScreen(), {width: 0, height: offset + 25});
+    brsEmu.redraw(api.isFullScreen());
 };
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {

@@ -123,28 +123,41 @@ export function createWindow(name, options) {
     ipcMain.on("reset", () => {
         win.reload();
     });
-    // macOS windows flags
+    
     if (isMacOS) {
+        // macOS windows flags
         win.setMaximizable(true);
         win.setWindowButtonVisibility(true);
+    } else {
+        win.on("resize", () => {
+            setAspectRatio(false);
+        });
     }
     return win;
 }
 
-export function setAspectRatio(displayMode, changed = true) {
+export function setAspectRatio(changed = true) {
+    const displayMode = global.sharedObject.deviceInfo.displayMode || "720p";
     const ASPECT_RATIO_SD = 4 / 3;
     const ASPECT_RATIO_HD = 16 / 9;
     const window = BrowserWindow.fromId(1);
-    const aspectRatio = displayMode === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
+    let aspectRatio = displayMode === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
     const appMenu = Menu.getApplicationMenu();
     const statusOn = appMenu.getMenuItemById("status-bar").checked;
-    const offset = statusOn ? 45 : 25;
+    let height = window.getBounds().height;
+    let offset = statusOn ? 45 : 25;
     if (window) {
-        if (isMacOS && changed) {
-            const height = window.getBounds().height - offset;
+        if (isMacOS) {
+            height -= offset;
+            window.setAspectRatio(aspectRatio, { width: 0, height: offset });
+        } else {
+            const width = Math.round((height-offset) * aspectRatio);
+            aspectRatio = width / height;
+            window.setAspectRatio(aspectRatio);
+        }
+        if (changed) {
             window.setBounds({ width: Math.round(height * aspectRatio) });
         }
-        window.setAspectRatio(aspectRatio, { width: 0, height: offset });
     }
 }
 

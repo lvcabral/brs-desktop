@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 // Status Bar Objects
-export const statusBar = document.getElementById("status");
+const statusBar = document.getElementById("status");
 const statusDevTools = document.getElementById("statusDevTools");
 const statusError = document.getElementById("statusError");
 const statusWarn = document.getElementById("statusWarn");
@@ -222,8 +222,7 @@ function shortenPath(bigPath, maxLen) {
 // Events from Main process
 api.receive("toggleStatusBar", function () {
     if (!api.isFullScreen()) {
-        const offset = api.isStatusEnabled() ? statusBar.clientHeight : 0;
-        brsEmu.redraw(false, {width: 0, height: offset + 25});
+        brsEmu.redraw(false);
     }
 });
 api.receive("serverStatus", function (server, enable, port) {
