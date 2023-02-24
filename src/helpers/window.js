@@ -6,6 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen, Menu } from "electron";
+import { getEmulatorOption } from "./settings";
 import path from "path";
 import jetpack from "fs-jetpack";
 
@@ -123,7 +124,7 @@ export function createWindow(name, options) {
     ipcMain.on("reset", () => {
         win.reload();
     });
-    
+
     if (isMacOS) {
         // macOS windows flags
         win.setMaximizable(true);
@@ -143,7 +144,7 @@ export function setAspectRatio(changed = true) {
     const window = BrowserWindow.fromId(1);
     let aspectRatio = displayMode === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
     const appMenu = Menu.getApplicationMenu();
-    const statusOn = appMenu.getMenuItemById("status-bar").checked;
+    const statusOn = getEmulatorOption("statusBar");
     let height = window.getBounds().height;
     let offset = statusOn ? 45 : 25;
     if (window) {
@@ -151,7 +152,7 @@ export function setAspectRatio(changed = true) {
             height -= offset;
             window.setAspectRatio(aspectRatio, { width: 0, height: offset });
         } else {
-            const width = Math.round((height-offset) * aspectRatio);
+            const width = Math.round((height - offset) * aspectRatio);
             aspectRatio = width / height;
             window.setAspectRatio(aspectRatio);
         }

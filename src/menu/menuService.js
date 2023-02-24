@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -39,8 +39,21 @@ export function createMenu() {
         helpMenuTemplate,
     ];
     if (isMacOS) {
-        const fileMenu = menuTemplate[0].submenu;
-        fileMenu.splice(fileMenu.length - 2, 2);
+        menuTemplate.unshift(macOSMenuTemplate);
+        if (fileMenuIndex === 0) {
+            fileMenuIndex = 1;
+            // Only need to do it once
+            const fileMenu = menuTemplate[fileMenuIndex].submenu;
+            fileMenu.splice(fileMenu.length - 2, 2);
+        }
+    }
+    restoreRecentFiles();
+    rebuildMenu(true);
+}
+
+export function createShortMenu() {
+    menuTemplate = [fileMenuTemplate, editMenuTemplate, helpMenuTemplate];
+    if (isMacOS) {
         menuTemplate.unshift(macOSMenuTemplate);
         fileMenuIndex = 1;
     }
@@ -97,6 +110,13 @@ export function loadSource(id) {
         loadFile([brs]);
     } else {
         console.log("No recent file to load!");
+    }
+}
+
+export function checkMenuItem(id, checked) {
+    const item = app.applicationMenu.getMenuItemById(id);
+    if (item) {
+        item.checked = checked;
     }
 }
 
@@ -187,6 +207,7 @@ function saveRecentFiles() {
 
 function rebuildMenu(template = false) {
     const window = BrowserWindow.fromId(1);
+    const appMenu = app.applicationMenu;
     if (isMacOS || template) {
         const recentMenu = menuTemplate[fileMenuIndex].submenu[recentMenuIndex].submenu;
         for (let index = 0; index < maxFiles; index++) {
@@ -214,22 +235,24 @@ function rebuildMenu(template = false) {
             recentFiles.zip.length + recentFiles.brs.length > 0;
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         if (isMacOS && window) {
-            let userTheme = global.sharedObject.theme;
-            if (userTheme === "system") {
-                userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
+            if (appMenu.getMenuItemById("view-menu")) {
+                let userTheme = global.sharedObject.theme;
+                if (userTheme === "system") {
+                    userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
+                }
+                appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+                appMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
+                appMenu.getMenuItemById("status-bar").checked = getEmulatorOption("statusBar");
             }
-            app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
-            app.applicationMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
-            app.applicationMenu.getMenuItemById("status-bar").checked =
-                getEmulatorOption("statusBar");
-            setDisplayOption("displayMode");
-            setDisplayOption("overscanMode");
-            app.applicationMenu.getMenuItemById("web-installer").checked = isInstallerEnabled;
-            app.applicationMenu.getMenuItemById("ecp-api").checked = isECPEnabled;
-            app.applicationMenu.getMenuItemById("telnet").checked = isTelnetEnabled;
+            if (appMenu.getMenuItemById("device-menu")) {
+                setDisplayOption("displayMode");
+                setDisplayOption("overscanMode");
+                appMenu.getMenuItemById("web-installer").checked = isInstallerEnabled;
+                appMenu.getMenuItemById("ecp-api").checked = isECPEnabled;
+                appMenu.getMenuItemById("telnet").checked = isTelnetEnabled;
+            }
         }
     } else {
-        const appMenu = app.applicationMenu;
         const recentMenu = appMenu.getMenuItemById("file-open-recent").submenu;
         for (let index = 0; index < maxFiles; index++) {
             let fileMenu = recentMenu.getMenuItemById(`zip-${index}`);

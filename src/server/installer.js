@@ -13,6 +13,7 @@ import http from "http";
 import crypt from "crypto";
 import { loadFile } from "../helpers/files";
 import { setPreference } from "../helpers/settings";
+import { checkMenuItem } from "../menu/menuService";
 
 const credentials = {
     userName: "rokudev",
@@ -213,7 +214,7 @@ export function disableInstaller() {
 
 export function updateInstallerStatus(enabled) {
     setPreference("services.installer", enabled ? ["enabled"] : []);
-    app.applicationMenu.getMenuItemById("web-installer").checked = enabled;
+    checkMenuItem("web-installer", enabled);
     const window = BrowserWindow.fromId(1);
     window.webContents.send("serverStatus", "Web", enabled, port);
     window.webContents.send("refreshMenu");

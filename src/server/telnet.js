@@ -8,6 +8,8 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import * as telnet from "net";
 import { setPreference } from "../helpers/settings";
+import { checkMenuItem } from "../menu/menuService";
+
 const PORT = 8085;
 const BUFFER_SIZE = 700;
 let server;
@@ -100,7 +102,7 @@ export function disableTelnet() {
 
 export function updateTelnetStatus(enabled) {
     setPreference("services.telnet", enabled ? ["enabled"] : []);
-    app.applicationMenu.getMenuItemById("telnet").checked = enabled;
+    checkMenuItem("telnet", enabled);
     const window = BrowserWindow.fromId(1);
     window.webContents.send("serverStatus", "Telnet", enabled, PORT);
     window.webContents.send("refreshMenu");

@@ -93,7 +93,6 @@ brsEmu.subscribe("statusbar", (event, data) => {
         statusSepRes.style.display = "none";
     } else if (event === "redraw") {
         if (!data && api.isStatusEnabled()) {
-            // display.style.bottom = "20px";
             statusBar.style.visibility = "visible";
             if (filePath !== "") {
                 statusFile.innerText = shortenPath(
@@ -102,7 +101,6 @@ brsEmu.subscribe("statusbar", (event, data) => {
                 );
             }
         } else {
-            // display.style.bottom = "0px";
             statusBar.style.visibility = "hidden";
         }
     } else if (event === "resolution") {

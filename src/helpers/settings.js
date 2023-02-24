@@ -19,6 +19,7 @@ import {
     isInstallerEnabled,
     setPassword,
 } from "../server/installer";
+import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
 
 const isMacOS = process.platform === "darwin";
 const timeZoneLabels = new Map();
@@ -27,6 +28,8 @@ const w = 800;
 const h = isMacOS ? 610 : 650;
 let settings;
 let settingsWindow;
+let statusBarVisible = true;
+
 export function getSettings(window) {
     if (settings === undefined) {
         const bounds = window.getBounds();
@@ -439,15 +442,14 @@ export function getSettings(window) {
             ],
         });
         settings.on("save", (preferences) => {
-            const appMenu = app.applicationMenu;
             if (preferences.emulator) {
                 const options = preferences.emulator.options;
                 const onTop = options.includes("alwaysOnTop");
                 const statusBar = options.includes("statusBar");
-                appMenu.getMenuItemById("on-top").checked = onTop;
+                checkMenuItem("on-top", onTop);
                 window.setAlwaysOnTop(onTop);
-                if (appMenu.getMenuItemById("status-bar").checked != statusBar) {
-                    appMenu.getMenuItemById("status-bar").checked = statusBar;
+                if (statusBarVisible != statusBar) {
+                    checkMenuItem("status-bar", statusBar);
                     setStatusBar(statusBar);
                 }
                 setThemeSource(undefined, true);
@@ -491,11 +493,8 @@ export function getSettings(window) {
                     }
                 }
                 const overscanMode = settings.value("display.overscanMode");
-                const menuItem = app.applicationMenu.getMenuItemById(overscanMode);
-                if (!menuItem.checked) {
-                    menuItem.checked = true;
-                    window.webContents.send("setOverscan", overscanMode);
-                }
+                checkMenuItem(overscanMode, true);
+                window.webContents.send("setOverscan", overscanMode);
             }
             if (preferences.audio) {
                 setDeviceInfo("audio", "maxSimulStreams", true);
@@ -506,7 +505,7 @@ export function getSettings(window) {
                 const localeId = preferences.localization.locale;
                 if (global.sharedObject.deviceInfo.locale !== localeId) {
                     global.sharedObject.deviceInfo.locale = localeId;
-                    app.applicationMenu.getMenuItemById(localeId).checked = true;
+                    checkMenuItem(localeId, true);
                     window.webContents.send("setLocale", localeId);
                 }
                 setDeviceInfo("localization", "clockFormat", true);
@@ -538,7 +537,9 @@ export function showSettings() {
     let x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
     let y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
 
-    if (!isMacOS) {
+    if (isMacOS) {
+        createShortMenu();
+    } else {
         const userTheme = global.sharedObject.theme;
         settings.browserWindowOverrides.titleBarOverlay = getTitleOverlayTheme(userTheme);
     }
@@ -548,8 +549,30 @@ export function showSettings() {
         settingsWindow.setAlwaysOnTop(true);
     }
     settingsWindow.setBounds({ x: x, y: y });
-    settingsWindow.on('closed', () => {
+    settingsWindow.on("closed", () => {
         settingsWindow = null;
+        if (isMacOS) {
+            createMenu();
+            const displayMode = settings.value("display.displayMode");
+            checkMenuItem(displayMode, true);
+            const overscanMode = settings.value("display.overscanMode");
+            checkMenuItem(overscanMode, true);
+            const localeId = settings.value("localization.locale");
+            checkMenuItem(localeId, true);
+            const installerEnabled = settings.value("services.installer").includes("enabled");
+            checkMenuItem("web-installer", installerEnabled);
+            const ecpEnabled = settings.value("services.ecp").includes("enabled");
+            checkMenuItem("ecp-api", ecpEnabled);
+            const telnetEnabled = settings.value("services.telnet").includes("enabled");
+            checkMenuItem("telnet", telnetEnabled);
+            const options = settings.value("emulator.options");
+            if (options) {
+                checkMenuItem("on-top", options.includes("alwaysOnTop"));
+                checkMenuItem("status-bar", options.includes("statusBar"));
+            }
+            const userTheme = settings.value("emulator.theme");
+            checkMenuItem(`theme-${userTheme}`, true);
+        }
     });
 }
 
@@ -569,12 +592,12 @@ export function setDeviceInfo(section, key, notifyApp) {
     }
 }
 
-export function setStatusBar(enabled) {
+export function setStatusBar(visible) {
     const window = BrowserWindow.fromId(1);
     if (window) {
         setAspectRatio(false);
         if (isMacOS) {
-            if (enabled) {
+            if (visible) {
                 window.setBounds({ height: window.getBounds().height + 20 });
             } else {
                 window.setBounds({ height: window.getBounds().height - 20 });
@@ -582,6 +605,7 @@ export function setStatusBar(enabled) {
         }
         window.webContents.send("toggleStatusBar");
     }
+    statusBarVisible = visible;
 }
 
 export function setDisplayOption(option, mode, notifyApp) {
@@ -597,7 +621,7 @@ export function setDisplayOption(option, mode, notifyApp) {
     if ((mode !== current) & (mode === "480p" || current === "480p")) {
         setAspectRatio();
     }
-    app.applicationMenu.getMenuItemById(mode).checked = true;
+    checkMenuItem(mode, true);
     if (notifyApp) {
         const window = BrowserWindow.fromId(1);
         const msg = option === "displayMode" ? "setDisplay" : "setOverscan";
@@ -611,7 +635,7 @@ export function setThemeSource(userTheme, notifyApp) {
     } else {
         userTheme = settings.value("emulator.theme");
     }
-    app.applicationMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
+    checkMenuItem(`theme-${userTheme}`, true);
     let systemTheme = userTheme === "purple" ? "system" : userTheme;
     nativeTheme.themeSource = systemTheme;
     if (userTheme === "system") {
@@ -645,7 +669,7 @@ export function setEmulatorOption(key, enable, menuId) {
         }
         settings.value("emulator.options", options);
         if (menuId) {
-            app.applicationMenu.getMenuItemById(menuId).checked = enable;
+            checkMenuItem(menuId, enable);
         }
     }
 }
@@ -702,12 +726,11 @@ function getTitleOverlayTheme(userTheme) {
     if (userTheme === "purple") {
         return { color: "#3d1b56", symbolColor: "#dac7ea", height: 28 };
     } else if (userTheme === "dark") {
-        return { color: "#252526", symbolColor: "#cccccc", height: 28  };
+        return { color: "#252526", symbolColor: "#cccccc", height: 28 };
     } else {
         return { color: "#dddddd", symbolColor: "#333333", height: 28 };
     }
 }
-
 
 // Data Arrays
 

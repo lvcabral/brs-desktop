@@ -16,7 +16,7 @@ import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./server/installer";
 import { initECP, enableECP, updateECPStatus } from "./server/ecp";
 import { enableTelnet, updateTelnetStatus } from "./server/telnet";
-import { createMenu, enableMenuItem, isMenuItemEnabled, loadPackage } from "./menu/menuService";
+import { createMenu, enableMenuItem, checkMenuItem, isMenuItemEnabled, loadPackage } from "./menu/menuService";
 import { loadFile } from "./helpers/files";
 import {
     getSettings,
@@ -110,11 +110,10 @@ app.on("ready", () => {
         if (settings.value("emulator.options")) {
             const options = settings.value("emulator.options");
             const onTop = options.includes("alwaysOnTop");
-            app.applicationMenu.getMenuItemById("on-top").checked = onTop;
+            checkMenuItem("on-top", onTop);
             mainWindow.setAlwaysOnTop(onTop);
             mainWindow.setFullScreen(argv.fullscreen || options.includes("fullScreen"));
-            app.applicationMenu.getMenuItemById("status-bar").checked =
-                options.includes("statusBar");
+            checkMenuItem("status-bar", options.includes("statusBar"));
             startup.runLastChannel = options.includes("runLastChannel");
             startup.devTools = options.includes("devTools");
         }
@@ -138,7 +137,7 @@ app.on("ready", () => {
         setDisplayOption("displayMode");
         setAspectRatio(settings.value("display.displayMode"), false);
         const overscanMode = settings.value("display.overscanMode");
-        app.applicationMenu.getMenuItemById(overscanMode).checked = true;
+        checkMenuItem(overscanMode, true);
     }
     if (settings.preferences.audio) {
         setDeviceInfo("audio", "maxSimulStreams");
@@ -148,7 +147,7 @@ app.on("ready", () => {
         const localeId = settings.value("localization.locale");
         if (localeId) {
             deviceInfo.locale = localeId;
-            app.applicationMenu.getMenuItemById(localeId).checked = true;
+            checkMenuItem(localeId, true);
         }
         setDeviceInfo("localization", "clockFormat");
         setDeviceInfo("localization", "countryCode");

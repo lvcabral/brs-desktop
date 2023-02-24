@@ -35,8 +35,9 @@ contextBridge.exposeInMainWorld("api", {
         onPreferencesChangedHandler = handler;
     },
     isStatusEnabled: () => {
-        const appMenu = Menu.getApplicationMenu();
-        return appMenu.getMenuItemById("status-bar").checked;
+        const settings = ipcRenderer.sendSync("getPreferences");
+        const options = settings?.emulator?.options;
+        return options ? options.includes("statusBar") : false;
     },
     getDeviceInfo: () => {
         return getGlobal("sharedObject").deviceInfo;

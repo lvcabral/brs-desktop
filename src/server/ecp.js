@@ -13,6 +13,7 @@ import {
     getRecentId,
     getRecentName,
     getRecentVersion,
+    checkMenuItem,
 } from "../menu/menuService";
 import { loadFile } from "../helpers/files";
 import { setPreference, getModelName } from "../helpers/settings";
@@ -151,7 +152,7 @@ export function disableECP() {
 
 export function updateECPStatus(enabled) {
     setPreference("services.ecp", enabled ? ["enabled"] : []);
-    app.applicationMenu.getMenuItemById("ecp-api").checked = enabled;
+    checkMenuItem("ecp-api", enabled);
     window = BrowserWindow.fromId(1);
     window.webContents.send("serverStatus", "ECP", enabled, ECPPORT);
     window.webContents.send("refreshMenu");
