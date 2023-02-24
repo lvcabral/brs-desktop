@@ -58,6 +58,7 @@ export const helpMenuTemplate = {
                 const about = openAboutWindow({
                     icon_path: path.join(__dirname, "images/icon.png"),
                     copyright: "Copyright © 2019-2023 Marcelo Lv Cabral",
+                    homepage: "https://github.com/lvcabral/brs-emu-app#readme",
                     win_options: {
                         parent: window,
                         x: x,
@@ -66,6 +67,8 @@ export const helpMenuTemplate = {
                         height: h,
                         opacity: 0.9,
                         modal: true,
+                        maximizable: false,
+                        minimizable: false,
                     },
                 });
                 about.setMenuBarVisibility(false);
