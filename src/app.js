@@ -34,6 +34,7 @@ customKeys.set("Space", "play"); // Keep consistency with older versions
 
 brsEmu.initialize(api.getDeviceInfo(), {
     debugToConsole: true,
+    showStats: false,
     customKeys: customKeys,
 });
 brsEmu.subscribe("app", (event, data) => {
