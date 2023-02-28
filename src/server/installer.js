@@ -191,13 +191,13 @@ export function enableInstaller() {
             isInstallerEnabled = true;
             updateInstallerStatus(isInstallerEnabled, window);
         });
-    server.on("error", (error) => {
-        if (error.code === "EADDRINUSE") {
+    server.on("error", (e) => {
+        if (e.code === "EADDRINUSE") {
             window.webContents.send("console", `Web Installer server failed:${e.message}`, true);
             isInstallerEnabled = false;
             updateInstallerStatus(isInstallerEnabled, window);
         } else {
-            window.webContents.send("console", error.message, true);
+            window.webContents.send("console", e.message, true);
         }
     });
 }
