@@ -55,9 +55,6 @@ const deviceInfo = {
     audioVolume: 40,
 };
 
-// Enable SharedArrayBuffer
-// app.commandLine.appendSwitch('enable-features','SharedArrayBuffer');
-
 require("@electron/remote/main").initialize();
 
 // Parse CLI parameters

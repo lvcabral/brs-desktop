@@ -40,9 +40,12 @@ brsEmu.initialize(api.getDeviceInfo(), {
 brsEmu.subscribe("app", (event, data) => {
     if (event === "loaded") {
         currentChannel = data;
-        let prefs = api.getPreferences();
-        if (prefs && prefs.display && prefs.display.overscanMode) {
-            brsEmu.setOverscanMode(prefs.display.overscanMode);
+        let settings = api.getPreferences();
+        if (settings && settings.display && settings.display.overscanMode) {
+            brsEmu.setOverscanMode(settings.display.overscanMode);
+        }
+        if (settings && settings.emulator && settings.emulator.options) {
+            brsEmu.enableStats(settings.emulator.options.includes("perfStats"));
         }
         api.updateTitle(`${data.title} - ${defaultTitle}`);
         if (data.id === "brs") {

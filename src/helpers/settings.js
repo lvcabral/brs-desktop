@@ -61,6 +61,11 @@ export function getSettings(window) {
                     displayMode: "720p",
                     overscanMode: "disabled",
                 },
+                remote: {
+                    keyBack: "Escape",
+                    keyHome: "Home",
+                    keyInfo: "Insert",
+                },
                 audio: {
                     maxSimulStreams: global.sharedObject.deviceInfo.maxSimulStreams,
                     audioVolume: global.sharedObject.deviceInfo.audioVolume,
@@ -122,6 +127,10 @@ export function getSettings(window) {
                                             {
                                                 label: "Enable Always on Top Mode",
                                                 value: "alwaysOnTop",
+                                            },
+                                            {
+                                                label: "Show Performance Statistics",
+                                                value: "perfStats",
                                             },
                                             {
                                                 label: "Show Status Bar",
@@ -267,31 +276,26 @@ export function getSettings(window) {
                     form: {
                         groups: [
                             {
-                                label: "Remote Controle Emulation",
+                                label: "Remote Control Emulation",
                                 fields: [
                                     {
-                                        label: "Serial Number",
-                                        key: "key1",
-                                        type: "text",
-                                        help: "Device serial number, must be 12 characters long, only letters and numbers",
+                                        label: "Button: Back",
+                                        key: "keyBack",
+                                        type: "accelerator",
+                                        help: "Select a keyboard shortcut for the `back` button.",
+                                        modifierRequired: false,
                                     },
                                     {
-                                        label: "Channel Client Id",
-                                        key: "key2",
-                                        type: "text",
-                                        help: "Unique device identifier returned by ifDeviceInfo.GetChannelClientId()",
+                                        label: "Button: Home",
+                                        key: "keyHome",
+                                        type: "accelerator",
+                                        help: "Select a keyboard shortcut for the `home` button.",
                                     },
                                     {
-                                        label: "RIDA",
-                                        key: "key3",
-                                        type: "text",
-                                        help: "Unique identifier for advertisement tracking returned by ifDevideInfo.GetRIDA()",
-                                    },
-                                    {
-                                        label: "Developer Id",
-                                        key: "key4",
-                                        type: "text",
-                                        help: "Unique id to segregate registry among channels, the registry only changes after a reset or app restart",
+                                        label: "Button: Info",
+                                        key: "keyInfo",
+                                        type: "accelerator",
+                                        help: "Select a keyboard shortcut for the `info` (*) button",
                                     },
                                 ],
                             },
