@@ -1877,10 +1877,10 @@ browserslist@^4.21.3, browserslist@^4.21.4:
     node-releases "^2.0.6"
     update-browserslist-db "^1.0.9"
 
-brs-emu@^0.10.10-dev:
-  version "0.10.10-dev"
-  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.10.10-dev.tgz#bf89c8b0b91a1daa639b454bf43906199968bf6b"
-  integrity sha512-l5ocOoFgVdflj9T4bErtaxXuMXnCK57YMBf8dw54KPtVG00FlhAoqPWXowuVaQaC47m1M4I8YMwoJqxzzC5qPA==
+brs-emu@^0.10.11-dev:
+  version "0.10.11-dev"
+  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.10.11-dev.tgz#006840820f5a9542f8f6bccb966226439f37b326"
+  integrity sha512-Be3ZxAKd1D2flEBVMbtKsUl6OZNhfbBgf0tWLFkXKxDq+QKiTKlGDK7GUzOAjwixko6NSu8TC6HmZt/KKoniCQ==
   dependencies:
     bowser "^2.11.0"
     crc "^3.8.0"
