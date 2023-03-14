@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -12,6 +12,7 @@ import { setLocaleId, setDisplayOption } from "../helpers/settings";
 import { reloadApp } from "../helpers/window";
 
 export const deviceMenuTemplate = {
+    id: "device-menu",
     label: "&Device",
     submenu: [
         {

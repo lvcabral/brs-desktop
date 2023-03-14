@@ -9,6 +9,7 @@ import { setThemeSource, setEmulatorOption, setStatusBar } from "../helpers/sett
 import { setAlwaysOnTop } from "../helpers/window";
 
 export const viewMenuTemplate = {
+    id: "view-menu",
     label: "&View",
     submenu: [
         {

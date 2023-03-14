@@ -240,16 +240,18 @@ function rebuildMenu(template = false) {
                 if (userTheme === "system") {
                     userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
                 }
-                appMenu.getMenuItemById(`theme-${userTheme}`).checked = true;
-                appMenu.getMenuItemById("on-top").checked = window.isAlwaysOnTop();
-                appMenu.getMenuItemById("status-bar").checked = getEmulatorOption("statusBar");
+                const localeId = global.sharedObject.deviceInfo.locale;
+                checkMenuItem(localeId, true);
+                checkMenuItem(`theme-${userTheme}`, true);
+                checkMenuItem("on-top", window.isAlwaysOnTop());
+                checkMenuItem("status-bar", getEmulatorOption("statusBar"));
             }
             if (appMenu.getMenuItemById("device-menu")) {
                 setDisplayOption("displayMode");
                 setDisplayOption("overscanMode");
-                appMenu.getMenuItemById("web-installer").checked = isInstallerEnabled;
-                appMenu.getMenuItemById("ecp-api").checked = isECPEnabled;
-                appMenu.getMenuItemById("telnet").checked = isTelnetEnabled;
+                checkMenuItem("web-installer", isInstallerEnabled);
+                checkMenuItem("ecp-api", isECPEnabled);
+                checkMenuItem("telnet", isTelnetEnabled);
             }
         }
     } else {
