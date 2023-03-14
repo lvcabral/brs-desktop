@@ -352,8 +352,8 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("default-device-name", {}, `${device.friendlyName} - ${device.serialNumber}`);
     xml.ele("user-device-name", {}, device.friendlyName);
     xml.ele("build-number", {}, device.firmwareVersion);
-    xml.ele("software-version", {}, "10.0.0");
-    xml.ele("software-build", {}, "4209");
+    xml.ele("software-version", {}, getRokuOS(device.firmwareVersion));
+    xml.ele("software-build", {}, getRokuOS(device.firmwareVersion, false));
     xml.ele("secure-device", {}, true);
     xml.ele("language", {}, device.locale.split("_")[0]);
     xml.ele("country", {}, device.countryCode);
@@ -501,4 +501,18 @@ function getMacAddress() {
         mac = "87:3e:aa:9f:77:70";
     }
     return mac;
+}
+
+function getRokuOS(firmware, version = true) {
+    if (firmware && firmware.length > 0) {
+        if (version) {
+            const versions = "0123456789ACDEFGHJKLMNPRSTUVWXY";
+            const major = versions.indexOf(firmware.charAt(2));
+            const minor = firmware.slice(4, 5);
+            const revision = firmware.slice(7, 8);
+            return `${major}.${minor}.${revision}`;
+        } else {
+            return firmware.slice(8, 12);
+        }
+    }
 }
