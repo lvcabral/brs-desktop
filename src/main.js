@@ -112,7 +112,7 @@ app.on("ready", () => {
             mainWindow.setFullScreen(argv.fullscreen || options.includes("fullScreen"));
             checkMenuItem("status-bar", options.includes("statusBar"));
             startup.runLastChannel = options.includes("runLastChannel");
-            startup.devTools = options.includes("devTools");
+            startup.devTools = options.includes("devToolsStartup");
         }
         setThemeSource();
     }

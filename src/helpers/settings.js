@@ -122,7 +122,11 @@ export function getSettings(window) {
                                             },
                                             {
                                                 label: "Open Developer Tools on Startup",
-                                                value: "devTools",
+                                                value: "devToolsStartup",
+                                            },
+                                            {
+                                                label: "Open Developer Tools when Micro Debugger is Triggered",
+                                                value: "devToolsDebug",
                                             },
                                             {
                                                 label: "Enable Always on Top Mode",

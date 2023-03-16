@@ -111,6 +111,11 @@ export function createWindow(name, options) {
     ipcMain.on("openDevTools", (event, data) => {
         win.openDevTools();
     });
+    ipcMain.on("debugStarted", (event, data) => {
+        if (getEmulatorOption("devToolsDebug")) {
+            win.openDevTools();
+        }
+    });
     ipcMain.on("setBackgroundColor", (event, color) => {
         win.setBackgroundColor(color);
         global.sharedObject.backgroundColor = color;

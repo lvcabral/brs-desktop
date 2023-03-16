@@ -94,6 +94,7 @@ contextBridge.exposeInMainWorld("api", {
             "addRecentSource",
             "addRecentPackage",
             "openDevTools",
+            "debugStarted",
             "setAudioMute",
             "saveFile",
             "saveIcon",

@@ -83,11 +83,10 @@ brsEmu.subscribe("app", (event, data) => {
         }
     } else if (event === "debug") {
         if (data.level === "stop") {
-            api.send("openDevTools");
+            api.send("debugStarted");
         } else if (typeof data.content === "string") {
             api.send("telnet", data.content);
         }
-        
     } else if (event === "icon") {
         api.send("saveIcon", [currentChannel.id, data]);
     } else if (event === "reset") {
