@@ -1859,10 +1859,10 @@ browserslist@^4.21.4:
     node-releases "^2.0.6"
     update-browserslist-db "^1.0.9"
 
-brs-emu@^0.10.19-dev:
-  version "0.10.19-dev"
-  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.10.19-dev.tgz#d10033be9c6378b07ea6c10ea85c2241b3b2f70b"
-  integrity sha512-FdfEHARFIXqGc9KwjcMUv4hmwt1C8lXBwfXHZgZcuaF7oUmGyVB4yfnpOVHnXAY1gPy3cXiqtA5fi0rlgrmHaA==
+brs-emu@^0.10.21:
+  version "0.10.21"
+  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.10.21.tgz#e86e2ed257ac8270cc5cd8d4fc389d2d7ad3988c"
+  integrity sha512-uq3jhF++8hoPmimNTNrqfcruA+VtqsvbXxtLVDHj1ZRfgb9Gl2X6MD7SUgP96fXIMLFb2kqBP+K3QIlnNbGqhA==
   dependencies:
     crc "^3.8.0"
     decode-bmp "^0.1.0"
@@ -2447,7 +2447,7 @@ currently-unhandled@^0.4.1:
   dependencies:
     array-find-index "^1.0.1"
 
-custom-electron-titlebar@^4.0.0:
+custom-electron-titlebar@^4.1.6:
   version "4.1.6"
   resolved "https://registry.yarnpkg.com/custom-electron-titlebar/-/custom-electron-titlebar-4.1.6.tgz#5853c76fbe1ab6ab764e9075df84ec9cf9780015"
   integrity sha512-AGULUZMxhEZDpl0Z1jfZzXgQEdhAPe8YET0dYQA/19t8oCrTFzF2PzdvJNCmxGU4Ai3jPWVeCPKg4vM7ffU0Mg==
