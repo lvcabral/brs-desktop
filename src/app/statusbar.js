@@ -65,44 +65,11 @@ setLocaleStatus(currentLocale);
 // Subscribe Events
 brsEmu.subscribe("statusbar", (event, data) => {
     if (event === "loaded") {
-        clearCounters();
-        setStatusColor();
-        statusIconFile.innerHTML =
-            data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
-        statusFile.innerText = shortenPath(
-            data.file,
-            Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
-        );
-        filePath = data.file;
-        if (data.version !== "") {
-            statusVersion.innerText = data.version;
-            statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
-            statusIconVersion.style.display = "";
-        }
-        setAudioStatus(brsEmu.getAudioMute());
-        statusAudio.style.display = "";
+        updateStatus(data);
     } else if (event === "closed") {
-        statusIconFile.innerText = "";
-        statusFile.innerText = "";
-        filePath = "";
-        statusVersion.innerText = "";
-        statusIconVersion.style.display = "none";
-        statusAudio.style.display = "none";
-        statusResolution.style.display = "none";
-        statusIconRes.style.display = "none";
-        statusSepRes.style.display = "none";
+        updateStatus(false);
     } else if (event === "redraw") {
-        if (!data && api.isStatusEnabled()) {
-            statusBar.style.visibility = "visible";
-            if (filePath !== "") {
-                statusFile.innerText = shortenPath(
-                    filePath,
-                    Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
-                );
-            }
-        } else {
-            statusBar.style.visibility = "hidden";
-        }
+        redrawStatus(data);
     } else if (event === "resolution") {
         statusResolution.innerText = `${data.width}x${data.height}`;
         statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
@@ -110,8 +77,7 @@ brsEmu.subscribe("statusbar", (event, data) => {
         statusIconRes.style.display = "";
         statusSepRes.style.display = "";
     } else if (event === "display") {
-        let ui = data == "720p" ? "HD" : data == "1080p" ? "FHD" : "SD";
-        statusDisplay.innerText = `${ui} (${data})`;
+        statusDisplay.innerText = `${getUIType(data)} (${data})`;
     } else if (event === "debug") {
         if (data.level === "error") {
             errorCount++;
@@ -193,28 +159,24 @@ export function clearCounters() {
 }
 // Function that shortens a path (based on code by https://stackoverflow.com/users/2149492/johnpan)
 function shortenPath(bigPath, maxLen) {
-    if (bigPath.length <= maxLen) return bigPath;
-    var splitter = bigPath.indexOf("/") > -1 ? "/" : "\\",
-        tokens = bigPath.split(splitter),
-        maxLen = maxLen || 25,
-        drive = bigPath.indexOf(":") > -1 ? tokens[0] : "",
-        fileName = tokens[tokens.length - 1],
-        len = drive.length + fileName.length,
-        remLen = maxLen - len - 3, // remove the current length and also space for ellipsis char and 2 slashes
-        path, lenA, lenB, pathA, pathB;
-    //remove first and last elements from the array
-    tokens.splice(0, 1);
-    tokens.splice(tokens.length - 1, 1);
-    //recreate our path
-    path = tokens.join(splitter);
-    //handle the case of an odd length
-    lenA = Math.ceil(remLen / 2);
-    lenB = Math.floor(remLen / 2);
-    //rebuild the path from beginning and end
-    pathA = path.substring(0, lenA);
-    pathB = path.substring(path.length - lenB);
-    path = drive + splitter + pathA + "…" + pathB + splitter;
-    path = path + fileName;
+    let path = bigPath;
+    if (path.length > maxLen) {
+        const splitter = bigPath.indexOf("/") > -1 ? "/" : "\\"
+        const tokens = bigPath.split(splitter)
+        const drive = bigPath.indexOf(":") > -1 ? tokens[0] : ""
+        const fileName = tokens[tokens.length - 1]
+        const len = drive.length + fileName.length
+        const remLen = maxLen - len - 3 // remove the current length and also space for ellipsis char and 2 slashes
+        //remove first and last elements from the array
+        tokens.splice(0, 1);
+        tokens.splice(tokens.length - 1, 1);
+        //recreate our path
+        path = tokens.join(splitter);
+        //rebuild the path from beginning and end
+        const pathA = path.substring(0, Math.ceil(remLen / 2));
+        const pathB = path.substring(path.length - Math.floor(remLen / 2));
+        path = `${drive}${splitter}${pathA}…${pathB}${splitter}${fileName}`;
+    }
     return path;
 }
 // Events from Main process
@@ -237,3 +199,54 @@ api.receive("setLocale", function (locale) {
         setLocaleStatus(locale);
     }
 });
+
+// Helper Functions
+
+function updateStatus(data) {
+    if (data) {
+        clearCounters();
+        setStatusColor();
+        statusIconFile.innerHTML =
+            data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
+        statusFile.innerText = shortenPath(
+            data.file,
+            Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+        );
+        filePath = data.file;
+        if (data.version !== "") {
+            statusVersion.innerText = data.version;
+            statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
+            statusIconVersion.style.display = "";
+        }
+        setAudioStatus(brsEmu.getAudioMute());
+        statusAudio.style.display = "";
+    } else {
+        statusIconFile.innerText = "";
+        statusFile.innerText = "";
+        filePath = "";
+        statusVersion.innerText = "";
+        statusIconVersion.style.display = "none";
+        statusAudio.style.display = "none";
+        statusResolution.style.display = "none";
+        statusIconRes.style.display = "none";
+        statusSepRes.style.display = "none";
+    }
+}
+
+function redrawStatus(fullscreen) {
+    if (!fullscreen && api.isStatusEnabled()) {
+        statusBar.style.visibility = "visible";
+        if (filePath !== "") {
+            statusFile.innerText = shortenPath(
+                filePath,
+                Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+            );
+        }
+    } else {
+        statusBar.style.visibility = "hidden";
+    }
+}
+
+function getUIType(resolution) {
+    return resolution == "720p" ? "HD" : resolution == "1080p" ? "FHD" : "SD"
+}

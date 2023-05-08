@@ -123,8 +123,8 @@ export function enableInstaller() {
                 busboy.on("finish", function () {
                     if (done === "screenshot") {
                         setTimeout(() => {
-                            let saveTo = path.join(app.getPath("userData"), "dev.png");
-                            var s = fs.createReadStream(saveTo);
+                            const saveTo = path.join(app.getPath("userData"), "dev.png");
+                            const s = fs.createReadStream(saveTo);
                             s.on("open", () => {
                                 res.setHeader("Content-Type", "image/png");
                                 s.pipe(res);
@@ -189,13 +189,13 @@ export function enableInstaller() {
         })
         .listen(port, () => {
             isInstallerEnabled = true;
-            updateInstallerStatus(isInstallerEnabled, window);
+            updateInstallerStatus(isInstallerEnabled);
         });
     server.on("error", (e) => {
         if (e.code === "EADDRINUSE") {
             window.webContents.send("console", `Web Installer server failed:${e.message}`, true);
             isInstallerEnabled = false;
-            updateInstallerStatus(isInstallerEnabled, window);
+            updateInstallerStatus(isInstallerEnabled);
         } else {
             window.webContents.send("console", e.message, true);
         }
