@@ -47,6 +47,7 @@
         "e2e": "mocha temp/e2e.js --require source-map-support/register",
         "test": "npm run unit && npm run e2e",
         "start": "node build/start.js",
+        "build": "webpack --config build/webpack.app.config.js",
         "dist": "webpack --config build/webpack.app.config.js --env production && electron-builder",
         "dist-win": "webpack --config build/webpack.app.config.js --env production && electron-builder -w --x64 --ia32",
         "dist-linux32": "webpack --config build/webpack.app.config.js --env production && electron-builder -l --ia32",
