@@ -23,7 +23,6 @@ export function createWindow(name, options) {
     let win;
 
     const restore = () => {
-        const appMenu = app.applicationMenu;
         let restoredState = {};
         try {
             restoredState = userDataDir.read(stateStoreFile, "json");
