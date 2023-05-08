@@ -128,6 +128,9 @@ api.receive("console", function (text, error) {
 api.receive("debugCommand", function (cmd) {
     brsEmu.debug(cmd);
 });
+api.receive("setCustomKeys", function (keys) {
+    brsEmu.setCustomKeys(keys);
+});
 api.receive("postKeyDown", function (key) {
     brsEmu.sendKeyDown(key);
 });

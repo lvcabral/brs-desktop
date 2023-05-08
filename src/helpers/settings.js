@@ -65,6 +65,8 @@ export function getSettings(window) {
                     keyBack: "Escape",
                     keyHome: "Home",
                     keyInfo: "Insert",
+                    keyReplay: "Backspace",
+                    keyPlayPause: "End",
                 },
                 audio: {
                     maxSimulStreams: global.sharedObject.deviceInfo.maxSimulStreams,
@@ -280,7 +282,7 @@ export function getSettings(window) {
                     form: {
                         groups: [
                             {
-                                label: "Remote Control Emulation",
+                                label: "Remote Control Emulation - Customize Keys",
                                 fields: [
                                     {
                                         label: "Button: Back",
@@ -299,7 +301,19 @@ export function getSettings(window) {
                                         label: "Button: Info",
                                         key: "keyInfo",
                                         type: "accelerator",
-                                        help: "Select a keyboard shortcut for the `info` (*) button",
+                                        help: "Select a keyboard shortcut for the `info` (*) button.",
+                                    },
+                                    {
+                                        label: "Button: Instant Replay",
+                                        key: "keyReplay",
+                                        type: "accelerator",
+                                        help: "Select a keyboard shortcut for the `instant replay` button.",
+                                    },
+                                    {
+                                        label: "Button: Play/Pause",
+                                        key: "keyPlayPause",
+                                        type: "accelerator",
+                                        help: "Select a keyboard shortcut for the `play/pause` button.",
                                     },
                                 ],
                             },
@@ -491,7 +505,7 @@ export function getSettings(window) {
                 setDeviceInfo("device", "RIDA", true);
                 setDeviceInfo("device", "developerId"); // Do not notify app to avoid change registry without reset
             }
-            if (settings.preferences.display) {
+            if (preferences.display) {
                 const oldValue = global.sharedObject.deviceInfo.displayMode;
                 const newValue = settings.value("display.displayMode");
                 if (newValue && newValue !== oldValue) {
@@ -503,6 +517,9 @@ export function getSettings(window) {
                 const overscanMode = settings.value("display.overscanMode");
                 checkMenuItem(overscanMode, true);
                 window.webContents.send("setOverscan", overscanMode);
+            }
+            if (preferences.remote) {
+                setRemoteKeys(settings.defaults.remote, preferences.remote);
             }
             if (preferences.audio) {
                 setDeviceInfo("audio", "maxSimulStreams", true);
@@ -530,6 +547,104 @@ export function getSettings(window) {
         });
     }
     return settings;
+}
+
+export function setRemoteKeys(defaults, remote) {
+    const customKeys = new Map();
+    if (remote.keyBack === "") {
+        settings.value("remote.keyBack", defaults.keyBack);
+    } else if (defaults.keyBack !== remote.keyBack) {
+        customKeys.set(convertKey(remote.keyBack), "back");
+    }
+    if (remote.keyHome === "") {
+        settings.value("remote.keyHome", defaults.keyHome);
+    } else if (defaults.keyHome !== remote.keyHome) {
+        customKeys.set(convertKey(remote.keyHome), "home");
+    }
+    if (remote.keyInfo === "") {
+        settings.value("remote.keyInfo", defaults.keyInfo);
+    } else if (defaults.keyInfo !== remote.keyInfo) {
+        customKeys.set(convertKey(remote.keyInfo), "info");
+    }
+    if (remote.keyReplay === "") {
+        settings.value("remote.keyReplay", defaults.keyReplay);
+    } else if (defaults.keyReplay !== remote.keyReplay) {
+        customKeys.set(convertKey(remote.keyReplay), "instantreplay");
+    }
+    if (remote.keyPlayPause === "") {
+        settings.value("remote.keyPlayPause", defaults.keyPlayPause);
+    } else if (defaults.keyPlayPause !== remote.keyPlayPause) {
+        customKeys.set(convertKey(remote.keyPlayPause), "play");
+    }
+    if (customKeys.size > 0) {
+        const window = BrowserWindow.fromId(1);
+        if (window) {
+            console.log("sent keys!!!");
+            window.webContents.send("setCustomKeys", customKeys);
+        }
+    }
+}
+
+function convertKey(keyCode) {
+    const arrows = new Set(["Left", "Right", "Up", "Down"]);
+    let newCode = keyCode.replaceAll(" ", "");
+    if (keyCode.includes("+")) {
+        const leftKey = keyCode.split("+")[0];
+        const rightKey = keyCode.split("+")[1];
+        if (rightKey.length === 1) {
+            newCode = `${leftKey}+${convertChar(rightKey)}`;
+        } else if (arrows.has(rightKey)) {
+            newCode = `${leftKey}+Arrow${rightKey}`;
+        }
+    } else if (keyCode.length === 1) {
+        newCode = convertChar(keyCode);
+    } else if (arrows.has(keyCode)) {
+        newCode = `Arrow${keyCode}`;
+    }
+    return newCode;
+}
+
+function convertChar(keyChar) {
+    if (isNumber(keyChar)) {
+        return `Digit${keyChar}`;
+    } else if (isLetter(keyChar)) {
+        return `Key${keyChar}`;
+    } else {
+        switch (keyChar) {
+            case "`":
+                return "Backquote";
+            case "-":
+                return "Minus";
+            case "=":
+                return "Equal";
+            case "[":
+                return "BracketLeft";
+            case "]":
+                return "BracketRight";
+            case ";":
+                return "Semicolon";
+            case "'":
+                return "Quote";
+            case ",":
+                return "Comma";
+            case ".":
+                return "Period";
+            case "\\":
+                return "Backslash";
+            case "/":
+                return "Slash";
+            default:
+                return keyChar;
+        }
+    }
+}
+
+function isNumber(str) {
+    return str.length === 1 && str.match(/[0-9]/i);
+}
+
+function isLetter(str) {
+    return str.length === 1 && str.match(/[a-z]/i);
 }
 
 export function showSettings() {
@@ -744,15 +859,11 @@ function getTitleOverlayTheme(userTheme) {
 
 function getRokuModelArray() {
     const modelArray = [];
-    modelLabels.set("N1050", "Roku SD Classic");
     modelLabels.set("N1000", "Roku DVP Classic");
     modelLabels.set("N1100", "Roku HD Classic");
     modelLabels.set("N1101", "Roku HD-XR Classic");
     modelLabels.set("2050X", "Roku XD");
-    modelLabels.set("2050N", "Roku XD");
     modelLabels.set("2100X", "Roku XD|S");
-    modelLabels.set("2100N", "Roku XD|S");
-    modelLabels.set("2000C", "Roku HD");
     modelLabels.set("2400X", "Roku LT");
     modelLabels.set("2450X", "Roku LT");
     modelLabels.set("2500X", "Roku HD");
@@ -767,7 +878,6 @@ function getRokuModelArray() {
     modelLabels.set("4210X", "Roku 3 (US)");
     modelLabels.set("4230X", "Roku 3 (US)");
     modelLabels.set("4400X", "Roku 4");
-    modelLabels.set("4500SK", "Sky Now TV (UK)");
     modelLabels.set("3400X", "Roku Stick");
     modelLabels.set("3420X", "Roku Stick");
     modelLabels.set("3500X", "Roku Stick (HDMI)");
@@ -784,7 +894,6 @@ function getRokuModelArray() {
     modelLabels.set("3800X", "Roku Stick (2017)");
     modelLabels.set("3810X", "Roku Stick+");
     modelLabels.set("3900X", "Roku Express (2017)");
-    modelLabels.set("3900EU", "Roku Express EU (2017)");
     modelLabels.set("3910X", "Roku Express+ (2017)");
     modelLabels.set("3930X", "Roku Express (2019)");
     modelLabels.set("3931X", "Roku Express+ (2019)");

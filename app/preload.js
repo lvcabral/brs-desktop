@@ -119,6 +119,7 @@ contextBridge.exposeInMainWorld("api", {
             "setOverscan",
             "setLocale",
             "setDeviceInfo",
+            "setCustomKeys",
             "setAudioMute",
             "toggleStatusBar",
             "serverStatus",

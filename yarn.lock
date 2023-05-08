@@ -1859,10 +1859,10 @@ browserslist@^4.21.4:
     node-releases "^2.0.6"
     update-browserslist-db "^1.0.9"
 
-brs-emu@^0.10.21:
-  version "0.10.21"
-  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.10.21.tgz#e86e2ed257ac8270cc5cd8d4fc389d2d7ad3988c"
-  integrity sha512-uq3jhF++8hoPmimNTNrqfcruA+VtqsvbXxtLVDHj1ZRfgb9Gl2X6MD7SUgP96fXIMLFb2kqBP+K3QIlnNbGqhA==
+brs-emu@^0.10.22:
+  version "0.10.22"
+  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.10.22.tgz#ab500e2925433445ee80990e35acf32b80158d99"
+  integrity sha512-hn+bVrOLA2k4/mMbO39StmrL8aQTybjd4kkopuMqypCS+Ga8DxgfojoXVHUUxoewEEuQJXJMuIA7dxvdxZ8nNQ==
   dependencies:
     crc "^3.8.0"
     decode-bmp "^0.1.0"

@@ -22,6 +22,7 @@ import {
     getSettings,
     setDeviceInfo,
     setDisplayOption,
+    setRemoteKeys,
     setThemeSource,
     setTimeZone,
 } from "./helpers/settings";
@@ -232,6 +233,9 @@ app.on("ready", () => {
             updateECPStatus(settings.value("services.ecp").includes("enabled"));
             updateTelnetStatus(settings.value("services.telnet").includes("enabled"));
             updateInstallerStatus(settings.value("services.installer").includes("enabled"));
+        }
+        if (settings.preferences.remote) {
+            setRemoteKeys(settings.defaults.remote, settings.preferences.remote);
         }
     });
     if (isMacOS) {
