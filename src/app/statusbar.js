@@ -54,7 +54,7 @@ statusAudio.onclick = function () {
 };
 
 let displayMode = api.getDeviceInfo().displayMode;
-let ui = displayMode == "720p" ? "HD" : displayMode == "1080p" ? "FHD" : "SD";
+let ui = getUIType(displayMode);
 statusDisplay.innerText = `${ui} (${displayMode})`;
 const MIN_PATH_SIZE = 30;
 const PATH_SIZE_FACTOR = 0.045;
@@ -248,5 +248,10 @@ function redrawStatus(fullscreen) {
 }
 
 function getUIType(resolution) {
-    return resolution == "720p" ? "HD" : resolution == "1080p" ? "FHD" : "SD"
+    if (resolution === "480p") {
+        return "SD";
+    } else if (resolution === "1080p") {
+        return "FHD";
+    }
+    return "HD";
 }
