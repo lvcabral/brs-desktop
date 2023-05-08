@@ -1,14 +1,24 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+import { setThemeSource, setEmulatorOption, setStatusBar } from "../helpers/settings";
+import { setAlwaysOnTop } from "../helpers/window";
+
 export const viewMenuTemplate = {
+    id: "view-menu",
     label: "&View",
     submenu: [
         {
             label: "Full Screen",
-            role: "togglefullscreen"
+            role: "togglefullscreen",
         },
         {
             label: "Developer Tools",
-            accelerator: "CmdOrCtrl+Shift+I",
-            role: "toggleDevTools"
+            role: "toggleDevTools",
         },
         { type: "separator" },
         {
@@ -16,27 +26,36 @@ export const viewMenuTemplate = {
             label: "Purple Theme",
             type: "radio",
             checked: true,
-            click: (event, window) => {
-                window.webContents.send("setTheme", "purple");
-            }
+            click: (item) => {
+                setThemeSource(item.id.slice(6), true);
+            },
         },
         {
             id: "theme-light",
             label: "Light Theme",
             type: "radio",
             checked: false,
-            click: (event, window) => {
-                window.webContents.send("setTheme", "light");
-            }
+            click: (item) => {
+                setThemeSource(item.id.slice(6), true);
+            },
         },
         {
             id: "theme-dark",
             label: "Dark Theme",
             type: "radio",
             checked: false,
-            click: (event, window) => {
-                window.webContents.send("setTheme", "dark");
-            }
+            click: (item) => {
+                setThemeSource(item.id.slice(6), true);
+            },
+        },
+        {
+            id: "theme-system",
+            label: "System Theme",
+            type: "radio",
+            checked: false,
+            click: (item) => {
+                setThemeSource(item.id.slice(6), true);
+            },
         },
         { type: "separator" },
         {
@@ -45,9 +64,10 @@ export const viewMenuTemplate = {
             type: "checkbox",
             checked: false,
             enabled: true,
-            click: (event, window) => {
-                window.webContents.send("toggleOnTop");
-            }
+            click: (item) => {
+                setEmulatorOption("alwaysOnTop", item.checked, item.id);
+                setAlwaysOnTop(item.checked);
+            },
         },
         {
             id: "status-bar",
@@ -55,9 +75,10 @@ export const viewMenuTemplate = {
             type: "checkbox",
             checked: true,
             enabled: true,
-            click: (event, window) => {
-                window.webContents.send("toggleStatusBar");
-            }
-        }
-    ]
+            click: (item) => {
+                setEmulatorOption("statusBar", item.checked, item.id);
+                setStatusBar(item.checked);
+            },
+        },
+    ],
 };

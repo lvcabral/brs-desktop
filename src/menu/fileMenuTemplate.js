@@ -1,5 +1,13 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import * as dialog from "../helpers/dialog";
-import { getRecentPackage, clearRecentFiles, getRecentSource } from "./menuService";
+import { closeChannel } from "../helpers/window";
+import { loadPackage, loadSource, clearRecentFiles } from "./menuService";
 
 export const fileMenuTemplate = {
     label: "&File",
@@ -9,14 +17,14 @@ export const fileMenuTemplate = {
             accelerator: "CmdOrCtrl+O",
             click: () => {
                 dialog.openChannelPackage();
-            }
+            },
         },
         {
             label: "Open Source File...",
             accelerator: "CmdOrCtrl+Shift+O",
             click: () => {
                 dialog.openBrightScriptFile();
-            }
+            },
         },
         {
             id: "file-open-recent",
@@ -27,145 +35,145 @@ export const fileMenuTemplate = {
                     label: "",
                     accelerator: "CmdOrCtrl+R",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 0);
-                    }
+                    click: (item, window) => {
+                        loadPackage(0);
+                    },
                 },
                 {
                     id: "zip-1",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 1);
-                    }
+                    click: (item, window) => {
+                        loadPackage(1);
+                    },
                 },
                 {
                     id: "zip-2",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 2);
-                    }
+                    click: (item, window) => {
+                        loadPackage(2);
+                    },
                 },
                 {
                     id: "zip-3",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 3);
-                    }
+                    click: (item, window) => {
+                        loadPackage(3);
+                    },
                 },
                 {
                     id: "zip-4",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 4);
-                    }
+                    click: (item, window) => {
+                        loadPackage(4);
+                    },
                 },
                 {
                     id: "zip-5",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 5);
-                    }
+                    click: (item, window) => {
+                        loadPackage(5);
+                    },
                 },
                 {
                     id: "zip-6",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        packageClick(window, 6);
-                    }
+                    click: (item, window) => {
+                        loadPackage(6);
+                    },
                 },
                 {
                     id: "zip-empty",
                     label: "No Channel .zip Package Recently Opened",
-                    enabled: false
+                    enabled: false,
                 },
                 { type: "separator" },
                 {
                     id: "brs-0",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 0);
-                    }
+                    click: (item, window) => {
+                        loadSource(0);
+                    },
                 },
                 {
                     id: "brs-1",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 1);
-                    }
+                    click: (item, window) => {
+                        loadSource(1);
+                    },
                 },
                 {
                     id: "brs-2",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 2);
-                    }
+                    click: (item, window) => {
+                        loadSource(2);
+                    },
                 },
                 {
                     id: "brs-3",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 3);
-                    }
+                    click: (item, window) => {
+                        loadSource(3);
+                    },
                 },
                 {
                     id: "brs-4",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 4);
-                    }
+                    click: (item, window) => {
+                        loadSource(4);
+                    },
                 },
                 {
                     id: "brs-5",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 5);
-                    }
+                    click: (item, window) => {
+                        loadSource(5);
+                    },
                 },
                 {
                     id: "brs-6",
                     label: "",
                     visible: false,
-                    click: (event, window) => {
-                        sourceClick(window, 6);
-                    }
+                    click: (item, window) => {
+                        loadSource(6);
+                    },
                 },
                 {
                     id: "brs-empty",
                     label: "No Source .brs File Recently Opened",
-                    enabled: false
+                    enabled: false,
                 },
                 { type: "separator" },
                 {
                     id: "file-clear",
                     label: "Clear Recently Opened",
                     enabled: false,
-                    click: (event, window) => {
+                    click: (item, window) => {
                         clearRecentFiles();
-                        window.blur();
-                        window.focus();
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         },
         { type: "separator" },
         {
+            id: "save-screen",
             label: "Save Screenshot...",
             accelerator: "CmdOrCtrl+S",
+            enabled: false,
             click: () => {
                 dialog.saveScreenshot();
-            }
+            },
         },
         { type: "separator" },
         {
@@ -173,25 +181,13 @@ export const fileMenuTemplate = {
             label: "Close Channel",
             accelerator: "CmdOrCtrl+W",
             enabled: false,
-            click: (event, window) => {
-                window.webContents.send("closeChannel", "Menu");
-            }
+            click: () => {
+                closeChannel();
+            },
         },
         { type: "separator" },
         {
-            role: "quit"
-        }
-    ]
+            role: "quit",
+        },
+    ],
 };
-
-function packageClick(window, id) {
-    window.webContents.send("fileSelected", [ getRecentPackage(id) ]);
-    window.blur();
-    window.focus();
-}
-
-function sourceClick(window, id) {
-    window.webContents.send("fileSelected", [ getRecentSource(id) ]);
-    window.blur();
-    window.focus();
-}

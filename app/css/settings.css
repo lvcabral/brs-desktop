@@ -1,0 +1,182 @@
+[data-theme^="purple"],
+[data-theme] [data-theme^="purple"] {
+    --main-color: #dac7ea;
+    --background-color: #251135;
+    --title-color: #dac7ea;
+    --title-background-color: #3d1b56;
+    --help-color: #6a3aa5;
+    --sidebar-background-color: #220d31;
+    --icon-active-color: #dac7ea;
+    --icon-hover-color: #c090fa;
+    --icon-background-color: #6a3aa5;
+    --control-background-color: #3d1b56;
+    --control-border-color: #3d1b56;
+}
+
+[data-theme^="dark"],
+[data-theme] [data-theme^="dark"] {
+    --main-color: #d4d4d4;
+    --background-color: #1e1e1e;
+    --title-color: #cccccc;
+    --title-background-color: #252526;
+    --help-color: #5d5d5d;
+    --control-background-color: #252526;
+    --sidebar-background-color: #141414;
+    --icon-active-color: #0084ff;
+    --icon-hover-color: #006dd9;
+    --icon-background-color: #787878;
+    --control-border-color: #0e0e0e;
+}
+
+[data-theme^="light"],
+[data-theme] [data-theme^="light"] {
+    --main-color: #000000;
+    --background-color: #ffffff;
+    --title-color: #333333;
+    --title-background-color: #dddddd;
+    --help-color: #5d5d5d;
+    --item-background-color: #094771;
+    --icon-active-color: #007acc;
+    --icon-hover-color: #1f8ad2;
+    --icon-background-color: #787878;
+    --control-border-color: #f2f2f2;
+}
+
+#titlebar {
+    padding: 4px;
+    height: 28px;
+    background-color: var(--title-background-color);
+}
+
+#drag-region {
+    width: 100%;
+    height: 100%;
+    -webkit-app-region: drag;
+}
+
+#window-title {
+    width: 100%;
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-size: 13px;
+    text-align: center;
+}
+
+#window-title span {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: var(--background-color);
+        color: var(--main-color);
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--control-background-color);
+    }
+    .sidebar {
+        background-color: var(--sidebar-background-color);
+    }
+    .sidebar .sidebar-section {
+        color: var(--icon-background-color);
+    }
+    .sidebar .sidebar-section .section-icon {
+        background-color: var(--icon-background-color);
+    }
+    .sidebar .sidebar-section.active {
+        color: var(--icon-active-color);
+    }
+    .sidebar .sidebar-section:focus {
+        border: 2px solid var(--icon-hover-color);
+    }
+    .sidebar .sidebar-section:hover {
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+    .sidebar .sidebar-section.active .section-icon {
+        background-color: var(--icon-active-color);
+    }
+    .group-label {
+        color: var(--title-color);
+    }
+    .field-checkbox .checkbox-option .check-square {
+        border: 1px solid var(--control-border-color);
+    }
+    .field-checkbox .checkbox-option .check-square:after {
+        border: solid #252525;
+        border-width: 0 3px 3px 0;
+    }
+    .field-checkbox .checkbox-option input:focus ~ .check-square {
+        border-color: var(--icon-active-color);
+        border-width: 2px;
+    }
+    .field-checkbox .checkbox-option input:checked:focus ~ .check-square {
+        border-color: var(--icon-active-color);
+    }
+    .field-checkbox .checkbox-option input:checked ~ .check-square {
+        background-color: var(--icon-active-color);
+        border-color: var(--icon-active-color);
+    }
+    .field-checkbox .checkbox-option:hover input:checked ~ .check-square {
+        background-color: var(--icon-hover-color);
+        border-color: var(--icon-hover-color);
+    }
+    .field-radio .radio-option:hover input ~ .check-circle {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+    .field-radio .radio-option .check-circle {
+        border: 1px solid var(--control-border-color);
+    }
+    .field-radio .radio-option .check-circle:after {
+        border: 2px solid #252525;
+    }
+    .field-radio .radio-option input:checked ~ .check-circle {
+        background-color: var(--icon-active-color);
+        border-color: var(--icon-active-color);
+    }
+    .field-radio .radio-option:hover input:checked ~ .check-circle {
+        background-color: var(--icon-hover-color);
+        border-color: var(--icon-hover-color);
+    }
+    .field-text input {
+        color: var(--main-color);
+        background-color: var(--control-background-color);
+        border: 1px solid var(--control-border-color);
+    }
+    .field-accelerator input {
+        color: var(--main-color);
+        background-color: var(--control-background-color);
+        border: 1px solid var(--control-border-color);
+    }
+    .field-dropdown select {
+        color: var(--main-color);
+        background-color: var(--control-background-color);
+        border: 1px solid var(--control-border-color);
+    }
+    .field-slider input::-webkit-slider-thumb {
+        background: var(--icon-active-color);
+    }
+    .field-slider input {
+        opacity: 1;
+    }
+    .field-slider input:hover {
+        opacity: 0.85;
+    }
+    .field-slider input::-webkit-slider-runnable-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .field-slider input:focus::-webkit-slider-runnable-track {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .group .field .help {
+        color: var(--help-color);
+    }
+}

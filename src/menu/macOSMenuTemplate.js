@@ -6,30 +6,50 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { showSettings } from "../helpers/settings";
-import { copyScreenshot } from "../helpers/window";
-const isMacOS = process.platform === "darwin";
 
-export const editMenuTemplate = {
-    label: "&Edit",
+export const macOSMenuTemplate = {
+    label: "BrightScript Emulator",
     submenu: [
         {
-            id: "copy-screen",
-            label: "Copy Screenshot",
-            accelerator: "CmdOrCtrl+C",
-            enabled: false,
-            click: () => {
-                copyScreenshot();
-            },
+            label: "About BrightScript Emulator",
+            role: "about",
         },
         { type: "separator" },
         {
             id: "settings",
             label: "Settings...",
-            visible: !isMacOS,
             accelerator: "CmdOrCtrl+,",
             click: () => {
                 showSettings();
             },
+        },
+        { type: "separator" },
+        {
+            label: "Services",
+            role: "services",
+            submenu: [],
+        },
+        {
+            type: "separator",
+        },
+        {
+            label: "Hide BrightScript Emulator",
+            role: "hide",
+        },
+        {
+            label: "Hide Others",
+            role: "hideothers",
+        },
+        {
+            label: "Show All",
+            role: "unhide",
+        },
+        {
+            type: "separator",
+        },
+        {
+            label: "Quit BrightScript Emulator",
+            role: "quit",
         },
     ],
 };

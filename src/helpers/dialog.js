@@ -1,15 +1,25 @@
-import { dialog, BrowserWindow } from "electron";
-
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+import { BrowserWindow, dialog } from "electron";
+import { loadFile } from "./files";
 /*
  * Show open dialog to open a .zip or .brs file.
  */
 export function openChannelPackage() {
     const opts = {
         title: "Select a Channel package file.",
-        filters: [ { name: "Channel Packages", extensions: [ "zip" ] }, { name: "All Files", extensions: [ "*" ] } ],
-        properties: [ "openFile" ]
+        filters: [
+            { name: "Channel Packages", extensions: ["zip"] },
+            { name: "All Files", extensions: ["*"] },
+        ],
+        properties: ["openFile"],
     };
-    const window = BrowserWindow.getFocusedWindow();
+    const window = BrowserWindow.fromId(1);
     dialog
         .showOpenDialog(window, opts)
         .then((result) => {
@@ -17,7 +27,7 @@ export function openChannelPackage() {
                 console.log("cancelled");
                 return;
             }
-            window.webContents.send("fileSelected", result.filePaths);
+            loadFile(result.filePaths);
         })
         .catch((err) => {
             console.log(err);
@@ -27,10 +37,13 @@ export function openChannelPackage() {
 export function openBrightScriptFile() {
     const opts = {
         title: "Select a BrightScript source file.",
-        filters: [ { name: "BrightScript source files", extensions: [ "brs" ] }, { name: "All Files", extensions: [ "*" ] } ],
-        properties: [ "openFile" ]
+        filters: [
+            { name: "BrightScript source files", extensions: ["brs"] },
+            { name: "All Files", extensions: ["*"] },
+        ],
+        properties: ["openFile"],
     };
-    const window = BrowserWindow.getFocusedWindow();
+    const window = BrowserWindow.fromId(1);
     dialog
         .showOpenDialog(window, opts)
         .then((result) => {
@@ -38,7 +51,7 @@ export function openBrightScriptFile() {
                 console.log("cancelled");
                 return;
             }
-            window.webContents.send("fileSelected", result.filePaths);
+            loadFile(result.filePaths);
         })
         .catch((err) => {
             console.log(err);
@@ -48,9 +61,12 @@ export function openBrightScriptFile() {
 export function saveScreenshot() {
     const opts = {
         title: "Save the Screenshot as",
-        filters: [ { name: "PNG Image", extensions: [ "png" ] }, { name: "All Files", extensions: [ "*" ] } ]
+        filters: [
+            { name: "PNG Image", extensions: ["png"] },
+            { name: "All Files", extensions: ["*"] },
+        ],
     };
-    const window = BrowserWindow.getFocusedWindow();
+    const window = BrowserWindow.fromId(1);
     dialog
         .showSaveDialog(window, opts)
         .then((result) => {

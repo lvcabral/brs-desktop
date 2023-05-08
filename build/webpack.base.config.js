@@ -3,7 +3,7 @@ const nodeExternals = require("webpack-node-externals");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 
 const translateEnvToMode = (env) => {
-  if (env === "production") {
+  if (env.production) {
     return "production";
   }
   return "development";
@@ -20,7 +20,7 @@ module.exports = env => {
     externals: [nodeExternals()],
     resolve: {
       alias: {
-        env: path.resolve(__dirname, `../config/env_${env}.json`)
+        env: path.resolve(__dirname, `../config/env_${translateEnvToMode(env)}.json`)
       }
     },
     devtool: "source-map",
@@ -38,7 +38,7 @@ module.exports = env => {
       ]
     },
     plugins: [
-      new FriendlyErrorsWebpackPlugin({ clearConsole: env === "development" })
+      new FriendlyErrorsWebpackPlugin({ clearConsole: env.development })
     ]
   };
 };

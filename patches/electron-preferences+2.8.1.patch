@@ -1,0 +1,257 @@
+diff --git a/node_modules/electron-preferences/build/index.html b/node_modules/electron-preferences/build/index.html
+index 3699e18..d02d577 100644
+--- a/node_modules/electron-preferences/build/index.html
++++ b/node_modules/electron-preferences/build/index.html
+@@ -1,11 +1,30 @@
+ <!DOCTYPE html>
+ <html>
+-  <head>
+-    <meta charset="UTF-8" />
+-    <title>Preferences</title>
+-  </head>
+-  <body>
++<head>
++    <meta charset="UTF-8">
++    <script>
++        window.__setTheme = () => {
++            const prefs = api.getPreferences();
++            const theme = prefs.emulator.theme || "purple";
++            document.documentElement.setAttribute("data-theme", theme === "system" ? "dark" : theme);
++            api.onPreferencesChanged(prefs => {
++                const theme = prefs.emulator.theme || "purple";
++                document.documentElement.setAttribute("data-theme", theme === "system" ? "dark" : theme);
++            });
++        }        
++        __setTheme();
++    </script>
++</head>
++
++<body>
++    <header id="titlebar">
++        <div id="drag-region">
++            <div id="window-title">
++                <span>Settings</span>
++            </div>
++        </div>
++    </header>
+     <div class="window noselect" id="window"></div>
+     <script src="app.js"></script>
+-  </body>
++</body>
+ </html>
+diff --git a/node_modules/electron-preferences/build/svg/app-terminal.svg b/node_modules/electron-preferences/build/svg/app-terminal.svg
+new file mode 100644
+index 0000000..21bd581
+--- /dev/null
++++ b/node_modules/electron-preferences/build/svg/app-terminal.svg
+@@ -0,0 +1,19 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
++<svg version="1.1" id="Icons" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
++	 viewBox="0 0 32 32" xml:space="preserve">
++<style type="text/css">
++	.st0{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
++</style>
++<path d="M27,4H5C3.3,4,2,5.3,2,7v18c0,1.7,1.3,3,3,3h22c1.7,0,3-1.3,3-3V7C30,5.3,28.7,4,27,4z M9.1,7.6c0.1-0.1,0.1-0.2,0.2-0.3
++	c0.1-0.1,0.2-0.2,0.3-0.2C10,6.9,10.4,7,10.7,7.3c0.1,0.1,0.2,0.2,0.2,0.3C11,7.7,11,7.9,11,8c0,0.3-0.1,0.5-0.3,0.7
++	C10.5,8.9,10.3,9,10,9C9.7,9,9.5,8.9,9.3,8.7C9.1,8.5,9,8.3,9,8C9,7.9,9,7.7,9.1,7.6z M6,8c0-0.3,0.1-0.5,0.3-0.7
++	c0,0,0.1-0.1,0.1-0.1c0.1,0,0.1-0.1,0.2-0.1C6.7,7,6.7,7,6.8,7c0.1,0,0.3,0,0.4,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0.1,0.2,0.1
++	c0,0,0.1,0.1,0.1,0.1c0.1,0.1,0.2,0.2,0.2,0.3C8,7.7,8,7.9,8,8c0,0.1,0,0.3-0.1,0.4C7.9,8.5,7.8,8.6,7.7,8.7C7.5,8.9,7.3,9,7,9
++	S6.5,8.9,6.3,8.7C6.1,8.5,6,8.3,6,8z M11.7,18.7l-3,3C8.5,21.9,8.3,22,8,22s-0.5-0.1-0.7-0.3c-0.4-0.4-0.4-1,0-1.4L9.6,18l-2.3-2.3
++	c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l3,3C12.1,17.7,12.1,18.3,11.7,18.7z M12.3,8.7c-0.1-0.1-0.2-0.2-0.2-0.3C12,8.3,12,8.1,12,8
++	c0-0.1,0-0.3,0.1-0.4c0.1-0.1,0.1-0.2,0.2-0.3c0.4-0.4,1-0.4,1.4,0c0.1,0.1,0.2,0.2,0.2,0.3C14,7.7,14,7.9,14,8c0,0.1,0,0.3-0.1,0.4
++	c-0.1,0.1-0.1,0.2-0.2,0.3C13.5,8.9,13.3,9,13,9c-0.1,0-0.3,0-0.4-0.1C12.5,8.9,12.4,8.8,12.3,8.7z M18,22h-4c-0.6,0-1-0.4-1-1
++	s0.4-1,1-1h4c0.6,0,1,0.4,1,1S18.6,22,18,22z"/>
++</svg>
+\ No newline at end of file
+diff --git a/node_modules/electron-preferences/build/svg/roku-box.svg b/node_modules/electron-preferences/build/svg/roku-box.svg
+new file mode 100644
+index 0000000..9a28926
+--- /dev/null
++++ b/node_modules/electron-preferences/build/svg/roku-box.svg
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
++<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
++<path d="M20.5391 9.98392V14.1072C20.5514 14.3564 20.4328 14.6111 20.1844 14.7513L13.0531 18.7751C12.4152 19.135 11.6357 19.136 10.9969 18.7776L3.82014 14.7521C3.56599 14.6096 3.4472 14.3472 3.46483 14.0931V9.99806C3.44748 9.74785 3.56221 9.48948 3.81004 9.345L10.9665 5.17282C11.6208 4.79136 12.43 4.7924 13.0833 5.17554L20.1946 9.34593C20.4366 9.4879 20.5512 9.73871 20.5391 9.98392Z" stroke="#000000"/>
++<path d="M3.82016 10.5584C3.34867 10.2939 3.34304 9.61727 3.81007 9.34499L10.9665 5.17281C11.6208 4.79135 12.43 4.79239 13.0833 5.17554L20.1946 9.34592C20.6595 9.61859 20.6539 10.2927 20.1845 10.5576L13.0531 14.5813C12.4152 14.9413 11.6357 14.9423 10.9969 14.5839L3.82016 10.5584Z" stroke="#000000"/>
++</svg>
+\ No newline at end of file
+diff --git a/node_modules/electron-preferences/build/svg/roku-remote.svg b/node_modules/electron-preferences/build/svg/roku-remote.svg
+new file mode 100644
+index 0000000..1c60549
+--- /dev/null
++++ b/node_modules/electron-preferences/build/svg/roku-remote.svg
+@@ -0,0 +1,91 @@
++<?xml version="1.0" standalone="no"?>
++<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
++ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
++<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
++ width="1200.000000pt" height="1108.000000pt" viewBox="0 0 1200.000000 1108.000000"
++ preserveAspectRatio="xMidYMid meet">
++<metadata>
++Created by potrace 1.16, written by Peter Selinger 2001-2019
++</metadata>
++<g transform="translate(0.000000,1108.000000) scale(0.100000,-0.100000)"
++fill="#000000" stroke="none">
++<path d="M6045 10429 c-619 -5 -1026 -13 -1105 -20 -69 -7 -150 -14 -180 -16
++-85 -6 -96 -10 -151 -59 -29 -25 -65 -50 -80 -56 -27 -9 -114 -109 -156 -178
++-12 -19 -30 -65 -42 -102 -11 -37 -27 -81 -36 -98 -14 -27 -17 -131 -24 -823
++-4 -435 -6 -808 -4 -827 2 -19 -3 -136 -10 -260 l-14 -225 -46 -91 c-52 -103
++-129 -195 -191 -226 -23 -11 -58 -36 -78 -54 -20 -18 -54 -37 -75 -42 -206
++-50 -124 -46 -1183 -48 -865 -1 -993 -3 -1053 -17 -99 -24 -164 -57 -232 -118
++-33 -30 -81 -71 -107 -92 -60 -48 -94 -106 -107 -182 -6 -33 -18 -98 -26 -145
++-14 -72 -17 -239 -24 -1070 -10 -1179 -5 -1315 53 -1469 19 -52 43 -102 53
++-111 200 -187 275 -234 423 -267 79 -17 148 -18 1035 -18 921 0 1026 -3 1172
++-31 12 -2 42 -21 67 -42 25 -20 67 -55 93 -76 71 -58 131 -140 149 -205 9 -31
++28 -72 43 -91 l26 -35 5 -1060 5 -1060 26 -55 c15 -30 30 -66 34 -80 22 -78
++137 -214 229 -271 28 -18 67 -43 87 -56 26 -17 71 -29 170 -45 129 -20 170
++-21 1154 -24 863 -3 1040 -2 1150 11 183 22 228 32 277 65 24 16 65 37 91 46
++82 28 174 149 251 332 l27 63 6 1067 6 1067 33 63 c19 35 34 71 34 79 0 57
++150 213 258 267 137 69 95 66 1169 66 639 -1 986 3 1022 9 29 6 69 11 89 11
++19 0 55 11 81 24 25 14 71 36 101 50 34 16 91 60 148 114 89 83 94 91 123 172
++69 193 63 68 66 1354 3 1120 2 1172 -16 1250 -10 44 -22 100 -26 123 -4 24
++-19 57 -39 80 -17 21 -45 57 -62 79 -43 61 -169 163 -244 197 -54 25 -85 31
++-180 39 -63 5 -538 8 -1055 8 -909 -1 -943 0 -1026 19 -104 24 -126 34 -204
++84 -91 60 -153 125 -189 197 -18 36 -45 83 -59 104 -27 38 -27 42 -27 200 0
++89 -2 563 -5 1055 -5 872 -6 897 -26 970 -25 90 -71 183 -106 219 -14 14 -40
++49 -59 78 -28 43 -43 56 -86 72 -29 11 -80 36 -113 56 -32 20 -75 41 -94 46
++-62 17 -215 18 -1216 9z m207 -1244 c181 -184 210 -220 200 -257 -6 -25 -52
++-48 -94 -48 -29 0 -45 12 -113 81 -184 187 -198 199 -226 199 -21 0 -51 -26
++-147 -125 -126 -132 -158 -155 -207 -155 -75 0 -96 59 -46 126 41 55 302 322
++337 345 17 11 47 19 71 19 40 0 45 -4 225 -185z m-83 -1815 c161 -15 370 -63
++486 -114 58 -25 130 -58 148 -67 330 -173 571 -400 764 -724 24 -40 113 -220
++113 -228 0 -5 7 -23 14 -40 23 -49 58 -157 66 -202 4 -22 15 -67 23 -100 9
++-33 21 -131 28 -217 14 -184 1 -415 -32 -558 -23 -99 -68 -244 -86 -280 -7
++-14 -13 -30 -13 -37 0 -23 -122 -249 -184 -342 -184 -272 -480 -523 -760 -641
++-39 -17 -78 -34 -86 -38 -23 -12 -176 -58 -265 -80 -136 -34 -360 -48 -537
++-33 -84 7 -189 22 -233 33 -89 22 -242 68 -265 80 -8 4 -49 21 -90 39 -41 17
++-80 35 -86 40 -6 5 -36 22 -68 39 -245 131 -502 389 -673 675 -26 42 -112 221
++-118 245 -4 14 -11 30 -14 35 -4 6 -19 48 -33 95 -74 245 -99 474 -79 723 6
++83 21 193 33 242 25 107 68 256 78 270 4 6 11 21 15 35 6 22 86 187 124 257
++55 103 187 271 297 379 114 112 302 253 409 306 17 8 39 19 50 25 21 12 86 41
++147 66 238 101 536 143 827 117z m-3499 -1395 c55 -28 51 -95 -8 -146 -97 -82
++-242 -233 -242 -251 0 -35 21 -62 140 -178 64 -64 122 -126 129 -139 17 -31 6
++-87 -22 -106 -35 -25 -72 -19 -104 18 -15 17 -55 59 -89 92 -34 33 -107 108
++-163 168 -87 93 -101 112 -101 141 0 29 8 41 46 72 25 21 56 52 68 69 41 59
++273 275 296 275 11 0 34 -7 50 -15z m6869 -164 c111 -110 183 -189 187 -205
++10 -41 -2 -109 -23 -124 -10 -7 -89 -81 -176 -165 -87 -84 -171 -158 -188
++-166 -26 -13 -31 -13 -50 5 -18 16 -20 27 -17 73 5 56 10 63 104 142 10 9 54
++56 98 103 62 69 77 91 72 109 -3 12 -66 80 -141 151 -130 125 -135 131 -135
++171 0 53 23 85 60 85 23 0 59 -31 209 -179z m-3833 -3524 c12 -7 83 -72 158
++-144 108 -106 142 -133 164 -133 22 0 50 24 147 129 66 71 130 134 143 140 58
++28 122 1 122 -51 0 -26 -16 -46 -98 -127 -303 -297 -307 -300 -344 -280 -72
++38 -384 343 -394 385 -8 33 10 72 38 84 31 12 39 11 64 -3z"/>
++<path d="M5760 7160 c-47 -4 -105 -15 -129 -24 -24 -9 -52 -16 -63 -16 -10 0
++-36 -9 -58 -20 -22 -11 -47 -20 -56 -20 -31 0 -226 -96 -313 -155 -24 -17 -54
++-35 -65 -42 -46 -25 -244 -213 -311 -294 -81 -97 -99 -122 -149 -210 -54 -94
++-53 -92 -115 -231 -20 -45 -47 -133 -80 -258 -33 -125 -46 -345 -32 -517 7
++-82 19 -167 27 -191 9 -23 19 -66 24 -95 13 -85 40 -155 120 -317 85 -172 147
++-263 271 -394 172 -181 331 -294 564 -397 27 -12 103 -38 140 -49 17 -5 66
++-19 110 -32 75 -21 97 -23 355 -23 258 0 280 2 355 23 44 13 94 27 110 32 93
++26 266 102 340 150 17 11 44 27 60 36 62 35 207 158 302 258 85 89 233 286
++233 310 0 4 8 20 18 34 39 57 142 314 142 357 1 11 7 38 15 60 17 46 45 285
++45 384 0 95 -26 330 -43 387 -8 27 -19 67 -25 89 -11 46 -29 96 -47 140 -8 17
++-26 59 -41 95 -15 36 -36 76 -46 89 -10 13 -18 28 -18 33 0 25 -140 216 -226
++306 -178 189 -331 297 -569 403 -34 15 -108 40 -150 51 -22 6 -69 20 -105 30
++-53 16 -105 20 -285 23 -121 2 -258 0 -305 -5z m-38 -1080 c70 0 278 -172 278
++-230 0 -12 12 -42 28 -68 25 -44 27 -54 27 -168 0 -115 -1 -122 -27 -160 -20
++-29 -28 -52 -28 -83 0 -40 -5 -48 -72 -115 -85 -84 -162 -130 -254 -152 -59
++-13 -74 -13 -140 0 -107 22 -180 63 -263 148 -78 80 -87 102 -111 255 -12 81
++-4 203 20 288 4 17 11 43 15 59 8 37 147 183 195 204 44 20 145 31 230 26 36
++-2 82 -4 102 -4z m660 -19 c19 -18 48 -118 48 -165 0 -17 -7 -50 -17 -74 -14
++-37 -14 -45 -2 -57 12 -12 21 -9 67 21 28 19 60 47 70 61 9 14 31 41 48 61 17
++21 45 58 62 84 56 83 131 110 186 67 19 -15 26 -30 26 -55 0 -54 -51 -144
++-104 -183 -25 -19 -46 -38 -46 -43 0 -5 -18 -28 -40 -52 -22 -24 -40 -51 -40
++-60 0 -9 18 -36 40 -60 22 -24 40 -48 40 -54 0 -6 15 -30 33 -54 18 -24 45
++-65 61 -92 16 -27 43 -65 61 -85 39 -44 49 -72 41 -117 -18 -91 -101 -124
++-157 -61 -83 91 -119 137 -142 182 -14 28 -41 73 -59 100 -27 41 -39 50 -62
++50 -49 0 -69 -40 -71 -137 -2 -92 -20 -146 -62 -190 -35 -36 -90 -38 -120 -5
++-46 50 -47 54 -49 437 -2 201 -1 381 2 401 3 19 15 48 27 63 36 45 120 54 159
++17z"/>
++<path d="M5548 5882 c-32 -8 -123 -82 -161 -131 -26 -33 -27 -40 -27 -152 l0
++-119 48 -53 c26 -30 66 -64 90 -76 107 -54 254 -1 315 114 27 50 29 163 4 247
++-34 113 -165 196 -269 170z"/>
++</g>
++</svg>
+diff --git a/node_modules/electron-preferences/build/svg/speaker.svg b/node_modules/electron-preferences/build/svg/speaker.svg
+new file mode 100644
+index 0000000..31c7781
+--- /dev/null
++++ b/node_modules/electron-preferences/build/svg/speaker.svg
+@@ -0,0 +1,12 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
++<svg width="800px" height="800px" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
++<g clip-path="url(#clip0_901_1526)">
++<path d="M29.5165 19.5547C30.4325 18.6487 30.9995 17.3907 30.9995 15.9997C30.9995 14.6187 30.4405 13.3687 29.5355 12.4647M2.48331 12.4648C1.56731 13.3708 1.00031 14.6288 1.00031 16.0198C1.00031 17.4008 1.55931 18.6508 2.46431 19.5548M25.9999 30C25.9999 30.553 25.5529 31 24.9999 31H6.99991C6.44691 31 5.99991 30.553 5.99991 30V2C5.99991 1.447 6.44691 1 6.99991 1H24.9999C25.5529 1 25.9999 1.447 25.9999 2V30ZM21.9999 21C21.9999 17.686 19.3139 15 15.9999 15C12.6859 15 9.99991 17.686 9.99991 21C9.99991 24.314 12.6859 27 15.9999 27C19.3139 27 21.9999 24.314 21.9999 21ZM18.9999 8C18.9999 6.344 17.6559 5 15.9999 5C14.3439 5 12.9999 6.344 12.9999 8C12.9999 9.656 14.3439 11 15.9999 11C17.6559 11 18.9999 9.656 18.9999 8ZM16.9999 21C16.9999 20.447 16.5529 20 15.9999 20C15.4469 20 14.9999 20.447 14.9999 21C14.9999 21.553 15.4469 22 15.9999 22C16.5529 22 16.9999 21.553 16.9999 21Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
++</g>
++<defs>
++<clipPath id="clip0_901_1526">
++<rect width="32" height="32" fill="white"/>
++</clipPath>
++</defs>
++</svg>
+\ No newline at end of file
+diff --git a/node_modules/electron-preferences/build/svg/tv-screen.svg b/node_modules/electron-preferences/build/svg/tv-screen.svg
+new file mode 100644
+index 0000000..ef81f28
+--- /dev/null
++++ b/node_modules/electron-preferences/build/svg/tv-screen.svg
+@@ -0,0 +1,32 @@
++<?xml version="1.0" standalone="no"?>
++<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
++ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
++<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
++ width="218.000000pt" height="184.000000pt" viewBox="0 0 218.000000 184.000000"
++ preserveAspectRatio="xMidYMid meet">
++<metadata>
++Created by potrace 1.16, written by Peter Selinger 2001-2019
++</metadata>
++<g transform="translate(0.000000,184.000000) scale(0.100000,-0.100000)"
++fill="#000000" stroke="none">
++<path d="M57 1732 c-16 -17 -17 -79 -17 -688 0 -590 2 -672 16 -692 l15 -22
++440 0 439 0 0 -45 0 -45 -170 0 -170 0 0 -25 0 -25 485 0 485 0 0 25 0 25
++-170 0 -170 0 0 45 0 45 439 0 440 0 15 22 c14 20 16 102 16 688 0 586 -2 668
++-16 688 l-15 22 -1023 0 c-978 0 -1024 -1 -1039 -18z m2023 -692 l0 -640 -985
++0 -985 0 0 640 0 640 985 0 985 0 0 -640z"/>
++<path d="M790 1375 l0 -145 180 0 180 0 0 145 0 145 -180 0 -180 0 0 -145z"/>
++<path d="M1200 1375 l0 -145 180 0 180 0 0 145 0 145 -180 0 -180 0 0 -145z"/>
++<path d="M1620 1375 l0 -145 175 0 175 0 0 145 0 145 -175 0 -175 0 0 -145z"/>
++<path d="M242 1438 l3 -73 230 0 230 0 3 73 3 72 -236 0 -236 0 3 -72z"/>
++<path d="M240 1255 l0 -35 170 0 170 0 0 35 0 35 -170 0 -170 0 0 -35z"/>
++<path d="M790 1035 l0 -145 180 0 181 0 -3 143 -3 142 -177 3 -178 2 0 -145z"/>
++<path d="M1207 1173 c-4 -3 -7 -69 -7 -145 l0 -138 180 0 180 0 0 145 0 145
++-173 0 c-96 0 -177 -3 -180 -7z"/>
++<path d="M1620 1035 l0 -145 175 0 175 0 0 145 0 145 -175 0 -175 0 0 -145z"/>
++<path d="M247 1023 c-4 -3 -7 -19 -7 -35 l0 -28 150 0 150 0 0 35 0 35 -143 0
++c-79 0 -147 -3 -150 -7z"/>
++<path d="M790 685 l0 -145 180 0 180 0 0 145 0 145 -180 0 -180 0 0 -145z"/>
++<path d="M1200 685 l0 -145 180 0 180 0 0 145 0 145 -180 0 -180 0 0 -145z"/>
++<path d="M1620 685 l0 -145 175 0 175 0 0 145 0 145 -175 0 -175 0 0 -145z"/>
++</g>
++</svg>
+diff --git a/node_modules/electron-preferences/preload.js b/node_modules/electron-preferences/preload.js
+index 0c91968..835c5bb 100644
+--- a/node_modules/electron-preferences/preload.js
++++ b/node_modules/electron-preferences/preload.js
+@@ -6,6 +6,7 @@ const { contextBridge } = electron;
+ const { ipcRenderer } = electron;
+ 
+ const deserializeJson = (serializedJavascript) => eval('(' + serializedJavascript + ')'); //deserialize function for 'serialize-javascript' library
++let onPreferencesChangedHandler = () => {};
+ 
+ contextBridge.exposeInMainWorld('api', {
+ 	getSections: () => deserializeJson(ipcRenderer.sendSync('getSections')),
+@@ -14,5 +15,10 @@ contextBridge.exposeInMainWorld('api', {
+ 	setPreferences: preferences => ipcRenderer.send('setPreferences', preferences),
+ 	showOpenDialog: dialogOptions => ipcRenderer.sendSync('showOpenDialog', dialogOptions),
+ 	sendButtonClick: channel => ipcRenderer.send('sendButtonClick', channel),
+-  encrypt: secret => ipcRenderer.sendSync('encrypt', secret),
++  	encrypt: secret => ipcRenderer.sendSync('encrypt', secret),
++	onPreferencesChanged: handler => { onPreferencesChangedHandler = handler; },
++});
++
++ipcRenderer.on('preferencesUpdated', (e, preferences) => {
++	onPreferencesChangedHandler(preferences);
+ });

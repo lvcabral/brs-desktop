@@ -1,197 +1,201 @@
-import { isECPEnabled, enableECP, disableECP } from "../servers/ecp";
-import { isTelnetEnabled, enableTelnet, disableTelnet } from "../servers/telnet";
-import { hasInstaller, enableInstaller, disableInstaller } from "../servers/installer";
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+import { isECPEnabled, enableECP, disableECP } from "../server/ecp";
+import { isTelnetEnabled, enableTelnet, disableTelnet } from "../server/telnet";
+import { isInstallerEnabled, enableInstaller, disableInstaller } from "../server/installer";
+import { setLocaleId, setDisplayOption } from "../helpers/settings";
+import { reloadApp } from "../helpers/window";
 
 export const deviceMenuTemplate = {
+    id: "device-menu",
     label: "&Device",
     submenu: [
         {
-            id: "device-480p",
+            id: "480p",
             label: "Display Mode: SD 480p (4:3)",
             type: "radio",
             checked: false,
-            click: (event, window) => {
-                window.webContents.send("setDisplay", "480p");
-            }
+            click: (item, window) => {
+                setDisplayOption("displayMode", item.id, true);
+            },
         },
         {
-            id: "device-720p",
+            id: "720p",
             label: "Display Mode: HD 720p (16:9)",
             type: "radio",
             checked: true,
-            click: (event, window) => {
-                window.webContents.send("setDisplay", "720p");
-            }
+            click: (item, window) => {
+                setDisplayOption("displayMode", item.id, true);
+            },
         },
         {
-            id: "device-1080p",
+            id: "1080p",
             label: "Display Mode: FHD 1080p (16:9)",
             type: "radio",
             checked: false,
-            click: (event, window) => {
-                window.webContents.send("setDisplay", "1080p");
-            }
+            click: (item, window) => {
+                setDisplayOption("displayMode", item.id, true);
+            },
         },
         { type: "separator" },
         {
-            id: "overscan-disabled",
+            id: "disabled",
             label: "TV Overscan: Disabled",
             type: "radio",
             checked: true,
-            click: (event, window) => {
-                window.webContents.send("setOverscan", "disabled");
-            }
+            click: (item, window) => {
+                setDisplayOption("overscanMode", item.id, true);
+            },
         },
         {
-            id: "overscan-guide-lines",
+            id: "guidelines",
             label: "TV Overscan: Guide Lines",
             type: "radio",
             checked: false,
-            click: (event, window) => {
-                window.webContents.send("setOverscan", "guide-lines");
-            }
+            click: (item, window) => {
+                setDisplayOption("overscanMode", item.id, true);
+            },
         },
         {
-            id: "overscan-enabled",
+            id: "overscan",
             label: "TV Overscan: Enabled",
             type: "radio",
             checked: false,
-            click: (event, window) => {
-                window.webContents.send("setOverscan", "enabled");
-            }
+            click: (item, window) => {
+                setDisplayOption("overscanMode", item.id, true);
+            },
         },
         { type: "separator" },
         {
             id: "locale-menu",
-            label: "Localization",
+            label: "Channel Localization",
             submenu: [
                 {
                     id: "en_US",
                     label: "US English (en-US)",
                     type: "radio",
                     checked: true,
-                    click: (event, window) => {
-                        changeLocale(window, "en_US");
-                    }
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
                 },
                 {
                     id: "en_GB",
                     label: "British English (en-GB)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "en_GB");
-                    }
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
                 },
                 {
                     id: "fr_CA",
                     label: "Canadian French (fr-CA)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "fr_CA");
-                    }
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
                 },
                 {
                     id: "es_ES",
                     label: "International Spanish (es-ES)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "es_ES");
-                    }
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
                 },
                 {
                     id: "es_MX",
                     label: "Mexican Spanish (es-MX)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "es_MX");
-                    }
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
                 },
                 {
                     id: "de_DE",
                     label: "German (de-DE)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "de_DE");
-                    }
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
                 },
                 {
                     id: "it_IT",
                     label: "Italian (it-IT)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "it_IT");
-                    }
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
                 },
                 {
                     id: "pt_BR",
                     label: "Brazilian Portuguese (pt-BR)",
                     type: "radio",
                     checked: false,
-                    click: (event, window) => {
-                        changeLocale(window, "pt_BR");
-                    }
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
                 },
-            ]
+            ],
         },
         { type: "separator" },
         {
             id: "web-installer",
             label: "Web Application Installer",
             type: "checkbox",
-            checked: true,
-            click: (event, window) => {
-                if (hasInstaller) {
-                    disableInstaller(window);
+            checked: false,
+            click: (item, window) => {
+                if (isInstallerEnabled) {
+                    disableInstaller();
                 } else {
-                    enableInstaller(window);
+                    enableInstaller();
                 }
-            }
+            },
         },
         {
             id: "ecp-api",
             label: "External Control Protocol",
             type: "checkbox",
-            checked: true,
-            click: (event, window) => {
+            checked: false,
+            click: (item, window) => {
                 if (isECPEnabled) {
-                    disableECP(window);
+                    disableECP();
                 } else {
-                    enableECP(window);
+                    enableECP();
                 }
-            }
+            },
         },
         {
             id: "telnet",
             label: "BrightScript Remote Console",
             type: "checkbox",
-            checked: true,
-            click: (event, window) => {
+            checked: false,
+            click: (item, window) => {
                 if (isTelnetEnabled) {
-                    disableTelnet(window);
+                    disableTelnet();
                 } else {
-                    enableTelnet(window);
+                    enableTelnet();
                 }
-            }
+            },
         },
         { type: "separator" },
         {
             label: "Reset Device",
             accelerator: "CmdOrCtrl+Shift+R",
-            click: (event, window) => {
-                window.webContents.reloadIgnoringCache();
-            }
-        }
-    ]
+            click: (item, window) => {
+                reloadApp();
+            },
+        },
+    ],
 };
-
-function changeLocale(window, locale) {
-    window.webContents.send("setLocale", locale);
-    window.blur();
-    window.focus();
-}

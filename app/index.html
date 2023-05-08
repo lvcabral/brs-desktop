@@ -3,20 +3,19 @@
 <head>
     <meta charset="utf-8">
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' data: blob: 'self';"> -->
-    <title>BrightScript 2D API Emulator</title>
+    <title>BrightScript Emulator</title>
     <script>
         window.__setTheme = () => {
-            let userTheme = localStorage.getItem("userTheme");
-            let defaultTheme = 'purple';
-            document.documentElement.setAttribute('data-theme', userTheme || defaultTheme);
+            document.documentElement.setAttribute('data-theme', api.getTheme() || "purple");
         }
         __setTheme();
     </script>
-    <link href="./css/solid.min.css" rel="stylesheet"> 
+    <link href="./css/solid.min.css" rel="stylesheet">
 </head>
 <body>
+    <div id="stats"></div>
     <canvas id="display"></canvas>
-    <div id="status" class="statusbar">
+    <div id="status" class="statusbar" style="visibility: hidden;">
         <span style="float:left"></span>
         <a href="#" tabindex="-1" title="Open Dev Tools"><span id="statusDevTools" class="statusIcons">
             <span style="float:left"><i class="fa fa-times-circle"></i></span>
@@ -32,7 +31,13 @@
         <span style="float:left"></span>
         <span id="statusIconVersion" style="float:left"></span>
         <span id="statusVersion" style="float:left"></span>
-        
+
+        <a href="#" tabindex="-2" title="Mute on/off"><span id="statusAudio" class="statusIcons" style="float:left; display:none">
+            <span style="float:left"></span>
+            <span id="statusIconAudio" style="float:left"></span>
+            <span style="float:left"></span>
+        </span></a>
+
         <span style="float:right"></span>
         <span id="statusDisplay" style="float:right"></span>
         <span style="float:right"><i class="fa fa-desktop"></i></span>
@@ -45,22 +50,23 @@
         <span id="statusLocale" style="float:right"></span>
         <span style="float:right"><i class="fa fa-globe-americas"></i></span>
 
-        <span id="statusTelnet" style="float:right">
+        <span id="statusTelnet" style="float:right; display:none">
             <span style="float:right"></span>
             <span id="statusTelnetText" style="float:right"></span>
             <span style="float:right"><i class='fa fa-terminal'></i></span>
         </span>
-        <a href="#" tabindex="-2" title="Show Device Info XML"><span id="statusECP"  class="statusIcons" style="float:right">
+        <a href="#" tabindex="-2" title="Show Device Info XML"><span id="statusECP" class="statusIcons" style="float:right; display:none">
             <span style="float:right"></span>
             <span id="statusECPText" style="float:right"></span>
             <span style="float:right"><i class='fa fa-server'></i></span>
         </span></a>
-        <a href="#" tabindex="-3" title="Open Web Installer"><span id="statusWeb" class="statusIcons" style="float:right">
+        <a href="#" tabindex="-3" title="Open Web Installer"><span id="statusWeb" class="statusIcons" style="float:right; display:none">
             <span style="float:right"></span>
             <span id="statusWebText" style="float:right"></span>
             <span style="float:right"><i class='fa fa-upload'></i></span>
         </span></a>
     </div>
+    <script src="../node_modules/brs-emu/app/lib/brsEmu.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

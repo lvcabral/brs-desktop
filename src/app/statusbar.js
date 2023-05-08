@@ -1,8 +1,10 @@
-import { remote, shell } from "electron";
-import { deviceData } from "./device";
-import { subscribeLoader } from "./loader";
-import { subscribeDisplay } from "./display";
-import { subscribeConsole } from "./console";
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
@@ -12,6 +14,8 @@ const statusWarn = document.getElementById("statusWarn");
 const statusIconFile = document.getElementById("statusIconFile");
 const statusFile = document.getElementById("statusFile");
 const statusIconVersion = document.getElementById("statusIconVersion");
+const statusAudio = document.getElementById("statusAudio");
+const statusIconAudio = document.getElementById("statusIconAudio");
 const statusVersion = document.getElementById("statusVersion");
 const statusDisplay = document.getElementById("statusDisplay");
 const statusLocale = document.getElementById("statusLocale");
@@ -24,76 +28,79 @@ const statusTelnet = document.getElementById("statusTelnet");
 const statusTelnetText = document.getElementById("statusTelnetText");
 const statusWeb = document.getElementById("statusWeb");
 const statusWebText = document.getElementById("statusWebText");
-const appMenu = remote.Menu.getApplicationMenu();
-const menuStatus = appMenu.getMenuItemById("status-bar");
 statusResolution.style.display = "none";
 statusIconRes.style.display = "none";
 statusSepRes.style.display = "none";
 statusError.innerText = "0";
 statusWarn.innerText = "0";
-statusDevTools.onclick = function() {
-    remote.getCurrentWindow().openDevTools();
-};
 let errorCount = 0;
 let warnCount = 0;
 let ECPPort = 8060;
-statusECP.onclick = function() {
-    shell.openExternal(`http://${getLocalIp()}:${ECPPort}/query/device-info`);
+statusECP.onclick = function () {
+    api.openExternal(`http://localhost:${ECPPort}/query/device-info`);
 };
 let installerPort = 80;
-statusWeb.onclick = function() {
-    shell.openExternal(`http://${getLocalIp()}:${installerPort}/`);
+statusWeb.onclick = function () {
+    api.openExternal(`http://localhost:${installerPort}/`);
 };
-function getLocalIp() {
-    let localIp = "127.0.0.1";
-    if (deviceData.localIps.length > 0) {
-        localIp = deviceData.localIps[0].split(",")[1];
-    }
-    return localIp;    
-}
-let mode = deviceData.displayMode;
-let ui = mode == "720p" ? "HD" : mode == "1080p" ? "FHD" : "SD";
-statusDisplay.innerText = `${ui} (${mode})`;    
+statusDevTools.onclick = function () {
+    api.send("openDevTools");
+};
+statusAudio.onclick = function () {
+    let muted = !brsEmu.getAudioMute();
+    brsEmu.setAudioMute(muted);
+    api.send("setAudioMute", muted);
+    setAudioStatus(muted);
+};
+
+let displayMode = api.getDeviceInfo().displayMode;
+let ui = displayMode == "720p" ? "HD" : displayMode == "1080p" ? "FHD" : "SD";
+statusDisplay.innerText = `${ui} (${displayMode})`;
 const MIN_PATH_SIZE = 30;
 const PATH_SIZE_FACTOR = 0.045;
 let filePath = "";
-
+// Locale on StatusBar
+let currentLocale = api.getDeviceInfo().locale;
+setLocaleStatus(currentLocale);
 // Subscribe Events
-subscribeLoader("statusbar", (event, data) => {
+brsEmu.subscribe("statusbar", (event, data) => {
     if (event === "loaded") {
-        statusIconFile.innerHTML = data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
-        statusFile.innerText = shortenPath(data.file, 
-            Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR));
+        clearCounters();
+        setStatusColor();
+        statusIconFile.innerHTML =
+            data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
+        statusFile.innerText = shortenPath(
+            data.file,
+            Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+        );
         filePath = data.file;
         if (data.version !== "") {
             statusVersion.innerText = data.version;
             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
             statusIconVersion.style.display = "";
         }
-        appMenu.getMenuItemById("close-channel").enabled = true;
+        setAudioStatus(brsEmu.getAudioMute());
+        statusAudio.style.display = "";
     } else if (event === "closed") {
         statusIconFile.innerText = "";
         statusFile.innerText = "";
         filePath = "";
         statusVersion.innerText = "";
         statusIconVersion.style.display = "none";
+        statusAudio.style.display = "none";
         statusResolution.style.display = "none";
         statusIconRes.style.display = "none";
         statusSepRes.style.display = "none";
-        appMenu.getMenuItemById("close-channel").enabled = false;
-    }
-});
-subscribeDisplay("statusbar", (event, data) => {
-    if (event === "redraw") {
-        if (!data && menuStatus.checked) {
-            display.style.bottom = "20px";
+    } else if (event === "redraw") {
+        if (!data && api.isStatusEnabled()) {
             statusBar.style.visibility = "visible";
             if (filePath !== "") {
-                statusFile.innerText = shortenPath(filePath, 
-                    Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR));
+                statusFile.innerText = shortenPath(
+                    filePath,
+                    Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+                );
             }
         } else {
-            display.style.bottom = "0px";
             statusBar.style.visibility = "hidden";
         }
     } else if (event === "resolution") {
@@ -101,75 +108,82 @@ subscribeDisplay("statusbar", (event, data) => {
         statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
         statusResolution.style.display = "";
         statusIconRes.style.display = "";
-        statusSepRes.style.display = "";    
-    } else if (event === "mode") {
+        statusSepRes.style.display = "";
+    } else if (event === "display") {
         let ui = data == "720p" ? "HD" : data == "1080p" ? "FHD" : "SD";
-        statusDisplay.innerText = `${ui} (${data})`;    
+        statusDisplay.innerText = `${ui} (${data})`;
+    } else if (event === "debug") {
+        if (data.level === "error") {
+            errorCount++;
+        } else if (data.level === "warning") {
+            warnCount++;
+        }
+        setStatusColor();
     }
 });
-subscribeConsole("statusbar", (event, data) => {
-    if (event === "error") {
-        errorCount++;
-    } else if (event === "warning") {
-        warnCount++;
-    }
-    setStatusColor();
-});
-// Status Bar visibility
-export function toggleStatusBar() {
-    let visible = statusBar.style.visibility === "visible";
-    menuStatus.checked = !visible;
-}
 // Set status bar colors
 export function setStatusColor() {
     statusError.innerText = errorCount.toString();
     statusWarn.innerText = warnCount.toString();
     if (errorCount > 0) {
         statusBar.className = "statusbarError";
+        statusAudio.className = "statusIconsError";
         statusWeb.className = "statusIconsError";
         statusECP.className = "statusIconsError";
         statusDevTools.className = "statusIconsError";
     } else if (warnCount > 0) {
         statusBar.className = "statusbarWarn";
+        statusAudio.className = "statusIconsWarn";
         statusWeb.className = "statusIconsWarn";
         statusECP.className = "statusIconsWarn";
         statusDevTools.className = "statusIconsWarn";
     } else {
         statusBar.className = "statusbar";
+        statusAudio.className = "statusIcons";
         statusWeb.className = "statusIcons";
         statusECP.className = "statusIcons";
         statusDevTools.className = "statusIcons";
     }
 }
+
+// Update Audio icon on Status Bar
+export function setAudioStatus(mute) {
+    if (mute) {
+        statusIconAudio.innerHTML = "<i class='fa fa-volume-off'></i>";
+    } else {
+        statusIconAudio.innerHTML = "<i class='fa fa-volume-up'></i>";
+    }
+}
+
 // Update locale id on Status Bar
 export function setLocaleStatus(localeId) {
-    statusLocale.innerText = localeId.replace("_","-");
+    statusLocale.innerText = localeId.replace("_", "-");
 }
 // Update server icons on Status Bar
-export function setServerStatus(name, port, enabled) {
-    if (name === "ECP") {
-        ECPPort = port;
+export function setServerStatus(server, enabled, port) {
+    if (server === "ECP") {
         if (enabled) {
+            ECPPort = port;
             statusECPText.innerText = port.toString();
             statusECP.style.display = "";
         } else {
             statusECP.style.display = "none";
         }
-    } else if (name === "Web") {
-        installerPort = port;
+    } else if (server === "Web") {
         if (enabled) {
+            installerPort = port;
             statusWebText.innerText = port.toString();
             statusWeb.style.display = "";
         } else {
             statusWeb.style.display = "none";
-        }    
-    } else if (name ==="Telnet") {
+        }
+    } else if (server === "Telnet") {
         if (enabled) {
             statusTelnetText.innerText = port.toString();
             statusTelnet.style.display = "";
         } else {
             statusTelnet.style.display = "none";
-        }    
+        }
     }
 }
 // Clear error and warning counters
@@ -177,18 +191,17 @@ export function clearCounters() {
     errorCount = 0;
     warnCount = 0;
 }
-
 // Function that shortens a path (based on code by https://stackoverflow.com/users/2149492/johnpan)
 function shortenPath(bigPath, maxLen) {
     if (bigPath.length <= maxLen) return bigPath;
-    var splitter = bigPath.indexOf('/')>-1 ? '/' : "\\",
-        tokens = bigPath.split(splitter), 
+    var splitter = bigPath.indexOf("/") > -1 ? "/" : "\\",
+        tokens = bigPath.split(splitter),
         maxLen = maxLen || 25,
-        drive = bigPath.indexOf(':')>-1 ? tokens[0] : "",  
+        drive = bigPath.indexOf(":") > -1 ? tokens[0] : "",
         fileName = tokens[tokens.length - 1],
-        len = drive.length + fileName.length,    
+        len = drive.length + fileName.length,
         remLen = maxLen - len - 3, // remove the current length and also space for ellipsis char and 2 slashes
-        path, lenA, lenB, pathA, pathB;    
+        path, lenA, lenB, pathA, pathB;
     //remove first and last elements from the array
     tokens.splice(0, 1);
     tokens.splice(tokens.length - 1, 1);
@@ -200,7 +213,27 @@ function shortenPath(bigPath, maxLen) {
     //rebuild the path from beginning and end
     pathA = path.substring(0, lenA);
     pathB = path.substring(path.length - lenB);
-    path = drive + splitter + pathA + "…" + pathB + splitter ;
-    path = path + fileName; 
+    path = drive + splitter + pathA + "…" + pathB + splitter;
+    path = path + fileName;
     return path;
 }
+// Events from Main process
+api.receive("toggleStatusBar", function () {
+    if (!api.isFullScreen()) {
+        brsEmu.redraw(false);
+    }
+});
+api.receive("serverStatus", function (server, enable, port) {
+    if (enable) {
+        console.info(`${server} server started listening port ${port}`);
+    } else {
+        console.info(`${server} server was disabled.`);
+    }
+    setServerStatus(server, enable, port);
+});
+api.receive("setLocale", function (locale) {
+    if (locale !== currentLocale) {
+        currentLocale = locale;
+        setLocaleStatus(locale);
+    }
+});

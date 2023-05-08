@@ -1,18 +1,23 @@
-// This helper remembers the size and position of your windows (and restores
-// them in that place after app relaunch).
-// Can be used for more than one window, just construct many
-// instances of it and give each different name.
-
-import { app, BrowserWindow, screen } from "electron";
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *
+ *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+import { app, BrowserWindow, ipcMain, screen, Menu } from "electron";
+import { getEmulatorOption } from "./settings";
 import path from "path";
 import jetpack from "fs-jetpack";
 
-export default (name, options, argv) => {
+const isMacOS = process.platform === "darwin";
+
+export function createWindow(name, options) {
     const userDataDir = jetpack.cwd(app.getPath("userData"));
     const stateStoreFile = `window-state-${name}.json`;
     const defaultSize = {
         width: options.width,
-        height: options.height
+        height: options.height,
     };
     let state = {};
     let win;
@@ -22,8 +27,6 @@ export default (name, options, argv) => {
         let restoredState = {};
         try {
             restoredState = userDataDir.read(stateStoreFile, "json");
-            appMenu.getMenuItemById("on-top").checked = restoredState.alwaysOnTop;
-            appMenu.getMenuItemById("status-bar").checked = restoredState.status;
         } catch (err) {
             // For some reason json can't be read (might be corrupted).
             // No worries, we have defaults.
@@ -32,17 +35,13 @@ export default (name, options, argv) => {
     };
 
     const getWindowState = () => {
-        const appMenu = app.applicationMenu;
-        const position = win.getPosition();
-        const size = win.getSize();
+        const bounds = win.getBounds();
         return {
-            x: position[0],
-            y: position[1],
-            width: size[0],
-            height: size[1],
+            x: bounds.x,
+            y: bounds.y,
+            width: bounds.width,
+            height: bounds.height,
             backgroundColor: global.sharedObject.backgroundColor,
-            alwaysOnTop: appMenu.getMenuItemById("on-top").checked,
-            status: appMenu.getMenuItemById("status-bar").checked
         };
     };
 
@@ -59,7 +58,7 @@ export default (name, options, argv) => {
         const bounds = screen.getPrimaryDisplay().bounds;
         return Object.assign({}, defaultSize, {
             x: (bounds.width - defaultSize.width) / 2,
-            y: (bounds.height - defaultSize.height) / 2
+            y: (bounds.height - defaultSize.height) / 2,
         });
     };
 
@@ -83,61 +82,115 @@ export default (name, options, argv) => {
     };
 
     state = ensureVisibleOnSomeDisplay(restore());
-    let full = {};
-
-    if (argv.fullscreen) {
-        full = { fullscreen: true };
-    }
 
     win = new BrowserWindow(
-        Object.assign(full, options, state, {
+        Object.assign(options, state, {
             webPreferences: {
+                preload: path.join(__dirname, "./preload.js"),
+                contextIsolation: true,
                 enableRemoteModule: true,
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
-                webSecurity: true
+                webSecurity: true,
             },
-            icon: __dirname + "/images/icon512x512.png",
+            icon: __dirname + "/images/icon.ico",
             frame: false,
-            show: false
+            show: false,
         })
     );
+    require("@electron/remote/main").enable(win.webContents);
 
-    win.on("ready-to-show", function() {
-        let openFile;
-        if (argv && argv.o) {
-            openFile = argv.o.trim();
-        } else {
-            try {
-                let index = argv._.length - 1;
-                if (index && argv._[index]) {
-                    if (jetpack.exists(argv._[index])) {
-                        openFile = argv._[index];
-                    }
-                }
-            } catch (error) {
-                console.error("Invalid parameters!", error);
-            }
+    // Enable SharedArrayBuffer
+    win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+        details.responseHeaders["Cross-Origin-Opener-Policy"] = ["same-origin"];
+        details.responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
+        callback({ responseHeaders: details.responseHeaders });
+    });
+    win.on("close", saveState);
+    // App Renderer Events
+    ipcMain.on("openDevTools", (event, data) => {
+        win.openDevTools();
+    });
+    ipcMain.on("debugStarted", (event, data) => {
+        if (getEmulatorOption("devToolsDebug")) {
+            win.openDevTools();
         }
-        if (openFile) {
-            const fileExt = path.parse(openFile).ext.toLowerCase();
-            if (fileExt === ".zip") {
-                win.webContents.send("fileSelected", [ openFile ]);
-            } else if (fileExt === ".brs") {
-                win.webContents.send("fileSelected", [ openFile ]);
-            } else {
-                console.log("File format not supported: ", fileExt);
-            }        
-        }
-        win.show();
-        win.focus();
+    });
+    ipcMain.on("setBackgroundColor", (event, color) => {
+        win.setBackgroundColor(color);
+        global.sharedObject.backgroundColor = color;
+    });
+    ipcMain.on("isFullScreen", (event) => {
+        event.returnValue = win.isFullScreen();
+    });
+    ipcMain.on("toggleFullScreen", () => {
+        win.setFullScreen(!win.isFullScreen());
+    });
+    ipcMain.on("reset", () => {
+        win.reload();
     });
 
-    win.on("close", saveState);
-
-    if (process.platform === "darwin") {
+    if (isMacOS) {
+        // macOS windows flags
         win.setMaximizable(true);
         win.setWindowButtonVisibility(true);
+    } else {
+        win.on("resize", () => {
+            setAspectRatio(false);
+        });
     }
     return win;
-};
+}
+
+export function setAspectRatio(changed = true) {
+    const displayMode = global.sharedObject.deviceInfo.displayMode || "720p";
+    const ASPECT_RATIO_SD = 4 / 3;
+    const ASPECT_RATIO_HD = 16 / 9;
+    const window = BrowserWindow.fromId(1);
+    let aspectRatio = displayMode === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
+    const appMenu = Menu.getApplicationMenu();
+    const statusOn = getEmulatorOption("statusBar");
+    let height = window.getBounds().height;
+    let offset = statusOn ? 45 : 25;
+    if (window) {
+        if (isMacOS) {
+            height -= offset;
+            window.setAspectRatio(aspectRatio, { width: 0, height: offset });
+        } else {
+            const width = Math.round((height - offset) * aspectRatio);
+            aspectRatio = width / height;
+            window.setAspectRatio(aspectRatio);
+        }
+        if (changed) {
+            window.setBounds({ width: Math.round(height * aspectRatio) });
+        }
+    }
+}
+
+export function setAlwaysOnTop(enabled) {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.setAlwaysOnTop(enabled);
+    }
+}
+
+export function copyScreenshot() {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.webContents.send("copyScreenshot");
+    }
+}
+
+export function closeChannel() {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.webContents.send("closeChannel", "Menu");
+    }
+}
+
+export function reloadApp() {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.webContents.reloadIgnoringCache();
+    }
+}

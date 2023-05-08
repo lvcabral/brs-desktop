@@ -1,11 +1,12 @@
 /* Color Themes */
-[data-theme^="purple"],
-[data-theme] [data-theme^="purple"] {
+
+[data-theme^="purple"], [data-theme] [data-theme^="purple"] {
     --main-color: #dac7ea;
     --background-color: #251135;
     --link-color: #aa46f7;
     --title-color: #dac7ea;
     --title-background-color: #3d1b56;
+    --item-background-color: #662d91;
     --status-color: #f2f2f2;
     --status-background-color: #662d91;
     --status-hover-color: #7e3ab3;
@@ -14,13 +15,14 @@
     --status-warning-color: #cc6633;
     --status-warning-hover-color: #d4865f;
 }
-[data-theme^="light"],
-[data-theme] [data-theme^="light"] {
+
+[data-theme^="light"], [data-theme] [data-theme^="light"] {
     --main-color: #000000;
     --background-color: #ffffff;
     --link-color: #0000ff;
     --title-color: #333333;
     --title-background-color: #dddddd;
+    --item-background-color: #094771;
     --status-color: #f2f2f2;
     --status-background-color: #007acc;
     --status-hover-color: #1f8ad2;
@@ -29,13 +31,14 @@
     --status-warning-color: #cc6633;
     --status-warning-hover-color: #d4865f;
 }
-[data-theme^="dark"],
-[data-theme] [data-theme^="dark"] {
+
+[data-theme^="dark"], [data-theme] [data-theme^="dark"] {
     --main-color: #d4d4d4;
     --background-color: #1e1e1e;
     --link-color: #3e5763;
     --title-color: #cccccc;
     --title-background-color: #252526;
+    --item-background-color: #094771;
     --status-color: #f2f2f2;
     --status-background-color: #007acc;
     --status-hover-color: #1f8ad2;
@@ -44,9 +47,10 @@
     --status-warning-color: #cc6633;
     --status-warning-hover-color: #d4865f;
 }
+
 /* Style Definitions */
-html,
-body {
+
+html, body {
     width: 100%;
     height: 100%;
     padding: 0;
@@ -54,15 +58,16 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-        "Droid Sans", "Helvetica Neue", sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     color: var(--main-color);
     background-color: var(--background-color);
 }
+
 a {
     color: var(--link-color);
     outline: none;
 }
+
 .statusbar {
     overflow: hidden;
     background-color: var(--status-background-color);
@@ -73,6 +78,7 @@ a {
     user-select: none;
     -webkit-user-select: none;
 }
+
 .statusbar span {
     float: left;
     display: block;
@@ -82,6 +88,7 @@ a {
     text-decoration: none;
     font-size: 12px;
 }
+
 .statusbarError {
     overflow: hidden;
     background-color: var(--status-error-color);
@@ -92,6 +99,7 @@ a {
     user-select: none;
     -webkit-user-select: none;
 }
+
 .statusbarError span {
     float: left;
     display: block;
@@ -101,6 +109,7 @@ a {
     text-decoration: none;
     font-size: 12px;
 }
+
 .statusbarWarn {
     overflow: hidden;
     background-color: var(--status-warning-color);
@@ -111,6 +120,7 @@ a {
     user-select: none;
     -webkit-user-select: none;
 }
+
 .statusbarWarn span {
     float: left;
     display: block;
@@ -120,20 +130,33 @@ a {
     text-decoration: none;
     font-size: 12px;
 }
+
 .statusIcons:hover {
-	background-color: var(--status-hover-color);
+    background-color: var(--status-hover-color);
 }
+
 .statusIconsError:hover {
-	background-color: var(--status-error-hover-color);
+    background-color: var(--status-error-hover-color);
 }
+
 .statusIconsWarn:hover {
-	background-color: var(--status-warning-hover-color);
+    background-color: var(--status-warning-hover-color);
 }
+
 #display {
     position: absolute;
     top: 0;
-    bottom: 20px;
     left: 0;
     right: 0;
     margin: auto;
+}
+
+#stats{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+	z-index:60;
+	opacity: 0.5;
+	visibility: hidden;
 }
