@@ -466,30 +466,15 @@ export function getSettings(window) {
         ],
     });
     settings.on("save", (preferences) => {
-        if (preferences.emulator) {
-            const options = preferences.emulator.options;
-            const onTop = options.includes("alwaysOnTop");
-            const statusBar = options.includes("statusBar");
-            checkMenuItem("on-top", onTop);
-            window.setAlwaysOnTop(onTop);
-            if (statusBarVisible != statusBar) {
-                checkMenuItem("status-bar", statusBar);
-                setStatusBar(statusBar);
-            }
-            setThemeSource(undefined, true);
-        }
-        if (preferences.services) {
-            saveServicesSettings(preferences.services, window);
-        }
+        saveEmulatorSettings(preferences.emulator.options, window);
+        saveServicesSettings(preferences.services, window);
         setDeviceInfo("device", "deviceModel", true);
         setDeviceInfo("device", "serialNumber", true);
         setDeviceInfo("device", "clientId", true);
         setDeviceInfo("device", "RIDA", true);
         setDeviceInfo("device", "developerId"); // Do not notify app to avoid change registry without reset
         saveDisplaySettings(window);
-        if (preferences.remote) {
-            setRemoteKeys(settings.defaults.remote, preferences.remote);
-        }
+        setRemoteKeys(settings.defaults.remote, preferences.remote);
         if (preferences.audio) {
             setDeviceInfo("audio", "maxSimulStreams", true);
             setDeviceInfo("audio", "audioVolume", true);
@@ -750,25 +735,41 @@ export function getModelName(model) {
 
 // Settings Helper Functions
 
-function saveServicesSettings(services, window) {
-    if (services.installer.includes("enabled")) {
-        if (!isInstallerEnabled) {
-            setPort(services.webPort);
-            setPassword(services.password);
-            enableInstaller(window);
+function saveEmulatorSettings(options, window) {
+    if (options) {
+        const onTop = options.includes("alwaysOnTop");
+        const statusBar = options.includes("statusBar");
+        checkMenuItem("on-top", onTop);
+        window.setAlwaysOnTop(onTop);
+        if (statusBarVisible != statusBar) {
+            checkMenuItem("status-bar", statusBar);
+            setStatusBar(statusBar);
         }
-    } else {
-        disableInstaller(window);
+        setThemeSource(undefined, true);
     }
-    if (services.ecp.includes("enabled")) {
-        enableECP(window);
-    } else {
-        disableECP(window);
-    }
-    if (services.telnet.includes("enabled")) {
-        enableTelnet(window);
-    } else {
-        disableTelnet(window);
+}
+
+function saveServicesSettings(services, window) {
+    if (services) {
+        if (services.installer.includes("enabled")) {
+            if (!isInstallerEnabled) {
+                setPort(services.webPort);
+                setPassword(services.password);
+                enableInstaller(window);
+            }
+        } else {
+            disableInstaller(window);
+        }
+        if (services.ecp.includes("enabled")) {
+            enableECP(window);
+        } else {
+            disableECP(window);
+        }
+        if (services.telnet.includes("enabled")) {
+            enableTelnet(window);
+        } else {
+            disableTelnet(window);
+        }
     }
 }
 
