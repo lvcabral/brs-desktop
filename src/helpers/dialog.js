@@ -13,10 +13,7 @@ import { loadFile } from "./files";
 export function openChannelPackage() {
     const opts = {
         title: "Select a Channel package file.",
-        filters: [
-            { name: "Channel Packages", extensions: ["zip"] },
-            { name: "All Files", extensions: ["*"] },
-        ],
+        filters: getFileFilter("Channel Packages",["zip"]),
         properties: ["openFile"],
     };
     const window = BrowserWindow.fromId(1);
@@ -37,10 +34,7 @@ export function openChannelPackage() {
 export function openBrightScriptFile() {
     const opts = {
         title: "Select a BrightScript source file.",
-        filters: [
-            { name: "BrightScript source files", extensions: ["brs"] },
-            { name: "All Files", extensions: ["*"] },
-        ],
+        filters: getFileFilter("BrightScript source files", ["brs"]),
         properties: ["openFile"],
     };
     const window = BrowserWindow.fromId(1);
@@ -61,10 +55,7 @@ export function openBrightScriptFile() {
 export function saveScreenshot() {
     const opts = {
         title: "Save the Screenshot as",
-        filters: [
-            { name: "PNG Image", extensions: ["png"] },
-            { name: "All Files", extensions: ["*"] },
-        ],
+        filters: getFileFilter("PNG Image", ["png"]),
     };
     const window = BrowserWindow.fromId(1);
     dialog
@@ -78,4 +69,13 @@ export function saveScreenshot() {
         .catch((err) => {
             console.log(err);
         });
+}
+
+// Helper functions
+
+function getFileFilter(description, extensions) {
+    return [
+        { name: description, extensions: extensions },
+        { name: "All Files", extensions: ["*"] },
+    ];
 }

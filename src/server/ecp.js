@@ -295,11 +295,11 @@ function genDeviceRootXml() {
     xmlDevice.ele("deviceType", {}, "urn:roku-com:device:player:1-0");
     xmlDevice.ele("friendlyName", {}, device.friendlyName);
     xmlDevice.ele("manufacturer", {}, "Roku");
-    xmlDevice.ele("manufacturerURL", {}, "http://www.roku.com/");
+    xmlDevice.ele("manufacturerURL", {}, "https://www.roku.com/");
     xmlDevice.ele("modelDescription", {}, app.getName());
     xmlDevice.ele("modelName", {}, getModelName(device.deviceModel));
     xmlDevice.ele("modelNumber", {}, device.deviceModel);
-    xmlDevice.ele("modelURL", {}, "http://www.lvcabral.com/brs/");
+    xmlDevice.ele("modelURL", {}, "https://www.lvcabral.com/brs/");
     xmlDevice.ele("serialNumber", {}, device.serialNumber);
     xmlDevice.ele("UDN", {}, `uuid:${UDN}`);
     const xmlList = xmlDevice.ele("serviceList");
