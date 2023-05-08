@@ -147,7 +147,6 @@ export function setAspectRatio(changed = true) {
     const ASPECT_RATIO_HD = 16 / 9;
     const window = BrowserWindow.fromId(1);
     let aspectRatio = displayMode === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
-    const appMenu = Menu.getApplicationMenu();
     const statusOn = getEmulatorOption("statusBar");
     let height = window.getBounds().height;
     let offset = statusOn ? 45 : 25;
