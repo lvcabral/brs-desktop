@@ -25,7 +25,7 @@ import path from "path";
 const WebSocket = require("ws");
 const url = require("url");
 
-const DEBUG = false;
+const DEBUG = true;
 const ECPPORT = 8060;
 const SSDPPORT = 1900;
 const MAC = getMacAddress();
@@ -175,64 +175,56 @@ function processRequest(ws, message) {
         const statusOK = `"response":"${msg["request"]}","response-id":"${msg["request-id"]}","status":"200","status-msg":"OK"`;
         if (msg["request"] == "authenticate" && msg["param-response"]) {
             reply = `{${statusOK}}`;
-        } else if (msg["request"] == "query-device-info") {
-            reply = `{"content-data":"${genDeviceInfoXml(
-                true
-            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
-        } else if (msg["request"] == "query-themes") {
-            reply = `{"content-data":"${genThemesXml(
-                true
-            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
-        } else if (msg["request"] == "query-screensavers") {
-            reply = `{"content-data":"${genScrsvXml(
-                true
-            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
-        } else if (msg["request"] == "query-apps") {
-            reply = `{"content-data":"${genAppsXml(
-                true
-            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
-        } else if (msg["request"] == "query-icon") {
-            reply = `{"content-data":"${genAppIcon(
-                msg["param-channel-id"],
-                true
-            )}","content-type":"image/png",${statusOK}}`;
-        } else if (msg["request"] == "query-tv-active-channel") {
-            reply = `{"content-data":"${genActiveApp(
-                true
-            )}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+        } else if (msg["request"]?.startsWith("query")) {
+            reply = queryReply(msg, statusOK);
         } else if (msg["request"] == "launch") {
             launchApp(msg["param-channel-id"]);
             reply = `{${statusOK}}`;
-        } else if (msg["request"] == "request-events") {
-            reply = `{${statusOK}}`;
-        } else if (msg["request"] == "query-media-player") {
-            const content = Buffer.from(`<?xml version="1.0" encoding="UTF-8" ?>`).toString(
-                "base64"
-            );
-            reply = `{"content-data":"${content}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
-        } else if (msg["request"] == "query-audio-device") {
-            const content = Buffer.from(`<?xml version="1.0" encoding="UTF-8" ?>`).toString(
-                "base64"
-            );
-            reply = `{"content-data":"${content}","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
-        } else if (msg["request"] == "query-textedit-state") {
-            const content = Buffer.from(`{"textedit-state":{"textedit-id":"none"}}`).toString(
-                "base64"
-            );
-            reply = `{"content-data":"${content}","content-type":"application/json",${statusOK}}`;
         } else if (msg["request"] == "key-press") {
             window.webContents.send("postKeyPress", msg["param-key"]);
             reply = `{${statusOK}}`;
+        } else {
+            // Reply OK to any other request, including "request-events"
+            reply = `{${statusOK}}`;
         }
-        if (reply !== "") {
-            if (DEBUG) {
-                console.log(`replying: %s`, reply);
-            }
-            ws.send(reply);
-        } else if (DEBUG) {
-            console.log(`no reply for: %s`, msg["request-id"]);
+        if (DEBUG) {
+            console.log(`replying: ${msg["request-id"]}:${msg["request"]} with ${reply}`);
         }
+        ws.send(reply);
     }
+}
+
+function queryReply(msg, statusOK) {
+    const request = msg["request"];
+    const xml = `<?xml version="1.0" encoding="UTF-8" ?>`;
+    const xml64 = Buffer.from(xml).toString("base64");
+    const template = `{"content-data":"$data","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
+    let reply = `{${statusOK}}`;
+    if (request == "query-device-info") {
+        reply = template.replace("$data", genDeviceInfoXml(true));
+    } else if (request == "query-themes") {
+        reply = template.replace("$data", genThemesXml(true));
+    } else if (request == "query-screensavers") {
+        reply = template.replace("$data", genScrsvXml(true));
+    } else if (request == "query-apps") {
+        reply = template.replace("$data", genAppsXml(true));
+    } else if (request == "query-icon") {
+        reply = template.replace("$data", genAppIcon(msg["param-channel-id"], true));
+        reply = reply.replace("text/xml", "image/png");
+    } else if (request == "query-tv-active-channel") {
+        reply = template.replace("$data", genActiveApp(true));
+    } else if (msg["request"] == "query-media-player") {
+        reply = template.replace("$data", xml64);
+    } else if (msg["request"] == "query-audio-device") {
+        reply = template.replace("$data", xml64);
+    } else if (msg["request"] == "query-textedit-state") {
+        const content = Buffer.from(`{"textedit-state":{"textedit-id":"none"}}`).toString(
+            "base64"
+        );
+        reply = template.replace("$data", content);
+        reply = reply.replace("text/xml", "application/json");
+    }
+    return reply
 }
 
 // ECP REST API Methods

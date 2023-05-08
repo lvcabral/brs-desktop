@@ -29,23 +29,7 @@ export function enableTelnet() {
         clientId++;
         // listen for the actual data from the client
         client.on("data", (data) => {
-            if (data !== undefined && data.length > 0) {
-                let expr = data
-                    .toString()
-                    .trim()
-                    .split(/(?<=^\S+)\s/);
-                let cmd = expr[0].toLowerCase();
-                if (cmd.toLowerCase() === "close") {
-                    client.write("bye!\r\n");
-                    client.destroy();
-                } else if (cmd === "quit") {
-                    window.webContents.send("closeChannel", "EXIT_BRIGHTSCRIPT_STOP");
-                } else if (cmd === "\x03") {
-                    window.webContents.send("debugCommand", "break");
-                } else {
-                    window.webContents.send("debugCommand", expr.join(" "));
-                }
-            }
+            processData(data, client, window);
         });
         // Handle exceptions from the client
         client.on("error", (e) => {
@@ -106,4 +90,24 @@ export function updateTelnetStatus(enabled) {
     const window = BrowserWindow.fromId(1);
     window.webContents.send("serverStatus", "Telnet", enabled, PORT);
     window.webContents.send("refreshMenu");
+}
+
+function processData(data, client, window) {
+    if (data?.length > 0) {
+        let expr = data
+            .toString()
+            .trim()
+            .split(/(?<=^\S+)\s/);
+        let cmd = expr[0].toLowerCase();
+        if (cmd.toLowerCase() === "close") {
+            client.write("bye!\r\n");
+            client.destroy();
+        } else if (cmd === "quit") {
+            window.webContents.send("closeChannel", "EXIT_BRIGHTSCRIPT_STOP");
+        } else if (cmd === "\x03") {
+            window.webContents.send("debugCommand", "break");
+        } else {
+            window.webContents.send("debugCommand", expr.join(" "));
+        }
+    }
 }

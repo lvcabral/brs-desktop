@@ -477,26 +477,7 @@ export function getSettings(window) {
                 setThemeSource(undefined, true);
             }
             if (preferences.services) {
-                const services = preferences.services;
-                if (services.installer.includes("enabled")) {
-                    if (!isInstallerEnabled) {
-                        setPort(services.webPort);
-                        setPassword(services.password);
-                        enableInstaller(window);
-                    }
-                } else {
-                    disableInstaller(window);
-                }
-                if (services.ecp.includes("enabled")) {
-                    enableECP(window);
-                } else {
-                    disableECP(window);
-                }
-                if (services.telnet.includes("enabled")) {
-                    enableTelnet(window);
-                } else {
-                    disableTelnet(window);
-                }
+                saveServicesSettings(preferences.services, window);
             }
             if (preferences.device) {
                 setDeviceInfo("device", "deviceModel", true);
@@ -506,17 +487,7 @@ export function getSettings(window) {
                 setDeviceInfo("device", "developerId"); // Do not notify app to avoid change registry without reset
             }
             if (preferences.display) {
-                const oldValue = global.sharedObject.deviceInfo.displayMode;
-                const newValue = settings.value("display.displayMode");
-                if (newValue && newValue !== oldValue) {
-                    setDisplayOption("displayMode", undefined, true);
-                    if (newValue === "480p" || oldValue === "480p") {
-                        setAspectRatio();
-                    }
-                }
-                const overscanMode = settings.value("display.overscanMode");
-                checkMenuItem(overscanMode, true);
-                window.webContents.send("setOverscan", overscanMode);
+                saveDisplaySettings(window);
             }
             if (preferences.remote) {
                 setRemoteKeys(settings.defaults.remote, preferences.remote);
@@ -579,72 +550,9 @@ export function setRemoteKeys(defaults, remote) {
     if (customKeys.size > 0) {
         const window = BrowserWindow.fromId(1);
         if (window) {
-            console.log("sent keys!!!");
             window.webContents.send("setCustomKeys", customKeys);
         }
     }
-}
-
-function convertKey(keyCode) {
-    const arrows = new Set(["Left", "Right", "Up", "Down"]);
-    let newCode = keyCode.replaceAll(" ", "");
-    if (keyCode.includes("+")) {
-        const leftKey = keyCode.split("+")[0];
-        const rightKey = keyCode.split("+")[1];
-        if (rightKey.length === 1) {
-            newCode = `${leftKey}+${convertChar(rightKey)}`;
-        } else if (arrows.has(rightKey)) {
-            newCode = `${leftKey}+Arrow${rightKey}`;
-        }
-    } else if (keyCode.length === 1) {
-        newCode = convertChar(keyCode);
-    } else if (arrows.has(keyCode)) {
-        newCode = `Arrow${keyCode}`;
-    }
-    return newCode;
-}
-
-function convertChar(keyChar) {
-    if (isNumber(keyChar)) {
-        return `Digit${keyChar}`;
-    } else if (isLetter(keyChar)) {
-        return `Key${keyChar}`;
-    } else {
-        switch (keyChar) {
-            case "`":
-                return "Backquote";
-            case "-":
-                return "Minus";
-            case "=":
-                return "Equal";
-            case "[":
-                return "BracketLeft";
-            case "]":
-                return "BracketRight";
-            case ";":
-                return "Semicolon";
-            case "'":
-                return "Quote";
-            case ",":
-                return "Comma";
-            case ".":
-                return "Period";
-            case "\\":
-                return "Backslash";
-            case "/":
-                return "Slash";
-            default:
-                return keyChar;
-        }
-    }
-}
-
-function isNumber(str) {
-    return str.length === 1 && str.match(/[0-9]/i);
-}
-
-function isLetter(str) {
-    return str.length === 1 && str.match(/[a-z]/i);
 }
 
 export function showSettings() {
@@ -741,7 +649,7 @@ export function setDisplayOption(option, mode, notifyApp) {
     if (option in global.sharedObject.deviceInfo) {
         global.sharedObject.deviceInfo[option] = mode;
     }
-    if ((mode !== current) & (mode === "480p" || current === "480p")) {
+    if (mode !== current && (mode === "480p" || current === "480p")) {
         setAspectRatio();
     }
     checkMenuItem(mode, true);
@@ -841,6 +749,106 @@ ipcMain.on("setAudioMute", (event, mute) => {
 
 export function getModelName(model) {
     return modelLabels.get(model).replace(/ *\([^)]*\) */g, "");
+}
+
+// Settings Helper Functions
+
+function saveServicesSettings(services, window) {
+    if (services.installer.includes("enabled")) {
+        if (!isInstallerEnabled) {
+            setPort(services.webPort);
+            setPassword(services.password);
+            enableInstaller(window);
+        }
+    } else {
+        disableInstaller(window);
+    }
+    if (services.ecp.includes("enabled")) {
+        enableECP(window);
+    } else {
+        disableECP(window);
+    }
+    if (services.telnet.includes("enabled")) {
+        enableTelnet(window);
+    } else {
+        disableTelnet(window);
+    }
+}
+
+function saveDisplaySettings(window) {
+    const oldValue = global.sharedObject.deviceInfo.displayMode;
+    const newValue = settings.value("display.displayMode");
+    if (newValue && newValue !== oldValue) {
+        setDisplayOption("displayMode", undefined, true);
+        if (newValue === "480p" || oldValue === "480p") {
+            setAspectRatio();
+        }
+    }
+    const overscanMode = settings.value("display.overscanMode");
+    checkMenuItem(overscanMode, true);
+    window.webContents.send("setOverscan", overscanMode);
+}
+
+function convertKey(keyCode) {
+    const arrows = new Set(["Left", "Right", "Up", "Down"]);
+    let newCode = keyCode.replaceAll(" ", "");
+    if (keyCode.includes("+")) {
+        const leftKey = keyCode.split("+")[0];
+        const rightKey = keyCode.split("+")[1];
+        if (rightKey.length === 1) {
+            newCode = `${leftKey}+${convertChar(rightKey)}`;
+        } else if (arrows.has(rightKey)) {
+            newCode = `${leftKey}+Arrow${rightKey}`;
+        }
+    } else if (keyCode.length === 1) {
+        newCode = convertChar(keyCode);
+    } else if (arrows.has(keyCode)) {
+        newCode = `Arrow${keyCode}`;
+    }
+    return newCode;
+}
+
+function convertChar(keyChar) {
+    if (isNumber(keyChar)) {
+        return `Digit${keyChar}`;
+    } else if (isLetter(keyChar)) {
+        return `Key${keyChar}`;
+    } else {
+        switch (keyChar) {
+            case "`":
+                return "Backquote";
+            case "-":
+                return "Minus";
+            case "=":
+                return "Equal";
+            case "[":
+                return "BracketLeft";
+            case "]":
+                return "BracketRight";
+            case ";":
+                return "Semicolon";
+            case "'":
+                return "Quote";
+            case ",":
+                return "Comma";
+            case ".":
+                return "Period";
+            case "\\":
+                return "Backslash";
+            case "/":
+                return "Slash";
+            default:
+                return keyChar;
+        }
+    }
+}
+
+function isNumber(str) {
+    return str.length === 1 && str.match(/[0-9]/i);
+}
+
+function isLetter(str) {
+    return str.length === 1 && str.match(/[a-z]/i);
 }
 
 // Title Overlay Theme

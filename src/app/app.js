@@ -43,44 +43,14 @@ brsEmu.initialize(api.getDeviceInfo(), {
 brsEmu.subscribe("app", (event, data) => {
     if (event === "loaded") {
         currentChannel = data;
-        let settings = api.getPreferences();
-        if (settings && settings.display && settings.display.overscanMode) {
-            brsEmu.setOverscanMode(settings.display.overscanMode);
-        }
-        if (settings && settings.emulator && settings.emulator.options) {
-            brsEmu.enableStats(settings.emulator.options.includes("perfStats"));
-        }
-        api.updateTitle(`${data.title} - ${defaultTitle}`);
-        if (data.id === "brs") {
-            api.send("addRecentSource", data.file);
-        } else {
-            api.send("addRecentPackage", data);
-        }
-        api.enableMenuItem("close-channel", true);
-        api.enableMenuItem("save-screen", true);
-        api.enableMenuItem("copy-screen", true);
+        appLoaded(data);
     } else if (event === "started") {
         currentChannel = data;
         stats.style.visibility = "visible";
     } else if (event === "closed" || event === "error") {
-        currentChannel = { id: "", running: false };
-        stats.style.visibility = "hidden";
-        api.updateTitle(defaultTitle);
-        api.enableMenuItem("close-channel", false);
-        api.enableMenuItem("save-screen", false);
-        api.enableMenuItem("copy-screen", false);
+        appTerminated();
     } else if (event === "redraw") {
-        const windowTitleBar = document.querySelector("body > div.cet-titlebar.cet-mac.cet-shadow");
-        const windowContainer = document.querySelector("body > div.cet-container");
-        if (windowTitleBar && windowContainer) {
-            if (data) {
-                windowTitleBar.style.visibility = "hidden";
-                windowContainer.style.top = "0px";
-            } else if (windowTitleBar.style.visibility !== "visible") {
-                windowTitleBar.style.visibility = "visible";
-                windowContainer.style.top = "28px";
-            }
-        }
+        redrawEvent(data);
     } else if (event === "debug") {
         if (data.level === "stop") {
             api.send("debugStarted");
@@ -143,7 +113,9 @@ api.receive("postKeyPress", function (key) {
 api.receive("copyScreenshot", function () {
     display.toBlob(function (blob) {
         const item = new ClipboardItem({ "image/png": blob });
-        navigator.clipboard.write([item]);
+        navigator.clipboard.write([item]).catch((err) => {
+            console.log(`error copying screenshot to clipboard: ${err.message}`);
+        });
     });
 });
 api.receive("saveScreenshot", function (file) {
@@ -176,3 +148,47 @@ window.onload = window.onresize = function () {
 display.ondblclick = function () {
     api.toggleFullScreen();
 };
+
+// Helper functions
+
+function appLoaded(channelData) {
+    let settings = api.getPreferences();
+    if (settings?.display && settings?.display?.overscanMode) {
+        brsEmu.setOverscanMode(settings.display.overscanMode);
+    }
+    if (settings?.emulator && settings?.emulator?.options) {
+        brsEmu.enableStats(settings.emulator.options.includes("perfStats"));
+    }
+    api.updateTitle(`${channelData.title} - ${defaultTitle}`);
+    if (channelData.id === "brs") {
+        api.send("addRecentSource", channelData.file);
+    } else {
+        api.send("addRecentPackage", channelData);
+    }
+    api.enableMenuItem("close-channel", true);
+    api.enableMenuItem("save-screen", true);
+    api.enableMenuItem("copy-screen", true);
+}
+
+function appTerminated() {
+    currentChannel = { id: "", running: false };
+    stats.style.visibility = "hidden";
+    api.updateTitle(defaultTitle);
+    api.enableMenuItem("close-channel", false);
+    api.enableMenuItem("save-screen", false);
+    api.enableMenuItem("copy-screen", false);
+}
+
+function redrawEvent(redraw) {
+    const windowTitleBar = document.querySelector("body > div.cet-titlebar.cet-mac.cet-shadow");
+    const windowContainer = document.querySelector("body > div.cet-container");
+    if (windowTitleBar && windowContainer) {
+        if (redraw) {
+            windowTitleBar.style.visibility = "hidden";
+            windowContainer.style.top = "0px";
+        } else if (windowTitleBar.style.visibility !== "visible") {
+            windowTitleBar.style.visibility = "visible";
+            windowContainer.style.top = "28px";
+        }
+    }
+}

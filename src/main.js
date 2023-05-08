@@ -88,13 +88,13 @@ app.on("ready", () => {
         backgroundColor: global.sharedObject.backgroundColor,
     });
     // Configure Window and load content
-    let firstLoad = true;
-    let winBounds = mainWindow.getBounds();
-    let display = screen.getDisplayNearestPoint({ x: winBounds.x, y: winBounds.y });
+    const winBounds = mainWindow.getBounds();
+    const display = screen.getDisplayNearestPoint({ x: winBounds.x, y: winBounds.y });
     mainWindow.setMinimumSize(
         Math.min(346, display.size.width),
         Math.min(264, display.size.height)
     );
+    let firstLoad = true;
     // Load Emulator Settings
     let settings = getSettings(mainWindow);
     let startup = {
