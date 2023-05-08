@@ -25,7 +25,7 @@ import path from "path";
 const WebSocket = require("ws");
 const url = require("url");
 
-const DEBUG = true;
+const DEBUG = false;
 const ECPPORT = 8060;
 const SSDPPORT = 1900;
 const MAC = getMacAddress();
@@ -218,13 +218,11 @@ function queryReply(msg, statusOK) {
     } else if (msg["request"] == "query-audio-device") {
         reply = template.replace("$data", xml64);
     } else if (msg["request"] == "query-textedit-state") {
-        const content = Buffer.from(`{"textedit-state":{"textedit-id":"none"}}`).toString(
-            "base64"
-        );
+        const content = Buffer.from(`{"textedit-state":{"textedit-id":"none"}}`).toString("base64");
         reply = template.replace("$data", content);
         reply = reply.replace("text/xml", "application/json");
     }
-    return reply
+    return reply;
 }
 
 // ECP REST API Methods
@@ -472,17 +470,16 @@ function getMacAddress() {
     const ifaces = os.networkInterfaces();
     let mac = "";
     Object.keys(ifaces).forEach(function (ifname) {
-        if (mac !== "") {
+        if (
+            mac !== "" ||
+            ifname.toLowerCase().startsWith("vmware") ||
+            ifname.toLowerCase().startsWith("virtualbox")
+        ) {
             return;
         }
         ifaces[ifname].forEach(function (iface) {
             if ("IPv4" !== iface.family || iface.internal !== false) {
                 // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-                return;
-            } else if (
-                ifname.slice(0, 6).toLowerCase() === "vmware" ||
-                ifname.slice(0, 10).toLowerCase() === "virtualbox"
-            ) {
                 return;
             }
             mac = iface.mac;
