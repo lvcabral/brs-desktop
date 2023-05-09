@@ -2,7 +2,7 @@
     "name": "brs-emu-app",
     "productName": "BrightScript Emulator",
     "description": "Desktop Application",
-    "version": "0.10.24",
+    "version": "0.10.25",
     "private": true,
     "author": {
         "name": "Marcelo Lv Cabral",
@@ -36,8 +36,7 @@
         "mac": {
             "artifactName": "brsEmuApp-${version}-macOS.${ext}",
             "category": "public.app-category.developer-tools"
-        },
-        "publish": null
+        }
     },
     "scripts": {
         "postinstall": "patch-package && electron-builder install-app-deps",
