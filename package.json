@@ -36,6 +36,18 @@
         "mac": {
             "artifactName": "brsEmuApp-${version}-macOS.${ext}",
             "category": "public.app-category.developer-tools"
+        },
+        "linux": {
+            "target": [
+                {
+                    "target": "appimage",
+                    "arch": ["x64", "ia32", "armv7l"]
+                },
+                {
+                    "target": "deb",
+                    "arch": "x64"
+                }
+            ]
         }
     },
     "scripts": {
