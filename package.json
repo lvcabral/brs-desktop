@@ -2,7 +2,7 @@
     "name": "brs-emu-app",
     "productName": "BrightScript Emulator",
     "description": "Desktop Application",
-    "version": "0.10.25-app",
+    "version": "0.10.26-app",
     "private": true,
     "author": {
         "name": "Marcelo Lv Cabral",
@@ -41,7 +41,7 @@
             "target": [
                 {
                     "target": "appimage",
-                    "arch": ["x64", "ia32", "armv7l"]
+                    "arch": ["x64", "armv7l"]
                 },
                 {
                     "target": "deb",
