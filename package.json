@@ -41,7 +41,10 @@
             "target": [
                 {
                     "target": "appimage",
-                    "arch": ["x64", "armv7l"]
+                    "arch": [
+                        "x64",
+                        "armv7l"
+                    ]
                 },
                 {
                     "target": "deb",
@@ -71,9 +74,9 @@
         "@electron/remote": "^2.0.9",
         "brs-emu": "^0.10.22",
         "busboy": "^0.3.1",
-        "custom-electron-titlebar": "^4.1.6",
+        "custom-electron-titlebar": "^4.2.3",
         "electron-about-window": "^1.14.0",
-        "electron-preferences": "^2.8.1",
+        "electron-preferences": "2.8.1",
         "fs-jetpack": "^4.1.0",
         "luxon": "^2.0.1",
         "minimist": "^1.2.5",
