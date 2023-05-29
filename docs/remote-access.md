@@ -43,9 +43,28 @@ The **Remote Console** can be accessed using telnet through a shell application 
 ```
 $ telnet <emulator-ip-address> 8085
 ```
-Unlike a Roku device, the emulator doesn't support (yet) interactive debugging using the **Remote Console**, currently it only displays console output (`print` statements results and exceptions). However there are a few commands that can be executed:
+The emulator now supports the interactive debugging using the **Remote Console**, the list below has the Roku MicroDebugger commands currently implemented:
+
+- `bt` - Print backtrace of call function context frames
+- `cont|c` - Continue script execution
+- `down|d` - Move down the function context chain one
+- `exit|q` - Exit shell
+- `gc` - Run garbage collector"
+- `last|l` - Show last line that executed
+- `next|n` - Show the next line to execute
+- `list` - List current function
+- `step|s|t` - Step one program statement
+- `thread|th` - Show selected thread
+- `threads|ths` - List all threads of execution
+- `over|v` - Step over one program statement (for now act as step)
+- `out|o` - Step out from current function (for now act as step)
+- `var` - Display local variables and their types/values
+- `print|p|?` - Print variable value or expression
 - `exit` or `quit` - Finishes current channel execution
 - `close` - Disconnect from the remote console
 - `help` - Show a list of supported commands
+
+When the debugger is activated (either with `STOP` statement or via `Ctrl+Break`) you can type any expression for a live compile and run, in the context of the current function.
+
 
 If the **Remote Console** is enabled an icon is shown in the status bar together with the port number 8085.
