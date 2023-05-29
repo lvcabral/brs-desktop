@@ -3,11 +3,16 @@
 <img alt="Emulator Desktop Apps" src="docs/images/brs-emu-app.png?raw=true"/>
 </p>
 
-This project was created to develop a _multiplatform desktop application_ for the **BrightScript 2D API emulator**, please follow the link below to visit the emulator library repository and know all about the project features (and limitations):
+![GitHub](https://img.shields.io/github/license/lvcabral/brs-emu-app)
+[![Build](https://github.com/lvcabral/brs-emu-app/actions/workflows/build.yml/badge.svg)](https://github.com/lvcabral/brs-emu-app/actions/workflows/build.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
+
+This project was created to develop a _multiplatform desktop application_ for the **BrightScript Emulator**, please follow the link below to visit the emulator library repository and know all about the project history, features and limitations:
 - http://github.com/lvcabral/brs-emu
 
-The binaries of this dektop application (for all platforms) are released together with the emulator library at:
-- https://github.com/lvcabral/brs-emu/releases
+The binaries/installers for this dektop application (for all platforms) are available at:
+- https://github.com/lvcabral/brs-emu-app/releases
 
 ## Documentation
 
@@ -17,17 +22,17 @@ Below you will find the links for the documentation related to this project, how
 
 * [Overview Diagram](docs/images/brs-emu-app-architecture-overview.png)
 
-### Contributing
-
-* [How to contribute](docs/contributing.md)
-* [How to build from source](docs/build-from-source.md)
-
 ### How to Use the Application
 
 * [Menu Options](docs/how-to-use.md#menu-options)
 * [Command Line Options](docs/how-to-use.md#command-line-options)
 * [Control Keyboard Reference](docs/control-reference.md)
 * [Remote Access Services](docs/remote-access.md)
+
+### Contributing
+
+* [How to contribute](docs/contributing.md)
+* [How to build from source](docs/build-from-source.md)
 
 ## Author Links
 - My website is [https://lvcabral.com](https://lvcabral.com)
@@ -37,6 +42,6 @@ Below you will find the links for the documentation related to this project, how
 
 ## License
 
-Copyright © 2019-2021 Marcelo Lv Cabral. All rights reserved.
+Copyright © 2019-2023 Marcelo Lv Cabral. All rights reserved.
 
 Licensed under [MIT](LICENSE) License.
