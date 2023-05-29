@@ -77,9 +77,9 @@ contextBridge.exposeInMainWorld("api", {
     },
     updateTitlebarColor: (mnColor, bgColor, itColor) => {
         titleColor = mnColor;
-        titleBarConfig.backgroundColor = customTitlebar.Color.fromHex(bgColor);
+        titleBarConfig.backgroundColor = customTitlebar.TitlebarColor.fromHex(bgColor);
         titleBar.updateBackground(titleBarConfig.backgroundColor);
-        titleBar.updateItemBGColor(customTitlebar.Color.fromHex(itColor));
+        titleBar.updateItemBGColor(customTitlebar.TitlebarColor.fromHex(itColor));
     },
     enableMenuItem: (id, enable) => {
         ipcRenderer.send("enableMenuItem", id, enable);

@@ -2339,7 +2339,7 @@ currently-unhandled@^0.4.1:
   dependencies:
     array-find-index "^1.0.1"
 
-custom-electron-titlebar@4.2.3:
+custom-electron-titlebar@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/custom-electron-titlebar/-/custom-electron-titlebar-4.2.3.tgz#4e10b091e4baafc775ceb55d6461e2af36d09234"
   integrity sha512-nWzTL13vwac0R4kyOdMbTp5X/Mq7akhWc7IoojFyXwjovtfeNca5flf2ftl71mwfV2DhZr5qMoretLfNNq1YDg==
