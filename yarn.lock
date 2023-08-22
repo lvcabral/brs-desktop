@@ -2329,10 +2329,10 @@ currently-unhandled@^0.4.1:
   dependencies:
     array-find-index "^1.0.1"
 
-custom-electron-titlebar@^4.2.3:
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/custom-electron-titlebar/-/custom-electron-titlebar-4.2.3.tgz#4e10b091e4baafc775ceb55d6461e2af36d09234"
-  integrity sha512-nWzTL13vwac0R4kyOdMbTp5X/Mq7akhWc7IoojFyXwjovtfeNca5flf2ftl71mwfV2DhZr5qMoretLfNNq1YDg==
+custom-electron-titlebar@^4.2.7:
+  version "4.2.7"
+  resolved "https://registry.yarnpkg.com/custom-electron-titlebar/-/custom-electron-titlebar-4.2.7.tgz#a5efa3ce85e2316809e4d32c7042855fbdade151"
+  integrity sha512-5sROnS5jH8jaFsjMwID7aPwnohBJ4HU0dSx81qSGAaznnblc3067D8pyl/zOwj/WosoOPHV2837jbT3j4whvHw==
 
 dashdash@^1.12.0:
   version "1.14.1"
