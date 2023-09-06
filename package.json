@@ -93,7 +93,7 @@
         "babel-loader": "^8.0.6",
         "chai": "^4.1.0",
         "css-loader": "^6.7.3",
-        "electron": "^20.0.0",
+        "electron": "^22.3.21",
         "electron-builder": "^23.6.0",
         "electron-mocha": "^8.2.2",
         "friendly-errors-webpack-plugin": "^1.7.0",
