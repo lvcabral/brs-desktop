@@ -5,7 +5,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = env => {
-  let fileApi, fileWrk;
   let libraryName = "brsEmu";
   if (env.production) {
     fileApi = libraryName + ".min.js";
