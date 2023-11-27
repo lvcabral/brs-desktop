@@ -32,13 +32,14 @@ let statusBarVisible = true;
 
 export function getSettings(window) {
     if (settings !== undefined) {
-        return settings
+        return settings;
     }
     const bounds = window.getBounds();
     const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
     const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
     settings = new ElectronPreferences({
         css: "app/css/settings.css",
+        debug: false,
         dataStore: path.resolve(app.getPath("userData"), "brs-settings.json"),
         defaults: {
             emulator: {
@@ -81,9 +82,6 @@ export function getSettings(window) {
                 clockFormat: global.sharedObject.deviceInfo.clockFormat,
                 timeZone: "system",
             },
-        },
-        webPreferences: {
-            devTools: true,
         },
         browserWindowOverrides: {
             title: "Settings",
@@ -741,7 +739,8 @@ ipcMain.on("deviceData", (_, deviceData) => {
             if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
                 appDeviceInfo[key] = deviceData[key];
                 if (key === "models" && appDeviceInfo.models?.size) {
-                    settings.options.sections[2].form.groups[0].fields[0].options = getRokuModelArray();
+                    settings.options.sections[2].form.groups[0].fields[0].options =
+                        getRokuModelArray();
                 }
             }
         });

@@ -54,7 +54,7 @@
         }
     },
     "scripts": {
-        "postinstall": "patch-package && electron-builder install-app-deps",
+        "postinstall": "electron-builder install-app-deps",
         "preunit": "webpack --config build/webpack.unit.config.js --env test --display=none",
         "unit": "electron-mocha temp/specs.js --renderer --require source-map-support/register",
         "pree2e": "webpack --config build/webpack.app.config.js --env test --display=none && webpack --config build/webpack.e2e.config.js --env test --display none",
@@ -76,7 +76,7 @@
         "busboy": "^0.3.1",
         "custom-electron-titlebar": "^4.2.7",
         "electron-about-window": "^1.14.0",
-        "electron-preferences": "2.8.1",
+        "electron-preferences": "lvcabral/electron-preferences#build",
         "fs-jetpack": "^4.1.0",
         "luxon": "^2.0.1",
         "minimist": "^1.2.5",
@@ -101,7 +101,6 @@
         "friendly-errors-webpack-plugin": "^1.7.0",
         "html-webpack-plugin": "^5.5.3",
         "mocha": "^6.2.3",
-        "patch-package": "^6.4.7",
         "postinstall-postinstall": "^2.1.0",
         "source-map-support": "^0.5.6",
         "spectron": "^6.0.0",
