@@ -107,15 +107,15 @@ export function createWindow(name, options) {
     });
     win.on("close", saveState);
     // App Renderer Events
-    ipcMain.on("openDevTools", (event, data) => {
+    ipcMain.on("openDevTools", () => {
         win.openDevTools();
     });
-    ipcMain.on("debugStarted", (event, data) => {
+    ipcMain.on("debugStarted", () => {
         if (getEmulatorOption("devToolsDebug")) {
             win.openDevTools();
         }
     });
-    ipcMain.on("setBackgroundColor", (event, color) => {
+    ipcMain.on("setBackgroundColor", (_, color) => {
         win.setBackgroundColor(color);
         global.sharedObject.backgroundColor = color;
     });

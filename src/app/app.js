@@ -40,6 +40,9 @@ brsEmu.initialize(api.getDeviceInfo(), {
     showStats: false,
     customKeys: customKeys,
 });
+api.send("deviceData", brsEmu.deviceData);
+api.send("serialNumber", brsEmu.getSerialNumber());
+
 brsEmu.subscribe("app", (event, data) => {
     if (event === "loaded") {
         currentChannel = data;
@@ -76,9 +79,27 @@ api.receive("setTheme", function (theme) {
         setStatusColor();
     }
 });
+api.receive("setDeviceInfo", function (key, value) {
+    if (key in brsEmu.deviceData) {
+        brsEmu.deviceData[key] = value;
+        if (key === "deviceModel") {
+            api.send("serialNumber", brsEmu.getSerialNumber());
+        }
+    }
+});
 api.receive("fileSelected", function (filePath, data, clear, mute) {
     try {
-        brsEmu.execute(filePath, data, clear, mute);
+        const fileExt = filePath.split(".").pop()?.toLowerCase();
+        let password = "";
+        if (fileExt === "bpk") {
+            password = api.getDeviceInfo()?.developerPwd ?? "";
+        }
+        brsEmu.execute(filePath, data, {
+            clearDisplayOnExit: clear,
+            muteSound: mute,
+            execSource: "desktop_app",
+            password: password,
+        });
     } catch (error) {
         console.error(`Error opening ${filePath}:${error.message}`);
     }

@@ -1908,10 +1908,10 @@ browserslist@^4.14.5, browserslist@^4.21.3, browserslist@^4.21.5:
     node-releases "^2.0.8"
     update-browserslist-db "^1.0.10"
 
-brs-emu@0.11.5-dev:
-  version "0.11.5-dev"
-  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.11.5-dev.tgz#7b1b52a502c5ecfc6803bbcade5abee5b3b43d90"
-  integrity sha512-4hV3cLSvLPX2sbb0lPI3vofUh35T/K8Ri/qGysLRa6Lcnc0sQ8KVmgyCMNXqttHqMXsu8zS3r2oKVuhnLq2zdw==
+brs-emu@0.11.7-dev:
+  version "0.11.7-dev"
+  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.11.7-dev.tgz#d07263b0d69769c94f4462941289cc8fd66135a9"
+  integrity sha512-lm4iifulhF1WBQY13DtnCuXnBvY9Ds8f8fpWjU+aRYcM9t2PlH5yjWrYonysHJLBkRCG+PTTwZeVMz6YyjQUqw==
   dependencies:
     "@msgpack/msgpack" "^2.8.0"
     chalk "^5.3.0"
@@ -2381,9 +2381,9 @@ compare-version@^0.1.2:
   integrity sha512-pJDh5/4wrEnXX/VWRZvruAGHkzKdr46z11OlTPN+VrATlWWhSKewNCJ1futCO5C7eJB3nPMFZA1LeYtcFboZ2A==
 
 component-emitter@^1.2.1:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/component-emitter/-/component-emitter-1.3.0.tgz#16e4070fba8ae29b679f2215853ee181ab2eabc0"
-  integrity sha512-Rd3se6QB+sO1TwqZjscQrurpEPIfO0/yYnSin6Q/rD3mOutHvUrCAhJub3r90uNb+SESBuE0QYoB90YdfatsRg==
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/component-emitter/-/component-emitter-1.3.1.tgz#ef1d5796f7d93f135ee6fb684340b26403c97d17"
+  integrity sha512-T0+barUSQRTUQASh8bx02dl+DhF54GtIDY13Y3m9oWTklKbb3Wv974meRpeZ3lp1JpLVECWWNHC4vaG2XHXouQ==
 
 compress-commons@^1.2.0:
   version "1.2.2"

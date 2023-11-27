@@ -96,6 +96,8 @@ contextBridge.exposeInMainWorld("api", {
             "openDevTools",
             "debugStarted",
             "setAudioMute",
+            "deviceData",
+            "serialNumber",
             "saveFile",
             "saveIcon",
             "reset"

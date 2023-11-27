@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -34,7 +34,7 @@ export const helpMenuTemplate = {
         {
             label: "Release Notes",
             click: () => {
-                shell.openExternal("https://github.com/lvcabral/brs-emu/releases");
+                shell.openExternal("https://github.com/lvcabral/brs-emu-app/releases");
             },
         },
         {

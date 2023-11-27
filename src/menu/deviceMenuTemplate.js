@@ -73,7 +73,7 @@ export const deviceMenuTemplate = {
         { type: "separator" },
         {
             id: "locale-menu",
-            label: "Channel Localization",
+            label: "BrightScript App Localization",
             submenu: [
                 {
                     id: "en_US",

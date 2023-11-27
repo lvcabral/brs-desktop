@@ -54,10 +54,10 @@ export function getSettings(window) {
             },
             device: {
                 deviceModel: global.sharedObject.deviceInfo.deviceModel,
-                serialNumber: global.sharedObject.deviceInfo.serialNumber,
                 clientId: global.sharedObject.deviceInfo.clientId,
                 RIDA: global.sharedObject.deviceInfo.RIDA,
                 developerId: global.sharedObject.deviceInfo.developerId,
+                developerPwd: global.sharedObject.deviceInfo.developerPwd,
             },
             display: {
                 displayMode: "720p",
@@ -121,7 +121,7 @@ export function getSettings(window) {
                                             value: "fullScreen",
                                         },
                                         {
-                                            label: "Run last channel on Startup",
+                                            label: "Run Last Loaded App on Startup",
                                             value: "runLastChannel",
                                         },
                                         {
@@ -131,6 +131,10 @@ export function getSettings(window) {
                                         {
                                             label: "Open Developer Tools when Micro Debugger is Triggered",
                                             value: "devToolsDebug",
+                                        },
+                                        {
+                                            label: "Keep Last Display Image when App Exits",
+                                            value: "keepDisplayOnExit",
                                         },
                                         {
                                             label: "Enable Always on Top Mode",
@@ -189,7 +193,7 @@ export function getSettings(window) {
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "This service allows to remotely side load a channel, to change port and password restart the service ",
+                                    help: "This service allows to remotely side load an app, to change port and password restart the service ",
                                 },
                                 {
                                     label: "Port (default: 80)",
@@ -249,12 +253,6 @@ export function getSettings(window) {
                                     help: "Device model returned by ifDeviceInfo.GetModel(). This setting doesn't affect any behavior of the emulator",
                                 },
                                 {
-                                    label: "Serial Number",
-                                    key: "serialNumber",
-                                    type: "text",
-                                    help: "Device serial number, must be 12 characters long, only letters and numbers",
-                                },
-                                {
                                     label: "Channel Client Id",
                                     key: "clientId",
                                     type: "text",
@@ -270,7 +268,13 @@ export function getSettings(window) {
                                     label: "Developer Id",
                                     key: "developerId",
                                     type: "text",
-                                    help: "Unique id to segregate registry among channels, the registry only changes after a reset or app restart",
+                                    help: "Unique id to segregate registry data, the registry only changes after a reset or app restart",
+                                },
+                                {
+                                    label: "Developer Password",
+                                    key: "developerPwd",
+                                    type: "text",
+                                    help: "Password used to encrypt and decrypt the app package source code.",
                                 },
                             ],
                         },
@@ -348,7 +352,7 @@ export function getSettings(window) {
                                             value: "1080p",
                                         },
                                     ],
-                                    help: "Device display mode. Changing this setting will close any running channel",
+                                    help: "Device display mode. Changing this setting will close any running app",
                                 },
                                 {
                                     label: "TV Overscan",
@@ -398,7 +402,7 @@ export function getSettings(window) {
                                     type: "slider",
                                     min: 0,
                                     max: 100,
-                                    help: "Volume level of the channel user interface sound effects",
+                                    help: "Volume level of the app sound effects",
                                 },
                                 {
                                     key: "muted",
@@ -428,7 +432,7 @@ export function getSettings(window) {
                                     key: "locale",
                                     type: "radio",
                                     options: getLocaleIdArray(),
-                                    help: "Configure the localization, this setting only affects channels not the emulator UI",
+                                    help: "Configure the localization, this setting only affects apps not the emulator UI",
                                 },
                                 {
                                     label: "Clock Format",
@@ -469,10 +473,10 @@ export function getSettings(window) {
         saveEmulatorSettings(preferences.emulator.options, window);
         saveServicesSettings(preferences.services, window);
         setDeviceInfo("device", "deviceModel", true);
-        setDeviceInfo("device", "serialNumber", true);
         setDeviceInfo("device", "clientId", true);
         setDeviceInfo("device", "RIDA", true);
         setDeviceInfo("device", "developerId"); // Do not notify app to avoid change registry without reset
+        setDeviceInfo("device", "developerPwd");
         saveDisplaySettings(window);
         setRemoteKeys(settings.defaults.remote, preferences.remote);
         if (preferences.audio) {
@@ -729,8 +733,28 @@ ipcMain.on("setAudioMute", (event, mute) => {
     settings.value("audio.muted", mute ? [mute] : []);
 });
 
+ipcMain.on("deviceData", (_, deviceData) => {
+    if (deviceData) {
+        const appDeviceInfo = global.sharedObject.deviceInfo;
+        Object.keys(deviceData).forEach((key) => {
+            const ignoreKeys = ["registry", "audioCodecs", "fonts", "fontPath", "defaultFont"];
+            if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
+                appDeviceInfo[key] = deviceData[key];
+                if (key === "models" && appDeviceInfo.models?.size) {
+                    settings.options.sections[2].form.groups[0].fields[0].options = getRokuModelArray();
+                }
+            }
+        });
+    }
+});
+
+ipcMain.on("serialNumber", (_, serialNumber) => {
+    global.sharedObject.deviceInfo.serialNumber = serialNumber;
+});
+
 export function getModelName(model) {
-    return modelLabels.get(model).replace(/ *\([^)]*\) */g, "");
+    const modelName = global.sharedObject.deviceInfo.models.get(model);
+    return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }
 
 // Settings Helper Functions
@@ -865,61 +889,11 @@ function getTitleOverlayTheme(userTheme) {
 
 function getRokuModelArray() {
     const modelArray = [];
-    modelLabels.set("N1000", "Roku DVP Classic");
-    modelLabels.set("N1100", "Roku HD Classic");
-    modelLabels.set("N1101", "Roku HD-XR Classic");
-    modelLabels.set("2050X", "Roku XD");
-    modelLabels.set("2100X", "Roku XD|S");
-    modelLabels.set("2400X", "Roku LT");
-    modelLabels.set("2450X", "Roku LT");
-    modelLabels.set("2500X", "Roku HD");
-    modelLabels.set("2710X", "Roku 1");
-    modelLabels.set("2700X", "Roku LT (3d. Gen)");
-    modelLabels.set("2710SE", "Roku SE");
-    modelLabels.set("2720X", "Roku 2");
-    modelLabels.set("3000X", "Roku 2 HD");
-    modelLabels.set("3050X", "Roku 2 XD");
-    modelLabels.set("3100X", "Roku 2 XS");
-    modelLabels.set("4200X", "Roku 3");
-    modelLabels.set("4210X", "Roku 3 (US)");
-    modelLabels.set("4230X", "Roku 3 (US)");
-    modelLabels.set("4400X", "Roku 4");
-    modelLabels.set("3400X", "Roku Stick");
-    modelLabels.set("3420X", "Roku Stick");
-    modelLabels.set("3500X", "Roku Stick (HDMI)");
-    modelLabels.set("3600X", "Roku Stick (2016)");
-    modelLabels.set("5000X", "Roku TV (MIPS)");
-    modelLabels.set("6000X", "4K Roku TV");
-    modelLabels.set("7000X", "4K Roku TV (TCL)");
-    modelLabels.set("3700X", "Roku Express");
-    modelLabels.set("3710X", "Roku Express+");
-    modelLabels.set("4620X", "Roku Premiere");
-    modelLabels.set("4630X", "Roku Premiere+");
-    modelLabels.set("3920X", "Roku Premiere (2018)");
-    modelLabels.set("3921X", "Roku Premiere+ (2018)");
-    modelLabels.set("3800X", "Roku Stick (2017)");
-    modelLabels.set("3810X", "Roku Stick+");
-    modelLabels.set("3900X", "Roku Express (2017)");
-    modelLabels.set("3910X", "Roku Express+ (2017)");
-    modelLabels.set("3930X", "Roku Express (2019)");
-    modelLabels.set("3931X", "Roku Express+ (2019)");
-    modelLabels.set("3940X", "Roku Express 4K");
-    modelLabels.set("3941X", "Roku Express 4K+");
-    modelLabels.set("4640X", "Roku Ultra");
-    modelLabels.set("4660X", "Roku Ultra (2017)");
-    modelLabels.set("4661X", "Roku Ultra (2018)");
-    modelLabels.set("4662X", "Roku Ultra LT");
-    modelLabels.set("4670X", "Roku Ultra (2019)");
-    modelLabels.set("4800X", "Roku Ultra (2020)");
-    modelLabels.set("8000X", "Roku TV (ARM)");
-    modelLabels.set("9100X", "Roku Smart Soundbar");
-    modelLabels.set("9102X", "Roku Streambar");
-    modelLabels.set("A000X", "Roku TV 4K");
-    modelLabels.set("C000X", "Roku TV 4K");
-    modelLabels.forEach(function (value, key) {
-        modelArray.push({ label: `${value} - ${key}`, value: key });
-    });
-
+    if (global.sharedObject.deviceInfo?.models?.size) {
+        global.sharedObject.deviceInfo.models.forEach(function (value, key) {
+            modelArray.push({ label: `${value[0]} - ${key}`, value: key });
+        });
+    }
     return modelArray;
 }
 

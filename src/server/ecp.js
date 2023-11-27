@@ -36,8 +36,8 @@ let ecp;
 let ssdp;
 
 export let isECPEnabled = false;
-export function initECP(deviceInfo) {
-    device = deviceInfo;
+export function initECP() {
+    device = global.sharedObject.deviceInfo;
 }
 export function enableECP() {
     window = BrowserWindow.fromId(1);

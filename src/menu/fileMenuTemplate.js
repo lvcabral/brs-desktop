@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -13,7 +13,7 @@ export const fileMenuTemplate = {
     label: "&File",
     submenu: [
         {
-            label: "Open Channel Package...",
+            label: "Open App Package...",
             accelerator: "CmdOrCtrl+O",
             click: () => {
                 dialog.openChannelPackage();
@@ -89,7 +89,7 @@ export const fileMenuTemplate = {
                 },
                 {
                     id: "zip-empty",
-                    label: "No Channel .zip Package Recently Opened",
+                    label: "No app .zip/.bpk file Recently Opened",
                     enabled: false,
                 },
                 { type: "separator" },

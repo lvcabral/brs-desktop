@@ -34,11 +34,10 @@ const isMacOS = process.platform === "darwin";
 // Emulator Device Information Object
 const dt = DateTime.now().setZone("system");
 const deviceInfo = {
-    developerId: "emulator-dev-id", // Unique id to segregate registry among channels
+    developerId: "brs-dev-id", // Unique id to segregate registry data
     friendlyName: "BrightScript Emulator",
-    serialNumber: "BRSEMUAPP091",
     deviceModel: "4200X",
-    firmwareVersion: "46A.00E04209A",
+    firmwareVersion: "BSC.00E04193A", // v11.0
     clientId: "810e74d8-f387-49c2-8644-c72bd0e8e2a1", // Unique identifier of the device
     RIDA: "fad884dd-583f-4753-b694-fd0748152064", // Unique identifier for advertisement tracking
     countryCode: "US",
@@ -126,10 +125,10 @@ app.on("ready", () => {
     }
     if (settings.preferences.device) {
         setDeviceInfo("device", "deviceModel");
-        setDeviceInfo("device", "serialNumber");
         setDeviceInfo("device", "clientId");
         setDeviceInfo("device", "RIDA");
         setDeviceInfo("device", "developerId");
+        setDeviceInfo("device", "developerPwd");
     }
     if (settings.preferences.display) {
         setDisplayOption("displayMode");
@@ -152,7 +151,7 @@ app.on("ready", () => {
         setTimeZone();
     }
     // Initialize ECP and SSDP servers
-    initECP(deviceInfo);
+    initECP();
     // Load Renderer
     mainWindow
         .loadURL(
@@ -215,7 +214,7 @@ app.on("ready", () => {
             }
             if (openFile) {
                 const fileExt = path.parse(openFile).ext.toLowerCase();
-                if (fileExt === ".zip" || fileExt === ".brs") {
+                if (fileExt === ".zip" || fileExt === ".bpk" || fileExt === ".brs") {
                     loadFile([openFile]);
                 } else {
                     console.log("File format not supported: ", fileExt);

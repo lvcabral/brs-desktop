@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -8,12 +8,12 @@
 import { BrowserWindow, dialog } from "electron";
 import { loadFile } from "./files";
 /*
- * Show open dialog to open a .zip or .brs file.
+ * Show open dialog to open an app package .zip or .bpk file.
  */
 export function openChannelPackage() {
     const opts = {
         title: "Select a Channel package file.",
-        filters: getFileFilter("Channel Packages",["zip"]),
+        filters: getFileFilter("Channel Packages",["zip", "bpk"]),
         properties: ["openFile"],
     };
     const window = BrowserWindow.fromId(1);
@@ -31,6 +31,9 @@ export function openChannelPackage() {
         });
 }
 
+/*
+ * Show open dialog to open a source code .brs file.
+ */
 export function openBrightScriptFile() {
     const opts = {
         title: "Select a BrightScript source file.",

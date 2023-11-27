@@ -1,12 +1,12 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getAudioMuted } from "./settings";
+import { getAudioMuted, getEmulatorOption } from "./settings";
 import fs from "fs";
 import path from "path";
 
@@ -27,13 +27,13 @@ export function loadFile(file) {
     }
     const fileName = path.parse(filePath).base;
     const fileExt = path.parse(filePath).ext.toLowerCase();
-    if (fileExt === ".zip" || fileExt === ".brs") {
+    if (fileExt === ".zip" || fileExt === ".bpk" || fileExt === ".brs") {
         try {
             window.webContents.send(
                 "fileSelected",
                 filePath,
                 fs.readFileSync(filePath),
-                true,
+                !getEmulatorOption("keepDisplayOnExit"),
                 getAudioMuted()
             );
         } catch (error) {
