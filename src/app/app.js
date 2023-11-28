@@ -62,6 +62,8 @@ brsEmu.subscribe("app", (event, data) => {
         }
     } else if (event === "icon") {
         api.send("saveIcon", [currentChannel.id, data]);
+    } else if (event === "registry") {
+        api.send("updateRegistry", data);
     } else if (event === "reset") {
         api.send("reset");
     }

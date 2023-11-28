@@ -735,7 +735,7 @@ ipcMain.on("deviceData", (_, deviceData) => {
     if (deviceData) {
         const appDeviceInfo = global.sharedObject.deviceInfo;
         Object.keys(deviceData).forEach((key) => {
-            const ignoreKeys = ["registry", "audioCodecs", "fonts", "fontPath", "defaultFont"];
+            const ignoreKeys = ["audioCodecs", "fonts", "fontPath", "defaultFont"];
             if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
                 appDeviceInfo[key] = deviceData[key];
                 if (key === "models" && appDeviceInfo.models?.size) {

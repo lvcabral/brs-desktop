@@ -60,6 +60,7 @@ export function enableECP() {
     ecp.get("/query/apps", sendApps);
     ecp.get("/query/active-app", sendActiveApp);
     ecp.get("/query/icon/:appID", sendAppIcon);
+    ecp.get("/query/registry/:appID", sendRegistry);
     ecp.post("/launch/:appID", sendLaunchApp);
     ecp.post("/keypress/:key", sendKeyPress);
     ecp.post("/keydown/:key", sendKeyDown);
@@ -263,6 +264,11 @@ function sendAppIcon(req, res) {
     res.send(genAppIcon(req.params.appID, false));
 }
 
+function sendRegistry(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genAppRegistry(req.params.appID, false));
+}
+
 function sendLaunchApp(req, res) {
     launchApp(req.params.appID);
     res.end();
@@ -417,6 +423,9 @@ function genAppsXml(encrypt) {
 
 function genAppIcon(appID, encrypt) {
     let image;
+    if (appID.toLowerCase() === "dev") {
+        appID = path.join(app.getPath("userData"), "dev.zip").hashCode();
+    }
     let index = getChannelIds().indexOf(appID);
     if (index >= 0) {
         const iconPath = path.join(app.getPath("userData"), getRecentId(index) + ".png");
@@ -447,6 +456,52 @@ function genActiveApp(encrypt) {
         );
     } else {
         xml.ele("app", {}, app.getName());
+    }
+    const strXml = xml.end({ pretty: true });
+    return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
+}
+
+function genAppRegistry(plugin, encrypt) {
+    const xml = xmlbuilder.create("plugin-registry");
+    const plugins = getChannelIds().slice();
+    let index = plugins.indexOf(plugin);
+    if (index >= 0 || plugin.toLowerCase() === "dev") {
+        const devId = path.join(app.getPath("userData"), "dev.zip").hashCode();
+        const devIdx = plugins.indexOf(devId);
+        if (devIdx >= 0 ) {
+            plugins[devIdx] = "dev";
+            plugins.sort();
+        }
+        const regXml = xml.ele("registry")
+        regXml.ele("dev-id", {}, device.developerId);
+        regXml.ele("plugins", {}, plugins.join());
+        regXml.ele("space-available", {}, 32768);
+        const secsXml = regXml.ele("sections");
+        let curSection = "";
+        let scXml, itsXml, itXml;
+        const registry = new Map([...device.registry].sort())
+        registry.forEach((value, key) => {
+            const sections = key.split(".");
+            if (sections.length > 2 && sections[0] === device.developerId) {
+                if (sections[1] !== curSection) {
+                    curSection = sections[1];
+                    scXml = secsXml.ele("section");
+                    scXml.ele("name", {}, curSection);
+                    itsXml = scXml.ele("items");
+                }
+                itXml = itsXml.ele("item");
+                let key = sections[2];
+                if (sections.length > 3) {
+                    key = sections.slice(2).join(".");
+                }
+                itXml.ele("key", {}, key);
+                itXml.ele("value", {}, value);
+            }
+        });    
+        xml.ele("status", {}, "OK");
+    } else {
+        xml.ele("status", {}, "FAILED");
+        xml.ele("error", {}, `Plugin ${plugin} not found`);
     }
     const strXml = xml.end({ pretty: true });
     return encrypt ? Buffer.from(strXml).toString("base64") : strXml;

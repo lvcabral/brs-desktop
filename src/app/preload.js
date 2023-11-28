@@ -100,6 +100,7 @@ contextBridge.exposeInMainWorld("api", {
             "serialNumber",
             "saveFile",
             "saveIcon",
+            "updateRegistry",
             "reset"
         ];
         if (validChannels.includes(channel)) {

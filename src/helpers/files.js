@@ -49,10 +49,10 @@ export function saveFile(file, data) {
 }
 
 // App Renderer Events
-ipcMain.on("saveFile", (event, data) => {
+ipcMain.on("saveFile", (_, data) => {
     saveFile(data[0], data[1]);
 });
-ipcMain.on("saveIcon", (event, data) => {
+ipcMain.on("saveIcon", (_, data) => {
     const iconPath = path.join(app.getPath("userData"), data[0] + ".png");
     saveFile(iconPath, data[1]);
 });

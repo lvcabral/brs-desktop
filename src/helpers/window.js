@@ -125,6 +125,11 @@ export function createWindow(name, options) {
     ipcMain.on("toggleFullScreen", () => {
         win.setFullScreen(!win.isFullScreen());
     });
+    ipcMain.on("updateRegistry", (_, data) => {
+        if (data instanceof Map) {
+            global.sharedObject.deviceInfo.registry = data;
+        }
+    });    
     ipcMain.on("reset", () => {
         win.reload();
     });
