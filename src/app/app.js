@@ -25,6 +25,14 @@ let itemBgColor = colorValues.getPropertyValue("--item-background-color").trim()
 let backColor = colorValues.getPropertyValue("--background-color").trim();
 api.setBackgroundColor(backColor);
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
+const customDeviceInfo = api.getDeviceInfo();
+// On device reset, prevent sending back registry and models
+if ("registry" in customDeviceInfo) {
+    delete customDeviceInfo.registry;
+}
+if ("models" in customDeviceInfo) {
+    delete customDeviceInfo.models;
+}
 // Initialize Device Emulator and subscribe to events
 let currentChannel = { id: "", running: false };
 const customKeys = new Map();
@@ -35,7 +43,7 @@ customKeys.set("NumpadMultiply", "info");
 customKeys.set("KeyA", "a");
 customKeys.set("KeyZ", "b");
 
-brsEmu.initialize(api.getDeviceInfo(), {
+brsEmu.initialize(customDeviceInfo, {
     debugToConsole: true,
     showStats: false,
     customKeys: customKeys,
