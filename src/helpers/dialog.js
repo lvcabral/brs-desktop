@@ -12,8 +12,8 @@ import { loadFile } from "./files";
  */
 export function openChannelPackage() {
     const opts = {
-        title: "Select a Channel package file.",
-        filters: getFileFilter("Channel Packages",["zip", "bpk"]),
+        title: "Select an App package file.",
+        filters: getFileFilter("App Packages",["zip", "bpk"]),
         properties: ["openFile"],
     };
     const window = BrowserWindow.fromId(1);

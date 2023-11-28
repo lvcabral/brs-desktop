@@ -1,10 +1,10 @@
 # Remote Access Services
 
-The **BrightScript Emulator** desktop app, the same way all Roku devices, implements some remote access services in order to enable automation and monitoring of the channels being executed. It allows among other possibilities, to integrate the emulator to the [VSCode BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=celsoaf.brightscript). Below you will find a quick referece documentation about the services available.
+The **BrightScript Emulator** desktop app, the same way all Roku devices, implements some remote access services in order to enable automation and monitoring of the apps being executed. It allows among other possibilities, to integrate the emulator to the [VSCode BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=celsoaf.brightscript). Below you will find a quick referece documentation about the services available.
 
 ## Web Application Installer
 
-This service allows to remotely _side load_ a channel in the emulator, it has a web interface that can be accessed using a web browser, or any _HTTP_ client application. It also has a `Utilities` option where the user can request a screenshot of the currently running channel.
+This service allows to remotely _side load_ an app in the emulator, it has a web interface that can be accessed using a web browser, or any _HTTP_ client application. It also has a `Utilities` option where the user can request a screenshot of the currently running app.
 
 <p align="center">
 <img alt="Emulator Web Installer" src="images/web-installer.png?raw=true"/>
@@ -27,15 +27,15 @@ The **BrightScript Emulator** desktop app only implements a subset of **ECP** co
 | Command             | Description                                                                                                       |
 |---------------------|-------------------------------------------------------------------------------------------------------------------|
 | query/device-info   | Retrieves device information similar to that returned by roDeviceInfo. (HTTP GET) |
-| query/apps          | Returns a map of all the recent opened channels paired with their application ID. (HTTP GET) |
+| query/apps          | Returns a map of all the recent opened apps paired with their application ID. (HTTP GET) |
 | query/active-app    | Returns a child element named 'app' with the active application, in the same format as 'query/apps'. (HTTP GET) |
 | query/icon/`appID`  | Returns an icon corresponding to the application identified by appID. (HTTP GET) |
-| launch/`appID`      | Launches the channel identified by appID. (HTTP POST) |
+| launch/`appID`      | Launches the app identified by appID. (HTTP POST) |
 | keypress/`key`      | Equivalent to pressing down and releasing the remote control key identified after the slash. (HTTP POST) |
 | keydown/`key`       | Equivalent to pressing the remote control key identified after the slash. (HTTP POST) |
 | keyup/`key`         | Equivalent to releasing the remote control key identified after the slash. (HTTP POST) |
 
-**Note:** The Application ID in the emulator is a simple hash of the full path of the channel zip file.
+**Note:** The Application ID in the emulator is a simple hash of the full path of the app zip/bpk file.
 
 ## BrightScript Remote Console
 
@@ -60,7 +60,7 @@ The emulator now supports the interactive debugging using the **Remote Console**
 - `out|o` - Step out from current function (for now act as step)
 - `var` - Display local variables and their types/values
 - `print|p|?` - Print variable value or expression
-- `exit` or `quit` - Finishes current channel execution
+- `exit` or `quit` - Finishes current app execution
 - `close` - Disconnect from the remote console
 - `help` - Show a list of supported commands
 

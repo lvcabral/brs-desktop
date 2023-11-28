@@ -178,7 +178,7 @@ export const fileMenuTemplate = {
         { type: "separator" },
         {
             id: "close-channel",
-            label: "Close Channel",
+            label: "Close App",
             accelerator: "CmdOrCtrl+W",
             enabled: false,
             click: () => {
