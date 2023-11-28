@@ -94,8 +94,7 @@ app.on("ready", () => {
         Math.min(264, display.size.height)
     );
     let firstLoad = true;
-    // Load Emulator Settings
-    let settings = getSettings(mainWindow);
+    // Load application settings
     let startup = {
         devTools: false,
         runLastChannel: false,
@@ -103,6 +102,43 @@ app.on("ready", () => {
         telnetEnabled: false,
         installerEnabled: false,
     };
+    loadSettings(mainWindow, startup);
+    // Initialize ECP and SSDP servers
+    initECP();
+    // Load Renderer
+    mainWindow
+        .loadURL(
+            url.format({
+                pathname: path.join(__dirname, "index.html"),
+                protocol: "file:",
+                slashes: true,
+            })
+        )
+        .then(() => {
+            processArgv(mainWindow, startup);
+            firstLoad = false;
+            attachTitlebarToWindow(mainWindow);
+            mainWindow.show();
+            mainWindow.focus();
+        });
+    mainWindow.webContents.on("dom-ready", () => {
+        let settings = getSettings(mainWindow);
+        if (!firstLoad) {
+            updateECPStatus(settings.value("services.ecp").includes("enabled"));
+            updateTelnetStatus(settings.value("services.telnet").includes("enabled"));
+            updateInstallerStatus(settings.value("services.installer").includes("enabled"));
+        }
+        if (settings.preferences.remote) {
+            setRemoteKeys(settings.defaults.remote, settings.preferences.remote);
+        }
+    });
+    setupEvents(mainWindow);
+});
+
+// Load Settings
+function loadSettings(mainWindow, startup) {
+    // Load Emulator Settings
+    let settings = getSettings(mainWindow);
     if (settings.preferences.emulator) {
         if (settings.value("emulator.options")) {
             const options = settings.value("emulator.options");
@@ -150,93 +186,74 @@ app.on("ready", () => {
         setDeviceInfo("localization", "countryCode");
         setTimeZone();
     }
-    // Initialize ECP and SSDP servers
-    initECP();
-    // Load Renderer
-    mainWindow
-        .loadURL(
-            url.format({
-                pathname: path.join(__dirname, "index.html"),
-                protocol: "file:",
-                slashes: true,
-            })
-        )
-        .then(() => {
-            // CLI Switches
-            if (argv.ecp || startup.ecpEnabled) {
-                enableECP(mainWindow);
-            }
-            if (argv.telnet || startup.telnetEnabled) {
-                enableTelnet(mainWindow);
-            }
-            if (argv.pwd && argv.pwd.trim() !== "") {
-                setPassword(argv.pwd.trim());
-                settings.value("services.password", argv.pwd.trim());
-            }
-            if (argv.web) {
-                setPort(argv.web);
-                settings.value("services.webPort", parseInt(argv.web));
-                enableInstaller(mainWindow);
-            } else if (startup.installerEnabled) {
-                enableInstaller(mainWindow);
-            }
-            if (argv.mode && argv.mode.trim() !== "") {
-                let displayMode = "720p";
-                switch (argv.mode.trim().toLowerCase()) {
-                    case "sd":
-                        displayMode = "480p";
-                        break;
-                    case "fhd":
-                        displayMode = "1080p";
-                        break;
-                    default:
-                        break;
-                }
-                setDisplayOption("displayMode", displayMode, true);
-            }
-            if (startup.devTools || argv.devtools) {
-                mainWindow.openDevTools();
-            }
-            let openFile;
-            if (argv && argv.o) {
-                openFile = argv.o.trim();
-            } else {
-                try {
-                    let index = argv._.length - 1;
-                    if (index && argv._[index]) {
-                        if (jetpack.exists(argv._[index])) {
-                            openFile = argv._[index];
-                        }
-                    }
-                } catch (error) {
-                    console.error("Invalid parameters!", error);
-                }
-            }
-            if (openFile) {
-                const fileExt = path.parse(openFile).ext.toLowerCase();
-                if (fileExt === ".zip" || fileExt === ".bpk" || fileExt === ".brs") {
-                    loadFile([openFile]);
-                } else {
-                    console.log("File format not supported: ", fileExt);
-                }
-            } else if (startup.runLastChannel) {
-                loadPackage(0);
-            }
-            firstLoad = false;
-            attachTitlebarToWindow(mainWindow);
-            mainWindow.show();
-            mainWindow.focus();
-        });
-    mainWindow.webContents.on("dom-ready", () => {
-        if (!firstLoad) {
-            updateECPStatus(settings.value("services.ecp").includes("enabled"));
-            updateTelnetStatus(settings.value("services.telnet").includes("enabled"));
-            updateInstallerStatus(settings.value("services.installer").includes("enabled"));
+}
+
+// Process Command Line switches
+function processArgv(mainWindow, startup) {
+    let settings = getSettings(mainWindow);
+    if (argv?.ecp || startup.ecpEnabled) {
+        enableECP(mainWindow);
+    }
+    if (argv?.telnet || startup.telnetEnabled) {
+        enableTelnet(mainWindow);
+    }
+    if (argv?.pwd && argv.pwd.trim() !== "") {
+        setPassword(argv.pwd.trim());
+        settings.value("services.password", argv.pwd.trim());
+    }
+    if (argv?.web) {
+        setPort(argv.web);
+        settings.value("services.webPort", parseInt(argv.web));
+        enableInstaller(mainWindow);
+    } else if (startup.installerEnabled) {
+        enableInstaller(mainWindow);
+    }
+    if (argv?.mode && argv.mode.trim() !== "") {
+        let displayMode = "720p";
+        switch (argv.mode.trim().toLowerCase()) {
+            case "sd":
+                displayMode = "480p";
+                break;
+            case "fhd":
+                displayMode = "1080p";
+                break;
+            default:
+                break;
         }
-        if (settings.preferences.remote) {
-            setRemoteKeys(settings.defaults.remote, settings.preferences.remote);
+        setDisplayOption("displayMode", displayMode, true);
+    }
+    if (startup.devTools || argv.devtools) {
+        mainWindow.openDevTools();
+    }
+    let openFile;
+    if (argv?.o) {
+        openFile = argv.o.trim();
+    } else {
+        try {
+            let index = argv._.length - 1;
+            if (index && argv._[index]) {
+                if (jetpack.exists(argv._[index])) {
+                    openFile = argv._[index];
+                }
+            }
+        } catch (error) {
+            console.error("Invalid parameters!", error);
         }
-    });
+    }
+    if (openFile) {
+        const fileExt = path.parse(openFile).ext.toLowerCase();
+        if (fileExt === ".zip" || fileExt === ".bpk" || fileExt === ".brs") {
+            loadFile([openFile]);
+        } else {
+            console.log("File format not supported: ", fileExt);
+        }
+    } else if (startup.runLastChannel) {
+        loadPackage(0);
+    }
+}
+
+// Setup Application Window events
+function setupEvents(mainWindow) {
     if (isMacOS) {
         app.on("before-quit", function (evt) {
             app.quitting = true;
@@ -275,7 +292,7 @@ app.on("ready", () => {
             app.quit();
         });
     }
-});
+}
 
 // Helper Functions
 function getLocalIps() {
