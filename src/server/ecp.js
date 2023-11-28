@@ -454,6 +454,9 @@ function genActiveApp(encrypt) {
 
 // Helper Functions
 function launchApp(appID) {
+    if (appID.toLowerCase() === "dev") {
+        appID = path.join(app.getPath("userData"), "dev.zip").hashCode();
+    }
     let index = getChannelIds().indexOf(appID);
     if (index >= 0) {
         let zip = getRecentPackage(index);

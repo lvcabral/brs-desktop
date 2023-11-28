@@ -17,6 +17,7 @@ import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getEmulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile } from "../helpers/files";
+import path from "path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
 
@@ -74,6 +75,10 @@ export function getRecentPackage(index) {
 }
 
 export function getRecentId(index) {
+    const devFile = path.join(app.getPath("userData"), "dev.zip");
+    if (devFile.hashCode() === recentFiles.ids[index]) {
+        return "dev";
+    }
     return recentFiles.ids[index];
 }
 
