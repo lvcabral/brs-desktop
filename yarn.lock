@@ -1969,10 +1969,10 @@ browserslist@^4.14.5, browserslist@^4.21.3, browserslist@^4.21.5:
     node-releases "^2.0.8"
     update-browserslist-db "^1.0.10"
 
-brs-emu@0.11.7-dev:
-  version "0.11.7-dev"
-  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.11.7-dev.tgz#d07263b0d69769c94f4462941289cc8fd66135a9"
-  integrity sha512-lm4iifulhF1WBQY13DtnCuXnBvY9Ds8f8fpWjU+aRYcM9t2PlH5yjWrYonysHJLBkRCG+PTTwZeVMz6YyjQUqw==
+brs-emu@0.11.8-dev:
+  version "0.11.8-dev"
+  resolved "https://registry.yarnpkg.com/brs-emu/-/brs-emu-0.11.8-dev.tgz#878913f1f93ef485000a8d355c43973cda5c1f81"
+  integrity sha512-ES1kQrlmDMQ9wFTcgkSbCk32oV5HnxRXSvuyf4GHIWZ2Y9iS2guROLsbf5sLiVmbqs7ZqdgvAws+B2eRUibo3w==
   dependencies:
     "@msgpack/msgpack" "^2.8.0"
     chalk "^5.3.0"
