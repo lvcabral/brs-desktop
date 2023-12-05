@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
-  *  BrightScript Simulation Desktop App (https://github.com/lvcabral/brs-desktop)
+  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
