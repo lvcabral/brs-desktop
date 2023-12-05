@@ -38,9 +38,11 @@ export function getSettings(window) {
     const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
     const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
     settings = new ElectronPreferences({
-        css: "app/css/settings.css",
         debug: false,
-        dataStore: path.resolve(app.getPath("userData"), "brs-settings.json"),
+        config: {
+            css: "app/css/settings.css",
+            dataStore: path.resolve(app.getPath("userData"), "brs-settings.json"),
+        },
         defaults: {
             emulator: {
                 options: ["statusBar"],

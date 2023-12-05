@@ -129,7 +129,7 @@ export function createWindow(name, options) {
         if (data instanceof Map) {
             global.sharedObject.deviceInfo.registry = data;
         }
-    });    
+    });
     ipcMain.on("reset", () => {
         win.reload();
     });
