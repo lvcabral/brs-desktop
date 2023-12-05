@@ -1,6 +1,6 @@
-# BrightScript 2D API Emulator - Desktop Application
+# BrightScript Simulator - Desktop Application
 <p align="center">
-<img alt="Emulator Desktop Apps" src="docs/images/brs-emu-app.png?raw=true"/>
+<img alt="Simulator Desktop Apps" src="docs/images/brs-emu-app.png?raw=true"/>
 </p>
 
 ![GitHub](https://img.shields.io/github/license/lvcabral/brs-emu-app)
@@ -8,8 +8,8 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
 
-This project was created to develop a _multiplatform desktop application_ for the **BrightScript Emulator**, please follow the link below to visit the emulator library repository and know all about the project history, features and limitations:
-- http://github.com/lvcabral/brs-emu
+This project was created to develop a _multiplatform desktop application_ for the **BrightScript Engine**, please follow the link below to visit the engine library repository and know all about the project history, features and limitations:
+- http://github.com/lvcabral/brs-engine
 
 The binaries/installers for this dektop application (for all platforms) are available at:
 - https://github.com/lvcabral/brs-emu-app/releases

@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop App (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -47,8 +47,8 @@ statusDevTools.onclick = function () {
     api.send("openDevTools");
 };
 statusAudio.onclick = function () {
-    let muted = !brsEmu.getAudioMute();
-    brsEmu.setAudioMute(muted);
+    let muted = !brs.getAudioMute();
+    brs.setAudioMute(muted);
     api.send("setAudioMute", muted);
     setAudioStatus(muted);
 };
@@ -63,7 +63,7 @@ let filePath = "";
 let currentLocale = api.getDeviceInfo().locale;
 setLocaleStatus(currentLocale);
 // Subscribe Events
-brsEmu.subscribe("statusbar", (event, data) => {
+brs.subscribe("statusbar", (event, data) => {
     if (event === "loaded") {
         updateStatus(data);
     } else if (event === "closed") {
@@ -182,7 +182,7 @@ function shortenPath(bigPath, maxLen) {
 // Events from Main process
 api.receive("toggleStatusBar", function () {
     if (!api.isFullScreen()) {
-        brsEmu.redraw(false);
+        brs.redraw(false);
     }
 });
 api.receive("serverStatus", function (server, enable, port) {
@@ -218,7 +218,7 @@ function updateStatus(data) {
             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
             statusIconVersion.style.display = "";
         }
-        setAudioStatus(brsEmu.getAudioMute());
+        setAudioStatus(brs.getAudioMute());
         statusAudio.style.display = "";
     } else {
         statusIconFile.innerText = "";

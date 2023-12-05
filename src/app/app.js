@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop App (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -10,7 +10,7 @@ import "../css/fontawesome.min.css";
 import "../helpers/hash";
 import { setStatusColor, setAudioStatus } from "./statusbar";
 
-// Emulator display
+// Simulator display
 const display = document.getElementById("display");
 
 // Stats overlay
@@ -33,7 +33,7 @@ if ("registry" in customDeviceInfo) {
 if ("models" in customDeviceInfo) {
     delete customDeviceInfo.models;
 }
-// Initialize Device Emulator and subscribe to events
+// Initialize device and subscribe to events
 let currentChannel = { id: "", running: false };
 const customKeys = new Map();
 customKeys.set("Comma", "rev");
@@ -43,15 +43,15 @@ customKeys.set("NumpadMultiply", "info");
 customKeys.set("KeyA", "a");
 customKeys.set("KeyZ", "b");
 
-brsEmu.initialize(customDeviceInfo, {
+brs.initialize(customDeviceInfo, {
     debugToConsole: true,
     showStats: false,
     customKeys: customKeys,
 });
-api.send("deviceData", brsEmu.deviceData);
-api.send("serialNumber", brsEmu.getSerialNumber());
+api.send("deviceData", brs.deviceData);
+api.send("serialNumber", brs.getSerialNumber());
 
-brsEmu.subscribe("app", (event, data) => {
+brs.subscribe("app", (event, data) => {
     if (event === "loaded") {
         currentChannel = data;
         appLoaded(data);
@@ -90,10 +90,10 @@ api.receive("setTheme", function (theme) {
     }
 });
 api.receive("setDeviceInfo", function (key, value) {
-    if (key in brsEmu.deviceData) {
-        brsEmu.deviceData[key] = value;
+    if (key in brs.deviceData) {
+        brs.deviceData[key] = value;
         if (key === "deviceModel") {
-            api.send("serialNumber", brsEmu.getSerialNumber());
+            api.send("serialNumber", brs.getSerialNumber());
         }
     }
 });
@@ -104,7 +104,7 @@ api.receive("fileSelected", function (filePath, data, clear, mute) {
         if (fileExt === "bpk") {
             password = api.getDeviceInfo()?.developerPwd ?? "";
         }
-        brsEmu.execute(filePath, data, {
+        brs.execute(filePath, data, {
             clearDisplayOnExit: clear,
             muteSound: mute,
             execSource: "desktop_app",
@@ -116,7 +116,7 @@ api.receive("fileSelected", function (filePath, data, clear, mute) {
 });
 api.receive("closeChannel", function (source) {
     if (currentChannel.running) {
-        brsEmu.terminate(source);
+        brs.terminate(source);
     }
 });
 api.receive("console", function (text, error) {
@@ -127,19 +127,19 @@ api.receive("console", function (text, error) {
     }
 });
 api.receive("debugCommand", function (cmd) {
-    brsEmu.debug(cmd);
+    brs.debug(cmd);
 });
 api.receive("setCustomKeys", function (keys) {
-    brsEmu.setCustomKeys(keys);
+    brs.setCustomKeys(keys);
 });
 api.receive("postKeyDown", function (key) {
-    brsEmu.sendKeyDown(key);
+    brs.sendKeyDown(key);
 });
 api.receive("postKeyUp", function (key) {
-    brsEmu.sendKeyUp(key);
+    brs.sendKeyUp(key);
 });
 api.receive("postKeyPress", function (key) {
-    brsEmu.sendKeyPress(key);
+    brs.sendKeyPress(key);
 });
 api.receive("copyScreenshot", function () {
     display.toBlob(function (blob) {
@@ -155,25 +155,25 @@ api.receive("saveScreenshot", function (file) {
     api.send("saveFile", [file, data]);
 });
 api.receive("setDisplay", function (mode) {
-    if (mode !== brsEmu.getDisplayMode()) {
-        brsEmu.setDisplayMode(mode);
-        brsEmu.redraw(api.isFullScreen());
+    if (mode !== brs.getDisplayMode()) {
+        brs.setDisplayMode(mode);
+        brs.redraw(api.isFullScreen());
     }
 });
 api.receive("setOverscan", function (mode) {
-    if (mode !== brsEmu.getOverscanMode()) {
-        brsEmu.setOverscanMode(mode);
-        brsEmu.redraw(api.isFullScreen());
+    if (mode !== brs.getOverscanMode()) {
+        brs.setOverscanMode(mode);
+        brs.redraw(api.isFullScreen());
     }
 });
 api.receive("setAudioMute", function (mute) {
-    brsEmu.setAudioMute(mute);
+    brs.setAudioMute(mute);
     setAudioStatus(mute);
 });
 
 // Window Resize Event
 window.onload = window.onresize = function () {
-    brsEmu.redraw(api.isFullScreen());
+    brs.redraw(api.isFullScreen());
 };
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {
@@ -185,10 +185,10 @@ display.ondblclick = function () {
 function appLoaded(channelData) {
     let settings = api.getPreferences();
     if (settings?.display && settings?.display?.overscanMode) {
-        brsEmu.setOverscanMode(settings.display.overscanMode);
+        brs.setOverscanMode(settings.display.overscanMode);
     }
     if (settings?.emulator && settings?.emulator?.options) {
-        brsEmu.enableStats(settings.emulator.options.includes("perfStats"));
+        brs.enableStats(settings.emulator.options.includes("perfStats"));
     }
     api.updateTitle(`${channelData.title} - ${defaultTitle}`);
     if (channelData.id === "brs") {

@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop App (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -18,7 +18,7 @@ import { checkMenuItem } from "../menu/menuService";
 const credentials = {
     userName: "rokudev",
     password: "rokudev",
-    realm: "BrightScript Emulator",
+    realm: "BrightScript Simulator",
 };
 let port = 80;
 let server;

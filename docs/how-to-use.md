@@ -57,9 +57,9 @@ This section will describe the options available on the application menu, please
 Here are **optional** arguments you can use when starting the emulator at the command line:
 
 ```
-"BrightScript Emulator" [-o <path>] [-f] [-m <dm>] [-e] [-t] [-w [<port>]] [-p <newpwd>] [-d]
+"BrightScript Simulator" [-o <path>] [-f] [-m <dm>] [-e] [-t] [-w [<port>]] [-p <newpwd>] [-d]
 
-"BrightScript Emulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--rc] 
+"BrightScript Simulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--rc] 
                         [--web[=<port>]] [--pwd=<newpwd>] [--devtools]
 ```
 

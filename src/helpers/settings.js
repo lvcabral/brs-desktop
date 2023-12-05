@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop App (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -110,7 +110,7 @@ export function getSettings(window) {
                         {
                             fields: [
                                 {
-                                    label: "Emulator Options",
+                                    label: "Application Options",
                                     key: "options",
                                     type: "checkbox",
                                     options: [
@@ -150,7 +150,7 @@ export function getSettings(window) {
                                     help: "Select one or more configuration options.",
                                 },
                                 {
-                                    label: "App UI Theme",
+                                    label: "Application UI Theme",
                                     key: "theme",
                                     type: "radio",
                                     options: [
@@ -215,7 +215,7 @@ export function getSettings(window) {
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "ECP service allows the emulator to be controlled over the network",
+                                    help: "ECP service allows the simulator to be controlled over the network",
                                 },
                                 {
                                     label: "BrightScript Remote Console (Telnet)",
@@ -248,7 +248,7 @@ export function getSettings(window) {
                                     key: "deviceModel",
                                     type: "dropdown",
                                     options: getRokuModelArray(),
-                                    help: "Device model returned by ifDeviceInfo.GetModel(). This setting doesn't affect any behavior of the emulator",
+                                    help: "Device model returned by ifDeviceInfo.GetModel(). This setting doesn't affect any behavior of the simulator",
                                 },
                                 {
                                     label: "Channel Client Id",
@@ -430,7 +430,7 @@ export function getSettings(window) {
                                     key: "locale",
                                     type: "radio",
                                     options: getLocaleIdArray(),
-                                    help: "Configure the localization, this setting only affects apps not the emulator UI",
+                                    help: "Configure the localization, this setting only affects apps not the simulator UI",
                                 },
                                 {
                                     label: "Clock Format",

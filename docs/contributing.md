@@ -2,7 +2,7 @@
 Any contibutions you're willing to make are _super_ appreciated.  That includes a wide variety of things &ndash; not just code!
 
 ## Types of Contributions
-Since this project is still maturing, many of its initial contributions will take the form of new features or bug fixes.  Even if you're not familiar with JavaScript, you can still help make the BrightScript Emulator a better tool for the community.  You can:
+Since this project is still maturing, many of its initial contributions will take the form of new features or bug fixes.  Even if you're not familiar with JavaScript, you can still help make the BrightScript Simulator a better tool for the community.  You can:
 
 1. Improve documentation (even minor typos fixes are helpful!)
 2. File issues demonstrating where this implementation diverges from the reference one (i.e. on a Roku device)

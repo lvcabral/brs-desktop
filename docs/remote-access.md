@@ -1,6 +1,6 @@
 # Remote Access Services
 
-The **BrightScript Emulator** desktop app, the same way all Roku devices, implements some remote access services in order to enable automation and monitoring of the apps being executed. It allows among other possibilities, to integrate the emulator to the [VSCode BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=celsoaf.brightscript). Below you will find a quick referece documentation about the services available.
+The **BrightScript Simulator** desktop app, the same way all Roku devices, implements some remote access services in order to enable automation and monitoring of the apps being executed. It allows among other possibilities, to integrate the emulator to the [VSCode BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=celsoaf.brightscript). Below you will find a quick referece documentation about the services available.
 
 ## Web Application Installer
 
@@ -22,7 +22,7 @@ The **ECP** listens to the _TCP_ port 8060 and is disabled by default, it can be
 
 ### Supported Commands
 
-The **BrightScript Emulator** desktop app only implements a subset of **ECP** commands, here a list of supported commands:
+The **BrightScript Simulator** desktop app only implements a subset of **ECP** commands, here a list of supported commands:
 
 | Command             | Description                                                                                                       |
 |---------------------|-------------------------------------------------------------------------------------------------------------------|

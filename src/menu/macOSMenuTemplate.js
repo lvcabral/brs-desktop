@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop App (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -8,10 +8,10 @@
 import { showSettings } from "../helpers/settings";
 
 export const macOSMenuTemplate = {
-    label: "BrightScript Emulator",
+    label: "BrightScript Simulator",
     submenu: [
         {
-            label: "About BrightScript Emulator",
+            label: "About BrightScript Simulator",
             role: "about",
         },
         { type: "separator" },
@@ -33,7 +33,7 @@ export const macOSMenuTemplate = {
             type: "separator",
         },
         {
-            label: "Hide BrightScript Emulator",
+            label: "Hide BrightScript Simulator",
             role: "hide",
         },
         {
@@ -48,7 +48,7 @@ export const macOSMenuTemplate = {
             type: "separator",
         },
         {
-            label: "Quit BrightScript Emulator",
+            label: "Quit BrightScript Simulator",
             role: "quit",
         },
     ],

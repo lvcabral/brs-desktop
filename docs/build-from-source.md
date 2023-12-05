@@ -1,5 +1,5 @@
 # Building from Source
-The BrightScript Emulator Desktop App project is being developed using the [Electron framework](https://electronjs.org/), and it also uses `yarn` for dependency management.
+The BrightScript Simulator Desktop App project is being developed using the [Electron framework](https://electronjs.org/), and it also uses `yarn` for dependency management.
 
 ## Prerequisites
 To build the project you will need `NodeJS`, so you'll need to [install that first](https://nodejs.org).

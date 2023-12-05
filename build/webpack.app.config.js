@@ -5,13 +5,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = env => {
-  let libraryName = "brsEmu";
+  let libraryName = "brs";
   let fileApi, fileWrk;
   if (env.production) {
-    fileApi = libraryName + ".min.js";
-    fileWrk = libraryName + ".worker.min.js";
+    fileApi = libraryName + ".api.js";
+    fileWrk = libraryName + ".worker.js";
   } else {
-    fileApi = libraryName + ".js";
+    fileApi = libraryName + ".api.js";
     fileWrk = libraryName + ".worker.js";
   }
   return merge(base(env), {
@@ -30,10 +30,10 @@ module.exports = env => {
         patterns: [
           { context: "src/app/", from: "preload.js", to: "../app" },
           { context: "src/app/", from: "fonts/**", to: "../app" },
-          { context: "node_modules/brs-emu/app/lib", from: fileApi, to: "lib" },
-          { context: "node_modules/brs-emu/app/lib", from: fileWrk, to: "lib" },
-          { context: "node_modules/brs-emu/app/", from: "audio/**", to: "../app" },
-          { context: "node_modules/brs-emu/app/", from: "fonts/**", to: "../app" },
+          { context: "node_modules/brs-engine/app/lib", from: fileApi, to: "lib" },
+          { context: "node_modules/brs-engine/app/lib", from: fileWrk, to: "lib" },
+          { context: "node_modules/brs-engine/app/", from: "audio/**", to: "../app" },
+          { context: "node_modules/brs-engine/app/", from: "fonts/**", to: "../app" },
         ]
       })
     ],

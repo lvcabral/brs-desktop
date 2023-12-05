@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop App (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -31,11 +31,11 @@ import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/
 
 const isMacOS = process.platform === "darwin";
 
-// Emulator Device Information Object
+// Device Information Object
 const dt = DateTime.now().setZone("system");
 const deviceInfo = {
     developerId: "brs-dev-id", // Unique id to segregate registry data
-    friendlyName: "BrightScript Emulator",
+    friendlyName: "BrightScript Simulator",
     deviceModel: "4200X",
     firmwareVersion: "BSC.00E04193A", // v11.0
     clientId: "810e74d8-f387-49c2-8644-c72bd0e8e2a1", // Unique identifier of the device
@@ -137,7 +137,7 @@ app.on("ready", () => {
 
 // Load Settings
 function loadSettings(mainWindow, startup) {
-    // Load Emulator Settings
+    // Load Simulator Settings
     let settings = getSettings(mainWindow);
     if (settings.preferences.emulator) {
         if (settings.value("emulator.options")) {
