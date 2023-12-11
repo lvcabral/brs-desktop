@@ -187,7 +187,7 @@ export function copyScreenshot() {
 export function closeChannel() {
     const window = BrowserWindow.fromId(1);
     if (window) {
-        window.webContents.send("closeChannel", "Menu");
+        window.webContents.send("closeChannel", "EXIT_USER_NAV");
     }
 }
 

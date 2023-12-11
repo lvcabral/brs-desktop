@@ -8,7 +8,7 @@
 import "../css/main.css";
 import "../css/fontawesome.min.css";
 import "../helpers/hash";
-import { setStatusColor, setAudioStatus } from "./statusbar";
+import { setStatusColor, setAudioStatus, showToast } from "./statusbar";
 
 // Simulator display
 const display = document.getElementById("display");
@@ -59,12 +59,24 @@ brs.subscribe("app", (event, data) => {
         currentChannel = data;
         stats.style.visibility = "visible";
     } else if (event === "closed" || event === "error") {
+        if (event === "error") {
+            showToast(`Error: ${data}`, 5000, true);
+        } else if (data.endsWith("CRASH")) {
+            showToast(`App crashed, open DevTools console for details!`, 5000, true);
+        } else if (data === "EXIT_MISSING_PASSWORD") {
+            showToast(`Missing developer password, unable to unpack the app!`, 5000, true);
+        } else if (data !== "EXIT_USER_NAV") {
+            showToast(`App closed with exit reason: ${data}`, 5000, true);
+        } else {
+            showToast(`App finished with success!`);
+        }
         appTerminated();
     } else if (event === "redraw") {
         redrawEvent(data);
     } else if (event === "debug") {
         if (data.level === "stop") {
             api.send("debugStarted");
+            showToast(`App stopped and Micro Debugger is active!`);
         } else if (typeof data.content === "string") {
             api.send("telnet", data.content);
         }
@@ -111,7 +123,9 @@ api.receive("fileSelected", function (filePath, data, clear, mute) {
             password: password,
         });
     } catch (error) {
-        console.error(`Error opening ${filePath}:${error.message}`);
+        const errorMsg = `Error opening ${filePath}:${error.message}`;
+        console.error(errorMsg);
+        showToast(errorMsg, 5000, true);
     }
 });
 api.receive("closeChannel", function (source) {
@@ -125,6 +139,7 @@ api.receive("console", function (text, error) {
     } else {
         console.log(text);
     }
+    showToast(text, 5000, error);
 });
 api.receive("debugCommand", function (cmd) {
     brs.debug(cmd);

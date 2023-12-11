@@ -28,6 +28,8 @@ const statusTelnet = document.getElementById("statusTelnet");
 const statusTelnetText = document.getElementById("statusTelnetText");
 const statusWeb = document.getElementById("statusWeb");
 const statusWebText = document.getElementById("statusWebText");
+const colorValues = getComputedStyle(document.documentElement);
+
 statusResolution.style.display = "none";
 statusIconRes.style.display = "none";
 statusSepRes.style.display = "none";
@@ -51,6 +53,7 @@ statusAudio.onclick = function () {
     brs.setAudioMute(muted);
     api.send("setAudioMute", muted);
     setAudioStatus(muted);
+    showToast(`Audio is ${muted ? "off" : "on"}`);
 };
 
 let displayMode = api.getDeviceInfo().displayMode;
@@ -179,6 +182,25 @@ function shortenPath(bigPath, maxLen) {
     }
     return path;
 }
+
+// Function to display a Toast (from the bottom) with messages to the user
+export function showToast(message, duration = 3000, error = false) {
+    const toastColor = error ? "--status-error-color" : "--status-background-color";
+    Toastify({
+        text: message,
+        duration: duration,
+        close: false,
+        gravity: "bottom",
+        position: "center",
+        stopOnFocus: true,
+        offset: { y: 10 },
+        style: {
+            background: colorValues.getPropertyValue(toastColor).trim(),
+            fontSize: "14px",
+        }
+    }).showToast();
+}
+
 // Events from Main process
 api.receive("toggleStatusBar", function () {
     if (!api.isFullScreen()) {
