@@ -109,17 +109,19 @@ api.receive("setDeviceInfo", function (key, value) {
         }
     }
 });
-api.receive("fileSelected", function (filePath, data, clear, mute) {
+api.receive("fileSelected", function (filePath, data, clear, mute, debug) {
     try {
         const fileExt = filePath.split(".").pop()?.toLowerCase();
         let password = "";
         if (fileExt === "bpk") {
-            password = api.getDeviceInfo()?.developerPwd ?? "";
+            const settings = api.getPreferences();
+            password = settings?.device?.developerPwd ?? "";
         }
         brs.execute(filePath, data, {
             clearDisplayOnExit: clear,
             muteSound: mute,
             execSource: "desktop_app",
+            debugOnCrash: debug,
             password: password,
         });
     } catch (error) {

@@ -45,7 +45,7 @@ export function getSettings(window) {
         },
         defaults: {
             emulator: {
-                options: ["statusBar"],
+                options: ["statusBar", "debugOnCrash"],
                 theme: "purple",
             },
             services: {
@@ -60,7 +60,7 @@ export function getSettings(window) {
                 clientId: global.sharedObject.deviceInfo.clientId,
                 RIDA: global.sharedObject.deviceInfo.RIDA,
                 developerId: global.sharedObject.deviceInfo.developerId,
-                developerPwd: global.sharedObject.deviceInfo.developerPwd,
+                developerPwd: "",
             },
             display: {
                 displayMode: "720p",
@@ -112,7 +112,7 @@ export function getSettings(window) {
                         {
                             fields: [
                                 {
-                                    label: "Application Options",
+                                    label: "Simulator Options",
                                     key: "options",
                                     type: "checkbox",
                                     options: [
@@ -129,30 +129,34 @@ export function getSettings(window) {
                                             value: "devToolsStartup",
                                         },
                                         {
-                                            label: "Open Developer Tools when Micro Debugger is Triggered",
+                                            label: "Open Developer Tools when the Micro Debugger starts",
                                             value: "devToolsDebug",
                                         },
                                         {
-                                            label: "Keep Last Display Image when App Exits",
+                                            label: "Start the Micro Debugger when the App Crashes",
+                                            value: "debugOnCrash",
+                                        },
+                                        {
+                                            label: "Keep Last Display Image when the App is Closed",
                                             value: "keepDisplayOnExit",
                                         },
                                         {
-                                            label: "Enable Always on Top Mode",
+                                            label: "Make the Simulator Window Always on Top",
                                             value: "alwaysOnTop",
                                         },
                                         {
-                                            label: "Show Performance Statistics",
+                                            label: "Show Performance Statistics Overlay",
                                             value: "perfStats",
                                         },
                                         {
-                                            label: "Show Status Bar",
+                                            label: "Show the Status Bar",
                                             value: "statusBar",
                                         },
                                     ],
-                                    help: "Select one or more configuration options.",
+                                    help: "Configure your preferences for the Simulator window and debugging tools",
                                 },
                                 {
-                                    label: "Application UI Theme",
+                                    label: "Simulator UI Theme",
                                     key: "theme",
                                     type: "radio",
                                     options: [
@@ -274,7 +278,7 @@ export function getSettings(window) {
                                     label: "Developer Password",
                                     key: "developerPwd",
                                     type: "text",
-                                    help: "Password used to encrypt and decrypt the app package source code.",
+                                    help: "Password used to encrypt and decrypt the app package source code, needs to be 32 bytes long",
                                 },
                             ],
                         },
@@ -476,7 +480,6 @@ export function getSettings(window) {
         setDeviceInfo("device", "clientId", true);
         setDeviceInfo("device", "RIDA", true);
         setDeviceInfo("device", "developerId"); // Do not notify app to avoid change registry without reset
-        setDeviceInfo("device", "developerPwd");
         saveDisplaySettings(window);
         setRemoteKeys(settings.defaults.remote, preferences.remote);
         if (preferences.audio) {
@@ -837,32 +840,12 @@ function convertChar(keyChar) {
     } else if (isLetter(keyChar)) {
         return `Key${keyChar}`;
     } else {
-        switch (keyChar) {
-            case "`":
-                return "Backquote";
-            case "-":
-                return "Minus";
-            case "=":
-                return "Equal";
-            case "[":
-                return "BracketLeft";
-            case "]":
-                return "BracketRight";
-            case ";":
-                return "Semicolon";
-            case "'":
-                return "Quote";
-            case ",":
-                return "Comma";
-            case ".":
-                return "Period";
-            case "\\":
-                return "Backslash";
-            case "/":
-                return "Slash";
-            default:
-                return keyChar;
-        }
+        const keyMap = new Map([
+            ["`", "Backquote"], ["-", "Minus"], ["=", "Equal"], ["[", "BracketLeft"],
+            ["]", "BracketRight"], [";", "Semicolon"], ["'", "quote"], [",", "Comma"],
+            [".", "Period"], ["\\", "Backslash"], ["/", "Slash"]
+        ]);
+        return keyMap.get(keyChar) ?? keyChar;
     }
 }
 

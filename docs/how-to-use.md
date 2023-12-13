@@ -1,6 +1,7 @@
 # How to Use the Application
 
 ## Menu Options
+
 This section will describe the options available on the application menu, please notice that in **macOS** the options will be possibly in different location, as the OS has different standards than **Windows** and **Linux**.
 
 <p align="center">
@@ -23,18 +24,18 @@ This section will describe the options available on the application menu, please
 ### Device Menu
 
 - Display Modes - Defines the default UI resolution of the emulated device
-    - SD 480p - Emulates a device with resolution of 720x480
-    - HD 720p - Emulates a device with resolution of 1280x720
-    - FHD 1080p - Emulates a device with resolution of 1920x1080
+  - SD 480p - Emulates a device with resolution of 720x480
+  - HD 720p - Emulates a device with resolution of 1280x720
+  - FHD 1080p - Emulates a device with resolution of 1920x1080
 - TV Overscan Modes - Allows emulation of TV overscan effect
-    - Disable - Shows the entire image with no cropping or guide lines
-    - Guide Lines - Shows guide lines delimiting a potential hidden area by the TV overscan
-    - Enabled - Crops the image to emulate the TV overscan effect
+  - Disable - Shows the entire image with no cropping or guide lines
+  - Guide Lines - Shows guide lines delimiting a potential hidden area by the TV overscan
+  - Enabled - Crops the image to emulate the TV overscan effect
 - BrightScript App Localization - Submenu with all languages available for app localization
 - Web Application Installer - See [documentation](remote-access.md#web-application-installer)
 - External Control Protocol - See [documentation](remote-access.md#brightscript-remote-console)
 - BrightScript Remote Console - See [documentation](remote-access.md#brightscript-remote-console)
-- Reset Device - Resets the emulator releasing any app from the memory, also reloading Dev Tools
+- Reset Device - Resets the emulator releasing any app from the memory, also reloading Developer Tools
 
 ### View Menu
 
@@ -56,10 +57,10 @@ This section will describe the options available on the application menu, please
 
 Here are **optional** arguments you can use when starting the emulator at the command line:
 
-```
+```shell
 "BrightScript Simulator" [-o <path>] [-f] [-m <dm>] [-e] [-t] [-w [<port>]] [-p <newpwd>] [-d]
 
-"BrightScript Simulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--rc] 
+"BrightScript Simulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--rc]
                         [--web[=<port>]] [--pwd=<newpwd>] [--devtools]
 ```
 

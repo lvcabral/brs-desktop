@@ -34,7 +34,8 @@ export function loadFile(file) {
                 filePath,
                 fs.readFileSync(filePath),
                 !getEmulatorOption("keepDisplayOnExit"),
-                getAudioMuted()
+                getAudioMuted(),
+                getEmulatorOption("debugOnCrash")
             );
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);

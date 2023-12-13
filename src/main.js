@@ -164,7 +164,6 @@ function loadSettings(mainWindow, startup) {
         setDeviceInfo("device", "clientId");
         setDeviceInfo("device", "RIDA");
         setDeviceInfo("device", "developerId");
-        setDeviceInfo("device", "developerPwd");
     }
     if (settings.preferences.display) {
         setDisplayOption("displayMode");
