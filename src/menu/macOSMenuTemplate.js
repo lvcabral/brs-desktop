@@ -5,13 +5,14 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
+import { app } from "electron";
 import { showSettings } from "../helpers/settings";
 
 export const macOSMenuTemplate = {
-    label: "BrightScript Simulator",
+    label: app.getName(),
     submenu: [
         {
-            label: "About BrightScript Simulator",
+            label: `About ${app.getName()}`,
             role: "about",
         },
         { type: "separator" },
@@ -33,7 +34,7 @@ export const macOSMenuTemplate = {
             type: "separator",
         },
         {
-            label: "Hide BrightScript Simulator",
+            label: `Hide ${app.getName()}`,
             role: "hide",
         },
         {
@@ -48,7 +49,7 @@ export const macOSMenuTemplate = {
             type: "separator",
         },
         {
-            label: "Quit BrightScript Simulator",
+            label: `Quit ${app.getName()}`,
             role: "quit",
         },
     ],

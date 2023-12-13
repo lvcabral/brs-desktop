@@ -98,6 +98,7 @@ contextBridge.exposeInMainWorld("api", {
             "setAudioMute",
             "deviceData",
             "serialNumber",
+            "engineVersion",
             "saveFile",
             "saveIcon",
             "updateRegistry",

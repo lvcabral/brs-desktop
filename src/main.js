@@ -28,6 +28,7 @@ import {
 } from "./helpers/settings";
 import { createWindow, setAspectRatio } from "./helpers/window";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
+import { randomUUID } from "crypto";
 
 const isMacOS = process.platform === "darwin";
 
@@ -35,11 +36,10 @@ const isMacOS = process.platform === "darwin";
 const dt = DateTime.now().setZone("system");
 const deviceInfo = {
     developerId: "brs-dev-id", // Unique id to segregate registry data
-    friendlyName: "BrightScript Simulator",
+    friendlyName: app.getName(),
     deviceModel: "4200X",
-    firmwareVersion: "BSC.00E04193A", // v11.0
-    clientId: "810e74d8-f387-49c2-8644-c72bd0e8e2a1", // Unique identifier of the device
-    RIDA: "fad884dd-583f-4753-b694-fd0748152064", // Unique identifier for advertisement tracking
+    clientId: randomUUID(), // Unique identifier of the device
+    RIDA: randomUUID(), // Unique identifier for advertisement tracking
     countryCode: "US",
     timeZone: dt.zoneName,
     timeZoneIANA: dt.zoneName,

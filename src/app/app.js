@@ -50,6 +50,7 @@ brs.initialize(customDeviceInfo, {
 });
 api.send("deviceData", brs.deviceData);
 api.send("serialNumber", brs.getSerialNumber());
+api.send("engineVersion", brs.getVersion());
 
 brs.subscribe("app", (event, data) => {
     if (event === "loaded") {

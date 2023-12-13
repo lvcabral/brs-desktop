@@ -18,7 +18,7 @@ import { checkMenuItem } from "../menu/menuService";
 const credentials = {
     userName: "rokudev",
     password: "rokudev",
-    realm: "BrightScript Simulator",
+    realm: app.getName(),
 };
 let port = 80;
 let server;

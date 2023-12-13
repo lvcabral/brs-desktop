@@ -1,6 +1,7 @@
 const path = require("path");
 const merge = require("webpack-merge");
 const base = require("./webpack.base.config");
+const package = require("../package.json");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
@@ -23,6 +24,7 @@ module.exports = env => {
       new HtmlWebpackPlugin({
         chunks: ['app'],
         templateParameters: {
+          appName: package.productName,
           brsApi: fileApi
         }
       }),

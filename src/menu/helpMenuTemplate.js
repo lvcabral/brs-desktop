@@ -8,6 +8,7 @@
 import path from "path";
 import { shell } from "electron";
 import openAboutWindow from "electron-about-window";
+import packageInfo from "../../package.json";
 
 const isMacOS = process.platform === "darwin";
 
@@ -18,7 +19,7 @@ export const helpMenuTemplate = {
             label: "Documentation",
             accelerator: "F1",
             click: () => {
-                shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/README.md");
+                shell.openExternal(`${packageInfo.repository.url}#readme`);
             },
         },
         {
@@ -26,7 +27,7 @@ export const helpMenuTemplate = {
             accelerator: "CmdOrCtrl+F1",
             click: () => {
                 shell.openExternal(
-                    "https://github.com/lvcabral/brs-emu-app/blob/master/docs/control-reference.md"
+                    `${packageInfo.repository.url}/blob/master/docs/control-reference.md`
                 );
             },
         },
@@ -34,13 +35,13 @@ export const helpMenuTemplate = {
         {
             label: "Release Notes",
             click: () => {
-                shell.openExternal("https://github.com/lvcabral/brs-emu-app/releases");
+                shell.openExternal(`${packageInfo.repository.url}/releases`);
             },
         },
         {
             label: "View License",
             click: () => {
-                shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE");
+                shell.openExternal(`${packageInfo.repository.url}/blob/master/LICENSE`);
             },
         },
         // { type: "separator" },
@@ -57,8 +58,8 @@ export const helpMenuTemplate = {
                 const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
                 const about = openAboutWindow({
                     icon_path: path.join(__dirname, "images/icon.png"),
-                    copyright: "Copyright © 2019-2023 Marcelo Lv Cabral",
-                    homepage: "https://github.com/lvcabral/brs-emu-app#readme",
+                    copyright: `Copyright ${packageInfo.copyright}`,
+                    homepage: `${packageInfo.repository.url}#readme`,
                     win_options: {
                         parent: window,
                         x: x,
