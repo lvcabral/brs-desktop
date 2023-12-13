@@ -7,22 +7,21 @@
  *--------------------------------------------------------------------------------------------*/
 import { app } from "electron";
 import { showSettings } from "../helpers/settings";
+import { showAbout } from "../helpers/about";
 
 export const macOSMenuTemplate = {
     label: app.getName(),
     submenu: [
         {
             label: `About ${app.getName()}`,
-            role: "about",
+            click: showAbout,
         },
         { type: "separator" },
         {
             id: "settings",
             label: "Settings...",
             accelerator: "CmdOrCtrl+,",
-            click: () => {
-                showSettings();
-            },
+            click: showSettings,
         },
         { type: "separator" },
         {

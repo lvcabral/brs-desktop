@@ -139,15 +139,6 @@ export function createWindow(name, options) {
         // macOS windows flags
         win.setMaximizable(true);
         win.setWindowButtonVisibility(true);
-        ipcMain.on("engineVersion", (_, version) => {
-            app.setAboutPanelOptions({
-                applicationName: app.getName(),
-                applicationVersion: `Version ${app.getVersion()}`,
-                version: `brs-engine v${version}`,
-                credits: packageInfo.repository.url,
-                copyright: `Copyright ${packageInfo.copyright}`,
-            });
-        });
     } else {
         win.on("resize", () => {
             setAspectRatio(false);

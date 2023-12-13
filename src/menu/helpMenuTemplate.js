@@ -5,9 +5,8 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import path from "path";
 import { shell } from "electron";
-import openAboutWindow from "electron-about-window";
+import { showAbout } from "../helpers/about";
 import packageInfo from "../../package.json";
 
 const isMacOS = process.platform === "darwin";
@@ -50,31 +49,7 @@ export const helpMenuTemplate = {
         {
             label: "About",
             visible: !isMacOS,
-            click: (item, window) => {
-                const bounds = window.getBounds();
-                const w = 350;
-                const h = 450;
-                const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
-                const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
-                const about = openAboutWindow({
-                    icon_path: path.join(__dirname, "images/icon.png"),
-                    copyright: `Copyright ${packageInfo.copyright}`,
-                    homepage: `${packageInfo.repository.url}#readme`,
-                    win_options: {
-                        parent: window,
-                        x: x,
-                        y: y,
-                        width: w,
-                        height: h,
-                        opacity: 0.9,
-                        modal: true,
-                        maximizable: false,
-                        minimizable: false,
-                    },
-                });
-                about.setMenuBarVisibility(false);
-                about.setResizable(false);
-            },
+            click: showAbout,
         },
     ],
 };
