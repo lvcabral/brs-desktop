@@ -22,8 +22,8 @@ import {
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
 
 const isMacOS = process.platform === "darwin";
+const isWindows = process.platform === "win32";
 const timeZoneLabels = new Map();
-const modelLabels = new Map();
 const w = 800;
 const h = isMacOS ? 610 : 650;
 let settings;
@@ -87,7 +87,7 @@ export function getSettings(window) {
         },
         browserWindowOverrides: {
             title: "Settings",
-            titleBarStyle: "hidden",
+            titleBarStyle: isWindows || isMacOS ? "hidden": null,
             titleBarOverlay: getTitleOverlayTheme("purple"),
             frame: false,
             parent: window,
@@ -561,7 +561,9 @@ export function showSettings() {
         createShortMenu();
     } else {
         const userTheme = global.sharedObject.theme;
-        settings.browserWindowOverrides.titleBarOverlay = getTitleOverlayTheme(userTheme);
+        if (isWindows) {
+            settings.browserWindowOverrides.titleBarOverlay = getTitleOverlayTheme(userTheme);
+        }
     }
 
     settingsWindow = settings.show();
@@ -667,7 +669,7 @@ export function setThemeSource(userTheme, notifyApp) {
         window.webContents.send("setTheme", userTheme);
         window.webContents.send("refreshMenu");
 
-        if (!isMacOS && settingsWindow) {
+        if (isWindows && settingsWindow) {
             settingsWindow.setTitleBarOverlay(getTitleOverlayTheme(userTheme));
         }
     }
