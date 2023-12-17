@@ -40,9 +40,11 @@ The **BrightScript Simulator** desktop app only implements a subset of **ECP** c
 ## BrightScript Remote Console
 
 The **Remote Console** can be accessed using telnet through a shell application such as [PuTTY](http://www.putty.org/) for Windows or terminal on Mac and Linux:
+
 ```
 $ telnet <emulator-ip-address> 8085
 ```
+
 The emulator now supports the interactive debugging using the **Remote Console**, the list below has the Roku MicroDebugger commands currently implemented:
 
 - `bt` - Print backtrace of call function context frames
@@ -65,6 +67,5 @@ The emulator now supports the interactive debugging using the **Remote Console**
 - `help` - Show a list of supported commands
 
 When the debugger is activated (either with `STOP` statement or via `Ctrl+Break`) you can type any expression for a live compile and run, in the context of the current function.
-
 
 If the **Remote Console** is enabled an icon is shown in the status bar together with the port number 8085.

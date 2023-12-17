@@ -1,4 +1,4 @@
-## Control Keyboard Reference
+# Control Keyboard Reference
 
 The emulator supports by default the following mapping of the desktop keyboard to Roku remote control:
 
@@ -20,6 +20,6 @@ The emulator supports by default the following mapping of the desktop keyboard t
 <img src="images/control-reference.png?raw=true"/>
 </p>
 
-### Customization
+## Customization
 
 If you want to customize some of the keyboard key mappings, use the "Remote" tab on the "Settings" window.

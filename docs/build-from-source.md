@@ -12,7 +12,7 @@ $ npm install -g yarn
 ## Setup
 1. Clone this repo:
    ```
-   $ git clone https://github.com/lvcabral/brs-emu-app.git
+   $ git clone https://github.com/lvcabral/brs-desktop.git
    ```
 
 2. Install dependencies:
@@ -45,7 +45,7 @@ $ yarn dist
 
 Run from Windows `command` or `PowerShell` prompt:
 ```shell
-C:\git\brs-emu-app> yarn dist-win
+C:\git\brs-desktop> yarn dist-win
 ```
 #### Linux 32 bits (AppImage)
 

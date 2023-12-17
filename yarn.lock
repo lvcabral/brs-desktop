@@ -1958,8 +1958,10 @@ browserslist@^4.14.5, browserslist@^4.21.9, browserslist@^4.22.1:
     node-releases "^2.0.14"
     update-browserslist-db "^1.0.13"
 
-"brs-engine@file:../brs-emu":
+brs-engine@^1.0.0:
   version "1.0.0"
+  resolved "https://registry.yarnpkg.com/brs-engine/-/brs-engine-1.0.0.tgz#3e571513411ff5307bfcdfbff7ace0b00c924699"
+  integrity sha512-O3SGf5a254C7wonxGL5YC6XUwmknbbgV40pA6llQHhL4ToehCw71PXvThAlvnv+JIiDHweYN7N8tMc8q/jFoog==
   dependencies:
     "@msgpack/msgpack" "^2.8.0"
     chalk "^5.3.0"
@@ -1987,6 +1989,7 @@ browserslist@^4.14.5, browserslist@^4.21.9, browserslist@^4.22.1:
     strip-ansi "^7.1.0"
     upng-js lvcabral/UPNG.js
     url-parse "^1.5.10"
+    uuid "^9.0.1"
     xml2js "^0.5.0"
 
 buffer-alloc-unsafe@^1.1.0:
@@ -6928,6 +6931,11 @@ uuid@^3.3.2:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
+
+uuid@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
+  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 verror@1.10.0:
   version "1.10.0"
