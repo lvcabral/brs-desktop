@@ -8,7 +8,7 @@
 import { app, BrowserWindow, Menu, ipcMain } from "electron";
 import { macOSMenuTemplate } from "./macOSMenuTemplate";
 import { fileMenuTemplate } from "./fileMenuTemplate";
-import { editMenuTemplate } from "./editMenuTemplate";
+import { editMenuTemplate, editSettingsMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
@@ -53,7 +53,7 @@ export function createMenu() {
 }
 
 export function createShortMenu() {
-    menuTemplate = [fileMenuTemplate, editMenuTemplate, helpMenuTemplate];
+    menuTemplate = [fileMenuTemplate, editSettingsMenuTemplate, helpMenuTemplate];
     if (isMacOS) {
         menuTemplate.unshift(macOSMenuTemplate);
         fileMenuIndex = 1;
