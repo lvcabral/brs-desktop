@@ -25,7 +25,7 @@ const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
 const timeZoneLabels = new Map();
 const w = 800;
-const h = isMacOS ? 610 : 650;
+const h = isMacOS ? 630 : 650;
 let settings;
 let settingsWindow;
 let statusBarVisible = true;

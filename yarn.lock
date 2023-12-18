@@ -2996,8 +2996,8 @@ electron-osx-sign@^0.6.0:
     plist "^3.0.1"
 
 electron-preferences@lvcabral/electron-preferences#build:
-  version "2.8.2"
-  resolved "https://codeload.github.com/lvcabral/electron-preferences/tar.gz/951c88ce9b8dd4a0e98421d9d8f6ec9389ae4eaf"
+  version "2.8.3-custom"
+  resolved "https://codeload.github.com/lvcabral/electron-preferences/tar.gz/6a061e889a09963bcb2df54488c5f58e0b0c9348"
   dependencies:
     eventemitter2 "^6.4.9"
     load-json-file "^6.2.0"
