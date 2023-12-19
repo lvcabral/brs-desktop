@@ -14,7 +14,7 @@ const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
 const osVersion = process.getSystemVersion();
 const osName = isMacOS ? "macOS" : isWindows ? "Windows" : "Linux";
-const isBeyondBigSur = !isMacOS || osVersion.split(".")[0] > "10";
+const isBeforeBigSur = isMacOS && osVersion.split(".")[0] < "11";
 const aboutOptions = {
     icon_path: path.join(__dirname, "images/icon.png"),
     css_path: path.join(__dirname, "css/about.css"),
@@ -23,7 +23,7 @@ const aboutOptions = {
     win_options: {},
     use_version_info: ['electron', 'chrome', 'node'].map(e => [e, process.versions[e]]),
     bug_link_text: "got bugs?",
-    show_close_button: isBeyondBigSur ? "Close" : false,
+    show_close_button: isBeforeBigSur ? false : "Close",
 };
 
 ipcMain.on("engineVersion", (_, version) => {
@@ -44,7 +44,7 @@ export function showAbout(item, window) {
         width: w,
         height: h,
         opacity: 0.9,
-        modal: isBeyondBigSur,
+        modal: !isBeforeBigSur,
         maximizable: false,
         minimizable: false,
     };
