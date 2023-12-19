@@ -23,7 +23,7 @@ const aboutOptions = {
     win_options: {},
     use_version_info: ['electron', 'chrome', 'node'].map(e => [e, process.versions[e]]),
     bug_link_text: "got bugs?",
-    show_close_button: isBeforeBigSur ? false : "Close",
+    show_close_button: !isMacOS || isBeforeBigSur ? false : "Close",
 };
 
 ipcMain.on("engineVersion", (_, version) => {
