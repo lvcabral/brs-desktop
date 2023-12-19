@@ -9,7 +9,6 @@ import { app, BrowserWindow, ipcMain, screen } from "electron";
 import { getEmulatorOption } from "./settings";
 import path from "path";
 import jetpack from "fs-jetpack";
-import packageInfo from "../../package.json";
 
 const isMacOS = process.platform === "darwin";
 

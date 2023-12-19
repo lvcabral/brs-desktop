@@ -237,7 +237,11 @@ function redrawEvent(redraw) {
             windowContainer.style.top = "0px";
         } else if (windowTitleBar.style.visibility !== "visible") {
             windowTitleBar.style.visibility = "visible";
-            windowContainer.style.top = "28px";
+            windowContainer.style.top = `${windowTitleBar.clientHeight + 1}px`;
+            const titleText = document.querySelector("div.cet-title");
+            if (titleText) {
+                titleText.style.lineHeight = windowContainer.style.top;
+            }
         }
     }
 }
