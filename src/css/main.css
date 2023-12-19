@@ -165,3 +165,8 @@ a {
     opacity: 0.5;
     visibility: hidden;
 }
+
+.cet-menubar-menu-container .cet-action-menu-item {
+    height: 2em !important;
+    margin: 2px 3px !important;
+}
