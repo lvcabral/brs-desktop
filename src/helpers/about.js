@@ -11,6 +11,10 @@ import openAboutWindow from "electron-about-window";
 import packageInfo from "../../package.json";
 
 const isMacOS = process.platform === "darwin";
+const isWindows = process.platform === "win32";
+const osVersion = process.getSystemVersion();
+const osName = isMacOS ? "macOS" : isWindows ? "Windows" : "Linux";
+const isBeyondBigSur = !isMacOS || osVersion.split(".")[0] > "10";
 const aboutOptions = {
     icon_path: path.join(__dirname, "images/icon.png"),
     css_path: path.join(__dirname, "css/about.css"),
@@ -19,11 +23,12 @@ const aboutOptions = {
     win_options: {},
     use_version_info: ['electron', 'chrome', 'node'].map(e => [e, process.versions[e]]),
     bug_link_text: "got bugs?",
-    show_close_button: isMacOS ? "Close" : false,
+    show_close_button: isBeyondBigSur ? "Close" : false,
 };
 
 ipcMain.on("engineVersion", (_, version) => {
     aboutOptions.use_version_info.unshift(["brs-engine", version]);
+    aboutOptions.use_version_info.push([osName, osVersion]);
 });
 
 export function showAbout(item, window) {
@@ -39,11 +44,13 @@ export function showAbout(item, window) {
         width: w,
         height: h,
         opacity: 0.9,
-        modal: true,
+        modal: isBeyondBigSur,
         maximizable: false,
         minimizable: false,
     };
     const about = openAboutWindow(aboutOptions);
-    about.setMenuBarVisibility(false);
-    about.setResizable(false);
+    if (!isMacOS) {
+        about.setMenuBarVisibility(false);
+        about.setResizable(false);    
+    }
 }
