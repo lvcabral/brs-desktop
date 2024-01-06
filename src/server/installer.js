@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -79,14 +79,21 @@ export function enableInstaller() {
                 let done = "";
                 const busboy = new Busboy({ headers: req.headers });
                 busboy.on("file", function (fieldname, file, filename, encoding, mimetype) {
-                    if (filename && filename !== "") {
+                    if (filename?.length) {
                         try {
-                            let saveTo = path.join(app.getPath("userData"), "dev.zip");
-                            file.pipe(fs.createWriteStream(saveTo));
-                            file.on("end", function () {
-                                loadFile([saveTo]);
+                            let devFile = "dev.zip";
+                            if (filename.endsWith(".bpk")) {
+                                devFile = "dev.bpk";
+                            }
+                            const saveTo = path.join(app.getPath("userData"), devFile);
+                            const writeStream = fs.createWriteStream(saveTo);
+                            file.pipe(writeStream);
+                            file.on("end", () => {
                                 done = "file";
                             });
+                            writeStream.on("finish", () => {
+                                loadFile([saveTo]);
+                            })
                         } catch (error) {
                             res.writeHead(500);
                             res.end(
@@ -195,7 +202,6 @@ export function enableInstaller() {
         if (e.code === "EADDRINUSE") {
             window.webContents.send("console", `Web Installer server failed:${e.message}`, true);
             isInstallerEnabled = false;
-            updateInstallerStatus(isInstallerEnabled);
         } else {
             window.webContents.send("console", e.message, true);
         }
