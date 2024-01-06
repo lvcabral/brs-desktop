@@ -12,15 +12,22 @@ const isMacOS = process.platform === "darwin";
 export const editMenuTemplate = {
     label: "&Edit",
     submenu: [
+        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:", visible: isMacOS, },
+        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:", visible: isMacOS, },
+        { type: "separator", visible: isMacOS, },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:", visible: isMacOS, },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:", visible: isMacOS, },
         {
             id: "copy-screen",
             label: "Copy Screenshot",
-            accelerator: "CmdOrCtrl+C",
+            accelerator: "CmdOrCtrl+Shift+C",
             enabled: false,
             click: () => {
                 copyScreenshot();
             },
         },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:", visible: isMacOS, },
+        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:", visible: isMacOS, },
         { type: "separator" },
         {
             id: "settings",

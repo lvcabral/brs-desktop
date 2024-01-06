@@ -5,8 +5,9 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
+import { BrowserWindow } from "electron";
 import { setThemeSource, setSimulatorOption, setStatusBar } from "../helpers/settings";
-import { setAlwaysOnTop } from "../helpers/window";
+import { openDevConsole, setAlwaysOnTop } from "../helpers/window";
 
 export const viewMenuTemplate = {
     id: "view-menu",
@@ -18,7 +19,15 @@ export const viewMenuTemplate = {
         },
         {
             label: "Developer Tools",
-            role: "toggleDevTools",
+            accelerator: "F12",
+            click: () => {
+                const window = BrowserWindow.fromId(1);
+                if (window.webContents.isDevToolsOpened()) {
+                    window.webContents.closeDevTools()
+                } else {
+                    openDevConsole(window);
+                }
+            },
         },
         { type: "separator" },
         {

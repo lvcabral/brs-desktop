@@ -199,7 +199,7 @@ window.onload = window.onresize = function () {
     brs.redraw(api.isFullScreen());
 };
 
-// Pause/Resume based on Window Focus
+// Window Focus Events
 window.onfocus = function () {
     if (currentApp.running && debugMode === "pause") {
         brs.debug("cont");

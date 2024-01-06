@@ -108,11 +108,11 @@ export function createWindow(name, options) {
     win.on("close", saveState);
     // App Renderer Events
     ipcMain.on("openDevTools", () => {
-        win.openDevTools();
+        openDevConsole(win);
     });
     ipcMain.on("debugStarted", () => {
         if (getSimulatorOption("devToolsDebug")) {
-            win.openDevTools();
+            openDevConsole(win);
         }
     });
     ipcMain.on("setBackgroundColor", (_, color) => {
@@ -144,6 +144,9 @@ export function createWindow(name, options) {
         });
     }
     return win;
+}
+export function openDevConsole(window) {
+    window.openDevTools({ mode: 'detach' });
 }
 
 export function setAspectRatio(changed = true) {

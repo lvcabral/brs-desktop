@@ -26,7 +26,7 @@ import {
     setThemeSource,
     setTimeZone,
 } from "./helpers/settings";
-import { createWindow, setAspectRatio } from "./helpers/window";
+import { createWindow, openDevConsole, setAspectRatio } from "./helpers/window";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 import { randomUUID } from "crypto";
 
@@ -223,7 +223,7 @@ function processArgv(mainWindow, startup) {
         setDisplayOption("displayMode", displayMode, true);
     }
     if (startup.devTools || argv.devtools) {
-        mainWindow.openDevTools();
+        openDevConsole(mainWindow);
     }
     let openFile;
     if (argv?.o) {
@@ -310,7 +310,7 @@ function getLocalIps() {
                 console.log(`${ifname}:${alias}`, iface.address);
                 ips.push(`${ifname}:${alias},${iface.address}`);
             } else {
-                // this interface has only one ipv4 adress
+                // this interface has only one ipv4 address
                 console.log(ifname, iface.address);
                 ips.push(`${ifname},${iface.address}`);
             }
