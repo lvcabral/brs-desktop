@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -12,6 +12,7 @@ import { setStatusColor, setAudioStatus, showToast } from "./statusbar";
 
 // Simulator display
 const display = document.getElementById("display");
+let clearDisplay = true;
 
 // Stats overlay
 const stats = document.getElementById("stats");
@@ -217,15 +218,23 @@ function appLoaded(channelData) {
     api.enableMenuItem("close-channel", true);
     api.enableMenuItem("save-screen", true);
     api.enableMenuItem("copy-screen", true);
+    clearDisplay = channelData.clearDisplay;
 }
 
 function appTerminated() {
+    if (clearDisplay) {
+        window.requestAnimationFrame(delayRedraw);
+    }
     currentChannel = { id: "", running: false };
     stats.style.visibility = "hidden";
     api.updateTitle(defaultTitle);
     api.enableMenuItem("close-channel", false);
     api.enableMenuItem("save-screen", false);
     api.enableMenuItem("copy-screen", false);
+}
+
+function delayRedraw() {
+    brs.redraw(api.isFullScreen());
 }
 
 function redrawEvent(redraw) {
