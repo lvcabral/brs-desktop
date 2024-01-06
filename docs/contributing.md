@@ -1,6 +1,6 @@
 # Contributions Welcome!
 
-Any contibutions you're willing to make are _super_ appreciated.  That includes a wide variety of things &ndash; not just code!
+Any contributions you're willing to make are _super_ appreciated.  That includes a wide variety of things &ndash; not just code!
 
 ## Types of Contributions
 
@@ -8,13 +8,13 @@ Since this project is still maturing, many of its initial contributions will tak
 
 1. Improve documentation (even minor typos fixes are helpful!)
 1. File issues demonstrating where this implementation diverges from the reference one (i.e. on a Roku device)
-1. Use the emulator and tell your friends about it
+1. Use the simulator and tell your friends about it
 
 ## How to Contribute
 
 ### Submitting Issues
 
-If you find something wrong with the desktop application, or something doesn't seem right, feel free to [open a new issue](https://github.com/lvcabral/brs-desktop/issues/new). If the issue is related to how the **emulator** handles the _BrightScript_ language and components, then you should [open the issue on the `brs-engine` project](https://github.com/lvcabral/brs-engine/issues/new). Please try to avoid "how do I X in BrightScript" questions however &mdash; those are best suited for [StackOverflow](https://stackoverflow.com) or similar Q&A sites.
+If you find something wrong with the desktop application, or something doesn't seem right, feel free to [open a new issue](https://github.com/lvcabral/brs-desktop/issues/new). If the issue is related to how the **simulator** handles the _BrightScript_ language and components, then you should [open the issue on the `brs-engine` project](https://github.com/lvcabral/brs-engine/issues/new). Please try to avoid "how do I X in BrightScript" questions however &mdash; those are best suited for [StackOverflow](https://stackoverflow.com) or similar Q&A sites.
 
 ### Bug Reports
 

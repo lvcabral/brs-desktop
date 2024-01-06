@@ -15,7 +15,7 @@ import { helpMenuTemplate } from "./helpMenuTemplate";
 import { isInstallerEnabled } from "../server/installer";
 import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
-import { getEmulatorOption, setDisplayOption } from "../helpers/settings";
+import { getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile } from "../helpers/files";
 import path from "path";
 import jetpack from "fs-jetpack";
@@ -249,7 +249,7 @@ function rebuildMenu(template = false) {
                 checkMenuItem(localeId, true);
                 checkMenuItem(`theme-${userTheme}`, true);
                 checkMenuItem("on-top", window.isAlwaysOnTop());
-                checkMenuItem("status-bar", getEmulatorOption("statusBar"));
+                checkMenuItem("status-bar", getSimulatorOption("statusBar"));
             }
             if (appMenu.getMenuItemById("device-menu")) {
                 setDisplayOption("displayMode");

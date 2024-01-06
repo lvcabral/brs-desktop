@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getAudioMuted, getEmulatorOption } from "./settings";
+import { getAudioMuted, getSimulatorOption } from "./settings";
 import fs from "fs";
 import path from "path";
 
@@ -33,9 +33,9 @@ export function loadFile(file) {
                 "fileSelected",
                 filePath,
                 fs.readFileSync(filePath),
-                !getEmulatorOption("keepDisplayOnExit"),
+                !getSimulatorOption("keepDisplayOnExit"),
                 getAudioMuted(),
-                getEmulatorOption("debugOnCrash")
+                getSimulatorOption("debugOnCrash")
             );
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);

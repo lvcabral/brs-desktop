@@ -1,6 +1,6 @@
 # Control Keyboard Reference
 
-The emulator supports by default the following mapping of the desktop keyboard to Roku remote control:
+The simulator supports by default the following mapping of the keyboard to Roku remote control:
 
 | Keyboard Key    | Control Key | Description                                                             |
 |-----------------|-------------|-------------------------------------------------------------------------|

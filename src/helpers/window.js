@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
-import { getEmulatorOption } from "./settings";
+import { getSimulatorOption } from "./settings";
 import path from "path";
 import jetpack from "fs-jetpack";
 
@@ -111,7 +111,7 @@ export function createWindow(name, options) {
         win.openDevTools();
     });
     ipcMain.on("debugStarted", () => {
-        if (getEmulatorOption("devToolsDebug")) {
+        if (getSimulatorOption("devToolsDebug")) {
             win.openDevTools();
         }
     });
@@ -152,7 +152,7 @@ export function setAspectRatio(changed = true) {
     const ASPECT_RATIO_HD = 16 / 9;
     const window = BrowserWindow.fromId(1);
     let aspectRatio = displayMode === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
-    const statusOn = getEmulatorOption("statusBar");
+    const statusOn = getSimulatorOption("statusBar");
     let height = window.getBounds().height;
     let offset = statusOn ? 45 : 25;
     if (window) {

@@ -139,9 +139,9 @@ app.on("ready", () => {
 function loadSettings(mainWindow, startup) {
     // Load Simulator Settings
     let settings = getSettings(mainWindow);
-    if (settings.preferences.emulator) {
-        if (settings.value("emulator.options")) {
-            const options = settings.value("emulator.options");
+    if (settings.preferences.simulator) {
+        if (settings.value("simulator.options")) {
+            const options = settings.value("simulator.options");
             const onTop = options.includes("alwaysOnTop");
             checkMenuItem("on-top", onTop);
             mainWindow.setAlwaysOnTop(onTop);

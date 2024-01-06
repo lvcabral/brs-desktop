@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { setThemeSource, setEmulatorOption, setStatusBar } from "../helpers/settings";
+import { setThemeSource, setSimulatorOption, setStatusBar } from "../helpers/settings";
 import { setAlwaysOnTop } from "../helpers/window";
 
 export const viewMenuTemplate = {
@@ -65,7 +65,7 @@ export const viewMenuTemplate = {
             checked: false,
             enabled: true,
             click: (item) => {
-                setEmulatorOption("alwaysOnTop", item.checked, item.id);
+                setSimulatorOption("alwaysOnTop", item.checked, item.id);
                 setAlwaysOnTop(item.checked);
             },
         },
@@ -76,7 +76,7 @@ export const viewMenuTemplate = {
             checked: true,
             enabled: true,
             click: (item) => {
-                setEmulatorOption("statusBar", item.checked, item.id);
+                setSimulatorOption("statusBar", item.checked, item.id);
                 setStatusBar(item.checked);
             },
         },

@@ -209,7 +209,7 @@ window.onfocus = function () {
 window.onblur = function () {
     if (currentApp.running && debugMode === "continue") {
         let settings = api.getPreferences();
-        if (settings?.emulator?.options?.includes("pauseOnBlur")) {
+        if (settings?.simulator?.options?.includes("pauseOnBlur")) {
             brs.debug("pause");
         }
     }
@@ -227,8 +227,8 @@ function appLoaded(appData) {
     if (settings?.display?.overscanMode) {
         brs.setOverscanMode(settings.display.overscanMode);
     }
-    if (settings?.emulator?.options) {
-        brs.enableStats(settings.emulator.options.includes("perfStats"));
+    if (settings?.simulator?.options) {
+        brs.enableStats(settings.simulator.options.includes("perfStats"));
     }
     api.updateTitle(`${appData.title} - ${defaultTitle}`);
     if (appData.id === "brs") {

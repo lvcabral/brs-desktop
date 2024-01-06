@@ -36,7 +36,7 @@ contextBridge.exposeInMainWorld("api", {
     },
     isStatusEnabled: () => {
         const settings = ipcRenderer.sendSync("getPreferences");
-        const options = settings?.emulator?.options;
+        const options = settings?.simulator?.options;
         return options ? options.includes("statusBar") : false;
     },
     getDeviceInfo: () => {

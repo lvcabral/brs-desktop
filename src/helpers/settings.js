@@ -44,7 +44,7 @@ export function getSettings(window) {
             dataStore: path.resolve(app.getPath("userData"), "brs-settings.json"),
         },
         defaults: {
-            emulator: {
+            simulator: {
                 options: ["statusBar", "debugOnCrash"],
                 theme: "purple",
             },
@@ -105,7 +105,7 @@ export function getSettings(window) {
         },
         sections: [
             {
-                id: "emulator",
+                id: "simulator",
                 label: "General",
                 icon: "settings-gear-63",
                 form: {
@@ -297,7 +297,7 @@ export function getSettings(window) {
                 form: {
                     groups: [
                         {
-                            label: "Remote Control Emulation - Customize Keys",
+                            label: "Remote Control Keyboard Mapping - Customize Keys",
                             fields: [
                                 {
                                     label: "Button: Back",
@@ -499,7 +499,7 @@ export function getSettings(window) {
         ],
     });
     settings.on("save", (preferences) => {
-        saveEmulatorSettings(preferences.emulator.options, window);
+        saveSimulatorSettings(preferences.simulator.options, window);
         saveServicesSettings(preferences.services, window);
         setDeviceInfo("device", "deviceModel", true);
         setDeviceInfo("device", "clientId", true);
@@ -525,7 +525,7 @@ export function getSettings(window) {
         }
     });
     nativeTheme.on("updated", () => {
-        if (settings.value("emulator.theme") === "system") {
+        if (settings.value("simulator.theme") === "system") {
             const userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
             window.webContents.send("setTheme", userTheme);
             global.sharedObject.theme = userTheme;
@@ -612,12 +612,12 @@ export function showSettings() {
             checkMenuItem("ecp-api", ecpEnabled);
             const telnetEnabled = settings.value("services.telnet").includes("enabled");
             checkMenuItem("telnet", telnetEnabled);
-            const options = settings.value("emulator.options");
+            const options = settings.value("simulator.options");
             if (options) {
                 checkMenuItem("on-top", options.includes("alwaysOnTop"));
                 checkMenuItem("status-bar", options.includes("statusBar"));
             }
-            const userTheme = settings.value("emulator.theme");
+            const userTheme = settings.value("simulator.theme");
             checkMenuItem(`theme-${userTheme}`, true);
         }
     });
@@ -678,9 +678,9 @@ export function setDisplayOption(option, mode, notifyApp) {
 
 export function setThemeSource(userTheme, notifyApp) {
     if (userTheme) {
-        settings.value("emulator.theme", userTheme);
+        settings.value("simulator.theme", userTheme);
     } else {
-        userTheme = settings.value("emulator.theme");
+        userTheme = settings.value("simulator.theme");
     }
     checkMenuItem(`theme-${userTheme}`, true);
     let systemTheme = userTheme === "purple" ? "system" : userTheme;
@@ -701,20 +701,20 @@ export function setThemeSource(userTheme, notifyApp) {
     return userTheme;
 }
 
-export function getEmulatorOption(key) {
-    let options = settings.value("emulator.options");
+export function getSimulatorOption(key) {
+    let options = settings.value("simulator.options");
     return options ? options.includes(key) : false;
 }
 
-export function setEmulatorOption(key, enable, menuId) {
-    let options = settings.value("emulator.options");
+export function setSimulatorOption(key, enable, menuId) {
+    let options = settings.value("simulator.options");
     if (options) {
         if (enable && !options.includes(key)) {
             options.push(key);
         } else if (!enable && options.includes(key)) {
             options = options.filter((item) => item !== key);
         }
-        settings.value("emulator.options", options);
+        settings.value("simulator.options", options);
         if (menuId) {
             checkMenuItem(menuId, enable);
         }
@@ -790,7 +790,7 @@ export function getModelName(model) {
 
 // Settings Helper Functions
 
-function saveEmulatorSettings(options, window) {
+function saveSimulatorSettings(options, window) {
     if (options) {
         const onTop = options.includes("alwaysOnTop");
         const statusBar = options.includes("statusBar");
