@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -136,6 +136,10 @@ export function getSettings(window) {
                                         {
                                             label: "Start the Micro Debugger when the App Crashes",
                                             value: "debugOnCrash",
+                                        },
+                                        {
+                                            label: "Pause App when the Simulator loses the Focus",
+                                            value: "pauseOnBlur",
                                         },
                                         {
                                             label: "Keep Last Display Image when the App is Closed",

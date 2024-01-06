@@ -35,7 +35,8 @@ if ("models" in customDeviceInfo) {
     delete customDeviceInfo.models;
 }
 // Initialize device and subscribe to events
-let currentChannel = { id: "", running: false };
+let currentApp = { id: "", running: false };
+let debugMode = "continue";
 const customKeys = new Map();
 customKeys.set("Comma", "rev");
 customKeys.set("Period", "fwd");
@@ -55,10 +56,10 @@ api.send("engineVersion", brs.getVersion());
 
 brs.subscribe("app", (event, data) => {
     if (event === "loaded") {
-        currentChannel = data;
+        currentApp = data;
         appLoaded(data);
     } else if (event === "started") {
-        currentChannel = data;
+        currentApp = data;
         stats.style.visibility = "visible";
     } else if (event === "closed" || event === "error") {
         if (event === "error") {
@@ -82,8 +83,11 @@ brs.subscribe("app", (event, data) => {
         } else if (typeof data.content === "string") {
             api.send("telnet", data.content);
         }
+        if (["stop", "pause", "continue"].includes(data.level)) {
+            debugMode = data.level;
+        }
     } else if (event === "icon") {
-        api.send("saveIcon", [currentChannel.id, data]);
+        api.send("saveIcon", [currentApp.id, data]);
     } else if (event === "registry") {
         api.send("updateRegistry", data);
     } else if (event === "reset") {
@@ -133,7 +137,7 @@ api.receive("fileSelected", function (filePath, data, clear, mute, debug) {
     }
 });
 api.receive("closeChannel", function (source) {
-    if (currentChannel.running) {
+    if (currentApp.running) {
         brs.terminate(source);
     }
 });
@@ -194,6 +198,23 @@ api.receive("setAudioMute", function (mute) {
 window.onload = window.onresize = function () {
     brs.redraw(api.isFullScreen());
 };
+
+// Pause/Resume based on Window Focus
+window.onfocus = function () {
+    if (currentApp.running && debugMode === "pause") {
+        brs.debug("cont");
+    }
+};
+
+window.onblur = function () {
+    if (currentApp.running && debugMode === "continue") {
+        let settings = api.getPreferences();
+        if (settings?.emulator?.options?.includes("pauseOnBlur")) {
+            brs.debug("pause");
+        }
+    }
+};
+
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {
     api.toggleFullScreen();
@@ -201,31 +222,31 @@ display.ondblclick = function () {
 
 // Helper functions
 
-function appLoaded(channelData) {
+function appLoaded(appData) {
     let settings = api.getPreferences();
-    if (settings?.display && settings?.display?.overscanMode) {
+    if (settings?.display?.overscanMode) {
         brs.setOverscanMode(settings.display.overscanMode);
     }
-    if (settings?.emulator && settings?.emulator?.options) {
+    if (settings?.emulator?.options) {
         brs.enableStats(settings.emulator.options.includes("perfStats"));
     }
-    api.updateTitle(`${channelData.title} - ${defaultTitle}`);
-    if (channelData.id === "brs") {
-        api.send("addRecentSource", channelData.file);
+    api.updateTitle(`${appData.title} - ${defaultTitle}`);
+    if (appData.id === "brs") {
+        api.send("addRecentSource", appData.file);
     } else {
-        api.send("addRecentPackage", channelData);
+        api.send("addRecentPackage", appData);
     }
     api.enableMenuItem("close-channel", true);
     api.enableMenuItem("save-screen", true);
     api.enableMenuItem("copy-screen", true);
-    clearDisplay = channelData.clearDisplay;
+    clearDisplay = appData.clearDisplay;
 }
 
 function appTerminated() {
     if (clearDisplay) {
         window.requestAnimationFrame(delayRedraw);
     }
-    currentChannel = { id: "", running: false };
+    currentApp = { id: "", running: false };
     stats.style.visibility = "hidden";
     api.updateTitle(defaultTitle);
     api.enableMenuItem("close-channel", false);

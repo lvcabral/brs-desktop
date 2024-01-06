@@ -1,17 +1,17 @@
 ﻿/*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 const { contextBridge, ipcRenderer, shell } = require("electron");
-const { BrowserWindow, Menu, getCurrentWebContents, getGlobal } = require('@electron/remote')
+const { getCurrentWebContents, getGlobal } = require('@electron/remote')
 const customTitlebar = require("custom-electron-titlebar");
 const Mousetrap = require("mousetrap");
 const path = require("path");
 
-let onPreferencesChangedHandler = (preferences) => { };
+let onPreferencesChangedHandler = () => { };
 let titleBar;
 let titleBarConfig;
 let titleColor;
@@ -132,7 +132,7 @@ contextBridge.exposeInMainWorld("api", {
             "fileSelected"
         ];
         if (validChannels.includes(channel)) {
-            // Deliberately strip event as it includes `sender` 
+            // Deliberately strip event as it includes `sender`
             ipcRenderer.on(channel, (event, ...args) => func(...args));
         } else {
             console.warn(`api.receive() - invalid channel: ${channel}`);
@@ -140,7 +140,7 @@ contextBridge.exposeInMainWorld("api", {
     }
 });
 
-ipcRenderer.on("refreshMenu", (e) => {
+ipcRenderer.on("refreshMenu", () => {
     if (titleBar) {
         titleBar.refreshMenu();
     }
