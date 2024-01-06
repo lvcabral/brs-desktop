@@ -170,6 +170,7 @@ function loadSettings(mainWindow, startup) {
         setAspectRatio(settings.value("display.displayMode"), false);
         const overscanMode = settings.value("display.overscanMode");
         checkMenuItem(overscanMode, true);
+        setDeviceInfo("display", "maxFps");
     }
     if (settings.preferences.audio) {
         setDeviceInfo("audio", "maxSimulStreams");

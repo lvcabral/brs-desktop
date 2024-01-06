@@ -9,7 +9,7 @@
         "email": "marcelo@lvcabral.com",
         "url": "https://lvcabral.com/"
     },
-    "copyright": "© 2019-2023, Marcelo Lv Cabral",
+    "copyright": "© 2019-2024, Marcelo Lv Cabral",
     "homepage": "https://lvcabral.com/brs/",
     "bugs": {
         "url": "https://github.com/lvcabral/brs-desktop/issues"
@@ -95,7 +95,7 @@
         "@babel/preset-env": "^7.14.4",
         "@types/luxon": "^1.27.1",
         "babel-loader": "^8.0.6",
-        "brs-engine": "^1.0.0",
+        "brs-engine": "^1.1.11",
         "chai": "^4.1.0",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.7.3",
