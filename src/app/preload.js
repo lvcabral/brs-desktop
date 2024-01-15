@@ -10,6 +10,7 @@ const { getCurrentWebContents, getGlobal } = require('@electron/remote')
 const customTitlebar = require("custom-electron-titlebar");
 const Mousetrap = require("mousetrap");
 const path = require("path");
+const isMacOS = process.platform === "darwin";
 
 let onPreferencesChangedHandler = () => { };
 let titleBar;
@@ -143,6 +144,9 @@ contextBridge.exposeInMainWorld("api", {
 ipcRenderer.on("refreshMenu", () => {
     if (titleBar) {
         titleBar.refreshMenu();
+        if (!isMacOS) {
+            titleBar.updateTitleAlignment("center");
+        }
     }
 });
 

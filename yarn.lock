@@ -1959,10 +1959,10 @@ browserslist@^4.14.5, browserslist@^4.22.2:
     node-releases "^2.0.14"
     update-browserslist-db "^1.0.13"
 
-brs-engine@^1.1.11:
-  version "1.1.11"
-  resolved "https://registry.yarnpkg.com/brs-engine/-/brs-engine-1.1.11.tgz#8debea942b9cbe7db33a5b21e42527922c18de0b"
-  integrity sha512-ttxsuxAAaQxCFHr5v4v0mtM8OmTUseDFMZIlpI05Hp/+DN3ZfDW17RVeMTo6luWietHwQdwlxzxl39rjWcXq/Q==
+brs-engine@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/brs-engine/-/brs-engine-1.2.0.tgz#1e9c28f567419ffd641345035dd00fd5ed8a4b0e"
+  integrity sha512-tVCpA8FcOpuvqd+1BTooz9URDkL4dL0GE/7DI133ESBMUbtPCgvkKJtKwT96Smw2hAvUJpwKsGqzJBP1II8NYw==
   dependencies:
     "@msgpack/msgpack" "^2.8.0"
     chalk "^5.3.0"
@@ -2626,10 +2626,10 @@ cssesc@^3.0.0:
   resolved "https://registry.yarnpkg.com/cssesc/-/cssesc-3.0.0.tgz#37741919903b868565e1c09ea747445cd18983ee"
   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
 
-custom-electron-titlebar@^4.2.7:
-  version "4.2.7"
-  resolved "https://registry.yarnpkg.com/custom-electron-titlebar/-/custom-electron-titlebar-4.2.7.tgz#a5efa3ce85e2316809e4d32c7042855fbdade151"
-  integrity sha512-5sROnS5jH8jaFsjMwID7aPwnohBJ4HU0dSx81qSGAaznnblc3067D8pyl/zOwj/WosoOPHV2837jbT3j4whvHw==
+custom-electron-titlebar@^4.2.8:
+  version "4.2.8"
+  resolved "https://registry.yarnpkg.com/custom-electron-titlebar/-/custom-electron-titlebar-4.2.8.tgz#8b0d024cf372b10c9758cc512ca55498b69616da"
+  integrity sha512-JEFiOKJdSZtMh90FO90FeEqCc463ZZhuh78JxILvO9Nc0H8I9MfKekgCf6jZH6xccd3/tm1OcYOoUJi3JbXR/w==
 
 dashdash@^1.12.0:
   version "1.14.1"
