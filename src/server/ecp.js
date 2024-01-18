@@ -516,7 +516,7 @@ function launchApp(appID) {
     if (index >= 0) {
         let zip = getRecentPackage(index);
         if (zip) {
-            loadFile([zip]);
+            loadFile([zip], "external-control");
         }
     } else {
         window.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);

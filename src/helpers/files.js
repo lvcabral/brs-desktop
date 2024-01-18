@@ -10,7 +10,7 @@ import { getAudioMuted, getSimulatorOption } from "./settings";
 import fs from "fs";
 import path from "path";
 
-export function loadFile(file) {
+export function loadFile(file, source) {
     let window = BrowserWindow.fromId(1);
     if (file == undefined) return;
     if (window.isMinimized()) {
@@ -35,7 +35,8 @@ export function loadFile(file) {
                 fs.readFileSync(filePath),
                 !getSimulatorOption("keepDisplayOnExit"),
                 getAudioMuted(),
-                getSimulatorOption("debugOnCrash")
+                getSimulatorOption("debugOnCrash"),
+                source ?? "desktop_app"
             );
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);

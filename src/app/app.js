@@ -115,7 +115,7 @@ api.receive("setDeviceInfo", function (key, value) {
         }
     }
 });
-api.receive("fileSelected", function (filePath, data, clear, mute, debug) {
+api.receive("fileSelected", function (filePath, data, clear, mute, debug, source) {
     try {
         const fileExt = filePath.split(".").pop()?.toLowerCase();
         let password = "";
@@ -126,7 +126,7 @@ api.receive("fileSelected", function (filePath, data, clear, mute, debug) {
         brs.execute(filePath, data, {
             clearDisplayOnExit: clear,
             muteSound: mute,
-            execSource: "desktop_app",
+            execSource: source,
             debugOnCrash: debug,
             password: password,
         });

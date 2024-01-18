@@ -92,7 +92,7 @@ export function enableInstaller() {
                                 done = "file";
                             });
                             writeStream.on("finish", () => {
-                                loadFile([saveTo]);
+                                loadFile([saveTo], "auto-run-dev");
                             })
                         } catch (error) {
                             res.writeHead(500);
