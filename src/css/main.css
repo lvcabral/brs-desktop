@@ -156,6 +156,10 @@ a {
     margin: auto;
 }
 
+#player {
+    display: none;
+}
+
 #stats {
     position: absolute;
     top: 0;
