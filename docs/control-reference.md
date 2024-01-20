@@ -1,6 +1,6 @@
 # Keyboard and Game Pad Control Reference
 
-The simulator supports by default the following mapping of the keyboard to Roku remote control:
+The simulator supports by default the following mapping of the keyboard and game pads to Roku remote control:
 
 | Keyboard    | Game Pad   | Roku Control | Description                                                           |
 |-------------|------------|--------------|-----------------------------------------------------------------------|
