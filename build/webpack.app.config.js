@@ -7,14 +7,8 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = env => {
   let libraryName = "brs";
-  let fileApi, fileWrk;
-  if (env.production) {
-    fileApi = libraryName + ".api.js";
-    fileWrk = libraryName + ".worker.js";
-  } else {
-    fileApi = libraryName + ".api.js";
-    fileWrk = libraryName + ".worker.js";
-  }
+  let fileApi = libraryName + ".api.js";
+  let fileWrk = libraryName + ".worker.js";
   return merge(base(env), {
     entry: {
       main: "./src/main.js",

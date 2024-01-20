@@ -58,6 +58,7 @@
     --slider-track-color: rgba(0, 0, 0, 0.1);
     --slider-track-focus-color: rgba(0, 0, 0, 0.2);
 }
+
 #titlebar {
     display: block;
     position: fixed;
@@ -66,11 +67,13 @@
     width: 100%;
     background-color: var(--title-background-color);
 }
+
 #titlebar #drag-region {
     width: 100%;
     height: 100%;
     -webkit-app-region: drag;
 }
+
 #window-title {
     width: 100%;
     display: flex;
@@ -82,6 +85,7 @@
     font-size: 13px;
     text-align: center;
 }
+
 #window-title span {
     width: 100%;
     overflow: hidden;
@@ -89,12 +93,14 @@
     white-space: nowrap;
     line-height: 1.5;
 }
+
 #window {
     height: calc(100% - 28px);
     margin-top: 28px;
     padding: 3px;
     overflow-y: auto;
 }
+
 #window-controls {
     display: grid;
     grid-template-columns: repeat(1, 46px);
@@ -103,6 +109,7 @@
     right: 0;
     height: 100%;
 }
+
 #window-controls .button {
     grid-row: 1 / span 1;
     display: flex;
@@ -111,144 +118,181 @@
     width: 100%;
     height: 100%;
 }
+
 #window-controls {
     -webkit-app-region: no-drag;
 }
+
 #window-controls .button {
     user-select: none;
 }
+
 #window-controls .button:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
 #window-controls .button:active {
     background: rgba(255, 255, 255, 0.2);
 }
+
 #close-button:hover {
     background: #e81123 !important;
 }
+
 #close-button:active {
     background: #f1707a !important;
 }
+
 #close-button:active .icon {
     filter: invert(1);
 }
+
 #close-button {
     grid-column: 1;
 }
+
 @media (-webkit-device-pixel-ratio: 1.5),
-    (device-pixel-ratio: 1.5),
-    (-webkit-device-pixel-ratio: 2),
-    (device-pixel-ratio: 2),
-    (-webkit-device-pixel-ratio: 3),
-    (device-pixel-ratio: 3) {
+(-webkit-device-pixel-ratio: 2),
+(-webkit-device-pixel-ratio: 3) {
     #window-controls .icon {
         width: 10px;
         height: 10px;
     }
 }
+
 body {
     background: var(--background-color);
     color: var(--main-color);
 }
+
 ::-webkit-scrollbar-thumb {
     background-color: var(--control-background-color);
 }
+
 .sidebar {
     background-color: var(--sidebar-background-color);
 }
+
 .sidebar .sidebar-section {
     color: var(--icon-background-color);
 }
+
 .sidebar .sidebar-section .section-icon {
     background-color: var(--icon-background-color);
 }
+
 .sidebar .sidebar-section.active {
     color: var(--icon-active-color);
 }
+
 .sidebar .sidebar-section:focus {
     border: 2px solid var(--icon-hover-color);
 }
+
 .sidebar .sidebar-section:hover {
     background-color: var(--sidebar-hover-color);
 }
+
 .sidebar .sidebar-section.active .section-icon {
     background-color: var(--icon-active-color);
 }
+
 .group-label {
     color: var(--title-color);
 }
+
 .field-checkbox .checkbox-option .check-square {
     border: 1px solid var(--control-border-color);
 }
+
 .field-checkbox .checkbox-option .check-square:after {
     border: solid var(--control-background-color);
     border-width: 0 3px 3px 0;
 }
-.field-checkbox .checkbox-option input:focus ~ .check-square {
+
+.field-checkbox .checkbox-option input:focus~.check-square {
     border-color: var(--icon-active-color);
     border-width: 2px;
 }
-.field-checkbox .checkbox-option input:checked:focus ~ .check-square {
+
+.field-checkbox .checkbox-option input:checked:focus~.check-square {
     border-color: var(--icon-active-color);
 }
-.field-checkbox .checkbox-option input:checked ~ .check-square {
+
+.field-checkbox .checkbox-option input:checked~.check-square {
     background-color: var(--icon-active-color);
     border-color: var(--icon-active-color);
 }
-.field-checkbox .checkbox-option:hover input:checked ~ .check-square {
+
+.field-checkbox .checkbox-option:hover input:checked~.check-square {
     background-color: var(--icon-hover-color);
     border-color: var(--icon-hover-color);
 }
-.field-radio .radio-option:hover input ~ .check-circle {
+
+.field-radio .radio-option:hover input~.check-circle {
     background-color: var(--sidebar-hover-color);
 }
+
 .field-radio .radio-option .check-circle {
     border: 1px solid var(--control-border-color);
 }
+
 .field-radio .radio-option .check-circle:after {
     border: 2px solid var(--control-background-color);
 }
-.field-radio .radio-option input:checked ~ .check-circle {
+
+.field-radio .radio-option input:checked~.check-circle {
     background-color: var(--icon-active-color);
     border-color: var(--icon-active-color);
 }
-.field-radio .radio-option:hover input:checked ~ .check-circle {
+
+.field-radio .radio-option:hover input:checked~.check-circle {
     background-color: var(--icon-hover-color);
     border-color: var(--icon-hover-color);
 }
+
 .field-text input {
     color: var(--main-color);
     background-color: var(--control-background-color);
     border: 1px solid var(--control-border-color);
 }
+
 .field-accelerator input {
     color: var(--main-color);
     background-color: var(--control-background-color);
     border: 1px solid var(--control-border-color);
 }
+
 .field-dropdown select {
     color: var(--main-color);
     background-color: var(--control-background-color);
     border: 1px solid var(--control-border-color);
 }
+
 .field-slider input::-webkit-slider-thumb {
     background: var(--slider-thumb-color);
 }
+
 .field-slider input:focus::-webkit-slider-thumb {
     background: var(--slider-thumb-focus-color);
 }
+
 .field-slider input {
     opacity: 1;
 }
+
 .field-slider input:hover {
     opacity: 0.85;
 }
+
 .field-slider input::-webkit-slider-runnable-track {
     background: var(--slider-track-color);
 }
+
 .field-slider input:focus::-webkit-slider-runnable-track {
     background: var(--slider-track-focus-color);
 }
+
 .group .field .help {
     color: var(--help-color);
 }
