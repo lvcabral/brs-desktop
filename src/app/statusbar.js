@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -28,6 +28,8 @@ const statusTelnet = document.getElementById("statusTelnet");
 const statusTelnetText = document.getElementById("statusTelnetText");
 const statusWeb = document.getElementById("statusWeb");
 const statusWebText = document.getElementById("statusWebText");
+const colorValues = getComputedStyle(document.documentElement);
+
 statusResolution.style.display = "none";
 statusIconRes.style.display = "none";
 statusSepRes.style.display = "none";
@@ -47,10 +49,11 @@ statusDevTools.onclick = function () {
     api.send("openDevTools");
 };
 statusAudio.onclick = function () {
-    let muted = !brsEmu.getAudioMute();
-    brsEmu.setAudioMute(muted);
+    let muted = !brs.getAudioMute();
+    brs.setAudioMute(muted);
     api.send("setAudioMute", muted);
     setAudioStatus(muted);
+    showToast(`Audio is ${muted ? "off" : "on"}`);
 };
 
 let displayMode = api.getDeviceInfo().displayMode;
@@ -63,7 +66,7 @@ let filePath = "";
 let currentLocale = api.getDeviceInfo().locale;
 setLocaleStatus(currentLocale);
 // Subscribe Events
-brsEmu.subscribe("statusbar", (event, data) => {
+brs.subscribe("statusbar", (event, data) => {
     if (event === "loaded") {
         updateStatus(data);
     } else if (event === "closed") {
@@ -179,10 +182,29 @@ function shortenPath(bigPath, maxLen) {
     }
     return path;
 }
+
+// Function to display a Toast (from the bottom) with messages to the user
+export function showToast(message, duration = 3000, error = false) {
+    const toastColor = error ? "--status-error-color" : "--status-background-color";
+    Toastify({
+        text: message,
+        duration: duration,
+        close: false,
+        gravity: "bottom",
+        position: "center",
+        stopOnFocus: true,
+        offset: { y: 10 },
+        style: {
+            background: colorValues.getPropertyValue(toastColor).trim(),
+            fontSize: "14px",
+        }
+    }).showToast();
+}
+
 // Events from Main process
 api.receive("toggleStatusBar", function () {
     if (!api.isFullScreen()) {
-        brsEmu.redraw(false);
+        brs.redraw(false);
     }
 });
 api.receive("serverStatus", function (server, enable, port) {
@@ -218,7 +240,7 @@ function updateStatus(data) {
             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
             statusIconVersion.style.display = "";
         }
-        setAudioStatus(brsEmu.getAudioMute());
+        setAudioStatus(brs.getAudioMute());
         statusAudio.style.display = "";
     } else {
         statusIconFile.innerText = "";

@@ -1,25 +1,28 @@
 {
-    "name": "brs-emu-app",
-    "productName": "BrightScript Emulator",
-    "description": "Desktop Application",
-    "version": "0.10.31",
-    "private": true,
+    "name": "brs-desktop",
+    "productName": "BrightScript Simulator",
+    "description": "Roku Device Simulation Tool",
+    "version": "0.11.6",
+    "license": "MIT",
     "author": {
         "name": "Marcelo Lv Cabral",
         "email": "marcelo@lvcabral.com",
         "url": "https://lvcabral.com/"
     },
-    "copyright": "© 2019-2023, Marcelo Lv Cabral",
+    "copyright": "© 2019-2024, Marcelo Lv Cabral",
     "homepage": "https://lvcabral.com/brs/",
+    "bugs": {
+        "url": "https://github.com/lvcabral/brs-desktop/issues"
+    },
     "repository": {
         "type": "git",
-        "url": "https://github.com/lvcabral/brs-emu-app"
+        "url": "https://github.com/lvcabral/brs-desktop"
     },
     "main": "app/main.js",
     "build": {
-        "appId": "com.lvcabral.brs-emu.app",
-        "productName": "BrightScript Emulator",
-        "artifactName": "brsEmuApp-${version}-${platform}-${arch}.${ext}",
+        "appId": "com.lvcabral.brs-desktop.app",
+        "productName": "BrightScript Simulator",
+        "artifactName": "brs-desktop-${version}-${platform}-${arch}.${ext}",
         "files": [
             "app/**/*",
             "package.json"
@@ -31,10 +34,10 @@
         "nsis": {
             "oneClick": false,
             "allowToChangeInstallationDirectory": true,
-            "artifactName": "brsEmuApp-${version}-windows.${ext}"
+            "artifactName": "brs-desktop-${version}-windows.${ext}"
         },
         "mac": {
-            "artifactName": "brsEmuApp-${version}-macOS.${ext}",
+            "artifactName": "brs-desktop-${version}-macOS.${ext}",
             "category": "public.app-category.developer-tools"
         },
         "linux": {
@@ -74,7 +77,7 @@
     "dependencies": {
         "@electron/remote": "^2.0.9",
         "busboy": "^0.3.1",
-        "custom-electron-titlebar": "^4.2.7",
+        "custom-electron-titlebar": "^4.2.8",
         "electron-about-window": "^1.14.0",
         "electron-preferences": "lvcabral/electron-preferences#build",
         "fs-jetpack": "^4.1.0",
@@ -83,6 +86,7 @@
         "mousetrap": "^1.6.5",
         "node-ssdp": "^4.0.1",
         "restana": "^3.4.2",
+        "toastify-js": "^1.12.0",
         "ws": "^7.5.0",
         "xmlbuilder": "^13.0.2"
     },
@@ -91,11 +95,11 @@
         "@babel/preset-env": "^7.14.4",
         "@types/luxon": "^1.27.1",
         "babel-loader": "^8.0.6",
-        "brs-emu": "0.11.8-dev",
+        "brs-engine": "^1.2.3",
         "chai": "^4.1.0",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.7.3",
-        "electron": "^20.0.0",
+        "electron": "^25.9.7",
         "electron-builder": "^23.6.0",
         "electron-mocha": "^8.2.2",
         "friendly-errors-webpack-plugin": "^1.7.0",

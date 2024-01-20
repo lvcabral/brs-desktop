@@ -1,16 +1,16 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getAudioMuted, getEmulatorOption } from "./settings";
+import { getAudioMuted, getSimulatorOption } from "./settings";
 import fs from "fs";
 import path from "path";
 
-export function loadFile(file) {
+export function loadFile(file, source) {
     let window = BrowserWindow.fromId(1);
     if (file == undefined) return;
     if (window.isMinimized()) {
@@ -33,8 +33,10 @@ export function loadFile(file) {
                 "fileSelected",
                 filePath,
                 fs.readFileSync(filePath),
-                !getEmulatorOption("keepDisplayOnExit"),
-                getAudioMuted()
+                !getSimulatorOption("keepDisplayOnExit"),
+                getAudioMuted(),
+                getSimulatorOption("debugOnCrash"),
+                source ?? "desktop_app"
             );
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);

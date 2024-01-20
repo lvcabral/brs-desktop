@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -182,7 +182,7 @@ function processRequest(ws, message) {
             launchApp(msg["param-channel-id"]);
             reply = `{${statusOK}}`;
         } else if (msg["request"] == "key-press") {
-            window.webContents.send("postKeyPress", msg["param-key"]);
+            window.webContents.send("postKeyPress", msg["param-key"], 300, 50);
             reply = `{${statusOK}}`;
         } else {
             // Reply OK to any other request, including "request-events"
@@ -497,7 +497,7 @@ function genAppRegistry(plugin, encrypt) {
                 itXml.ele("key", {}, key);
                 itXml.ele("value", {}, value);
             }
-        });    
+        });
         xml.ele("status", {}, "OK");
     } else {
         xml.ele("status", {}, "FAILED");
@@ -516,7 +516,7 @@ function launchApp(appID) {
     if (index >= 0) {
         let zip = getRecentPackage(index);
         if (zip) {
-            loadFile([zip]);
+            loadFile([zip], "external-control");
         }
     } else {
         window.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);

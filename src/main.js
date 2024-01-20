@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -26,20 +26,20 @@ import {
     setThemeSource,
     setTimeZone,
 } from "./helpers/settings";
-import { createWindow, setAspectRatio } from "./helpers/window";
+import { createWindow, openDevConsole, setAspectRatio } from "./helpers/window";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
+import { randomUUID } from "crypto";
 
 const isMacOS = process.platform === "darwin";
 
-// Emulator Device Information Object
+// Device Information Object
 const dt = DateTime.now().setZone("system");
 const deviceInfo = {
     developerId: "brs-dev-id", // Unique id to segregate registry data
-    friendlyName: "BrightScript Emulator",
+    friendlyName: app.getName(),
     deviceModel: "4200X",
-    firmwareVersion: "BSC.00E04193A", // v11.0
-    clientId: "810e74d8-f387-49c2-8644-c72bd0e8e2a1", // Unique identifier of the device
-    RIDA: "fad884dd-583f-4753-b694-fd0748152064", // Unique identifier for advertisement tracking
+    clientId: randomUUID(), // Unique identifier of the device
+    RIDA: randomUUID(), // Unique identifier for advertisement tracking
     countryCode: "US",
     timeZone: dt.zoneName,
     timeZoneIANA: dt.zoneName,
@@ -137,11 +137,11 @@ app.on("ready", () => {
 
 // Load Settings
 function loadSettings(mainWindow, startup) {
-    // Load Emulator Settings
+    // Load Simulator Settings
     let settings = getSettings(mainWindow);
-    if (settings.preferences.emulator) {
-        if (settings.value("emulator.options")) {
-            const options = settings.value("emulator.options");
+    if (settings.preferences.simulator) {
+        if (settings.value("simulator.options")) {
+            const options = settings.value("simulator.options");
             const onTop = options.includes("alwaysOnTop");
             checkMenuItem("on-top", onTop);
             mainWindow.setAlwaysOnTop(onTop);
@@ -164,13 +164,13 @@ function loadSettings(mainWindow, startup) {
         setDeviceInfo("device", "clientId");
         setDeviceInfo("device", "RIDA");
         setDeviceInfo("device", "developerId");
-        setDeviceInfo("device", "developerPwd");
     }
     if (settings.preferences.display) {
         setDisplayOption("displayMode");
         setAspectRatio(settings.value("display.displayMode"), false);
         const overscanMode = settings.value("display.overscanMode");
         checkMenuItem(overscanMode, true);
+        setDeviceInfo("display", "maxFps");
     }
     if (settings.preferences.audio) {
         setDeviceInfo("audio", "maxSimulStreams");
@@ -223,7 +223,7 @@ function processArgv(mainWindow, startup) {
         setDisplayOption("displayMode", displayMode, true);
     }
     if (startup.devTools || argv.devtools) {
-        mainWindow.openDevTools();
+        openDevConsole(mainWindow);
     }
     let openFile;
     if (argv?.o) {
@@ -310,7 +310,7 @@ function getLocalIps() {
                 console.log(`${ifname}:${alias}`, iface.address);
                 ips.push(`${ifname}:${alias},${iface.address}`);
             } else {
-                // this interface has only one ipv4 adress
+                // this interface has only one ipv4 address
                 console.log(ifname, iface.address);
                 ips.push(`${ifname},${iface.address}`);
             }

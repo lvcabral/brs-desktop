@@ -1,12 +1,13 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { setThemeSource, setEmulatorOption, setStatusBar } from "../helpers/settings";
-import { setAlwaysOnTop } from "../helpers/window";
+import { BrowserWindow } from "electron";
+import { setThemeSource, setSimulatorOption, setStatusBar } from "../helpers/settings";
+import { openDevConsole, setAlwaysOnTop } from "../helpers/window";
 
 export const viewMenuTemplate = {
     id: "view-menu",
@@ -18,7 +19,15 @@ export const viewMenuTemplate = {
         },
         {
             label: "Developer Tools",
-            role: "toggleDevTools",
+            accelerator: "F12",
+            click: () => {
+                const window = BrowserWindow.fromId(1);
+                if (window.webContents.isDevToolsOpened()) {
+                    window.webContents.closeDevTools()
+                } else {
+                    openDevConsole(window);
+                }
+            },
         },
         { type: "separator" },
         {
@@ -65,7 +74,7 @@ export const viewMenuTemplate = {
             checked: false,
             enabled: true,
             click: (item) => {
-                setEmulatorOption("alwaysOnTop", item.checked, item.id);
+                setSimulatorOption("alwaysOnTop", item.checked, item.id);
                 setAlwaysOnTop(item.checked);
             },
         },
@@ -76,7 +85,7 @@ export const viewMenuTemplate = {
             checked: true,
             enabled: true,
             click: (item) => {
-                setEmulatorOption("statusBar", item.checked, item.id);
+                setSimulatorOption("statusBar", item.checked, item.id);
                 setStatusBar(item.checked);
             },
         },

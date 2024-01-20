@@ -1,17 +1,18 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import "../css/main.css";
 import "../css/fontawesome.min.css";
 import "../helpers/hash";
-import { setStatusColor, setAudioStatus } from "./statusbar";
+import { setStatusColor, setAudioStatus, showToast } from "./statusbar";
 
-// Emulator display
+// Simulator display
 const display = document.getElementById("display");
+let clearDisplay = true;
 
 // Stats overlay
 const stats = document.getElementById("stats");
@@ -33,8 +34,9 @@ if ("registry" in customDeviceInfo) {
 if ("models" in customDeviceInfo) {
     delete customDeviceInfo.models;
 }
-// Initialize Device Emulator and subscribe to events
-let currentChannel = { id: "", running: false };
+// Initialize device and subscribe to events
+let currentApp = { id: "", running: false };
+let debugMode = "continue";
 const customKeys = new Map();
 customKeys.set("Comma", "rev");
 customKeys.set("Period", "fwd");
@@ -43,33 +45,39 @@ customKeys.set("NumpadMultiply", "info");
 customKeys.set("KeyA", "a");
 customKeys.set("KeyZ", "b");
 
-brsEmu.initialize(customDeviceInfo, {
+brs.initialize(customDeviceInfo, {
     debugToConsole: true,
     showStats: false,
     customKeys: customKeys,
 });
-api.send("deviceData", brsEmu.deviceData);
-api.send("serialNumber", brsEmu.getSerialNumber());
+api.send("deviceData", brs.deviceData);
+api.send("serialNumber", brs.getSerialNumber());
+api.send("engineVersion", brs.getVersion());
 
-brsEmu.subscribe("app", (event, data) => {
+brs.subscribe("app", (event, data) => {
     if (event === "loaded") {
-        currentChannel = data;
+        currentApp = data;
         appLoaded(data);
     } else if (event === "started") {
-        currentChannel = data;
+        currentApp = data;
         stats.style.visibility = "visible";
     } else if (event === "closed" || event === "error") {
+        showCloseMessage(event, data);
         appTerminated();
     } else if (event === "redraw") {
         redrawEvent(data);
     } else if (event === "debug") {
         if (data.level === "stop") {
             api.send("debugStarted");
+            showToast(`App stopped and Micro Debugger is active!`);
         } else if (typeof data.content === "string") {
             api.send("telnet", data.content);
         }
+        if (["stop", "pause", "continue"].includes(data.level)) {
+            debugMode = data.level;
+        }
     } else if (event === "icon") {
-        api.send("saveIcon", [currentChannel.id, data]);
+        api.send("saveIcon", [currentApp.id, data]);
     } else if (event === "registry") {
         api.send("updateRegistry", data);
     } else if (event === "reset") {
@@ -90,33 +98,37 @@ api.receive("setTheme", function (theme) {
     }
 });
 api.receive("setDeviceInfo", function (key, value) {
-    if (key in brsEmu.deviceData) {
-        brsEmu.deviceData[key] = value;
+    if (key in brs.deviceData) {
+        brs.deviceData[key] = value;
         if (key === "deviceModel") {
-            api.send("serialNumber", brsEmu.getSerialNumber());
+            api.send("serialNumber", brs.getSerialNumber());
         }
     }
 });
-api.receive("fileSelected", function (filePath, data, clear, mute) {
+api.receive("fileSelected", function (filePath, data, clear, mute, debug, source) {
     try {
         const fileExt = filePath.split(".").pop()?.toLowerCase();
         let password = "";
         if (fileExt === "bpk") {
-            password = api.getDeviceInfo()?.developerPwd ?? "";
+            const settings = api.getPreferences();
+            password = settings?.device?.developerPwd ?? "";
         }
-        brsEmu.execute(filePath, data, {
+        brs.execute(filePath, data, {
             clearDisplayOnExit: clear,
             muteSound: mute,
-            execSource: "desktop_app",
+            execSource: source,
+            debugOnCrash: debug,
             password: password,
         });
     } catch (error) {
-        console.error(`Error opening ${filePath}:${error.message}`);
+        const errorMsg = `Error opening ${filePath}:${error.message}`;
+        console.error(errorMsg);
+        showToast(errorMsg, 5000, true);
     }
 });
 api.receive("closeChannel", function (source) {
-    if (currentChannel.running) {
-        brsEmu.terminate(source);
+    if (currentApp.running) {
+        brs.terminate(source);
     }
 });
 api.receive("console", function (text, error) {
@@ -125,21 +137,22 @@ api.receive("console", function (text, error) {
     } else {
         console.log(text);
     }
+    showToast(text, 5000, error);
 });
 api.receive("debugCommand", function (cmd) {
-    brsEmu.debug(cmd);
+    brs.debug(cmd);
 });
 api.receive("setCustomKeys", function (keys) {
-    brsEmu.setCustomKeys(keys);
+    brs.setCustomKeys(keys);
 });
-api.receive("postKeyDown", function (key) {
-    brsEmu.sendKeyDown(key);
+api.receive("postKeyDown", function (key, remote) {
+    brs.sendKeyDown(key, remote);
 });
-api.receive("postKeyUp", function (key) {
-    brsEmu.sendKeyUp(key);
+api.receive("postKeyUp", function (key, remote) {
+    brs.sendKeyUp(key, remote);
 });
-api.receive("postKeyPress", function (key) {
-    brsEmu.sendKeyPress(key);
+api.receive("postKeyPress", function (key, delay, remote) {
+    brs.sendKeyPress(key, delay, remote);
 });
 api.receive("copyScreenshot", function () {
     display.toBlob(function (blob) {
@@ -155,59 +168,97 @@ api.receive("saveScreenshot", function (file) {
     api.send("saveFile", [file, data]);
 });
 api.receive("setDisplay", function (mode) {
-    if (mode !== brsEmu.getDisplayMode()) {
-        brsEmu.setDisplayMode(mode);
-        brsEmu.redraw(api.isFullScreen());
+    if (mode !== brs.getDisplayMode()) {
+        brs.setDisplayMode(mode);
+        brs.redraw(api.isFullScreen());
     }
 });
 api.receive("setOverscan", function (mode) {
-    if (mode !== brsEmu.getOverscanMode()) {
-        brsEmu.setOverscanMode(mode);
-        brsEmu.redraw(api.isFullScreen());
+    if (mode !== brs.getOverscanMode()) {
+        brs.setOverscanMode(mode);
+        brs.redraw(api.isFullScreen());
     }
 });
 api.receive("setAudioMute", function (mute) {
-    brsEmu.setAudioMute(mute);
+    brs.setAudioMute(mute);
     setAudioStatus(mute);
 });
 
 // Window Resize Event
 window.onload = window.onresize = function () {
-    brsEmu.redraw(api.isFullScreen());
+    brs.redraw(api.isFullScreen());
 };
+
+// Window Focus Events
+window.onfocus = function () {
+    if (currentApp.running && debugMode === "pause") {
+        brs.debug("cont");
+    }
+};
+
+window.onblur = function () {
+    if (currentApp.running && debugMode === "continue") {
+        let settings = api.getPreferences();
+        if (settings?.simulator?.options?.includes("pauseOnBlur")) {
+            brs.debug("pause");
+        }
+    }
+};
+
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {
     api.toggleFullScreen();
 };
 
 // Helper functions
-
-function appLoaded(channelData) {
-    let settings = api.getPreferences();
-    if (settings?.display && settings?.display?.overscanMode) {
-        brsEmu.setOverscanMode(settings.display.overscanMode);
-    }
-    if (settings?.emulator && settings?.emulator?.options) {
-        brsEmu.enableStats(settings.emulator.options.includes("perfStats"));
-    }
-    api.updateTitle(`${channelData.title} - ${defaultTitle}`);
-    if (channelData.id === "brs") {
-        api.send("addRecentSource", channelData.file);
+function showCloseMessage(event, data) {
+    if (event === "error") {
+        showToast(`Error: ${data}`, 5000, true);
+    } else if (data.endsWith("CRASH")) {
+        showToast(`App crashed, open DevTools console for details!`, 5000, true);
+    } else if (data === "EXIT_MISSING_PASSWORD") {
+        showToast(`Missing developer password, unable to unpack the app!`, 5000, true);
+    } else if (data !== "EXIT_USER_NAV") {
+        showToast(`App closed with exit reason: ${data}`, 5000, true);
     } else {
-        api.send("addRecentPackage", channelData);
+        showToast(`App finished with success!`);
+    }
+}
+
+function appLoaded(appData) {
+    let settings = api.getPreferences();
+    if (settings?.display?.overscanMode) {
+        brs.setOverscanMode(settings.display.overscanMode);
+    }
+    if (settings?.simulator?.options) {
+        brs.enableStats(settings.simulator.options.includes("perfStats"));
+    }
+    api.updateTitle(`${appData.title} - ${defaultTitle}`);
+    if (appData.id === "brs") {
+        api.send("addRecentSource", appData.file);
+    } else {
+        api.send("addRecentPackage", appData);
     }
     api.enableMenuItem("close-channel", true);
     api.enableMenuItem("save-screen", true);
     api.enableMenuItem("copy-screen", true);
+    clearDisplay = appData.clearDisplay;
 }
 
 function appTerminated() {
-    currentChannel = { id: "", running: false };
+    if (clearDisplay) {
+        window.requestAnimationFrame(delayRedraw);
+    }
+    currentApp = { id: "", running: false };
     stats.style.visibility = "hidden";
     api.updateTitle(defaultTitle);
     api.enableMenuItem("close-channel", false);
     api.enableMenuItem("save-screen", false);
     api.enableMenuItem("copy-screen", false);
+}
+
+function delayRedraw() {
+    brs.redraw(api.isFullScreen());
 }
 
 function redrawEvent(redraw) {
@@ -219,7 +270,11 @@ function redrawEvent(redraw) {
             windowContainer.style.top = "0px";
         } else if (windowTitleBar.style.visibility !== "visible") {
             windowTitleBar.style.visibility = "visible";
-            windowContainer.style.top = "28px";
+            windowContainer.style.top = `${windowTitleBar.clientHeight + 1}px`;
+            const titleText = document.querySelector("div.cet-title");
+            if (titleText) {
+                titleText.style.lineHeight = windowContainer.style.top;
+            }
         }
     }
 }

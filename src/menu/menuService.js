@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -8,14 +8,14 @@
 import { app, BrowserWindow, Menu, ipcMain } from "electron";
 import { macOSMenuTemplate } from "./macOSMenuTemplate";
 import { fileMenuTemplate } from "./fileMenuTemplate";
-import { editMenuTemplate } from "./editMenuTemplate";
+import { editMenuTemplate, editSettingsMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
 import { isInstallerEnabled } from "../server/installer";
 import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
-import { getEmulatorOption, setDisplayOption } from "../helpers/settings";
+import { getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile } from "../helpers/files";
 import path from "path";
 import jetpack from "fs-jetpack";
@@ -53,7 +53,7 @@ export function createMenu() {
 }
 
 export function createShortMenu() {
-    menuTemplate = [fileMenuTemplate, editMenuTemplate, helpMenuTemplate];
+    menuTemplate = [fileMenuTemplate, editSettingsMenuTemplate, helpMenuTemplate];
     if (isMacOS) {
         menuTemplate.unshift(macOSMenuTemplate);
         fileMenuIndex = 1;
@@ -249,7 +249,7 @@ function rebuildMenu(template = false) {
                 checkMenuItem(localeId, true);
                 checkMenuItem(`theme-${userTheme}`, true);
                 checkMenuItem("on-top", window.isAlwaysOnTop());
-                checkMenuItem("status-bar", getEmulatorOption("statusBar"));
+                checkMenuItem("status-bar", getSimulatorOption("statusBar"));
             }
             if (appMenu.getMenuItemById("device-menu")) {
                 setDisplayOption("displayMode");

@@ -1,13 +1,13 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import path from "path";
 import { shell } from "electron";
-import openAboutWindow from "electron-about-window";
+import { showAbout } from "../helpers/about";
+import packageInfo from "../../package.json";
 
 const isMacOS = process.platform === "darwin";
 
@@ -18,7 +18,7 @@ export const helpMenuTemplate = {
             label: "Documentation",
             accelerator: "F1",
             click: () => {
-                shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/README.md");
+                shell.openExternal(`${packageInfo.repository.url}#readme`);
             },
         },
         {
@@ -26,7 +26,7 @@ export const helpMenuTemplate = {
             accelerator: "CmdOrCtrl+F1",
             click: () => {
                 shell.openExternal(
-                    "https://github.com/lvcabral/brs-emu-app/blob/master/docs/control-reference.md"
+                    `${packageInfo.repository.url}/blob/master/docs/control-reference.md`
                 );
             },
         },
@@ -34,13 +34,13 @@ export const helpMenuTemplate = {
         {
             label: "Release Notes",
             click: () => {
-                shell.openExternal("https://github.com/lvcabral/brs-emu-app/releases");
+                shell.openExternal(`${packageInfo.repository.url}/releases`);
             },
         },
         {
             label: "View License",
             click: () => {
-                shell.openExternal("https://github.com/lvcabral/brs-emu-app/blob/master/LICENSE");
+                shell.openExternal(`${packageInfo.repository.url}/blob/master/LICENSE`);
             },
         },
         // { type: "separator" },
@@ -49,31 +49,7 @@ export const helpMenuTemplate = {
         {
             label: "About",
             visible: !isMacOS,
-            click: (item, window) => {
-                const bounds = window.getBounds();
-                const w = 350;
-                const h = 450;
-                const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
-                const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
-                const about = openAboutWindow({
-                    icon_path: path.join(__dirname, "images/icon.png"),
-                    copyright: "Copyright © 2019-2023 Marcelo Lv Cabral",
-                    homepage: "https://github.com/lvcabral/brs-emu-app#readme",
-                    win_options: {
-                        parent: window,
-                        x: x,
-                        y: y,
-                        width: w,
-                        height: h,
-                        opacity: 0.9,
-                        modal: true,
-                        maximizable: false,
-                        minimizable: false,
-                    },
-                });
-                about.setMenuBarVisibility(false);
-                about.setResizable(false);
-            },
+            click: showAbout,
         },
     ],
 };

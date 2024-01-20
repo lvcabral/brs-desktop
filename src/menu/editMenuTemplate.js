@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript 2D API Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
@@ -12,15 +12,22 @@ const isMacOS = process.platform === "darwin";
 export const editMenuTemplate = {
     label: "&Edit",
     submenu: [
+        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:", visible: isMacOS, },
+        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:", visible: isMacOS, },
+        { type: "separator", visible: isMacOS, },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:", visible: isMacOS, },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:", visible: isMacOS, },
         {
             id: "copy-screen",
             label: "Copy Screenshot",
-            accelerator: "CmdOrCtrl+C",
+            accelerator: "CmdOrCtrl+Shift+C",
             enabled: false,
             click: () => {
                 copyScreenshot();
             },
         },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:", visible: isMacOS, },
+        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:", visible: isMacOS, },
         { type: "separator" },
         {
             id: "settings",
@@ -31,5 +38,18 @@ export const editMenuTemplate = {
                 showSettings();
             },
         },
+    ],
+};
+
+export const editSettingsMenuTemplate = {
+    label: "&Edit",
+    submenu: [
+        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+        { type: "separator" },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
     ],
 };

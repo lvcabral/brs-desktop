@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -22,10 +22,10 @@ import {
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
 
 const isMacOS = process.platform === "darwin";
+const isWindows = process.platform === "win32";
 const timeZoneLabels = new Map();
-const modelLabels = new Map();
 const w = 800;
-const h = isMacOS ? 610 : 650;
+const h = 630;
 let settings;
 let settingsWindow;
 let statusBarVisible = true;
@@ -38,12 +38,14 @@ export function getSettings(window) {
     const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
     const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
     settings = new ElectronPreferences({
-        css: "app/css/settings.css",
         debug: false,
-        dataStore: path.resolve(app.getPath("userData"), "brs-settings.json"),
+        config: {
+            css: "app/css/settings.css",
+            dataStore: path.resolve(app.getPath("userData"), "brs-settings.json"),
+        },
         defaults: {
-            emulator: {
-                options: ["statusBar"],
+            simulator: {
+                options: ["statusBar", "debugOnCrash"],
                 theme: "purple",
             },
             services: {
@@ -58,11 +60,12 @@ export function getSettings(window) {
                 clientId: global.sharedObject.deviceInfo.clientId,
                 RIDA: global.sharedObject.deviceInfo.RIDA,
                 developerId: global.sharedObject.deviceInfo.developerId,
-                developerPwd: global.sharedObject.deviceInfo.developerPwd,
+                developerPwd: "",
             },
             display: {
                 displayMode: "720p",
                 overscanMode: "disabled",
+                maxFps: 60,
             },
             remote: {
                 keyBack: "Escape",
@@ -85,7 +88,7 @@ export function getSettings(window) {
         },
         browserWindowOverrides: {
             title: "Settings",
-            titleBarStyle: "hidden",
+            titleBarStyle: isWindows || isMacOS ? "hidden": null,
             titleBarOverlay: getTitleOverlayTheme("purple"),
             frame: false,
             parent: window,
@@ -102,7 +105,7 @@ export function getSettings(window) {
         },
         sections: [
             {
-                id: "emulator",
+                id: "simulator",
                 label: "General",
                 icon: "settings-gear-63",
                 form: {
@@ -110,7 +113,7 @@ export function getSettings(window) {
                         {
                             fields: [
                                 {
-                                    label: "Emulator Options",
+                                    label: "Simulator Options",
                                     key: "options",
                                     type: "checkbox",
                                     options: [
@@ -127,30 +130,38 @@ export function getSettings(window) {
                                             value: "devToolsStartup",
                                         },
                                         {
-                                            label: "Open Developer Tools when Micro Debugger is Triggered",
+                                            label: "Open Developer Tools when the Micro Debugger starts",
                                             value: "devToolsDebug",
                                         },
                                         {
-                                            label: "Keep Last Display Image when App Exits",
+                                            label: "Start the Micro Debugger when the App Crashes",
+                                            value: "debugOnCrash",
+                                        },
+                                        {
+                                            label: "Pause App when the Simulator loses the Focus",
+                                            value: "pauseOnBlur",
+                                        },
+                                        {
+                                            label: "Keep Last Display Image when the App is Closed",
                                             value: "keepDisplayOnExit",
                                         },
                                         {
-                                            label: "Enable Always on Top Mode",
+                                            label: "Make the Simulator Window Always on Top",
                                             value: "alwaysOnTop",
                                         },
                                         {
-                                            label: "Show Performance Statistics",
+                                            label: "Show Performance Statistics Overlay",
                                             value: "perfStats",
                                         },
                                         {
-                                            label: "Show Status Bar",
+                                            label: "Show the Status Bar",
                                             value: "statusBar",
                                         },
                                     ],
-                                    help: "Select one or more configuration options.",
+                                    help: "Configure your preferences for the Simulator window and debugging tools",
                                 },
                                 {
-                                    label: "App UI Theme",
+                                    label: "Simulator UI Theme",
                                     key: "theme",
                                     type: "radio",
                                     options: [
@@ -215,7 +226,7 @@ export function getSettings(window) {
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "ECP service allows the emulator to be controlled over the network",
+                                    help: "ECP service allows the simulator to be controlled over the network",
                                 },
                                 {
                                     label: "BrightScript Remote Console (Telnet)",
@@ -248,7 +259,7 @@ export function getSettings(window) {
                                     key: "deviceModel",
                                     type: "dropdown",
                                     options: getRokuModelArray(),
-                                    help: "Device model returned by ifDeviceInfo.GetModel(). This setting doesn't affect any behavior of the emulator",
+                                    help: "Device model returned by ifDeviceInfo.GetModel(). This setting doesn't affect any behavior of the simulator",
                                 },
                                 {
                                     label: "Channel Client Id",
@@ -272,7 +283,7 @@ export function getSettings(window) {
                                     label: "Developer Password",
                                     key: "developerPwd",
                                     type: "text",
-                                    help: "Password used to encrypt and decrypt the app package source code.",
+                                    help: "Password used to encrypt and decrypt the app package source code, needs to be 32 bytes long",
                                 },
                             ],
                         },
@@ -286,7 +297,7 @@ export function getSettings(window) {
                 form: {
                     groups: [
                         {
-                            label: "Remote Control Emulation - Customize Keys",
+                            label: "Remote Control Keyboard Mapping - Customize Keys",
                             fields: [
                                 {
                                     label: "Button: Back",
@@ -372,6 +383,26 @@ export function getSettings(window) {
                                     ],
                                     help: "Enable overscan to verify potential cuts of the UI on the TV borders",
                                 },
+                                {
+                                    label: "Maximum Display Framerate",
+                                    key: "maxFps",
+                                    type: "radio",
+                                    options: [
+                                        {
+                                            label: "Slow: 15 fps",
+                                            value: 15,
+                                        },
+                                        {
+                                            label: "Average: 30 fps",
+                                            value: 30,
+                                        },
+                                        {
+                                            label: "Fast: 60 fps (default)",
+                                            value: 60,
+                                        },
+                                    ],
+                                    help: "The maximum # of frames per second (fps) to be generated by the simulator.",
+                                },
                             ],
                         },
                     ],
@@ -407,7 +438,7 @@ export function getSettings(window) {
                                     type: "checkbox",
                                     options: [
                                         {
-                                            label: "Mute Music and Sound Effects",
+                                            label: "Mute Video, Audio and Sound Effects",
                                             value: true,
                                         },
                                     ],
@@ -430,7 +461,7 @@ export function getSettings(window) {
                                     key: "locale",
                                     type: "radio",
                                     options: getLocaleIdArray(),
-                                    help: "Configure the localization, this setting only affects apps not the emulator UI",
+                                    help: "Configure the localization, this setting only affects apps not the simulator UI",
                                 },
                                 {
                                     label: "Clock Format",
@@ -468,13 +499,12 @@ export function getSettings(window) {
         ],
     });
     settings.on("save", (preferences) => {
-        saveEmulatorSettings(preferences.emulator.options, window);
+        saveSimulatorSettings(preferences.simulator.options, window);
         saveServicesSettings(preferences.services, window);
         setDeviceInfo("device", "deviceModel", true);
         setDeviceInfo("device", "clientId", true);
         setDeviceInfo("device", "RIDA", true);
         setDeviceInfo("device", "developerId"); // Do not notify app to avoid change registry without reset
-        setDeviceInfo("device", "developerPwd");
         saveDisplaySettings(window);
         setRemoteKeys(settings.defaults.remote, preferences.remote);
         if (preferences.audio) {
@@ -495,7 +525,7 @@ export function getSettings(window) {
         }
     });
     nativeTheme.on("updated", () => {
-        if (settings.value("emulator.theme") === "system") {
+        if (settings.value("simulator.theme") === "system") {
             const userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
             window.webContents.send("setTheme", userTheme);
             global.sharedObject.theme = userTheme;
@@ -556,7 +586,9 @@ export function showSettings() {
         createShortMenu();
     } else {
         const userTheme = global.sharedObject.theme;
-        settings.browserWindowOverrides.titleBarOverlay = getTitleOverlayTheme(userTheme);
+        if (isWindows) {
+            settings.browserWindowOverrides.titleBarOverlay = getTitleOverlayTheme(userTheme);
+        }
     }
 
     settingsWindow = settings.show();
@@ -580,12 +612,12 @@ export function showSettings() {
             checkMenuItem("ecp-api", ecpEnabled);
             const telnetEnabled = settings.value("services.telnet").includes("enabled");
             checkMenuItem("telnet", telnetEnabled);
-            const options = settings.value("emulator.options");
+            const options = settings.value("simulator.options");
             if (options) {
                 checkMenuItem("on-top", options.includes("alwaysOnTop"));
                 checkMenuItem("status-bar", options.includes("statusBar"));
             }
-            const userTheme = settings.value("emulator.theme");
+            const userTheme = settings.value("simulator.theme");
             checkMenuItem(`theme-${userTheme}`, true);
         }
     });
@@ -646,9 +678,9 @@ export function setDisplayOption(option, mode, notifyApp) {
 
 export function setThemeSource(userTheme, notifyApp) {
     if (userTheme) {
-        settings.value("emulator.theme", userTheme);
+        settings.value("simulator.theme", userTheme);
     } else {
-        userTheme = settings.value("emulator.theme");
+        userTheme = settings.value("simulator.theme");
     }
     checkMenuItem(`theme-${userTheme}`, true);
     let systemTheme = userTheme === "purple" ? "system" : userTheme;
@@ -662,27 +694,27 @@ export function setThemeSource(userTheme, notifyApp) {
         window.webContents.send("setTheme", userTheme);
         window.webContents.send("refreshMenu");
 
-        if (!isMacOS && settingsWindow) {
+        if (isWindows && settingsWindow) {
             settingsWindow.setTitleBarOverlay(getTitleOverlayTheme(userTheme));
         }
     }
     return userTheme;
 }
 
-export function getEmulatorOption(key) {
-    let options = settings.value("emulator.options");
+export function getSimulatorOption(key) {
+    let options = settings.value("simulator.options");
     return options ? options.includes(key) : false;
 }
 
-export function setEmulatorOption(key, enable, menuId) {
-    let options = settings.value("emulator.options");
+export function setSimulatorOption(key, enable, menuId) {
+    let options = settings.value("simulator.options");
     if (options) {
         if (enable && !options.includes(key)) {
             options.push(key);
         } else if (!enable && options.includes(key)) {
             options = options.filter((item) => item !== key);
         }
-        settings.value("emulator.options", options);
+        settings.value("simulator.options", options);
         if (menuId) {
             checkMenuItem(menuId, enable);
         }
@@ -758,7 +790,7 @@ export function getModelName(model) {
 
 // Settings Helper Functions
 
-function saveEmulatorSettings(options, window) {
+function saveSimulatorSettings(options, window) {
     if (options) {
         const onTop = options.includes("alwaysOnTop");
         const statusBar = options.includes("statusBar");
@@ -808,6 +840,7 @@ function saveDisplaySettings(window) {
     const overscanMode = settings.value("display.overscanMode");
     checkMenuItem(overscanMode, true);
     window.webContents.send("setOverscan", overscanMode);
+    setDeviceInfo("display", "maxFps", true);
 }
 
 function convertKey(keyCode) {
@@ -835,32 +868,12 @@ function convertChar(keyChar) {
     } else if (isLetter(keyChar)) {
         return `Key${keyChar}`;
     } else {
-        switch (keyChar) {
-            case "`":
-                return "Backquote";
-            case "-":
-                return "Minus";
-            case "=":
-                return "Equal";
-            case "[":
-                return "BracketLeft";
-            case "]":
-                return "BracketRight";
-            case ";":
-                return "Semicolon";
-            case "'":
-                return "Quote";
-            case ",":
-                return "Comma";
-            case ".":
-                return "Period";
-            case "\\":
-                return "Backslash";
-            case "/":
-                return "Slash";
-            default:
-                return keyChar;
-        }
+        const keyMap = new Map([
+            ["`", "Backquote"], ["-", "Minus"], ["=", "Equal"], ["[", "BracketLeft"],
+            ["]", "BracketRight"], [";", "Semicolon"], ["'", "quote"], [",", "Comma"],
+            [".", "Period"], ["\\", "Backslash"], ["/", "Slash"]
+        ]);
+        return keyMap.get(keyChar) ?? keyChar;
     }
 }
 

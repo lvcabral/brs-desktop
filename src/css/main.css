@@ -1,6 +1,7 @@
 /* Color Themes */
 
-[data-theme^="purple"], [data-theme] [data-theme^="purple"] {
+[data-theme^="purple"],
+[data-theme] [data-theme^="purple"] {
     --main-color: #dac7ea;
     --background-color: #251135;
     --link-color: #aa46f7;
@@ -16,7 +17,8 @@
     --status-warning-hover-color: #d4865f;
 }
 
-[data-theme^="light"], [data-theme] [data-theme^="light"] {
+[data-theme^="light"],
+[data-theme] [data-theme^="light"] {
     --main-color: #000000;
     --background-color: #ffffff;
     --link-color: #0000ff;
@@ -32,7 +34,8 @@
     --status-warning-hover-color: #d4865f;
 }
 
-[data-theme^="dark"], [data-theme] [data-theme^="dark"] {
+[data-theme^="dark"],
+[data-theme] [data-theme^="dark"] {
     --main-color: #d4d4d4;
     --background-color: #1e1e1e;
     --link-color: #3e5763;
@@ -50,7 +53,8 @@
 
 /* Style Definitions */
 
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
     padding: 0;
@@ -58,7 +62,8 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     color: var(--main-color);
     background-color: var(--background-color);
 }
@@ -151,12 +156,21 @@ a {
     margin: auto;
 }
 
-#stats{
+#player {
+    display: none;
+}
+
+#stats {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-	z-index:60;
-	opacity: 0.5;
-	visibility: hidden;
+    z-index: 60;
+    opacity: 0.5;
+    visibility: hidden;
+}
+
+.cet-menubar-menu-container .cet-action-menu-item {
+    height: 2em !important;
+    margin: 2px 3px !important;
 }

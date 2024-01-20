@@ -1,5 +1,5 @@
 # Building from Source
-The BrightScript Emulator Desktop App project is being developed using the [Electron framework](https://electronjs.org/), and it also uses `yarn` for dependency management.
+The BrightScript Simulator Desktop App project is being developed using the [Electron framework](https://electronjs.org/), and it also uses `yarn` for dependency management.
 
 ## Prerequisites
 To build the project you will need `NodeJS`, so you'll need to [install that first](https://nodejs.org).
@@ -12,7 +12,7 @@ $ npm install -g yarn
 ## Setup
 1. Clone this repo:
    ```
-   $ git clone https://github.com/lvcabral/brs-emu-app.git
+   $ git clone https://github.com/lvcabral/brs-desktop.git
    ```
 
 2. Install dependencies:
@@ -45,7 +45,7 @@ $ yarn dist
 
 Run from Windows `command` or `PowerShell` prompt:
 ```shell
-C:\git\brs-emu-app> yarn dist-win
+C:\git\brs-desktop> yarn dist-win
 ```
 #### Linux 32 bits (AppImage)
 

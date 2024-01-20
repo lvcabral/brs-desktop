@@ -1,12 +1,12 @@
 /*---------------------------------------------------------------------------------------------
- *  BrightScript Emulator (https://github.com/lvcabral/brs-emu-app)
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
-import { getEmulatorOption } from "./settings";
+import { getSimulatorOption } from "./settings";
 import path from "path";
 import jetpack from "fs-jetpack";
 
@@ -108,11 +108,11 @@ export function createWindow(name, options) {
     win.on("close", saveState);
     // App Renderer Events
     ipcMain.on("openDevTools", () => {
-        win.openDevTools();
+        openDevConsole(win);
     });
     ipcMain.on("debugStarted", () => {
-        if (getEmulatorOption("devToolsDebug")) {
-            win.openDevTools();
+        if (getSimulatorOption("devToolsDebug")) {
+            openDevConsole(win);
         }
     });
     ipcMain.on("setBackgroundColor", (_, color) => {
@@ -129,7 +129,7 @@ export function createWindow(name, options) {
         if (data instanceof Map) {
             global.sharedObject.deviceInfo.registry = data;
         }
-    });    
+    });
     ipcMain.on("reset", () => {
         win.reload();
     });
@@ -145,6 +145,9 @@ export function createWindow(name, options) {
     }
     return win;
 }
+export function openDevConsole(window) {
+    window.openDevTools({ mode: 'detach' });
+}
 
 export function setAspectRatio(changed = true) {
     const displayMode = global.sharedObject.deviceInfo.displayMode || "720p";
@@ -152,7 +155,7 @@ export function setAspectRatio(changed = true) {
     const ASPECT_RATIO_HD = 16 / 9;
     const window = BrowserWindow.fromId(1);
     let aspectRatio = displayMode === "480p" ? ASPECT_RATIO_SD : ASPECT_RATIO_HD;
-    const statusOn = getEmulatorOption("statusBar");
+    const statusOn = getSimulatorOption("statusBar");
     let height = window.getBounds().height;
     let offset = statusOn ? 45 : 25;
     if (window) {
@@ -187,7 +190,7 @@ export function copyScreenshot() {
 export function closeChannel() {
     const window = BrowserWindow.fromId(1);
     if (window) {
-        window.webContents.send("closeChannel", "Menu");
+        window.webContents.send("closeChannel", "EXIT_USER_NAV");
     }
 }
 
