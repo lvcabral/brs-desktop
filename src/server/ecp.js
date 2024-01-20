@@ -182,7 +182,7 @@ function processRequest(ws, message) {
             launchApp(msg["param-channel-id"]);
             reply = `{${statusOK}}`;
         } else if (msg["request"] == "key-press") {
-            window.webContents.send("postKeyPress", msg["param-key"]);
+            window.webContents.send("postKeyPress", msg["param-key"], 300, 50);
             reply = `{${statusOK}}`;
         } else {
             // Reply OK to any other request, including "request-events"
@@ -497,7 +497,7 @@ function genAppRegistry(plugin, encrypt) {
                 itXml.ele("key", {}, key);
                 itXml.ele("value", {}, value);
             }
-        });    
+        });
         xml.ele("status", {}, "OK");
     } else {
         xml.ele("status", {}, "FAILED");

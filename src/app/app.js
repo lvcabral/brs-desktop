@@ -155,14 +155,14 @@ api.receive("debugCommand", function (cmd) {
 api.receive("setCustomKeys", function (keys) {
     brs.setCustomKeys(keys);
 });
-api.receive("postKeyDown", function (key) {
-    brs.sendKeyDown(key);
+api.receive("postKeyDown", function (key, remote) {
+    brs.sendKeyDown(key, remote);
 });
-api.receive("postKeyUp", function (key) {
-    brs.sendKeyUp(key);
+api.receive("postKeyUp", function (key, remote) {
+    brs.sendKeyUp(key, remote);
 });
-api.receive("postKeyPress", function (key) {
-    brs.sendKeyPress(key);
+api.receive("postKeyPress", function (key, delay, remote) {
+    brs.sendKeyPress(key, delay, remote);
 });
 api.receive("copyScreenshot", function () {
     display.toBlob(function (blob) {
