@@ -16,10 +16,10 @@ The simulator supports by default the following mapping of the keyboard to Roku 
 | A           |    10      |     A        | A game buttom. Check app instructions for custom usage.               |
 | Z           |    11      |     B        | B game buttom. Check app instructions for custom usage.               |
 
-<p align="center">
+<p align="left">
 <img src="images/control-reference.png?raw=true"/>
 </p>
 
 ## Customization
 
-If you want to customize some of the keyboard key mappings, use the "Remote" tab on the "Settings" window.
+If you want to customize some of the keyboard key mappings, use the "Remote" tab on the [Settings](how-to-use.md#settings-screen) window.
