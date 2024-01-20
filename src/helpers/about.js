@@ -51,6 +51,6 @@ export function showAbout(item, window) {
     const about = openAboutWindow(aboutOptions);
     if (!isMacOS) {
         about.setMenuBarVisibility(false);
-        about.setResizable(false);    
+        about.setResizable(false);
     }
 }

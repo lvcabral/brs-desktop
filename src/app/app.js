@@ -62,17 +62,7 @@ brs.subscribe("app", (event, data) => {
         currentApp = data;
         stats.style.visibility = "visible";
     } else if (event === "closed" || event === "error") {
-        if (event === "error") {
-            showToast(`Error: ${data}`, 5000, true);
-        } else if (data.endsWith("CRASH")) {
-            showToast(`App crashed, open DevTools console for details!`, 5000, true);
-        } else if (data === "EXIT_MISSING_PASSWORD") {
-            showToast(`Missing developer password, unable to unpack the app!`, 5000, true);
-        } else if (data !== "EXIT_USER_NAV") {
-            showToast(`App closed with exit reason: ${data}`, 5000, true);
-        } else {
-            showToast(`App finished with success!`);
-        }
+        showCloseMessage(event, data);
         appTerminated();
     } else if (event === "redraw") {
         redrawEvent(data);
@@ -221,6 +211,19 @@ display.ondblclick = function () {
 };
 
 // Helper functions
+function showCloseMessage(event, data) {
+    if (event === "error") {
+        showToast(`Error: ${data}`, 5000, true);
+    } else if (data.endsWith("CRASH")) {
+        showToast(`App crashed, open DevTools console for details!`, 5000, true);
+    } else if (data === "EXIT_MISSING_PASSWORD") {
+        showToast(`Missing developer password, unable to unpack the app!`, 5000, true);
+    } else if (data !== "EXIT_USER_NAV") {
+        showToast(`App closed with exit reason: ${data}`, 5000, true);
+    } else {
+        showToast(`App finished with success!`);
+    }
+}
 
 function appLoaded(appData) {
     let settings = api.getPreferences();
