@@ -7,6 +7,8 @@
 [![Build](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml/badge.svg)](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
+[![Slack](https://img.shields.io/badge/Slack-RokuCommunity-4A154B?logo=slack)](https://join.slack.com/t/rokudevelopers/shared_invite/zt-4vw7rg6v-NH46oY7hTktpRIBM_zGvwA)
+
 
 This project was created to develop a _multiplatform desktop application_ for the **BrightScript Simulation Engine**, please visit the engine library repository and know all about the project history, features and limitations: http://github.com/lvcabral/brs-engine
 
@@ -43,7 +45,7 @@ Below you will find the links for the documentation of this project, how to use,
 
 ### Changelog
 
-- [Release Changelog](CHANGELOG.md)
+- Click [here](CHANGELOG.md) to view the release changelog.
 
 ## Developer Links
 
