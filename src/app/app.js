@@ -12,7 +12,6 @@ import { setStatusColor, setAudioStatus, showToast } from "./statusbar";
 
 // Simulator display
 const display = document.getElementById("display");
-let clearDisplay = true;
 
 // Stats overlay
 const stats = document.getElementById("stats");
@@ -54,7 +53,7 @@ api.send("deviceData", brs.deviceData);
 api.send("serialNumber", brs.getSerialNumber());
 api.send("engineVersion", brs.getVersion());
 
-brs.subscribe("app", (event, data) => {
+brs.subscribe("desktop", (event, data) => {
     if (event === "loaded") {
         currentApp = data;
         appLoaded(data);
@@ -242,23 +241,15 @@ function appLoaded(appData) {
     api.enableMenuItem("close-channel", true);
     api.enableMenuItem("save-screen", true);
     api.enableMenuItem("copy-screen", true);
-    clearDisplay = appData.clearDisplay;
 }
 
 function appTerminated() {
-    if (clearDisplay) {
-        window.requestAnimationFrame(delayRedraw);
-    }
     currentApp = { id: "", running: false };
     stats.style.visibility = "hidden";
     api.updateTitle(defaultTitle);
     api.enableMenuItem("close-channel", false);
     api.enableMenuItem("save-screen", false);
     api.enableMenuItem("copy-screen", false);
-}
-
-function delayRedraw() {
-    brs.redraw(api.isFullScreen());
 }
 
 function redrawEvent(redraw) {
