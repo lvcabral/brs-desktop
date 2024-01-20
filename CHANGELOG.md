@@ -1,3 +1,56 @@
+<a name="v1.0.0"></a>
+
+# [v1.0.0 - BrightScript Simulator](https://github.com/lvcabral/brs-desktop/releases/tag/v1.0.0) - 20 Jan 2024
+
+After 4 years of Alpha and Beta stages, the project is stable and performant enough to finally be released as version 1.0 and with that, we decided to give it a new name:
+
+## BrightScript Simulator
+
+The term _simulator_ was chosen instead of the former _emulator_ to better represent the nature and purpose of the project, as there is no intention to fully emulate a Roku device (OS and Hardware), but rather simulate the behavior, as a development tool that allow us to run BrightScript apps in different platforms.
+
+### Release Changes
+
+* Renamed to "BrightScript Simulator" and updated the icon
+* Upgraded `brs-engine` to v1.2.3
+  * Added support for Game Pad controllers
+  * Added support for `roVideoPlayer`
+  * Added configurable limit for BrightScript app framerate
+  * Added option to switch control behavior based on `manifest` entry
+  * Added way to detect the BrightScript app is running on the simulator
+  * Micro Debugger now can be triggered when a crash happens
+  * Multiple fixes and improvements on BrightScript language support (see [engine changelog](https://github.com/lvcabral/brs-engine/blob/master/CHANGELOG.md))
+* Upgraded `custom-electron-titlebar` to v4.2.8
+  * Fixed issue with title moving left (Windows and Linux)
+  * Fixed issue with menu alignment (Windows and Linux)
+* Menu updates:
+  * Reduced Menu options spacing
+  * Open Dev Tools detached and enabled Edit commands on Mac OS
+  * Changed Dev Tools shortcut to F12
+* Settings screen updates:
+  * Added new option `debugOnCrash` on settings
+  * Added Developer Password option for decrypting `.bpk` packages
+  * Added support for `maxFps` new display configuration
+  * Added option to pause App when Simulator loses the focus
+  * Updated Settings TitleBar customization
+  * Updated Settings screen configuration on Mac OS
+  * Fixed #143 - Edit commands are now working on Settings Screen in MacOS
+  * Fixed Linux issue when showing Settings Screen
+  * Fixed settings.css for Linux
+* Remote Access Services updates:
+  * Updated web Installer to support bpk, improve reliability
+  * Updated initialization source for ECP and Installer to match Roku
+  * ECP-2 now generates control events with remote type "RMOB"
+  * Fixed: Do not disable Web Installer on error
+* Closed #38 - Integrated `toastify` to show messages to the user
+* About Box improvements for Mac OS
+* Update dynamically AboutBox and Menu with package.json information
+* Fixed TitleBar text alignment on old MacOS
+* Removed several bugs and code smells reported by Sonar Cloud
+* Added CHANGELOG.md
+* Updated documentation
+
+[Full Changelog][v1.0.0]
+
 <a name="v0.10.31"></a>
 
 # [v0.10.31 - Fixed Menu and Theme issues](https://github.com/lvcabral/brs-desktop/releases/tag/v0.10.31) - 22 Aug 2023
@@ -115,6 +168,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v1.0.0]: https://github.com/lvcabral/brs-desktop/compare/v0.10.30...v1.0.0
 [v0.10.31]: https://github.com/lvcabral/brs-desktop/compare/v0.10.30...v0.10.31
 [v0.10.30]: https://github.com/lvcabral/brs-desktop/compare/v0.9.0-app...v0.10.30
 [v0.9.0-app]: https://github.com/lvcabral/brs-desktop/compare/v0.8.1-app...v0.9.0-app
