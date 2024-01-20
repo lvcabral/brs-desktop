@@ -20,7 +20,7 @@ The objective of this application is to extend the `brs-engine`, making it a ful
 - Telnet Server (port 8085), enabling remote Debugging.
 - Customization of display, device model and information, controls and localization.
 
-This way, the desktop simulator can be detected and handled by the [VS Code BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=RokuCommunity.brightscript), and other development tools, as a real Roku device, for deploy and debugging. You can find the installers for this desktop application (for all platforms) at this reporitory [Releases](releases) page.
+This way, the desktop simulator can be detected and handled by the [VS Code BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=RokuCommunity.brightscript), and other development tools, as a real Roku device, for deploy and debugging. You can find the installers for this desktop application (for all platforms) at this reporitory [Releases](https://github.com/lvcabral/brs-desktop/releases) page.
 
 ## Documentation
 

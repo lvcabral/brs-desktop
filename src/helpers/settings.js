@@ -438,7 +438,7 @@ export function getSettings(window) {
                                     type: "checkbox",
                                     options: [
                                         {
-                                            label: "Mute Music and Sound Effects",
+                                            label: "Mute Video, Audio and Sound Effects",
                                             value: true,
                                         },
                                     ],

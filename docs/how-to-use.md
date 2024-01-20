@@ -19,7 +19,7 @@ This section will describe the options available on the application menu, please
 ### Edit Menu
 
 - Copy Screenshot - Copies the current screen image to the OS clipboard
-- Settings - Opens the Settings configuration screen
+- Settings - Opens the Settings configuration screen (see details below)
 
 ### Device Menu
 
@@ -28,7 +28,7 @@ This section will describe the options available on the application menu, please
   - HD 720p - Configure display with resolution of 1280x720
   - FHD 1080p - Configure display with resolution of 1920x1080
 - TV Overscan Modes - Allows simulation of TV overscan effect
-  - Disable - Shows the entire image with no cropping or guide lines
+  - Disabled - Shows the entire image with no cropping or guide lines
   - Guide Lines - Shows guide lines delimiting a potential hidden area by the TV overscan
   - Enabled - Crops the image to simulate the TV overscan effect
 - BrightScript App Localization - Submenu with all languages available for app localization
@@ -39,8 +39,9 @@ This section will describe the options available on the application menu, please
 
 ### View Menu
 
-- Full Screen - Enter full screen mode. If you double click the screen it also toggles full screen mode
-- Color Themes - Allows to select among the 3 available themes</br>
+- Full Screen - Enter full screen mode. If you double click the display area it also toggles full screen mode
+- Developer Tools - Open/Close the Developer Tools window. Clicking on the error icons in the side bar, also opens it.
+- Color Themes - Allows to select among the 3 available themes and the System theme</br>
 ![Screen Themes](images/screeshot-themes.png)
 - Always on Top - Toggles if the application will stay on top of other windows when it loses focus
 - Status Bar - Toggles if the status bar is displayed
@@ -48,10 +49,18 @@ This section will describe the options available on the application menu, please
 ### Help Menu
 
 - Documentation - Opens project [README file](../README.md)
-- Control Keyboard Reference - Opens the [remote control keyboard reference documentation](control-reference.md)
+- Control Keyboard Reference - Opens the [remote control reference documentation](control-reference.md)
 - Release Notes - Opens the [release page](https://github.com/lvcabral/brs-desktop/releases)
 - View License - Shows the [application license](../LICENSE)
 - About - Shows the about dialog box
+
+## Settings Screen
+
+This screen allows the user to configure multiple features, including some not available on the menus. Most fields have tips below to explain the details of that particular configuration.
+
+<p align="center">
+<img alt="Simulator Web and Desktop" src="images/app-settings.gif?raw=true"/>
+</p>
 
 ## Command Line Options
 
