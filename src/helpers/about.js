@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import path from "path";
-import { ipcMain } from "electron";
+import { ipcMain, BrowserWindow } from "electron";
 import openAboutWindow from "electron-about-window";
 import packageInfo from "../../package.json";
 
@@ -31,7 +31,8 @@ ipcMain.on("engineVersion", (_, version) => {
     aboutOptions.use_version_info.push([osName, osVersion]);
 });
 
-export function showAbout(item, window) {
+export function showAbout(item, focusedWindow) {
+    const window = BrowserWindow.fromId(1);
     const bounds = window.getBounds();
     const w = 350;
     const h = 450;
