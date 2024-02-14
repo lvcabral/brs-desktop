@@ -115,9 +115,9 @@ app.on("ready", () => {
             })
         )
         .then(() => {
-            processArgv(mainWindow, startup);
             firstLoad = false;
             attachTitlebarToWindow(mainWindow);
+            processArgv(mainWindow, startup);
             mainWindow.show();
             mainWindow.focus();
         });
@@ -145,7 +145,6 @@ function loadSettings(mainWindow, startup) {
             const onTop = options.includes("alwaysOnTop");
             checkMenuItem("on-top", onTop);
             mainWindow.setAlwaysOnTop(onTop);
-            mainWindow.setFullScreen(argv.fullscreen || options.includes("fullScreen"));
             checkMenuItem("status-bar", options.includes("statusBar"));
             startup.runLastChannel = options.includes("runLastChannel");
             startup.devTools = options.includes("devToolsStartup");
@@ -191,6 +190,10 @@ function loadSettings(mainWindow, startup) {
 // Process Command Line switches
 function processArgv(mainWindow, startup) {
     let settings = getSettings(mainWindow);
+    const options = settings?.value("simulator.options");
+    if (argv?.fullscreen || options?.includes("fullScreen")) {
+        mainWindow.setFullScreen(true);
+    }
     if (argv?.ecp || startup.ecpEnabled) {
         enableECP(mainWindow);
     }
