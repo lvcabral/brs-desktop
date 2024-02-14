@@ -202,19 +202,24 @@ export function getSettings(window) {
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "This service allows to remotely side load an app, to change port and password restart the service ",
+                                    help: "This service allows to remotely side load an app, to change port and password restart the service",
                                 },
                                 {
                                     label: "Port (default: 80)",
                                     key: "webPort",
-                                    type: "text",
-                                    inputType: "number",
+                                    type: "number",
                                 },
                                 {
                                     label: "Password (default: rokudev)",
                                     key: "password",
                                     type: "text",
                                     inputType: "password",
+                                },
+                                {
+                                    label: "Peer Roku IP (default: empty)",
+                                    key: "peerRoku",
+                                    type: "text",
+                                    help: "Roku IP to deploy the app in parallel with the simulator, using the Password defined above",
                                 },
                                 {
                                     label: "External Control Protocol (ECP)",
@@ -292,7 +297,7 @@ export function getSettings(window) {
             },
             {
                 id: "remote",
-                label: "Remote",
+                label: "Control",
                 icon: "roku-remote",
                 form: {
                     groups: [
@@ -718,6 +723,14 @@ export function setSimulatorOption(key, enable, menuId) {
         if (menuId) {
             checkMenuItem(menuId, enable);
         }
+    }
+}
+
+export function getPeerRoku() {
+    return {
+        ip: settings.value("services.peerRoku"),
+        username: "rokudev",
+        password: settings.value("services.password"),
     }
 }
 
