@@ -85,6 +85,9 @@ export function getSettings(window) {
                 clockFormat: global.sharedObject.deviceInfo.clockFormat,
                 timeZone: "system",
             },
+            peerRoku: {
+                password: "rokudev",
+            },
         },
         browserWindowOverrides: {
             title: "Settings",
@@ -202,13 +205,12 @@ export function getSettings(window) {
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "This service allows to remotely side load an app, to change port and password restart the service ",
+                                    help: "This service allows to remotely side load an app, to change port and password restart the service",
                                 },
                                 {
                                     label: "Port (default: 80)",
                                     key: "webPort",
-                                    type: "text",
-                                    inputType: "number",
+                                    type: "number",
                                 },
                                 {
                                     label: "Password (default: rokudev)",
@@ -292,7 +294,7 @@ export function getSettings(window) {
             },
             {
                 id: "remote",
-                label: "Remote",
+                label: "Control",
                 icon: "roku-remote",
                 form: {
                     groups: [
@@ -490,6 +492,43 @@ export function getSettings(window) {
                                     key: "timeZone",
                                     type: "dropdown",
                                     options: getTimezonArray(),
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+            {
+                id: "peerRoku",
+                label: "Peer Roku",
+                icon: "roku-logo",
+                form: {
+                    groups: [
+                        {
+                            label: "Peer Roku Device",
+                            fields: [
+                                {
+                                    label: "Device IP (default: empty)",
+                                    key: "ip",
+                                    type: "text",
+                                    help: "Roku IP to deploy the app in parallel with the simulator, if empty disable the feature",
+                                },
+                                {
+                                    label: "Installer Password (default: rokudev)",
+                                    key: "password",
+                                    type: "text",
+                                    inputType: "password",
+                                },
+                                {
+                                    key: "syncControl",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Synchronize Remote Control with Roku device",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "If enabled, the simulator will replicate all control key strokes on the peer Roku device",
                                 },
                             ],
                         },
@@ -719,6 +758,19 @@ export function setSimulatorOption(key, enable, menuId) {
             checkMenuItem(menuId, enable);
         }
     }
+}
+
+export function getPeerRoku() {
+    return {
+        ip: settings.value("peerRoku.ip"),
+        username: "rokudev",
+        password: settings.value("peerRoku.password"),
+    }
+}
+
+export function getSyncControl() {
+    return settings.value("peerRoku.syncControl")?.includes("enabled") || false;
+
 }
 
 export function setLocaleId(locale) {

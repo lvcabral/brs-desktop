@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getAudioMuted, getSimulatorOption } from "./settings";
+import { runOnPeerRoku } from "./roku";
 import { appFocused } from "./window";
 import fs from "fs";
 import path from "path";
@@ -43,6 +44,9 @@ export function loadFile(file, source) {
                 getSimulatorOption("debugOnCrash"),
                 source ?? "desktop_app"
             );
+            if (fileExt === ".zip") {
+                runOnPeerRoku(filePath);
+            }
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);
         }
