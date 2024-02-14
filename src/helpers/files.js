@@ -8,6 +8,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getAudioMuted, getSimulatorOption } from "./settings";
 import { runOnPeerRoku } from "./roku";
+import { appFocused } from "./window";
 import fs from "fs";
 import path from "path";
 
@@ -18,6 +19,10 @@ export function loadFile(file, source) {
         window.restore();
     } else if (!window.isVisible()) {
         window.show();
+    } else if (!appFocused) {
+        window.setAlwaysOnTop(true);
+        app.focus({ steal: true });
+        window.setAlwaysOnTop(false);
     }
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {

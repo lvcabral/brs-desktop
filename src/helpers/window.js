@@ -11,6 +11,7 @@ import path from "path";
 import jetpack from "fs-jetpack";
 
 const isMacOS = process.platform === "darwin";
+export let appFocused = false;
 
 export function createWindow(name, options) {
     const userDataDir = jetpack.cwd(app.getPath("userData"));
@@ -105,6 +106,12 @@ export function createWindow(name, options) {
         details.responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
         callback({ responseHeaders: details.responseHeaders });
     });
+    win.on("focus", () => {
+        appFocused = true;
+    })
+    win.on("blur", () => {
+        appFocused = false;
+    })
     win.on("close", saveState);
     // App Renderer Events
     ipcMain.on("openDevTools", () => {
