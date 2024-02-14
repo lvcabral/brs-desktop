@@ -65,6 +65,8 @@ brs.subscribe("desktop", (event, data) => {
         appTerminated();
     } else if (event === "redraw") {
         redrawEvent(data);
+    } else if (event === "control") {
+        api.send("keySent", data);
     } else if (event === "debug") {
         if (data.level === "stop") {
             api.send("debugStarted");

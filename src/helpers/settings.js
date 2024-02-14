@@ -85,6 +85,9 @@ export function getSettings(window) {
                 clockFormat: global.sharedObject.deviceInfo.clockFormat,
                 timeZone: "system",
             },
+            peerRoku: {
+                password: "rokudev",
+            },
         },
         browserWindowOverrides: {
             title: "Settings",
@@ -214,12 +217,6 @@ export function getSettings(window) {
                                     key: "password",
                                     type: "text",
                                     inputType: "password",
-                                },
-                                {
-                                    label: "Peer Roku IP (default: empty)",
-                                    key: "peerRoku",
-                                    type: "text",
-                                    help: "Roku IP to deploy the app in parallel with the simulator, using the Password defined above",
                                 },
                                 {
                                     label: "External Control Protocol (ECP)",
@@ -501,6 +498,43 @@ export function getSettings(window) {
                     ],
                 },
             },
+            {
+                id: "peerRoku",
+                label: "Peer Roku",
+                icon: "roku-logo",
+                form: {
+                    groups: [
+                        {
+                            label: "Peer Roku Device",
+                            fields: [
+                                {
+                                    label: "Device IP (default: empty)",
+                                    key: "ip",
+                                    type: "text",
+                                    help: "Roku IP to deploy the app in parallel with the simulator, if empty disable the feature",
+                                },
+                                {
+                                    label: "Installer Password (default: rokudev)",
+                                    key: "password",
+                                    type: "text",
+                                    inputType: "password",
+                                },
+                                {
+                                    key: "syncControl",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Synchronize Remote Control with Roku device",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "If enabled, the simulator will replicate all control key strokes on the peer Roku device",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
         ],
     });
     settings.on("save", (preferences) => {
@@ -728,10 +762,15 @@ export function setSimulatorOption(key, enable, menuId) {
 
 export function getPeerRoku() {
     return {
-        ip: settings.value("services.peerRoku"),
+        ip: settings.value("peerRoku.ip"),
         username: "rokudev",
-        password: settings.value("services.password"),
+        password: settings.value("peerRoku.password"),
     }
+}
+
+export function getSyncControl() {
+    return settings.value("peerRoku.syncControl")?.includes("enabled") || false;
+
 }
 
 export function setLocaleId(locale) {
