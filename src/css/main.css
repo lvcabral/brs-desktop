@@ -65,7 +65,7 @@ body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
         "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     color: var(--main-color);
-    background-color: var(--background-color);
+    background-color: #030303;
 }
 
 a {

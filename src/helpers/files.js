@@ -1,12 +1,13 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getAudioMuted, getSimulatorOption } from "./settings";
+import { appFocused } from "./window";
 import fs from "fs";
 import path from "path";
 
@@ -17,6 +18,10 @@ export function loadFile(file, source) {
         window.restore();
     } else if (!window.isVisible()) {
         window.show();
+    } else if (!appFocused) {
+        window.setAlwaysOnTop(true);
+        app.focus({ steal: true });
+        window.setAlwaysOnTop(false);
     }
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
