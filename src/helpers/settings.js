@@ -391,15 +391,15 @@ export function getSettings(window) {
                                     type: "radio",
                                     options: [
                                         {
-                                            label: "Slow: 15 fps",
+                                            label: "Low: 15 fps",
                                             value: 15,
                                         },
                                         {
-                                            label: "Average: 30 fps",
+                                            label: "Medium: 30 fps",
                                             value: 30,
                                         },
                                         {
-                                            label: "Fast: 60 fps (default)",
+                                            label: "High: 60 fps (default)",
                                             value: 60,
                                         },
                                     ],
