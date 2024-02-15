@@ -1,17 +1,43 @@
+# Changelog
+
+<a name="v1.1.0"></a>
+
+## [v1.1.0 - Peer Roku Device](https://github.com/lvcabral/brs-desktop/releases/tag/v1.1.0) - 14 Feb 2024
+
+### Release Changes
+
+* Added feature to allow parallel deployment of apps on a peer Roku device by [@lvcabral](https://github.com/lvcabral) in [#151](https://github.com/lvcabral/brs-desktop/pull/151)
+* Upgraded `brs-engine` to [v1.2.11](https://github.com/lvcabral/brs-engine/releases/tag/v1.2.11)
+  * Added detection of Video Codecs
+  * Added support to HLS streams with multiple audio tracks
+  * Added support to video inside the app package (.zip/.bpk)
+  * Added new API event `control` to return key strokes pressed on the simulator
+  * Changed the priority of the app entry point to `runUserInterface()` over `main()`
+  * Fixed low resolution on Screen Resize
+  * Fixed Video not always pausing on `break` or `pause` commands
+  * Fixed several issues related to remote control simulation
+  * Fixed several issues related to ifDraw2D rendering
+* Fixed #148 - Get correct window reference when opening About Box by [@lvcabral](https://github.com/lvcabral) in [#149](https://github.com/lvcabral/brs-desktop/pull/149)
+* Fixed #146 - Force focus on simulator window when `app` is deployed via ECP by [@lvcabral](https://github.com/lvcabral) in [#150](https://github.com/lvcabral/brs-desktop/pull/150)
+* Fixed #147 - In SD Display mode, when goes to full screen, the area behind the display is not black
+* Fixed #145 -  Full screen mode on startup is showing the menu in Windows and Linux by [@lvcabral](https://github.com/lvcabral) in [#152](https://github.com/lvcabral/brs-desktop/pull/152)
+
+[Full Changelog][v1.1.0]
+
 <a name="v1.0.0"></a>
 
-# [v1.0.0 - BrightScript Simulator](https://github.com/lvcabral/brs-desktop/releases/tag/v1.0.0) - 20 Jan 2024
+## [v1.0.0 - BrightScript Simulator](https://github.com/lvcabral/brs-desktop/releases/tag/v1.0.0) - 20 Jan 2024
 
 After 4 years of Alpha and Beta stages, the project is stable and performant enough to finally be released as version 1.0 and with that, we decided to give it a new name:
 
-## BrightScript Simulator
+### BrightScript Simulator
 
 The term _simulator_ was chosen instead of the former _emulator_ to better represent the nature and purpose of the project, as there is no intention to fully emulate a Roku device (OS and Hardware), but rather simulate the behavior, as a development tool that allow us to run BrightScript apps in different platforms.
 
 ### Release Changes
 
 * Renamed to "BrightScript Simulator" and updated the icon
-* Upgraded `brs-engine` to v1.2.3
+* Upgraded `brs-engine` to [v1.2.3](https://github.com/lvcabral/brs-engine/releases/tag/v1.2.3)
   * Added support for Game Pad controllers
   * Added support for `roVideoPlayer`
   * Added configurable limit for BrightScript app framerate
@@ -53,7 +79,9 @@ The term _simulator_ was chosen instead of the former _emulator_ to better repre
 
 <a name="v0.10.31"></a>
 
-# [v0.10.31 - Fixed Menu and Theme issues](https://github.com/lvcabral/brs-desktop/releases/tag/v0.10.31) - 22 Aug 2023
+## [v0.10.31 - Fixed Menu and Theme issues](https://github.com/lvcabral/brs-desktop/releases/tag/v0.10.31) - 22 Aug 2023
+
+### Release Changes
 
 * Bump custom-electron-titlebar from 4.2.4 to 4.2.7 by [@lvcabral](https://github.com/lvcabral)
   * Fixed issue [#128](https://github.com/lvcabral/brs-desktop/issues/128)  (theme switch in macOS)
@@ -68,7 +96,9 @@ The term _simulator_ was chosen instead of the former _emulator_ to better repre
 
 <a name="v0.10.30"></a>
 
-# [v0.10.30 - Better Performance, Debugger and Settings screen](https://github.com/lvcabral/brs-desktop/releases/tag/v0.10.30) - 29 May 2023
+## [v0.10.30 - Better Performance, Debugger and Settings screen](https://github.com/lvcabral/brs-desktop/releases/tag/v0.10.30) - 29 May 2023
+
+### Release Changes
 
 * Refactored the app to use the new library [brs-emu v0.10.22](https://www.npmjs.com/package/brs-emu)
   * Improved performance, the simulation is multiple times faster than v0.9.x
@@ -90,7 +120,7 @@ The term _simulator_ was chosen instead of the former _emulator_ to better repre
 
 <a name="v0.9.0-app"></a>
 
-# [v0.9.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.9.0-app) - 28 Jun 2021
+## [v0.9.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.9.0-app) - 28 Jun 2021
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
@@ -98,7 +128,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 <a name="v0.8.1-app"></a>
 
-# [v0.8.1-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.8.1-app) - 07 Jun 2021
+## [v0.8.1-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.8.1-app) - 07 Jun 2021
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
@@ -106,7 +136,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 <a name="v0.8.0-app"></a>
 
-# [v0.8.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.8.0-app) - 11 Mar 2020
+## [v0.8.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.8.0-app) - 11 Mar 2020
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
@@ -114,7 +144,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 <a name="v0.7.2-app"></a>
 
-# [v0.7.2-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.7.2-app) - 02 Dec 2019
+## [v0.7.2-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.7.2-app) - 02 Dec 2019
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
@@ -122,7 +152,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 <a name="v0.7.1-app"></a>
 
-# [v0.7.1-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.7.1-app) - 21 Nov 2019
+## [v0.7.1-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.7.1-app) - 21 Nov 2019
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
@@ -130,7 +160,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 <a name="v0.7.0-app"></a>
 
-# [v0.7.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.7.0-app) - 17 Nov 2019
+## [v0.7.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.7.0-app) - 17 Nov 2019
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
@@ -138,7 +168,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 <a name="v0.6.0-app"></a>
 
-# [v0.6.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.6.0-app) - 24 Oct 2019
+## [v0.6.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.6.0-app) - 24 Oct 2019
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
@@ -146,7 +176,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 <a name="v0.5.2-app"></a>
 
-# [v0.5.2-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.5.2-app) - 09 Oct 2019
+## [v0.5.2-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.5.2-app) - 09 Oct 2019
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
@@ -154,7 +184,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 <a name="v0.5.1-app"></a>
 
-# [v0.5.1-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.5.1-app) - 07 Oct 2019
+## [v0.5.1-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.5.1-app) - 07 Oct 2019
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
@@ -162,12 +192,13 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 <a name="v0.5.0-app"></a>
 
-# [v0.5.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.5.0-app) - 07 Oct 2019
+## [v0.5.0-app](https://github.com/lvcabral/brs-desktop/releases/tag/v0.5.0-app) - 07 Oct 2019
 
 Binaries are published at the engine library repository: <https://github.com/lvcabral/brs-engine/releases>
 
 [Changes][v0.5.0-app]
 
+[v1.1.0]: https://github.com/lvcabral/brs-desktop/compare/v1.0.0...v1.1.0
 [v1.0.0]: https://github.com/lvcabral/brs-desktop/compare/v0.10.30...v1.0.0
 [v0.10.31]: https://github.com/lvcabral/brs-desktop/compare/v0.10.30...v0.10.31
 [v0.10.30]: https://github.com/lvcabral/brs-desktop/compare/v0.9.0-app...v0.10.30
