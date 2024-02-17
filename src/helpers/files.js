@@ -7,10 +7,11 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getAudioMuted, getSimulatorOption } from "./settings";
-import { runOnPeerRoku, runBrs } from "./roku";
+import { runOnPeerRoku } from "./roku";
 import { appFocused } from "./window";
-import fs from "fs";
+import { zipSync, strToU8 } from "fflate";
 import path from "path";
+import * as fsExtra from "fs-extra";
 
 export function loadFile(file, source) {
     let window = BrowserWindow.fromId(1);
@@ -25,17 +26,17 @@ export function loadFile(file, source) {
         window.setAlwaysOnTop(false);
     }
     let filePath;
-    if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
+    if (file.length >= 1 && file[0].length > 1 && fsExtra.existsSync(file[0])) {
         filePath = file[0];
     } else {
         window.webContents.send("console", `Invalid file: ${file[0]}`, true);
         return;
     }
     const fileName = path.parse(filePath).base;
-    const fileExt = path.parse(filePath).ext.toLowerCase();
-    if (fileExt === ".zip" || fileExt === ".bpk" || fileExt === ".brs") {
+    let fileExt = path.parse(filePath).ext.toLowerCase();
+    if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
-            const fileData = fs.readFileSync(filePath);
+            let fileData = fsExtra.readFileSync(filePath);
             window.webContents.send(
                 "fileSelected",
                 filePath,
@@ -45,10 +46,11 @@ export function loadFile(file, source) {
                 getSimulatorOption("debugOnCrash"),
                 source ?? "desktop_app"
             );
-            if (fileExt === ".zip") {
+            if (fileExt === ".brs") {
+                filePath = packageBrs(fileName, fileData);
+            }
+            if (fileExt !== ".bpk") {
                 runOnPeerRoku(filePath);
-            } else if (fileExt === ".brs") {
-                runBrs(fileData)
             }
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);
@@ -59,7 +61,7 @@ export function loadFile(file, source) {
 }
 
 export function saveFile(file, data) {
-    fs.writeFileSync(file, new Buffer.from(data, "base64"));
+    fsExtra.writeFileSync(file, new Buffer.from(data, "base64"));
 }
 
 // App Renderer Events
@@ -70,3 +72,25 @@ ipcMain.on("saveIcon", (_, data) => {
     const iconPath = path.join(app.getPath("userData"), data[0] + ".png");
     saveFile(iconPath, data[1]);
 });
+ipcMain.on("runCode", (_, code) => {
+    const newZipPath = packageBrs("editor", code);
+    loadFile([newZipPath]);
+});
+
+function packageBrs(name, code) {
+    let manifest = `
+    title=BrsRunApp
+    subtitle=Generic Code Runner
+    major_version=1
+    minor_version=0
+    build_version=0
+    mm_icon_focus_hd=pkg:/images/channel-poster_hd.png
+    splash_screen_hd=pkg:/images/splash-screen_hd.jpg`
+    const zewZip = zipSync({
+        "manifest": [strToU8(manifest), {}],
+        "source/main.brs": [strToU8(code), {}],
+    });
+    const filePath = path.join(app.getPath("userData"), `${name}.zip`);
+    fsExtra.writeFileSync(filePath, zewZip);
+    return filePath;
+}

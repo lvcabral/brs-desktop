@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import Codec from "json-url";
 import VanillaTerminal from "vanilla-terminal";
-import { nanoid } from "../../node_modules/nanoid/index.browser";
+import { nanoid } from "nanoid";
 import { CodeMirrorManager } from "./codemirror";
 import packageInfo from "../../package.json";
 
