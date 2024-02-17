@@ -64,7 +64,7 @@
         "e2e": "mocha temp/e2e.js --require source-map-support/register",
         "test": "npm run unit && npm run e2e",
         "start": "node build/start.js",
-        "clean": "rimraf ./app/lib ./app/audio ./app/fonts && rimraf ./app/*.js ./app/*.map ./app/*.html",
+        "clean": "rimraf ./app/**",
         "build": "webpack --config build/webpack.app.config.js",
         "dist": "webpack --config build/webpack.app.config.js --env production && electron-builder",
         "dist-win": "webpack --config build/webpack.app.config.js --env production && electron-builder -w --x64 --ia32",
