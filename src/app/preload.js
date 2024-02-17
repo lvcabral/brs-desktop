@@ -104,6 +104,7 @@ contextBridge.exposeInMainWorld("api", {
             "saveIcon",
             "updateRegistry",
             "keySent",
+            "runCode",
             "reset"
         ];
         if (validChannels.includes(channel)) {

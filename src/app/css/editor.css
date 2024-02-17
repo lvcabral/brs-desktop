@@ -1,0 +1,315 @@
+.index-page {
+    overflow: hidden;
+    height: 100vh;
+    max-height: -moz-available;
+    /* WebKit-based browsers will ignore this. */
+    max-height: -webkit-fill-available;
+    /* Mozilla-based browsers will ignore this. */
+    max-height: fill-available;
+    background: #222222;
+}
+.console {
+    width: 100%;
+    background: #222222;
+}
+.console .console-header {
+    background: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.console .console-header h4 {
+    font-size: 18px;
+    color: #999;
+}
+.console .console-header button {
+    padding: 0 8px;
+    height: 26px;
+    vertical-align: middle;
+    border: none;
+    color: white;
+    background: #449dff;
+}
+.console .console-header button i {
+    font-size: 16px;
+}
+.console .console-header button span {
+    font-size: 16px;
+    margin-right: 0.2em;
+}
+.console iframe {
+    border: none;
+    width: 0;
+    height: 0;
+    visibility: hidden;
+}
+.simulator-display {
+    width: 100%;
+    background: #222222;
+}
+.simulator-display .display-header {
+    width: 100%;
+    height: 44px;
+    background: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.simulator-display .display-header h4 {
+    font-size: 18px;
+    color: #999;
+}
+
+.simulator-display .display-header button {
+    padding: 0 8px;
+    height: 26px;
+    vertical-align: middle;
+    border: none;
+    color: white;
+    background: #449dff;
+}
+.simulator-display .display-header button i {
+    font-size: 16px;
+}
+.simulator-display .display-header button span {
+    font-size: 16px;
+    margin-right: 0.2em;
+}
+.simulator-display .display-header label span {
+    font-family: Asap, Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    margin-right: 0.2em;
+    color: white;
+}
+.simulator-display .display-header label i {
+    font-size: 20px;
+    vertical-align: middle;
+    color: white;
+}
+
+#right-container {
+    background: #222222;
+    display: flex;
+    flex: 1 1 0%;
+    flex-direction: column;
+    height: calc(100vh - 55px);
+}
+#display {
+    height: 480px;
+    background-color: black;
+    opacity: 1;
+    z-index: 20;
+}
+#player {
+    display: none;
+}
+.code {
+    background: #222222;
+    height: calc(100vh - 55px);
+    width: 60%;
+    color-scheme: dark;
+    min-width: 730px;
+}
+.code .code-header {
+    background: #333;
+    display: flex;
+    height: 44px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.code .code-header button {
+    padding: 0 8px;
+    height: 26px;
+    vertical-align: middle;
+    border: none;
+    color: white;
+    background: #449dff;
+}
+.code .code-header button i {
+    font-size: 16px;
+}
+.code .code-header button span {
+    font-size: 16px;
+    margin-right: 0.2em;
+}
+.code .code-header .project-link {
+    display: flex;
+    align-items: center;
+    color: #999;
+}
+.code .code-header h4 {
+    font-size: 18px;
+    color: #999;
+}
+.code #brsCode {
+    display: block;
+    height: 100%;
+    width: 100%;
+    border: none;
+    background: #444;
+    color: #fff;
+    font-size: 18px;
+    padding: 16px;
+}
+.code #brsCode:focus,
+.code #brsCode:active {
+    outline-color: transparent;
+    box-shadow: none;
+}
+.editor {
+    display: flex;
+    width: 100%;
+}
+.editor .console {
+    height: 50%;
+}
+.editor .console #console-logs {
+    color-scheme: dark;
+    font-size: 12px;
+    overflow: auto;
+    height: 92%;
+}
+@media (max-width: 1060px) {
+    .code {
+        min-width: unset;
+    }
+    .editor {
+        flex-direction: column;
+    }
+    .editor .code,
+    .editor .console {
+        width: 100%;
+    }
+    .editor .code {
+        height: 60%;
+    }
+    .editor .console {
+        height: 40%;
+    }
+    button {
+        font-size: 14px;
+    }
+    button span {
+        display: none;
+    }
+}
+.layout-separator {
+    width: 3px;
+    margin: 0 -1px;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+    background-color: #232323;
+    opacity: 0;
+    z-index: 4;
+    cursor: col-resize;
+    opacity: 0.8;
+}
+.layout-separator:hover {
+    opacity: 0.4;
+}
+
+input {
+    appearance: none;
+    position: relative;
+    display: inline-block;
+    background: lightgrey;
+    height: 1.45rem;
+    width: 2.75rem;
+    vertical-align: middle;
+    border-radius: 2rem;
+    box-shadow: 0px 1px 3px #0003 inset;
+    transition: 0.25s linear background;
+}
+input::before {
+    content: "";
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: #fff;
+    border-radius: 1.2rem;
+    position: absolute;
+    top: 0.1rem;
+    left: 0.25rem;
+    box-shadow: 0px 1px 3px #0003;
+    transition: 0.25s linear transform;
+    transform: translateX(0rem);
+}
+
+:checked {
+    background: #449dff;
+}
+:checked::before {
+    transform: translateX(1rem);
+}
+
+.modal_dialog {
+    font-family: Asap, Arial, Helvetica, sans-serif;
+    border-radius: 7px;
+    border: 1px solid #449dff;
+    background-color: #333;
+    padding: 20px;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -ms-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+}
+.modal_dialog,
+.modal_dialog input,
+.modal_dialog button {
+    color: white;
+    font-size: 16px;
+}
+.modal_dialog input,
+.modal_dialog button {
+    padding: 5px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #333;
+    width: 100%;
+}
+.modal_dialog input:focus {
+    outline: none !important;
+    border: 1px solid #449dff;
+    background-color: #232323;
+}
+.modal_dialog_content {
+    margin: 10px 0px;
+}
+.modal_dialog_input {
+    margin: 20px 0px;
+}
+.modal_dialog button {
+    background-color: #449dff;
+    padding: 10px 0px;
+    border: 0px;
+    cursor: pointer;
+    outline: none;
+    width: 100px;
+}
+.modal_dialog .modal_dialog_cancel {
+    margin-left: 10px;
+    border: 1px solid #449dff;
+    background-color: #fff;
+    color: #449dff;
+}

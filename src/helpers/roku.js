@@ -5,8 +5,10 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { getPeerRoku, getSyncControl } from "./settings";
+import { zipSync, strToU8 } from "fflate";
+import path from "path";
 import * as fsExtra from "fs-extra";
 import request from "postman-request";
 
@@ -19,6 +21,10 @@ ipcMain.on("keySent", (_, data) => {
             postEcpRequest(device, `/keyup/${data.key}`);
         }
     }
+});
+
+ipcMain.on("runCode", (_, code) => {
+    runBrs(code);
 });
 
 export async function runOnPeerRoku(filePath) {
@@ -139,4 +145,22 @@ export function isValidIP(ip) {
         return ipFormat.test(ip);
     }
     return false;
+}
+
+export function runBrs(source) {
+    let manifest = `
+    title=BrsRunApp
+    subtitle=Generic Code Runner
+    major_version=1
+    minor_version=0
+    build_version=0
+    mm_icon_focus_hd=pkg:/images/channel-poster_hd.png
+    splash_screen_hd=pkg:/images/splash-screen_hd.jpg`
+    const zewZip = zipSync({
+        "manifest": [strToU8(manifest), {}],
+        "source/main.brs": [strToU8(source), {}],
+    });
+    const filePath = path.join(app.getPath("userData"), "temp.brs");
+    fsExtra.writeFileSync(filePath, zewZip);
+    runOnPeerRoku(filePath);
 }

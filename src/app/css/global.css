@@ -1,0 +1,118 @@
+@font-face {
+  font-family: "Asap";
+  src: url('../fonts/Asap-Regular.ttf') format("truetype");
+}
+/* CSS Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-size: 14px;
+    font-family: Consolas,'Courier New', Courier, monospace;
+    background: #f7f7f7;
+  }
+  a {
+    text-decoration: none;
+    color: #999;
+  }
+  button {
+    font-family: inherit;
+    font-size: inherit;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid #232323;
+    outline: none;
+  }
+  button {
+    font-family: Asap, Arial, Helvetica, sans-serif;
+    background: transparent;
+    cursor: pointer;
+  }
+  ul {
+    list-style: none;
+  }
+  ul li {
+    padding: 0;
+  }
+  pre {
+    font-family: inherit;
+  }
+  /*!
+   * Toastify js 1.11.1
+   * https://github.com/apvarun/toastify-js
+   * @license MIT licensed
+   *
+   * Copyright (C) 2018 Varun A P
+   */
+  .toastify {
+    padding: 8px 16px;
+    color: #504747;
+    display: inline-block;
+    box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12), 0 10px 36px -4px rgba(77, 96, 232, 0.3);
+    background: #fbf0a9;
+    position: fixed;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    max-width: calc(50% - 20px);
+    z-index: 2147483647;
+  }
+  .toastify.on {
+    opacity: 1;
+  }
+  .toast-close {
+    opacity: 0.4;
+    padding: 0;
+    margin-left: 16px;
+  }
+  .toastify-right {
+    right: 15px;
+  }
+  .toastify-left {
+    left: 15px;
+  }
+  .toastify-top {
+    top: -150px;
+  }
+  .toastify-bottom {
+    bottom: -150px;
+  }
+  .toastify-rounded {
+    border-radius: 25px;
+  }
+  .toastify-avatar {
+    width: 1.5em;
+    height: 1.5em;
+    margin: -7px 5px;
+    border-radius: 2px;
+  }
+  .toastify-center {
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    max-width: fit-content;
+    max-width: -moz-fit-content;
+  }
+  @media only screen and (max-width: 360px) {
+    .toastify-right, .toastify-left {
+      margin-left: auto;
+      margin-right: auto;
+      left: 0;
+      right: 0;
+      max-width: fit-content;
+    }
+  }
+  .toastify-error {
+    color: #fff;
+    background-color: rgba(182, 23, 23, 0.8);
+  }
+  .toastify-success {
+    color: #fff;
+    background-color: rgb(19, 185, 116, 0.8);
+  }

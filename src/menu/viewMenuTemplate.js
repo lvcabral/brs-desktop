@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { BrowserWindow } from "electron";
 import { setThemeSource, setSimulatorOption, setStatusBar } from "../helpers/settings";
-import { openDevConsole, setAlwaysOnTop } from "../helpers/window";
+import { openDevConsole, setAlwaysOnTop, createEditorWindow } from "../helpers/window";
 
 export const viewMenuTemplate = {
     id: "view-menu",
@@ -16,6 +16,14 @@ export const viewMenuTemplate = {
         {
             label: "Full Screen",
             role: "togglefullscreen",
+        },
+        {
+            id: "open-editor",
+            label: "Open Code Editor...",
+            enabled: true,
+            click: () => {
+                createEditorWindow();
+            },
         },
         {
             label: "Developer Tools",

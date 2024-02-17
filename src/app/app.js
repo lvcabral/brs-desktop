@@ -5,8 +5,8 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import "../css/main.css";
-import "../css/fontawesome.min.css";
+import "./styles/main.css";
+import "./styles/fontawesome.min.css";
 import "../helpers/hash";
 import { setStatusColor, setAudioStatus, showToast } from "./statusbar";
 

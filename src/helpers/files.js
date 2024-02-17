@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getAudioMuted, getSimulatorOption } from "./settings";
-import { runOnPeerRoku } from "./roku";
+import { runOnPeerRoku, runBrs } from "./roku";
 import { appFocused } from "./window";
 import fs from "fs";
 import path from "path";
@@ -35,10 +35,11 @@ export function loadFile(file, source) {
     const fileExt = path.parse(filePath).ext.toLowerCase();
     if (fileExt === ".zip" || fileExt === ".bpk" || fileExt === ".brs") {
         try {
+            const fileData = fs.readFileSync(filePath);
             window.webContents.send(
                 "fileSelected",
                 filePath,
-                fs.readFileSync(filePath),
+                fileData,
                 !getSimulatorOption("keepDisplayOnExit"),
                 getAudioMuted(),
                 getSimulatorOption("debugOnCrash"),
@@ -46,6 +47,8 @@ export function loadFile(file, source) {
             );
             if (fileExt === ".zip") {
                 runOnPeerRoku(filePath);
+            } else if (fileExt === ".brs") {
+                runBrs(fileData)
             }
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);

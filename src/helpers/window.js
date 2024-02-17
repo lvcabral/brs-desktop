@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
 import { getSimulatorOption } from "./settings";
+import url from "url";
 import path from "path";
 import jetpack from "fs-jetpack";
 
@@ -206,4 +207,31 @@ export function reloadApp() {
     if (window) {
         window.webContents.reloadIgnoringCache();
     }
+}
+
+export function createEditorWindow() {
+    const win = new BrowserWindow({
+        width: 1280,
+        height: 720,
+        webPreferences: {
+            preload: path.join(__dirname, "./preload.js"),
+            contextIsolation: true,
+            enableRemoteModule: true,
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            webSecurity: true,
+        },
+        show: false,
+    });
+    let editorUrl = url.format({
+        pathname: path.join(__dirname, "editor.html"),
+        protocol: "file:",
+        slashes: true,
+    });
+    win.loadURL(editorUrl).then(() => {
+        win.show();
+        win.focus();
+    });
+    ;
+    win.webContents.openDevTools();
 }
