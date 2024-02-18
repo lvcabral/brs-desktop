@@ -1,13 +1,20 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { BrowserWindow } from "electron";
 import { setThemeSource, setSimulatorOption, setStatusBar } from "../helpers/settings";
 import { openDevConsole, setAlwaysOnTop, createEditorWindow } from "../helpers/window";
+
+const isMacOS = process.platform === "darwin";
+
+let devToolsAccelerator = "Ctrl+Shift+I";
+if (isMacOS) {
+    devToolsAccelerator = "Cmd+Option+I";
+}
 
 export const viewMenuTemplate = {
     id: "view-menu",
@@ -18,23 +25,27 @@ export const viewMenuTemplate = {
             role: "togglefullscreen",
         },
         {
-            id: "open-editor",
-            label: "Open Code Editor...",
-            enabled: true,
-            click: () => {
-                createEditorWindow();
-            },
-        },
-        {
             label: "Developer Tools",
-            accelerator: "F12",
-            click: () => {
-                const window = BrowserWindow.fromId(1);
+            accelerator: devToolsAccelerator,
+            click: (_, window) => {
+                if (!window) {
+                    window = BrowserWindow.fromId(1);
+                }
                 if (window.webContents.isDevToolsOpened()) {
                     window.webContents.closeDevTools()
                 } else {
                     openDevConsole(window);
                 }
+            },
+        },
+        { type: "separator" },
+        {
+            id: "open-editor",
+            label: "Editor and Console...",
+            accelerator: "F12",
+            enabled: true,
+            click: () => {
+                createEditorWindow();
             },
         },
         { type: "separator" },

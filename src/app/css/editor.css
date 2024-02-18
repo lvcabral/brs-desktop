@@ -128,11 +128,17 @@ pre {
     max-height: fill-available;
     background: #222222;
 }
+
 .console {
-    width: 100%;
     background: #222222;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0%;
+    min-width: 530px;
 }
 .console .console-header {
+    width: 100%;
+    height: 44px;
     background: #333;
     display: flex;
     justify-content: space-between;
@@ -169,75 +175,30 @@ pre {
     height: 0;
     visibility: hidden;
 }
-.simulator-display {
-    width: 100%;
-    background: #222222;
-}
-.simulator-display .display-header {
-    width: 100%;
-    height: 44px;
-    background: #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 12px;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-}
-.simulator-display .display-header h4 {
-    font-size: 18px;
-    color: #999;
-}
-
-.simulator-display .display-header button {
-    padding: 0 8px;
-    height: 26px;
-    vertical-align: middle;
-    border: none;
-    color: white;
-    background: #449dff;
-}
-.simulator-display .display-header button i {
-    font-size: 16px;
-}
-.simulator-display .display-header button span {
+.console .console-header button span {
     font-size: 16px;
     margin-right: 0.2em;
 }
-.simulator-display .display-header label span {
+.console .console-header label span {
     font-family: Asap, Arial, Helvetica, sans-serif;
     font-size: 16px;
     margin-right: 0.2em;
     color: white;
 }
-.simulator-display .display-header label i {
-    font-size: 20px;
-    vertical-align: middle;
-    color: white;
+
+.VanillaTerm .command {
+    align-items: center;
 }
 
-#right-container {
-    background: #222222;
-    display: flex;
-    flex: 1 1 0%;
-    flex-direction: column;
-    height: calc(100vh - 55px);
-}
-#display {
-    height: 480px;
-    background-color: black;
-    opacity: 1;
-    z-index: 20;
-}
-#player {
-    display: none;
+.editor .console #console-logs {
+    color-scheme: dark;
+    font-size: 12px;
+    height: calc(100vh - 50px);
+    overflow: auto;
 }
 .code {
     background: #222222;
-    height: calc(100vh - 55px);
+    height: calc(100vh - 44px);
     width: 60%;
     color-scheme: dark;
     min-width: 730px;
@@ -298,17 +259,11 @@ pre {
     display: flex;
     width: 100%;
 }
-.editor .console {
-    height: 50%;
-}
-.editor .console #console-logs {
-    color-scheme: dark;
-    font-size: 12px;
-    overflow: auto;
-    height: 92%;
-}
-@media (max-width: 1060px) {
+@media (max-width: 1280px) {
     .code {
+        min-width: unset;
+    }
+    .console {
         min-width: unset;
     }
     .editor {
@@ -319,10 +274,10 @@ pre {
         width: 100%;
     }
     .editor .code {
-        height: 60%;
+        height: 50%;
     }
-    .editor .console {
-        height: 40%;
+    .editor .console #console-logs {
+        height: calc(52vh - 50px);
     }
     button {
         font-size: 14px;

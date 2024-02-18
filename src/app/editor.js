@@ -9,6 +9,7 @@ import Codec from "json-url";
 import VanillaTerminal from "vanilla-terminal";
 import { nanoid } from "nanoid";
 import { CodeMirrorManager } from "./codemirror";
+import Toastify from "toastify-js";
 import packageInfo from "../../package.json";
 
 const isMacOS = getOS() === "MacOS";
@@ -25,16 +26,13 @@ const layoutContainer = document.querySelector("main.editor");
 const layoutSeparator = document.querySelector("div.layout-separator")
 const codeColumn = document.querySelector("div.code")
 const consoleColumn = document.querySelector("div.console")
-const rightContainer = document.getElementById("right-container")
-const displayCanvas = document.getElementById("display")
-const keyboardSwitch = document.getElementById("keyboard")
-const gamePadSwitch = document.getElementById("gamepad")
-const audioSwitch = document.getElementById("audioSwitch")
-const audioIcon = document.getElementById("audio-icon")
 const codeSelect = document.getElementById("code-selector")
 const codeDialog = document.getElementById("code-dialog")
 const codeForm = document.getElementById("code-form")
 const deleteDialog = document.getElementById("delete-dialog")
+
+const simulator = window.opener;
+let [brs, currentApp] = simulator.getContext();
 
 const prompt = "Brightscript Debugger";
 const appId = packageInfo.name;
@@ -68,7 +66,6 @@ endButton.addEventListener("click", endExecution);
 shareButton.addEventListener("click", shareCode);
 layoutSeparator.addEventListener("mousedown", resizeColumn);
 
-let currentApp = { id: "", running: false };
 let consoleLogsContainer = document.getElementById("console-logs")
 let isResizing = false;
 let editorManager;
@@ -101,7 +98,7 @@ function main() {
         }
     }
     const { height } = codeColumn.getBoundingClientRect();
-    editorManager.editor.setSize("100%", `${height}px`);
+    editorManager.editor.setSize("100%", `${height - 15}px`);
     // Check saved id to load
     const loadId = localStorage.getItem(`${appId}.load`);
     populateCodeSelector(loadId ?? "");
@@ -110,19 +107,9 @@ function main() {
     }
     localStorage.removeItem(`${appId}.load`);
     // Initialize Device Simulator
-    if (displayCanvas) {
-        brs.initialize(
-            { developerId: appId },
-            {
-                debugToConsole: false,
-                disableKeys: !keyboardSwitch.checked,
-                disableGamePads: !gamePadSwitch.checked,
-            }
-        );
+    if (brs) {
         // Subscribe to Engine Events
         brs.subscribe(appId, handleEngineEvents);
-        // Resize the display canvas
-        resizeCanvas();
         // Handle console commands
         terminal.onInput((command, parameters, handled) => {
             if (!handled) {
@@ -254,8 +241,6 @@ function resetApp(id = "", code = "") {
         brs.terminate("EXIT_USER_NAV");
         clearTerminal();
     }
-    const ctx = displayCanvas.getContext("2d", { alpha: false });
-    ctx?.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
     editorManager.editor.setValue(code);
     editorManager.editor.focus();
 }
@@ -273,7 +258,7 @@ function shareCode() {
         };
         getShareUrl(data).then(function (shareLink) {
             navigator.clipboard.writeText(shareLink);
-            showToast("Share URL copied to clipboard");
+            showToast("brsFiddle.net share URL copied to clipboard");
         });
     } else {
         showToast("There is no Source Code to share", 3000, true);
@@ -289,7 +274,7 @@ function saveCode() {
             const codeName = codeSelect.options[codeSelect.selectedIndex].text;
             localStorage.setItem(currentId, `@=${codeName}=@${code}`);
             showToast(
-                "Code saved in your browser local storage!\nTo share it use the Share button.",
+                "Code saved in the simulator local storage!\nTo share it use the Share button.",
                 5000
             );
         }
@@ -317,16 +302,11 @@ codeDialog.addEventListener("close", (e) => {
     codeForm.codeName.value = "";
 });
 
-function runCode() {
+export function runCode() {
     const code = editorManager.editor.getValue();
     if (code && code.trim() !== "") {
         try {
-            brs.execute(appId, editorManager.editor.getValue(), {
-                clearDisplayOnExit: false,
-                debugOnCrash: true,
-                muteSound: !audioSwitch.checked,
-            });
-              api.send("runCode", editorManager.editor.getValue());
+            simulator.runCode(editorManager.editor.getValue());
         } catch (e) {
             console.log(e); // Check EvalError object
             terminal.output(`${e.name}: ${e.message}`);
@@ -355,21 +335,6 @@ function endExecution() {
 
 function clearTerminal() {
     terminal.clear();
-}
-
-audioSwitch.addEventListener("click", (e) => {
-    audioIcon.className = audioSwitch.checked ? "icon-sound-on" : "icon-sound-off";
-    brs.setAudioMute(!audioSwitch.checked);
-});
-
-keyboardSwitch.addEventListener("click", controlModeSwitch);
-gamePadSwitch.addEventListener("click", controlModeSwitch);
-
-function controlModeSwitch() {
-    brs.setControlMode({
-        keyboard: keyboardSwitch.checked,
-        gamePads: gamePadSwitch.checked,
-    });
 }
 
 function hotKeys(event) {
@@ -412,36 +377,26 @@ function resizeColumn() {
     isResizing = true;
 }
 
-function resizeCanvas() {
-    const rightRect = rightContainer.getBoundingClientRect();
-    brs.redraw(
-        false,
-        rightRect.width,
-        Math.trunc(rightRect.height / 2) - 10,
-        window.devicePixelRatio
-    );
-}
-
 function onMouseMove(e) {
     if (!isResizing) {
         return;
     }
     e.preventDefault();
-    if (layoutContainer && rightContainer && codeColumn && consoleColumn) {
+    if (layoutContainer && codeColumn && consoleColumn) {
         const { x, width } = layoutContainer.getBoundingClientRect();
         const separatorPosition = width - (e.clientX - x);
         const codeColumnWidth = `${width - separatorPosition}px`;
 
-        const rightRect = rightContainer.getBoundingClientRect();
-        if (width - separatorPosition >= 420 && separatorPosition >= 360) {
-            codeColumn.style.width = codeColumnWidth;
-            consoleColumn.style.width = rightRect.width.toString();
-        }
+        const rightRect = consoleColumn.getBoundingClientRect();
+        codeColumn.style.width = codeColumnWidth;
+        consoleColumn.style.width = rightRect.width.toString();
     }
 }
 
 function onMouseUp() {
-    resizeCanvas();
+    if (isResizing) {
+        scrollToBottom();
+    }
     isResizing = false;
 }
 
@@ -453,8 +408,13 @@ function onMouseDown(event) {
 
 function onResize() {
   const { height } = codeColumn.getBoundingClientRect();
-  editorManager.editor.setSize("100%", `${height}px`);
-  console.log("Resized", height);
+  if (window.innerWidth >= 1280) {
+    editorManager.editor.setSize("100%", `${height - 15}px`);
+  } else {
+    editorManager.editor.setSize("100%", `${Math.trunc(window.innerHeight * 0.4)}px`);
+    codeColumn.style.width = "100%";
+  }
+  scrollToBottom();
 }
 
 function getShareUrl(suite) {

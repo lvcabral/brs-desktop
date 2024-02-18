@@ -36,6 +36,7 @@ if ("models" in customDeviceInfo) {
 // Initialize device and subscribe to events
 let currentApp = { id: "", running: false };
 let debugMode = "continue";
+let editor = null;
 const customKeys = new Map();
 customKeys.set("Comma", "rev");
 customKeys.set("Period", "fwd");
@@ -86,6 +87,14 @@ brs.subscribe("desktop", (event, data) => {
     }
 });
 // Events from Main process
+api.receive("openEditor", function () {
+    if(editor === null || editor.closed) {
+        editor = window.open("editor.html", "BrightScript Editor", "width=1440,height=800");
+    } else {
+        api.send("showEditor");
+    }
+});
+
 api.receive("setTheme", function (theme) {
     if (theme !== document.documentElement.getAttribute("data-theme")) {
         document.documentElement.setAttribute("data-theme", theme);
@@ -270,4 +279,13 @@ function redrawEvent(redraw) {
             }
         }
     }
+}
+
+// Exposed API to Child Windows
+window.runCode = (code) => {
+    api.send("runCode", code);
+}
+
+window.getContext = () => {
+    return [brs, currentApp];
 }

@@ -1,13 +1,12 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
 import { getSimulatorOption } from "./settings";
-import url from "url";
 import path from "path";
 import jetpack from "fs-jetpack";
 
@@ -93,6 +92,7 @@ export function createWindow(name, options) {
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
                 webSecurity: true,
+                nativeWindowOpen: true
             },
             icon: __dirname + "/images/icon.ico",
             frame: false,
@@ -107,12 +107,29 @@ export function createWindow(name, options) {
         details.responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
         callback({ responseHeaders: details.responseHeaders });
     });
+
+    // Control Child Windows behavior
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        if (url.endsWith("editor.html")) {
+            return {
+                action: 'allow',
+                overrideBrowserWindowOptions: {
+                    minWidth: 600,
+                    minHeight: 600,
+                    backgroundColor: "black",
+                }
+            }
+        };
+        return { action: "allow" };
+    });
+
+    // Window Focus Events
     win.on("focus", () => {
         appFocused = true;
-    })
+    });
     win.on("blur", () => {
         appFocused = false;
-    })
+    });
     win.on("close", saveState);
     // App Renderer Events
     ipcMain.on("openDevTools", () => {
@@ -137,6 +154,20 @@ export function createWindow(name, options) {
         if (data instanceof Map) {
             global.sharedObject.deviceInfo.registry = data;
         }
+    });
+    ipcMain.on("showEditor", () => {
+        const allWindows = BrowserWindow.getAllWindows();
+        allWindows.some((window) => {
+            if (window.getURL().endsWith("editor.html")) {
+                if (window.isMinimized()) {
+                    window.restore();
+                } else if (!window.isVisible()) {
+                    window.show();
+                }
+                window.focus({ steal: true });
+                return true;
+            }
+        });
     });
     ipcMain.on("reset", () => {
         win.reload();
@@ -210,28 +241,8 @@ export function reloadApp() {
 }
 
 export function createEditorWindow() {
-    const win = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        webPreferences: {
-            preload: path.join(__dirname, "./preload.js"),
-            contextIsolation: true,
-            enableRemoteModule: true,
-            nodeIntegration: true,
-            nodeIntegrationInWorker: true,
-            webSecurity: true,
-        },
-        show: false,
-    });
-    let editorUrl = url.format({
-        pathname: path.join(__dirname, "editor.html"),
-        protocol: "file:",
-        slashes: true,
-    });
-    win.loadURL(editorUrl).then(() => {
-        win.show();
-        win.focus();
-    });
-    ;
-    win.webContents.openDevTools();
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.webContents.send("openEditor");
+    }
 }

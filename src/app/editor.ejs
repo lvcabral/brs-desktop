@@ -51,52 +51,27 @@
       </div>
     </div>
     <div class="layout-separator"></div>
-    <div id="right-container">
-      <div class="simulator-display">
-        <div class="display-header">
-          <div>
-            <h4>Display</h4>
-          </div>
-          <div>
-            <label title="Audio Switch">
-              <i class="icon-sound-on" id="audio-icon"></i>
-              <input type="checkbox" checked id="audioSwitch" />
-            </label>
-            <label title="Keyboard control">
-              <i class="icon-keyboard"></i>
-              <input type="checkbox" id="keyboard" />
-            </label>
-            <label title="Gamepad control">
-              <i class="icon-gamepad"></i>
-              <input type="checkbox" checked id="gamepad" />
-            </label>
-            <button title="Pause and Debug" class="break">
-              <i class="icon-pause"></i>
-              <span>DEBUG</span>
-            </button>
-            <button title="End the Execution" class="end">
-              <i class="icon-stop"></i>
-              <span>END</span>
-            </button>
-          </div>
+    <div class="console">
+      <div class="console-header">
+        <div>
+          <h4>Console</h4>
         </div>
-        <canvas id="display" class="display"></canvas>
-        <video id="player" crossorigin="anonymous"></video>
-      </div>
-      <div class="console">
-        <div class="console-header">
-          <div>
-            <h4>Console</h4>
-          </div>
-          <div>
-            <button title="Clear All Logs" class="clear-all">
-              <i class="icon-trash"></i>
-              <span>CLEAR</span>
-            </button>
-          </div>
+        <div>
+          <button title="Pause and Debug" class="break">
+            <i class="icon-pause"></i>
+            <span>DEBUG</span>
+          </button>
+          <button title="End the Execution" class="end">
+            <i class="icon-stop"></i>
+            <span>END</span>
+          </button>
+          <button title="Clear All Logs" class="clear-all">
+            <i class="icon-trash"></i>
+            <span>CLEAR</span>
+          </button>
         </div>
-        <div id="console-logs" class="active"></div>
       </div>
+      <div id="console-logs" class="active"></div>
     </div>
     <dialog id="code-dialog" class="modal_dialog" closed>
       <p class="modal_dialog_content">Enter the name of the code snippet:</p>
@@ -115,8 +90,6 @@
       </form>
     </dialog>
   </main>
-  <script src="../node_modules/toastify-js/src/toastify.js"></script>
-  <script src="./lib/<%= brsApi %>"></script>
 </body>
 
 </html>

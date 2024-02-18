@@ -103,6 +103,7 @@ contextBridge.exposeInMainWorld("api", {
             "saveFile",
             "saveIcon",
             "updateRegistry",
+            "showEditor",
             "keySent",
             "runCode",
             "reset"
@@ -132,7 +133,8 @@ contextBridge.exposeInMainWorld("api", {
             "serverStatus",
             "copyScreenshot",
             "saveScreenshot",
-            "fileSelected"
+            "fileSelected",
+            "openEditor",
         ];
         if (validChannels.includes(channel)) {
             // Deliberately strip event as it includes `sender`
