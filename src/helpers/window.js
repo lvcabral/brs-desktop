@@ -6,11 +6,13 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
-import { getSimulatorOption } from "./settings";
+import { getSimulatorOption, getTitleOverlayTheme } from "./settings";
 import path from "path";
 import jetpack from "fs-jetpack";
 
 const isMacOS = process.platform === "darwin";
+const isWindows = process.platform === "win32";
+
 export let appFocused = false;
 
 export function createWindow(name, options) {
@@ -111,12 +113,24 @@ export function createWindow(name, options) {
     // Control Child Windows behavior
     win.webContents.setWindowOpenHandler(({ url }) => {
         if (url.endsWith("editor.html")) {
+            const userTheme = global.sharedObject.theme;
             return {
                 action: 'allow',
                 overrideBrowserWindowOptions: {
+                    title: "Code Editor",
+                    titleBarStyle: isWindows || isMacOS ? "hidden": null,
+                    titleBarOverlay: getTitleOverlayTheme(userTheme),
                     minWidth: 600,
                     minHeight: 600,
                     backgroundColor: "black",
+                    webPreferences: {
+                        preload: path.join(__dirname, "./preload.js"),
+                        contextIsolation: true,
+                        enableRemoteModule: true,
+                        nodeIntegration: true,
+                        nodeIntegrationInWorker: true,
+                        webSecurity: true,
+                    },
                 }
             }
         };
@@ -132,12 +146,12 @@ export function createWindow(name, options) {
     });
     win.on("close", saveState);
     // App Renderer Events
-    ipcMain.on("openDevTools", () => {
-        openDevConsole(win);
+    ipcMain.on("openConsole", () => {
+        openCodeEditor();
     });
     ipcMain.on("debugStarted", () => {
-        if (getSimulatorOption("devToolsDebug")) {
-            openDevConsole(win);
+        if (getSimulatorOption("consoleOnDebug")) {
+            openCodeEditor();
         }
     });
     ipcMain.on("setBackgroundColor", (_, color) => {
@@ -184,7 +198,7 @@ export function createWindow(name, options) {
     }
     return win;
 }
-export function openDevConsole(window) {
+export function openDevTools(window) {
     window.openDevTools({ mode: 'detach' });
 }
 
@@ -240,7 +254,7 @@ export function reloadApp() {
     }
 }
 
-export function createEditorWindow() {
+export function openCodeEditor() {
     const window = BrowserWindow.fromId(1);
     if (window) {
         window.webContents.send("openEditor");

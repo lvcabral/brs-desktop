@@ -1,7 +1,186 @@
-@font-face {
-    font-family: "Asap";
-    src: url("../fonts/Asap-Regular.ttf") format("truetype");
+[data-theme^="purple"],
+[data-theme] [data-theme^="purple"] {
+    --main-color: #dac7ea;
+    --background-color: #251135;
+    --title-color: #dac7ea;
+    --title-background-color: #3d1b56;
+    --button-color: #f2f2f2;
+    --button-background-color: #662d91;
+    --button-border-color: #6a3aa5;
+    --header-color: #dac7ea;
+    --header-background-color: #4a2465;
+    --help-color: #6a3aa5;
+    --console-color: #dac7ea;
+    --console-background-color: #220d31;
+    --console-selection-color: #6a3aa5;
+    --input-color: #3d1b56;
+    --input-active-color: #dac7ea;
+    --input-border-color: #6a3aa5;
+    --input-background-color: #c090fa;
+    --icon-hover-color: #c090fa;
+    --icon-background-color: #6a3aa5;
+    --control-color: #dac7ea;
+    --control-background-color: #3d1b56;
+    --control-border-color: #3d1b56;
+    --dialog-color: #dac7ea;
+    --dialog-background-color: #3d1b56;
+    --dialog-border-color: #6a3aa5;
 }
+
+[data-theme^="dark"],
+[data-theme] [data-theme^="dark"] {
+    --main-color: #d4d4d4;
+    --background-color: #1e1e1e;
+    --title-color: #cccccc;
+    --title-background-color: #252526;
+    --button-color: #f2f2f2;
+    --button-background-color: #007acc;
+    --button-border-color: #006dd9;
+    --header-color: #cccccc;
+    --header-background-color: #353536;
+    --help-color: #5d5d5d;
+    --console-color: #d4d4d4;
+    --console-background-color: #141414;
+    --console-selection-color: #1e496c;
+    --input-color: #252526;
+    --input-active-color: #dddddd;
+    --input-border-color: #006dd9;
+    --input-background-color: #787878;
+    --icon-hover-color: #006dd9;
+    --icon-background-color: #787878;
+    --control-color: #cccccc;
+    --control-background-color: #252526;
+    --control-border-color: #5d5d5d;
+    --dialog-color: #cccccc;
+    --dialog-background-color: #252526;
+    --dialog-border-color: #5d5d5d;
+}
+
+[data-theme^="light"],
+[data-theme] [data-theme^="light"] {
+    --main-color: #000000;
+    --background-color: #ffffff;
+    --title-color: #333333;
+    --title-background-color: #dddddd;
+    --button-color: #f2f2f2;
+    --button-background-color: #007acc;
+    --button-border-color: #0084ff;
+    --header-color: #333333;
+    --header-background-color: #cccccc;
+    --help-color: #5d5d5d;
+    --console-color: #333333;
+    --console-background-color: #eeeeee;
+    --console-selection-color: #aaaaaa;
+    --item-background-color: #094771;
+    --input-color: #333333;
+    --input-active-color: #ffffff;
+    --input-border-color: #0084ff;
+    --input-background-color: #dddddd;
+    --icon-hover-color: #006dd9;
+    --icon-background-color: #787878;
+    --control-color: #333333;
+    --control-background-color: #eeeeee;
+    --control-border-color: #dddddd;
+    --dialog-color: #252526;
+    --dialog-background-color: #cccccc;
+    --dialog-border-color: #5d5d5d;
+}
+
+#titlebar {
+    display: block;
+    position: fixed;
+    padding: 4px;
+    height: 28px;
+    width: 100%;
+    background-color: var(--title-background-color);
+}
+
+#titlebar #drag-region {
+    width: 100%;
+    height: 100%;
+    -webkit-app-region: drag;
+}
+
+#window-title {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-size: 13px;
+    text-align: center;
+}
+
+#window-title span {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.5;
+}
+
+#window {
+    height: calc(100% - 28px);
+    margin-top: 28px;
+    padding: 3px;
+    overflow-y: auto;
+}
+
+#window-controls {
+    display: grid;
+    grid-template-columns: repeat(1, 46px);
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    -webkit-app-region: no-drag;
+}
+
+#window-controls .button {
+    grid-row: 1 / span 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+}
+
+#window-controls .button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#window-controls .button:active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#close-button:hover {
+    background: #e81123 !important;
+}
+
+#close-button:active {
+    background: #f1707a !important;
+}
+
+#close-button:active .icon {
+    filter: invert(1);
+}
+
+#close-button {
+    grid-column: 1;
+}
+
+@media (-webkit-device-pixel-ratio: 1.5),
+    (-webkit-device-pixel-ratio: 2),
+    (-webkit-device-pixel-ratio: 3) {
+    #window-controls .icon {
+        width: 10px;
+        height: 10px;
+    }
+}
+
 /* CSS Reset */
 * {
     margin: 0;
@@ -11,11 +190,11 @@
 body {
     font-size: 14px;
     font-family: Consolas, "Courier New", Courier, monospace;
-    background: #f7f7f7;
+    background: var(--background-color);
+    color: var(--main-color);
 }
 a {
     text-decoration: none;
-    color: #999;
 }
 button {
     font-family: inherit;
@@ -23,11 +202,11 @@ button {
     height: 44px;
     padding: 0 16px;
     border-radius: 8px;
-    border: 1px solid #232323;
+    border: 1px solid var(--button-border-color);
     outline: none;
 }
 button {
-    font-family: Asap, Arial, Helvetica, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     background: transparent;
     cursor: pointer;
 }
@@ -40,6 +219,312 @@ ul li {
 pre {
     font-family: inherit;
 }
+.index-page {
+    overflow: hidden;
+    height: 100vh;
+    max-height: -moz-available;
+    /* WebKit-based browsers will ignore this. */
+    max-height: -webkit-fill-available;
+    /* Mozilla-based browsers will ignore this. */
+    max-height: fill-available;
+    background: var(--background-color);
+}
+.editor {
+    display: flex;
+    width: 100%;
+    position: fixed;
+    top: 29px;
+}
+.console {
+    background: var(--background-color);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0%;
+    min-width: 470px;
+}
+.console .console-header {
+    width: 100%;
+    height: 44px;
+    background: var(--header-background-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.console .console-header h4 {
+    font-size: 18px;
+    color: var(--header-color);
+}
+.console .console-header button {
+    padding: 0 8px;
+    height: 26px;
+    vertical-align: middle;
+    border: none;
+    color: var(--button-color);
+    background: var(--button-background-color);
+}
+.console .console-header button i {
+    font-size: 16px;
+}
+.console .console-header button span {
+    font-size: 16px;
+    margin-right: 0.2em;
+}
+.console iframe {
+    border: none;
+    width: 0;
+    height: 0;
+    visibility: hidden;
+}
+.console .console-header button span {
+    font-size: 16px;
+    margin-right: 0.2em;
+}
+.console .console-header label span {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    margin-right: 0.2em;
+    color: var(--header-color);
+}
+
+.VanillaTerm {
+    background-color: var(--console-background-color) !important;
+    color: var(--console-color) !important;
+}
+.VanillaTerm .container {
+    overflow-y: auto !important;
+}
+.VanillaTerm .container ::selection {
+    background-color: var(--console-selection-color) !important;
+}
+.VanillaTerm output pre {
+    color: var(--console-color) !important;
+}
+.VanillaTerm .command {
+    align-items: center;
+}
+
+.editor .console #console-logs {
+    font-size: 12px;
+    height: calc(100vh - 78px);
+    overflow: auto;
+}
+.code {
+    background: var(--background-color);
+    height: calc(100vh - 72px);
+    width: 60%;
+    min-width: 750px;
+}
+.code .code-header {
+    background: var(--header-background-color);
+    display: flex;
+    height: 44px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.code .code-header button {
+    padding: 0 8px;
+    height: 26px;
+    vertical-align: middle;
+    border: none;
+    color: var(--button-color);
+    background: var(--button-background-color);
+}
+.code .code-header button i {
+    font-size: 16px;
+}
+.code .code-header button span {
+    font-size: 16px;
+    margin-right: 0.2em;
+}
+.code .code-header h4 {
+    font-size: 18px;
+    color: var(--header-color);
+}
+.code #brsCode {
+    display: block;
+    height: 100%;
+    width: 100%;
+    border: none;
+    background: var(--sidebar-background-color);
+    color: var(--header-color);
+    font-size: 18px;
+    padding: 16px;
+}
+.code #brsCode:focus,
+.code #brsCode:active {
+    outline-color: transparent;
+    box-shadow: none;
+}
+@media (max-width: 1280px) {
+    .code {
+        min-width: unset;
+    }
+    .console {
+        min-width: unset;
+    }
+    .editor {
+        flex-direction: column;
+    }
+    .editor .code,
+    .editor .console {
+        width: 100%;
+    }
+    .editor .code {
+        height: 50%;
+    }
+    .editor .console #console-logs {
+        height: calc(52vh - 78px);
+    }
+    button {
+        font-size: 14px;
+    }
+    button span {
+        display: none;
+    }
+}
+.layout-separator {
+    width: 3px;
+    margin: 0 -1px;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+    background-color: var(--background-color);
+    opacity: 0;
+    z-index: 4;
+    cursor: col-resize;
+    opacity: 0.8;
+}
+.layout-separator:hover {
+    opacity: 0.4;
+}
+
+input {
+    appearance: none;
+    position: relative;
+    display: inline-block;
+    height: 1.45rem;
+    width: 2.75rem;
+    vertical-align: middle;
+    transition: 0.25s linear background;
+}
+input::before {
+    content: "";
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    position: absolute;
+    top: 0.1rem;
+    left: 0.25rem;
+    transition: 0.25s linear transform;
+    transform: translateX(0rem);
+}
+
+:root {
+    --arrow-icon: url(../images/caret_down.svg);
+}
+/* <select> styles */
+select {
+    /* Reset */
+    appearance: none;
+    border: 0;
+    outline: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--control-color);
+    background-color: var(--control-background-color) !important;
+    /* Personalize */
+    width: 15rem;
+    height: 30px;
+    padding: 1px 1px 1px 1rem;
+    background: var(--arrow-icon) no-repeat right 0.8em center / 1.4em,
+        linear-gradient(
+            to left,
+            var(--icon-background-color) 3em,
+            var(--control-background-color) 3em
+        );
+    border-radius: 0.25em;
+    box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    /* Remove IE arrow */
+    &::-ms-expand {
+        display: none;
+    }
+    /* Remove focus outline */
+    &:focus {
+        outline: none;
+    }
+    /* <option> colors */
+    option {
+        color: inherit;
+        background-color: var(--control-background-color);
+    }
+}
+
+.modal_dialog {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    color: var(--dialog-color);
+    border-radius: 7px;
+    border: 1px solid var(--dialog-border-color);
+    background-color: var(--dialog-background-color);
+    padding: 20px;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -ms-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+}
+.modal_dialog input {
+    font-size: 16px;
+    color: var(--input-color);
+    background-color: var(--input-background-color);
+    padding: 5px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid var(--input-border-color);
+    width: 100%;
+}
+.modal_dialog input:focus {
+    outline: none !important;
+    border: 1px solid var(--input-border-color);
+    background-color: var(--input-active-color);
+}
+.modal_dialog_content {
+    margin: 10px 0px;
+}
+.modal_dialog_input {
+    margin: 20px 0px;
+}
+.modal_dialog button {
+    font-size: 16px;
+    color: var(--button-color);
+    background-color: var(--button-background-color);
+    padding: 10px 0px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 0px;
+    cursor: pointer;
+    outline: none;
+    width: 100px;
+}
+.modal_dialog .modal_dialog_cancel {
+    margin-left: 10px;
+    border: 1px solid var(--button-border-color);
+    background-color: var(--button-color);
+    color: var(--button-background-color);
+}
+
 /*!
      * Toastify js 1.11.1
      * https://github.com/apvarun/toastify-js
@@ -116,275 +601,4 @@ pre {
 .toastify-success {
     color: #fff;
     background-color: rgb(19, 185, 116, 0.8);
-}
-
-.index-page {
-    overflow: hidden;
-    height: 100vh;
-    max-height: -moz-available;
-    /* WebKit-based browsers will ignore this. */
-    max-height: -webkit-fill-available;
-    /* Mozilla-based browsers will ignore this. */
-    max-height: fill-available;
-    background: #222222;
-}
-
-.console {
-    background: #222222;
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0%;
-    min-width: 530px;
-}
-.console .console-header {
-    width: 100%;
-    height: 44px;
-    background: #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 12px;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-}
-.console .console-header h4 {
-    font-size: 18px;
-    color: #999;
-}
-.console .console-header button {
-    padding: 0 8px;
-    height: 26px;
-    vertical-align: middle;
-    border: none;
-    color: white;
-    background: #449dff;
-}
-.console .console-header button i {
-    font-size: 16px;
-}
-.console .console-header button span {
-    font-size: 16px;
-    margin-right: 0.2em;
-}
-.console iframe {
-    border: none;
-    width: 0;
-    height: 0;
-    visibility: hidden;
-}
-.console .console-header button span {
-    font-size: 16px;
-    margin-right: 0.2em;
-}
-.console .console-header label span {
-    font-family: Asap, Arial, Helvetica, sans-serif;
-    font-size: 16px;
-    margin-right: 0.2em;
-    color: white;
-}
-
-.VanillaTerm .command {
-    align-items: center;
-}
-
-.editor .console #console-logs {
-    color-scheme: dark;
-    font-size: 12px;
-    height: calc(100vh - 50px);
-    overflow: auto;
-}
-.code {
-    background: #222222;
-    height: calc(100vh - 44px);
-    width: 60%;
-    color-scheme: dark;
-    min-width: 730px;
-}
-.code .code-header {
-    background: #333;
-    display: flex;
-    height: 44px;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 12px;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-}
-.code .code-header button {
-    padding: 0 8px;
-    height: 26px;
-    vertical-align: middle;
-    border: none;
-    color: white;
-    background: #449dff;
-}
-.code .code-header button i {
-    font-size: 16px;
-}
-.code .code-header button span {
-    font-size: 16px;
-    margin-right: 0.2em;
-}
-.code .code-header .project-link {
-    display: flex;
-    align-items: center;
-    color: #999;
-}
-.code .code-header h4 {
-    font-size: 18px;
-    color: #999;
-}
-.code #brsCode {
-    display: block;
-    height: 100%;
-    width: 100%;
-    border: none;
-    background: #444;
-    color: #fff;
-    font-size: 18px;
-    padding: 16px;
-}
-.code #brsCode:focus,
-.code #brsCode:active {
-    outline-color: transparent;
-    box-shadow: none;
-}
-.editor {
-    display: flex;
-    width: 100%;
-}
-@media (max-width: 1280px) {
-    .code {
-        min-width: unset;
-    }
-    .console {
-        min-width: unset;
-    }
-    .editor {
-        flex-direction: column;
-    }
-    .editor .code,
-    .editor .console {
-        width: 100%;
-    }
-    .editor .code {
-        height: 50%;
-    }
-    .editor .console #console-logs {
-        height: calc(52vh - 50px);
-    }
-    button {
-        font-size: 14px;
-    }
-    button span {
-        display: none;
-    }
-}
-.layout-separator {
-    width: 3px;
-    margin: 0 -1px;
-    border-left: 1px solid transparent;
-    border-right: 1px solid transparent;
-    background-color: #232323;
-    opacity: 0;
-    z-index: 4;
-    cursor: col-resize;
-    opacity: 0.8;
-}
-.layout-separator:hover {
-    opacity: 0.4;
-}
-
-input {
-    appearance: none;
-    position: relative;
-    display: inline-block;
-    background: lightgrey;
-    height: 1.45rem;
-    width: 2.75rem;
-    vertical-align: middle;
-    border-radius: 2rem;
-    box-shadow: 0px 1px 3px #0003 inset;
-    transition: 0.25s linear background;
-}
-input::before {
-    content: "";
-    display: block;
-    width: 1.25rem;
-    height: 1.25rem;
-    background: #fff;
-    border-radius: 1.2rem;
-    position: absolute;
-    top: 0.1rem;
-    left: 0.25rem;
-    box-shadow: 0px 1px 3px #0003;
-    transition: 0.25s linear transform;
-    transform: translateX(0rem);
-}
-
-:checked {
-    background: #449dff;
-}
-:checked::before {
-    transform: translateX(1rem);
-}
-
-.modal_dialog {
-    font-family: Asap, Arial, Helvetica, sans-serif;
-    border-radius: 7px;
-    border: 1px solid #449dff;
-    background-color: #333;
-    padding: 20px;
-    top: 50%;
-    left: 50%;
-    -webkit-transform: translateX(-50%) translateY(-50%);
-    -moz-transform: translateX(-50%) translateY(-50%);
-    -ms-transform: translateX(-50%) translateY(-50%);
-    transform: translateX(-50%) translateY(-50%);
-}
-.modal_dialog,
-.modal_dialog input,
-.modal_dialog button {
-    color: white;
-    font-size: 16px;
-}
-.modal_dialog input,
-.modal_dialog button {
-    padding: 5px;
-    box-sizing: border-box;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    background-color: #333;
-    width: 100%;
-}
-.modal_dialog input:focus {
-    outline: none !important;
-    border: 1px solid #449dff;
-    background-color: #232323;
-}
-.modal_dialog_content {
-    margin: 10px 0px;
-}
-.modal_dialog_input {
-    margin: 20px 0px;
-}
-.modal_dialog button {
-    background-color: #449dff;
-    padding: 10px 0px;
-    border: 0px;
-    cursor: pointer;
-    outline: none;
-    width: 100px;
-}
-.modal_dialog .modal_dialog_cancel {
-    margin-left: 10px;
-    border: 1px solid #449dff;
-    background-color: #fff;
-    color: #449dff;
 }

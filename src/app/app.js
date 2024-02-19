@@ -287,5 +287,5 @@ window.runCode = (code) => {
 }
 
 window.getContext = () => {
-    return [brs, currentApp];
+    return [brs, currentApp, api.getConsoleBuffer()];
 }

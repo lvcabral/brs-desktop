@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -9,13 +9,12 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import * as telnet from "net";
 import { setPreference } from "../helpers/settings";
 import { checkMenuItem } from "../menu/menuService";
+import { consoleBuffer } from "../helpers/console";
 
 const PORT = 8085;
-const BUFFER_SIZE = 700;
 let server;
 let clientId = 0;
 let clients = new Map();
-let buffer = [];
 
 export let isTelnetEnabled = false;
 export function enableTelnet() {
@@ -40,7 +39,7 @@ export function enableTelnet() {
             clients.delete(id);
         });
         client.write(`Connected to ${app.getName()}\r\n`);
-        buffer.forEach((value) => {
+        consoleBuffer.forEach((value) => {
             client.write(value);
         });
         clients.set(id, client);
@@ -50,10 +49,6 @@ export function enableTelnet() {
         updateTelnetStatus(isTelnetEnabled);
         ipcMain.on("telnet", (event, text) => {
             if (text !== undefined) {
-                if (buffer.length > BUFFER_SIZE) {
-                    buffer.shift();
-                }
-                buffer.push(text);
                 clients.forEach((client, id) => {
                     client.write(text);
                 });
@@ -77,7 +72,6 @@ export function disableTelnet() {
             ipcMain.removeAllListeners("telnet");
             clientId = 0;
             clients = new Map();
-            buffer = [];
         }
         isTelnetEnabled = false;
         updateTelnetStatus(isTelnetEnabled);

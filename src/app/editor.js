@@ -8,7 +8,7 @@
 import Codec from "json-url";
 import VanillaTerminal from "vanilla-terminal";
 import { nanoid } from "nanoid";
-import { CodeMirrorManager } from "./codemirror";
+import { CodeMirrorManager, getThemeCss } from "./codemirror";
 import Toastify from "toastify-js";
 import packageInfo from "../../package.json";
 
@@ -32,7 +32,7 @@ const codeForm = document.getElementById("code-form")
 const deleteDialog = document.getElementById("delete-dialog")
 
 const simulator = window.opener;
-let [brs, currentApp] = simulator.getContext();
+let [brs, currentApp, consoleBuffer] = simulator.getContext();
 
 const prompt = "Brightscript Debugger";
 const appId = packageInfo.name;
@@ -45,15 +45,19 @@ const commands = {
     },
 };
 const terminal = new VanillaTerminal({
-    welcome: `<span style='color: #2e71ff'>BrightScript Console - ${packageInfo.name} v${
-        packageInfo.version
-    } -  brs-engine v${brs.getVersion()}</span>`,
+    welcome: `<span style='color: #2e71ff'>BrightScript Console - ${packageInfo.name} v${packageInfo.version
+        } -  brs-engine v${brs.getVersion()}</span>`,
     container: "console-logs",
     commands: commands,
     prompt: prompt,
     ignoreBadCommand: true,
     autoFocus: false,
 });
+if (consoleBuffer?.length) {
+    consoleBuffer.forEach((value) => {
+        updateTerminal(value);
+    });
+}
 terminal.idle();
 
 // Buttons Events
@@ -89,7 +93,9 @@ function main() {
     }
     // Initialize the Code Mirror manager
     if (brsCodeField) {
-        editorManager = new CodeMirrorManager(brsCodeField);
+        const preferences = api.getPreferences();
+        const theme = preferences?.simulator?.theme || 'purple';
+        editorManager = new CodeMirrorManager(brsCodeField, theme);
         if (isMacOS) {
             // Remove binding for Ctrl+V on MacOS to allow remapping
             // https://github.com/codemirror/codemirror5/issues/5848
@@ -122,8 +128,6 @@ function main() {
 function handleEngineEvents(event, data) {
     if (event === "loaded") {
         currentApp = data;
-        terminal.output(`<br />Executing source code...<br /><br />`);
-        terminal.idle();
     } else if (event === "started") {
         currentApp = data;
         console.info(`Execution started ${appId}`);
@@ -132,20 +136,10 @@ function handleEngineEvents(event, data) {
             terminal.output("<br />");
             terminal.setPrompt();
         } else if (data.level === "continue") {
+            terminal.output("<br />");
             terminal.idle();
-        } else if (data.level !== "beacon") {
-            let output = data.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            if (data.level === "print") {
-                const promptLen = `${prompt}&gt; `.length;
-                if (output.slice(-promptLen) === `${prompt}&gt; `) {
-                    output = output.slice(0, output.length - promptLen);
-                }
-            } else if (data.level === "warning") {
-                output = "<span style='color: #d7ba7d;'>" + output + "</span>";
-            } else if (data.level === "error") {
-                output = "<span style='color: #e95449;'>" + output + "</span>";
-            }
-            terminal.output(`<pre>${output}</pre>`);
+        } else if (typeof data.content === "string") {
+            updateTerminal(data.content, data.level);
         }
         scrollToBottom();
     } else if (event === "closed" || event === "error") {
@@ -153,6 +147,21 @@ function handleEngineEvents(event, data) {
         console.info(`Execution terminated! ${event}: ${data}`);
         terminal.idle();
     }
+}
+
+function updateTerminal(text, level = "print") {
+    let output = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    if (level === "print") {
+        const promptLen = `${prompt}&gt; `.length;
+        if (output.slice(-promptLen) === `${prompt}&gt; `) {
+            output = output.slice(0, output.length - promptLen);
+        }
+    } else if (level === "warning") {
+        output = "<span style='color: #d7ba7d;'>" + output + "</span>";
+    } else if (level === "error") {
+        output = "<span style='color: #e95449;'>" + output + "</span>";
+    }
+    terminal.output(`<pre>${output}</pre>`);
 }
 
 function scrollToBottom() {
@@ -230,7 +239,7 @@ deleteDialog.addEventListener("close", (e) => {
         localStorage.removeItem(currentId);
         currentId = nanoid(10);
         resetApp();
-        showToast("Code deleted from your browser local storage!", 3000);
+        showToast("Code deleted from the local storage!", 3000);
     }
     deleteDialog.returnValue = "";
 });
@@ -307,6 +316,8 @@ export function runCode() {
     if (code && code.trim() !== "") {
         try {
             simulator.runCode(editorManager.editor.getValue());
+            terminal.output(`<br /><pre>Executing source code...</pre><br /><br />`);
+            terminal.idle();
         } catch (e) {
             console.log(e); // Check EvalError object
             terminal.output(`${e.name}: ${e.message}`);
@@ -407,14 +418,14 @@ function onMouseDown(event) {
 }
 
 function onResize() {
-  const { height } = codeColumn.getBoundingClientRect();
-  if (window.innerWidth >= 1280) {
-    editorManager.editor.setSize("100%", `${height - 15}px`);
-  } else {
-    editorManager.editor.setSize("100%", `${Math.trunc(window.innerHeight * 0.4)}px`);
-    codeColumn.style.width = "100%";
-  }
-  scrollToBottom();
+    const { height } = codeColumn.getBoundingClientRect();
+    if (window.innerWidth >= 1280) {
+        editorManager.editor.setSize("100%", `${height - 15}px`);
+    } else {
+        editorManager.editor.setSize("100%", `${Math.trunc(window.innerHeight * 0.4)}px`);
+        codeColumn.style.width = "100%";
+    }
+    scrollToBottom();
 }
 
 function getShareUrl(suite) {
@@ -441,26 +452,62 @@ function showToast(message, duration = 3000, error = false) {
 }
 
 function getOS() {
-  const userAgent = window.navigator.userAgent;
-  const platform = window.navigator.platform;
-  let macosPlatforms = ["Macintosh", "MacIntel", "MacPPC", "Mac68K"];
-  const windowsPlatforms = ["Win32", "Win64", "Windows", "WinCE"];
-  const iosPlatforms = ["iPhone", "iPad", "iPod"];
-  let os = null;
-  if (macosPlatforms.indexOf(platform) !== -1) {
-      os = "MacOS";
-  } else if (iosPlatforms.indexOf(platform) !== -1) {
-      os = "iOS";
-  } else if (windowsPlatforms.indexOf(platform) !== -1) {
-      os = "Windows";
-  } else if (/Android/.test(userAgent)) {
-      os = "Android";
-  } else if (!os && /Linux/.test(platform)) {
-      os = "Linux";
-  }
-  return os;
+    const userAgent = window.navigator.userAgent;
+    const platform = window.navigator.platform;
+    let macosPlatforms = ["Macintosh", "MacIntel", "MacPPC", "Mac68K"];
+    const windowsPlatforms = ["Win32", "Win64", "Windows", "WinCE"];
+    const iosPlatforms = ["iPhone", "iPad", "iPod"];
+    let os = null;
+    if (macosPlatforms.includes(platform)) {
+        os = "MacOS";
+    } else if (iosPlatforms.includes(platform)) {
+        os = "iOS";
+    } else if (windowsPlatforms.includes(platform)) {
+        os = "Windows";
+    } else if (/Android/.test(userAgent)) {
+        os = "Android";
+    } else if (!os && /Linux/.test(platform)) {
+        os = "Linux";
+    }
+    return os;
 };
 
+// Theme Management
+window.__currentTheme = () =>
+    window.matchMedia('(prefers-color-scheme:dark)')?.matches
+        ? 'dark'
+        : 'light';
+window.__setTheme = () => {
+    const preferences = api.getPreferences();
+    let theme = preferences.simulator.theme || 'purple';
+    if (theme === 'system') {
+        theme = __currentTheme();
+    }
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('close-button-dark').style.display = theme === 'light' ? 'none' : '';
+    document.getElementById('close-button-light').style.display = theme === 'light' ? '' : 'none';
+    layoutContainer.style.colorScheme = theme === 'light' ? 'light' : 'dark';
+    if (editorManager) {
+        editorManager.editor.setOption("theme", getThemeCss(theme));
+    }
+};
+window
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', __setTheme);
+api.onPreferencesUpdated(__setTheme);
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    if (api.processPlatform() === 'darwin') {
+        document.getElementById('window-controls').style.visibility = 'hidden';
+    } else {
+        document.getElementById('close-button').addEventListener('click', event => {
+            api.closePreferences();
+        });
+    }
+    __setTheme();
+});
+
+// Events Handling
 window.addEventListener("load", main, false);
 window.addEventListener("resize", onResize, false);
 document.addEventListener("keydown", hotKeys, false);

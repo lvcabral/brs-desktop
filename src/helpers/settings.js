@@ -133,8 +133,12 @@ export function getSettings(window) {
                                             value: "devToolsStartup",
                                         },
                                         {
-                                            label: "Open Developer Tools when the Micro Debugger starts",
-                                            value: "devToolsDebug",
+                                            label: "Open Console on Startup",
+                                            value: "consoleStartup",
+                                        },
+                                        {
+                                            label: "Open Console when the Micro Debugger starts",
+                                            value: "consoleOnDebug",
                                         },
                                         {
                                             label: "Start the Micro Debugger when the App Crashes",
@@ -939,7 +943,7 @@ function isLetter(str) {
 
 // Title Overlay Theme
 
-function getTitleOverlayTheme(userTheme) {
+export function getTitleOverlayTheme(userTheme) {
     if (userTheme === "purple") {
         return { color: "#3d1b56", symbolColor: "#dac7ea", height: 28 };
     } else if (userTheme === "dark") {

@@ -26,7 +26,7 @@ import {
     setThemeSource,
     setTimeZone,
 } from "./helpers/settings";
-import { createWindow, openDevConsole, setAspectRatio } from "./helpers/window";
+import { createWindow, openCodeEditor, openDevTools, setAspectRatio } from "./helpers/window";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 import { randomUUID } from "crypto";
 
@@ -60,8 +60,8 @@ require("@electron/remote/main").initialize();
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
     string: ["o", "p", "m"],
-    boolean: ["d", "e", "f", "r"],
-    alias: { d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" },
+    boolean: ["c", "d", "e", "f", "r"],
+    alias: {c: "console", d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" },
 });
 
 // Save userData in separate folders for each environment.
@@ -97,6 +97,7 @@ app.on("ready", () => {
     // Load application settings
     let startup = {
         devTools: false,
+        console:false,
         runLastChannel: false,
         ecpEnabled: false,
         telnetEnabled: false,
@@ -119,7 +120,7 @@ app.on("ready", () => {
             attachTitlebarToWindow(mainWindow);
             processArgv(mainWindow, startup);
             mainWindow.show();
-            mainWindow.focus();
+            mainWindow.focus({ steal: true });
         });
     mainWindow.webContents.on("dom-ready", () => {
         let settings = getSettings(mainWindow);
@@ -148,6 +149,7 @@ function loadSettings(mainWindow, startup) {
             checkMenuItem("status-bar", options.includes("statusBar"));
             startup.runLastChannel = options.includes("runLastChannel");
             startup.devTools = options.includes("devToolsStartup");
+            startup.console = options.includes("consoleStartup");
         }
         setThemeSource();
     }
@@ -226,7 +228,10 @@ function processArgv(mainWindow, startup) {
         setDisplayOption("displayMode", displayMode, true);
     }
     if (startup.devTools || argv.devtools) {
-        openDevConsole(mainWindow);
+        openDevTools(mainWindow);
+    }
+    if (startup.console || argv.console) {
+        openCodeEditor();
     }
     let openFile;
     if (argv?.o) {

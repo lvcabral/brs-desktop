@@ -12,11 +12,28 @@
   <link rel="stylesheet" href="css/editor.css" />
   <link rel="stylesheet" href="css/codemirror.css" />
   <link rel="stylesheet" href="css/vscode-dark.css" />
+  <link rel="stylesheet" href="css/material-palenight.css" />
+  <link rel="stylesheet" href="css/xq-light.css" />
   <link rel="stylesheet" href="css/fontello.css" />
-  <link rel="stylesheet" href="css/code-selector.css" />
 </head>
 
 <body id="root" class="index-page">
+  <header id='titlebar'>
+    <div id='drag-region'>
+      <div id='window-title'>
+        <span>BrightScript Code Editor</span>
+      </div>
+      <div id='window-controls'>
+        <div class='button' id='close-button'>
+          <img class='icon' id='close-button-dark'
+            srcset='icons/close-w-10.png 1x, icons/close-w-12.png 1.25x, icons/close-w-15.png 1.5x, icons/close-w-15.png 1.75x, icons/close-w-20.png 2x, icons/close-w-20.png 2.25x, icons/close-w-24.png 2.5x, icons/close-w-30.png 3x, icons/close-w-30.png 3.5x'
+            draggable='false' /><img class='icon' id='close-button-light' style='display: none;'
+            srcset='icons/close-k-10.png 1x, icons/close-k-12.png 1.25x, icons/close-k-15.png 1.5x, icons/close-k-15.png 1.75x, icons/close-k-20.png 2x, icons/close-k-20.png 2.25x, icons/close-k-24.png 2.5x, icons/close-k-30.png 3x, icons/close-k-30.png 3.5x'
+            draggable='false' />
+        </div>
+      </div>
+    </div>
+  </header>
   <main class="main-container editor">
     <div class="code">
       <div class="code-header">
@@ -82,7 +99,7 @@
       </form>
     </dialog>
     <dialog id="delete-dialog" class="modal_dialog" closed>
-      <p class="modal_dialog_content">Are you sure you want to delete this code?</p>
+      <p class="modal_dialog_content">Do you really want to delete this code snippet?</p>
       <br />
       <form method="dialog">
         <button value="ok">Yes</button>

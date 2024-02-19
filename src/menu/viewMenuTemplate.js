@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { BrowserWindow } from "electron";
 import { setThemeSource, setSimulatorOption, setStatusBar } from "../helpers/settings";
-import { openDevConsole, setAlwaysOnTop, createEditorWindow } from "../helpers/window";
+import { openDevTools, setAlwaysOnTop, openCodeEditor } from "../helpers/window";
 
 const isMacOS = process.platform === "darwin";
 
@@ -34,7 +34,7 @@ export const viewMenuTemplate = {
                 if (window.webContents.isDevToolsOpened()) {
                     window.webContents.closeDevTools()
                 } else {
-                    openDevConsole(window);
+                    openDevTools(window);
                 }
             },
         },
@@ -45,7 +45,7 @@ export const viewMenuTemplate = {
             accelerator: "F12",
             enabled: true,
             click: () => {
-                createEditorWindow();
+                openCodeEditor();
             },
         },
         { type: "separator" },

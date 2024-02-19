@@ -20,9 +20,9 @@ export function loadFile(file, source) {
         window.restore();
     } else if (!window.isVisible()) {
         window.show();
-    } else if (!appFocused) {
+    } else if (!appFocused && !window.isAlwaysOnTop()) {
         window.setAlwaysOnTop(true);
-        app.focus({ steal: true });
+        window.focus({ steal: true });
         window.setAlwaysOnTop(false);
     }
     let filePath;

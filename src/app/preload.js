@@ -12,7 +12,7 @@ const Mousetrap = require("mousetrap");
 const path = require("path");
 const isMacOS = process.platform === "darwin";
 
-let onPreferencesChangedHandler = () => { };
+let onPreferencesUpdatedHandler = () => { };
 let titleBar;
 let titleBarConfig;
 let titleColor;
@@ -32,8 +32,11 @@ contextBridge.exposeInMainWorld("api", {
     getPreferences: () => {
         return ipcRenderer.sendSync("getPreferences");
     },
-    onPreferencesChanged: (handler) => {
-        onPreferencesChangedHandler = handler;
+    onPreferencesUpdated: (handler) => {
+        onPreferencesUpdatedHandler = handler;
+    },
+    getConsoleBuffer: () => {
+        return ipcRenderer.sendSync("getConsoleBuffer");
     },
     isStatusEnabled: () => {
         const settings = ipcRenderer.sendSync("getPreferences");
@@ -88,13 +91,14 @@ contextBridge.exposeInMainWorld("api", {
             titleBar.refreshMenu();
         }
     },
+    processPlatform: () => { return process.platform; },
     send: (channel, data) => {
         // whitelist channels
         let validChannels = [
             "telnet",
             "addRecentSource",
             "addRecentPackage",
-            "openDevTools",
+            "openConsole",
             "debugStarted",
             "setAudioMute",
             "deviceData",
@@ -155,5 +159,5 @@ ipcRenderer.on("refreshMenu", () => {
 });
 
 ipcRenderer.on("preferencesUpdated", (e, preferences) => {
-    onPreferencesChangedHandler(preferences);
+    onPreferencesUpdatedHandler(preferences);
 });
