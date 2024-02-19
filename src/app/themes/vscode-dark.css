@@ -37,7 +37,7 @@
  .cm-s-vscode-dark .CodeMirror-matchingbracket {background-color: #3b514d; color: yellow !important;}
  
  .CodeMirror-hints.vscode-dark {
-   font-family: Consolas, 'Courier New', monospace;
+   font-family: Monaco, Consolas, 'Courier New', monospace, serif;
    color: #9c9e9e;
    background-color: #3b3e3f !important;
  }

@@ -46,7 +46,7 @@ customKeys.set("KeyA", "a");
 customKeys.set("KeyZ", "b");
 
 brs.initialize(customDeviceInfo, {
-    debugToConsole: true,
+    debugToConsole: false,
     showStats: false,
     customKeys: customKeys,
 });

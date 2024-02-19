@@ -66,6 +66,11 @@ module.exports = env => {
           brsApi: fileApi
         }
       }),
+      new CopyWebpackPlugin({
+        patterns: [
+          { context: "src/app/", from: "themes/**", to: "../app" },
+        ]
+      })
     ],
     output: {
       filename: "[name].js",

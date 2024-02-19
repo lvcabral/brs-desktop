@@ -35,7 +35,7 @@ export class CodeMirrorManager {
 export function getThemeCss(theme) {
     let themeCss = "vscode-dark";
     if (theme === "light") {
-        themeCss = "xq-light";
+        themeCss = "coda";
     } else if (theme === "purple") {
         themeCss = "material-palenight";
     }

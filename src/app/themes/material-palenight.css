@@ -5,12 +5,12 @@
 */
 
 .cm-s-material-palenight.CodeMirror {
-  background-color: #292D3E;
+  background-color: #251135;
   color: #A6ACCD;
 }
 
 .cm-s-material-palenight .CodeMirror-gutters {
-  background: #292D3E;
+  background: #311644;
   color: #676E95;
   border: none;
 }
@@ -129,6 +129,7 @@
   color: #DECB6B;
 }
 
+.cm-s-material-palenight {font-family: Monaco, Consolas, 'Courier New', monospace, serif;}
 
 .cm-s-material-palenight .cm-error {
   color: rgba(255, 255, 255, 1.0);
