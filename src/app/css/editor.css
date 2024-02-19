@@ -367,7 +367,7 @@ pre {
     outline-color: transparent;
     box-shadow: none;
 }
-@media (max-width: 1280px) {
+@media (max-width: 1220px) {
     .code {
         min-width: unset;
     }

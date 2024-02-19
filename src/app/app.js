@@ -8,7 +8,7 @@
 import "./styles/main.css";
 import "./styles/fontawesome.min.css";
 import "../helpers/hash";
-import { setStatusColor, setAudioStatus, showToast } from "./statusbar";
+import { setStatusColor, setAudioStatus, showToast, clearCounters } from "./statusbar";
 
 // Simulator display
 const display = document.getElementById("display");
@@ -286,6 +286,11 @@ window.runCode = (code) => {
     api.send("runCode", code);
 }
 
-window.getContext = () => {
+window.getEngineContext = () => {
     return [brs, currentApp, api.getConsoleBuffer()];
+}
+
+window.clearStatusCounters = () => {
+    clearCounters();
+    setStatusColor();
 }

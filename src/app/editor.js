@@ -32,7 +32,7 @@ const codeForm = document.getElementById("code-form")
 const deleteDialog = document.getElementById("delete-dialog")
 
 const simulator = window.opener;
-let [brs, currentApp, consoleBuffer] = simulator.getContext();
+let [brs, currentApp, consoleBuffer] = simulator.getEngineContext();
 
 const prompt = "Brightscript Debugger";
 const appId = packageInfo.name;
@@ -346,6 +346,7 @@ function endExecution() {
 
 function clearTerminal() {
     terminal.clear();
+    simulator.clearStatusCounters();
 }
 
 function hotKeys(event) {
@@ -419,7 +420,7 @@ function onMouseDown(event) {
 
 function onResize() {
     const { height } = codeColumn.getBoundingClientRect();
-    if (window.innerWidth >= 1280) {
+    if (window.innerWidth >= 1220) {
         editorManager.editor.setSize("100%", `${height - 15}px`);
     } else {
         editorManager.editor.setSize("100%", `${Math.trunc(window.innerHeight * 0.4)}px`);
