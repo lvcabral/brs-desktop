@@ -69,6 +69,7 @@ module.exports = env => {
       new CopyWebpackPlugin({
         patterns: [
           { context: "src/app/", from: "themes/**", to: "../app" },
+          { context: "node_modules/electron-preferences/build/", from: "icons/**", to: "../app" },
         ]
       })
     ],

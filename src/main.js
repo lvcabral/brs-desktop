@@ -295,19 +295,19 @@ function setupEvents(mainWindow) {
         mainWindow.on("show", function () {
             enableMenuItem("copy-screen", isMenuItemEnabled("save-screen"));
         });
-        app.on("browser-window-created", (_, window) => {
-            window.on("close", (evt) => {
-                if (window.webContents?.getURL()?.endsWith("editor.html")) {
-                    evt.preventDefault();
-                    window.hide();
-                }
-            });
-        });
     } else {
         app.on("window-all-closed", () => {
             app.quit();
         });
     }
+    app.on("browser-window-created", (_, window) => {
+        window.on("close", (evt) => {
+            if (window.webContents?.getURL()?.endsWith("editor.html")) {
+                evt.preventDefault();
+                window.hide();
+            }
+        });
+    });
 }
 
 // Helper Functions

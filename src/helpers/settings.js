@@ -737,8 +737,16 @@ export function setThemeSource(userTheme, notifyApp) {
         window.webContents.send("setTheme", userTheme);
         window.webContents.send("refreshMenu");
 
-        if (isWindows && settingsWindow) {
-            settingsWindow.setTitleBarOverlay(getTitleOverlayTheme(userTheme));
+        if (isWindows) {
+            const titleTheme = getTitleOverlayTheme(userTheme);
+            settingsWindow?.setTitleBarOverlay(titleTheme);
+            const allWindows = BrowserWindow.getAllWindows();
+            allWindows.some((window) => {
+                if (window.getURL().endsWith("editor.html")) {
+                    window.setTitleBarOverlay(titleTheme);
+                    return true;
+                }
+            });
         }
     }
     return userTheme;

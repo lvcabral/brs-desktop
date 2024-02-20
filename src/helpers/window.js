@@ -122,7 +122,6 @@ export function createWindow(name, options) {
                     titleBarOverlay: getTitleOverlayTheme(userTheme),
                     minWidth: 600,
                     minHeight: 600,
-                    backgroundColor: "black",
                     webPreferences: {
                         preload: path.join(__dirname, "./preload.js"),
                         contextIsolation: true,
