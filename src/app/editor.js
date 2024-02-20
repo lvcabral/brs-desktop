@@ -32,7 +32,7 @@ const codeForm = document.getElementById("code-form")
 const deleteDialog = document.getElementById("delete-dialog")
 
 const simulator = window.opener;
-let [brs, currentApp, consoleBuffer] = simulator.getEngineContext();
+let [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
 
 const prompt = "Brightscript Debugger";
 const appId = packageInfo.name;
@@ -104,14 +104,7 @@ function main() {
         }
     }
     onResize();
-    // Check saved id to load
-    const loadId = localStorage.getItem(`${appId}.load`);
-    populateCodeSelector(loadId ?? "");
-    if (loadId?.length) {
-        loadCode(loadId);
-    }
-    localStorage.removeItem(`${appId}.load`);
-    // Initialize Device Simulator
+    // Subscribe to Engine events and initialize Console
     if (brs) {
         // Subscribe to Engine Events
         brs.subscribe(appId, handleEngineEvents);
@@ -121,6 +114,10 @@ function main() {
                 brs.debug(`${command} ${parameters.join(" ")}`);
             }
         });
+        if (debugMode === "stop") {
+            terminal.output("<br />");
+            terminal.setPrompt();
+        }
     }
 }
 

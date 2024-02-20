@@ -287,7 +287,7 @@ window.runCode = (code) => {
 }
 
 window.getEngineContext = () => {
-    return [brs, currentApp, api.getConsoleBuffer()];
+    return [brs, currentApp, api.getConsoleBuffer(), debugMode];
 }
 
 window.clearStatusCounters = () => {
