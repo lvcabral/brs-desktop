@@ -296,9 +296,11 @@ pre {
 .VanillaTerm {
     background-color: var(--console-background-color) !important;
     color: var(--console-color) !important;
+    padding: 0px !important;
 }
 .VanillaTerm .container {
     overflow-y: auto !important;
+    padding: 9px !important;
 }
 .VanillaTerm .container ::selection {
     background-color: var(--console-selection-color) !important;
@@ -386,7 +388,7 @@ pre {
         height: 50%;
     }
     .editor .console #console-logs {
-        height: calc(52vh - 78px);
+        height: calc(50vh - 78px);
     }
     button {
         font-size: 14px;
