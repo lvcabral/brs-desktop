@@ -49,7 +49,7 @@ statusDevTools.onclick = function () {
     api.send("openConsole");
 };
 statusAudio.onclick = function () {
-    let muted = !brs.getAudioMute();
+    const muted = !brs.getAudioMute();
     brs.setAudioMute(muted);
     api.send("setAudioMute", muted);
     setAudioStatus(muted);
@@ -73,6 +73,13 @@ brs.subscribe("statusbar", (event, data) => {
         updateStatus(false);
     } else if (event === "redraw") {
         redrawStatus(data);
+    } else if (event === "control") {
+        if (data.key === "volumemute" && data.mod === 0) {
+            const muted = brs.getAudioMute();
+            api.send("setAudioMute", muted);
+            setAudioStatus(muted);
+            showToast(`Audio is ${muted ? "off" : "on"}`);
+        }
     } else if (event === "resolution") {
         statusResolution.innerText = `${data.width}x${data.height}`;
         statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
