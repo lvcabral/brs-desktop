@@ -212,7 +212,9 @@ export function saveWindowState(stateStoreFile, state, win) {
     if (!win.isMinimized() && !win.isMaximized() && !win.isFullScreen() && win.isVisible()) {
         Object.assign(state, getWindowState(win));
     }
-    userDataDir.write(stateStoreFile, state, { atomic: true });
+    if (state.width && state.height) {
+        userDataDir.write(stateStoreFile, state, { atomic: true });
+    }
 };
 
 // Helper Functions
