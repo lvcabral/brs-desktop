@@ -103,7 +103,7 @@
         "@types/luxon": "^1.27.1",
         "@types/request": "^2.47.0",
         "babel-loader": "^8.0.6",
-        "brs-engine": "^1.2.11",
+        "brs-engine": "^1.3.0",
         "chai": "^4.1.0",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.7.3",

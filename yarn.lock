@@ -2035,10 +2035,10 @@ browserslist@^4.21.10, browserslist@^4.22.2, browserslist@^4.22.3:
     node-releases "^2.0.14"
     update-browserslist-db "^1.0.13"
 
-brs-engine@^1.2.11:
-  version "1.2.11"
-  resolved "https://registry.yarnpkg.com/brs-engine/-/brs-engine-1.2.11.tgz#1ca4cefc425ca627973d4e597b0a2000e0c10e46"
-  integrity sha512-XjPdypouErldly24za68tkiBnTjte/ZhrvrhMhs2sFxVST6DyamlUv2KRjnxaM5V5/UZWt8TN3JcZhOlPlZcKw==
+brs-engine@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/brs-engine/-/brs-engine-1.3.0.tgz#75d5a1b751e0ba6afc7561db2aac57a64422a2d7"
+  integrity sha512-GDMd4VD3Zlvcf3GTcoctGxAMQ5+QmccqWD7M678in0Vrd/nDpdAowGx+OgmzpVTzEFRNwQi8HIjqOXH30l+MpA==
   dependencies:
     "@msgpack/msgpack" "^2.8.0"
     chalk "^5.3.0"
