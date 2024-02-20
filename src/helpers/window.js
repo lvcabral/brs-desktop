@@ -10,13 +10,13 @@ import { getSimulatorOption, getTitleOverlayTheme } from "./settings";
 import path from "path";
 import jetpack from "fs-jetpack";
 
+const userDataDir = jetpack.cwd(app.getPath("userData"));
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
 
 export let appFocused = false;
 
 export function createWindow(name, options) {
-    const userDataDir = jetpack.cwd(app.getPath("userData"));
     const stateStoreFile = `window-state-${name}.json`;
     const defaultSize = {
         width: options.width,
@@ -25,65 +25,7 @@ export function createWindow(name, options) {
     let state = {};
     let win;
 
-    const restore = () => {
-        let restoredState = {};
-        try {
-            restoredState = userDataDir.read(stateStoreFile, "json");
-        } catch (err) {
-            // For some reason json can't be read (might be corrupted).
-            // No worries, we have defaults.
-        }
-        return Object.assign({}, defaultSize, restoredState);
-    };
-
-    const getWindowState = () => {
-        const bounds = win.getBounds();
-        return {
-            x: bounds.x,
-            y: bounds.y,
-            width: bounds.width,
-            height: bounds.height,
-            backgroundColor: global.sharedObject.backgroundColor,
-        };
-    };
-
-    const windowWithinBounds = (windowState, bounds) => {
-        return (
-            windowState.x >= bounds.x &&
-            windowState.y >= bounds.y &&
-            windowState.x + windowState.width <= bounds.x + bounds.width &&
-            windowState.y + windowState.height <= bounds.y + bounds.height
-        );
-    };
-
-    const resetToDefaults = () => {
-        const bounds = screen.getPrimaryDisplay().bounds;
-        return Object.assign({}, defaultSize, {
-            x: (bounds.width - defaultSize.width) / 2,
-            y: (bounds.height - defaultSize.height) / 2,
-        });
-    };
-
-    const ensureVisibleOnSomeDisplay = (windowState) => {
-        const visible = screen.getAllDisplays().some((display) => {
-            return windowWithinBounds(windowState, display.bounds);
-        });
-        if (!visible) {
-            // Window is partially or fully not visible now.
-            // Reset it to safe defaults.
-            return resetToDefaults();
-        }
-        return windowState;
-    };
-
-    const saveState = () => {
-        if (!win.isMinimized() && !win.isMaximized() && !win.isFullScreen()) {
-            Object.assign(state, getWindowState());
-        }
-        userDataDir.write(stateStoreFile, state, { atomic: true });
-    };
-
-    state = ensureVisibleOnSomeDisplay(restore());
+    state = restoreWindowState(stateStoreFile, defaultSize);
 
     win = new BrowserWindow(
         Object.assign(options, state, {
@@ -113,12 +55,15 @@ export function createWindow(name, options) {
     // Control Child Windows behavior
     win.webContents.setWindowOpenHandler(({ url }) => {
         if (url.endsWith("editor.html")) {
+            const stateStoreFile = "window-state-editor.json";
+            const defaultSize = { width: 1440, height: 800 };
+            const state = restoreWindowState(stateStoreFile, defaultSize);
             const userTheme = global.sharedObject.theme;
             return {
                 action: 'allow',
-                overrideBrowserWindowOptions: {
+                overrideBrowserWindowOptions: Object.assign(state, {
                     title: "Code Editor",
-                    titleBarStyle: isWindows || isMacOS ? "hidden": null,
+                    titleBarStyle: isWindows || isMacOS ? "hidden" : null,
                     titleBarOverlay: getTitleOverlayTheme(userTheme),
                     minWidth: 600,
                     minHeight: 600,
@@ -130,9 +75,9 @@ export function createWindow(name, options) {
                         nodeIntegrationInWorker: true,
                         webSecurity: true,
                     },
-                }
-            }
-        };
+                })
+            };
+        }
         return { action: "allow" };
     });
 
@@ -143,7 +88,9 @@ export function createWindow(name, options) {
     win.on("blur", () => {
         appFocused = false;
     });
-    win.on("close", saveState);
+    win.on("close", () => {
+        saveWindowState(stateStoreFile, state, win);
+    });
     // App Renderer Events
     ipcMain.on("openConsole", () => {
         openCodeEditor();
@@ -197,6 +144,7 @@ export function createWindow(name, options) {
     }
     return win;
 }
+
 export function openDevTools(window) {
     window.openDevTools({ mode: 'detach' });
 }
@@ -259,3 +207,58 @@ export function openCodeEditor() {
         window.webContents.send("openEditor");
     }
 }
+
+export function saveWindowState(stateStoreFile, state, win) {
+    if (!win.isMinimized() && !win.isMaximized() && !win.isFullScreen() && win.isVisible()) {
+        Object.assign(state, getWindowState(win));
+    }
+    userDataDir.write(stateStoreFile, state, { atomic: true });
+};
+
+// Helper Functions
+function getWindowState(win) {
+    const bounds = win.getBounds();
+    return {
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height,
+        backgroundColor: global.sharedObject.backgroundColor,
+    };
+};
+
+function restoreWindowState(stateStoreFile, defaultSize) {
+    let restoredState = {};
+    try {
+        restoredState = userDataDir.read(stateStoreFile, "json");
+    } catch (err) {
+        // For some reason json can't be read (might be corrupted).
+        // No worries, we have defaults.
+    }
+    return ensureVisibleOnSomeDisplay(Object.assign({}, defaultSize, restoredState), defaultSize);
+};
+
+function ensureVisibleOnSomeDisplay(windowState, defaultSize) {
+    const visible = screen.getAllDisplays().some((display) => {
+        return windowWithinBounds(windowState, display.bounds);
+    });
+    if (!visible) {
+        // Window is partially or fully not visible now.
+        // Reset it to safe defaults.
+        const bounds = screen.getPrimaryDisplay().bounds;
+        return Object.assign({}, defaultSize, {
+            x: (bounds.width - defaultSize.width) / 2,
+            y: (bounds.height - defaultSize.height) / 2,
+        });
+    }
+    return windowState;
+};
+
+function windowWithinBounds(windowState, bounds) {
+    return (
+        windowState.x >= bounds.x &&
+        windowState.y >= bounds.y &&
+        windowState.x + windowState.width <= bounds.x + bounds.width &&
+        windowState.y + windowState.height <= bounds.y + bounds.height
+    );
+};

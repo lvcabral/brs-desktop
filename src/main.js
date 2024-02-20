@@ -26,7 +26,7 @@ import {
     setThemeSource,
     setTimeZone,
 } from "./helpers/settings";
-import { createWindow, openCodeEditor, openDevTools, setAspectRatio } from "./helpers/window";
+import { createWindow, openCodeEditor, openDevTools, setAspectRatio, saveWindowState } from "./helpers/window";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 import { randomUUID } from "crypto";
 
@@ -61,7 +61,7 @@ require("@electron/remote/main").initialize();
 const argv = minimist(process.argv.slice(1), {
     string: ["o", "p", "m"],
     boolean: ["c", "d", "e", "f", "r"],
-    alias: {c: "console", d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" },
+    alias: { c: "console", d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" },
 });
 
 // Save userData in separate folders for each environment.
@@ -97,7 +97,7 @@ app.on("ready", () => {
     // Load application settings
     let startup = {
         devTools: false,
-        console:false,
+        console: false,
         runLastChannel: false,
         ecpEnabled: false,
         telnetEnabled: false,
@@ -303,6 +303,8 @@ function setupEvents(mainWindow) {
     app.on("browser-window-created", (_, window) => {
         window.on("close", (evt) => {
             if (window.webContents?.getURL()?.endsWith("editor.html")) {
+                const stateStoreFile = "window-state-editor.json";
+                saveWindowState(stateStoreFile, {}, window);
                 evt.preventDefault();
                 window.hide();
             }

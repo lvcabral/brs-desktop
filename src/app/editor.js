@@ -103,8 +103,7 @@ function main() {
             if (cm) delete cm.CodeMirror.constructor.keyMap.emacsy["Ctrl-V"];
         }
     }
-    const { height } = codeColumn.getBoundingClientRect();
-    editorManager.editor.setSize("100%", `${height - 15}px`);
+    onResize();
     // Check saved id to load
     const loadId = localStorage.getItem(`${appId}.load`);
     populateCodeSelector(loadId ?? "");
@@ -419,11 +418,12 @@ function onMouseDown(event) {
 }
 
 function onResize() {
-    const { height } = codeColumn.getBoundingClientRect();
     if (window.innerWidth >= 1220) {
+        const { height } = codeColumn.getBoundingClientRect();
         editorManager.editor.setSize("100%", `${height - 15}px`);
     } else {
-        editorManager.editor.setSize("100%", `${Math.trunc(window.innerHeight * 0.4)}px`);
+        const { top } = consoleColumn.getBoundingClientRect();
+        editorManager.editor.setSize("100%", `${Math.trunc(window.innerHeight - top - 15)}px`);
         codeColumn.style.width = "100%";
     }
     scrollToBottom();
