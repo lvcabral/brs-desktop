@@ -403,13 +403,19 @@ pre {
     border-left: 1px solid transparent;
     border-right: 1px solid transparent;
     background-color: var(--background-color);
-    opacity: 0;
     z-index: 4;
     cursor: col-resize;
-    opacity: 0.8;
+    opacity: 0.6;
+    transition: opacity 1s ease-in-out;
+    -moz-transition: opacity 1s ease-in-out;
+    -webkit-transition: opacity 1s ease-in-out;
 }
 .layout-separator:hover {
-    opacity: 0.4;
+    opacity: 1.0;
+    background-color: var(--button-background-color);
+    transition: opacity .55s ease-in-out;
+    -moz-transition: opacity .55s ease-in-out;
+    -webkit-transition: opacity .55s ease-in-out;
 }
 
 input {
