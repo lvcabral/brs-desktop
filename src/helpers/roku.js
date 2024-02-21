@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { getPeerRoku, getSyncControl } from "./settings";
 import * as fsExtra from "fs-extra";
 import request from "postman-request";
@@ -18,6 +18,11 @@ ipcMain.on("keySent", (_, data) => {
         } else {
             postEcpRequest(device, `/keyup/${data.key}`);
         }
+    }
+    if (data.key === "poweroff") {
+        const window = BrowserWindow.fromId(1);
+        window.close();
+        app.quit()
     }
 });
 
