@@ -6,18 +6,18 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 const { contextBridge, ipcRenderer, shell } = require("electron");
-const { getCurrentWebContents, getGlobal } = require('@electron/remote')
+const { getCurrentWebContents, getGlobal } = require("@electron/remote");
 const customTitlebar = require("custom-electron-titlebar");
 const Mousetrap = require("mousetrap");
 const path = require("path");
 const isMacOS = process.platform === "darwin";
 
-let onPreferencesUpdatedHandler = () => { };
+let onPreferencesUpdatedHandler = () => {};
 let titleBar;
 let titleBarConfig;
 let titleColor;
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener("DOMContentLoaded", () => {
     // Detect Clipboard Copy to create Screenshot
     Mousetrap.bind(["command+c", "ctrl+c"], function () {
         getCurrentWebContents().send("copyScreenshot");
@@ -72,7 +72,7 @@ contextBridge.exposeInMainWorld("api", {
             icon: "./images/icon.png",
             containerOverflow: "hidden",
             enableMnemonics: true,
-            shadow: true
+            shadow: true,
         };
         titleBar = new customTitlebar.Titlebar(titleBarConfig);
     },
@@ -91,7 +91,9 @@ contextBridge.exposeInMainWorld("api", {
             titleBar.refreshMenu();
         }
     },
-    processPlatform: () => { return process.platform; },
+    processPlatform: () => {
+        return process.platform;
+    },
     send: (channel, data) => {
         // whitelist channels
         let validChannels = [
@@ -110,7 +112,7 @@ contextBridge.exposeInMainWorld("api", {
             "showEditor",
             "keySent",
             "runCode",
-            "reset"
+            "reset",
         ];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
@@ -146,7 +148,7 @@ contextBridge.exposeInMainWorld("api", {
         } else {
             console.warn(`api.receive() - invalid channel: ${channel}`);
         }
-    }
+    },
 });
 
 ipcRenderer.on("refreshMenu", () => {

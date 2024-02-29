@@ -15,7 +15,7 @@ export class CodeMirrorManager {
         indentWithTabs: true,
         electricChars: false,
         matchBrackets: true,
-        autoCloseBrackets: "()[]{}``\"\"",
+        autoCloseBrackets: '()[]{}``""',
         mode: "brightscript",
     };
 

@@ -88,7 +88,7 @@ brs.subscribe("desktop", (event, data) => {
 });
 // Events from Main process
 api.receive("openEditor", function () {
-    if(editor === null || editor.closed) {
+    if (editor === null || editor.closed) {
         editor = window.open("editor.html", "BrightScript Editor", "width=1440,height=800");
     } else {
         api.send("showEditor");
@@ -284,13 +284,13 @@ function redrawEvent(redraw) {
 // Exposed API to Child Windows
 window.runCode = (code) => {
     api.send("runCode", code);
-}
+};
 
 window.getEngineContext = () => {
     return [brs, currentApp, api.getConsoleBuffer(), debugMode];
-}
+};
 
 window.clearStatusCounters = () => {
     clearCounters();
     setStatusColor();
-}
+};

@@ -114,9 +114,7 @@ export function defineMode(CodeMirror) {
             "sqr",
             "tan",
         ];
-        var builtinConsts = [
-            "LINE_NUM",
-        ];
+        var builtinConsts = ["LINE_NUM"];
         var builtinObjsWords = ["global", "m"];
         var knownElements = [
             "getdefaultfont",
@@ -381,7 +379,7 @@ export function defineMode(CodeMirror) {
                         (style.substr(0, 8) === "variable" ||
                             style === "builtin" ||
                             style === "keyword")) ||
-                            knownElements.indexOf(current.substring(1)) > -1
+                    knownElements.indexOf(current.substring(1)) > -1
                 ) {
                     if (style === "builtin" || style === "keyword") style = "variable";
                     if (knownElements.indexOf(current.substr(1)) > -1) style = "variable-2";

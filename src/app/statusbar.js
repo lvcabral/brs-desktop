@@ -171,12 +171,12 @@ export function clearCounters() {
 function shortenPath(bigPath, maxLen) {
     let path = bigPath;
     if (path.length > maxLen) {
-        const splitter = bigPath.indexOf("/") > -1 ? "/" : "\\"
-        const tokens = bigPath.split(splitter)
-        const drive = bigPath.indexOf(":") > -1 ? tokens[0] : ""
-        const fileName = tokens[tokens.length - 1]
-        const len = drive.length + fileName.length
-        const remLen = maxLen - len - 3 // remove the current length and also space for ellipsis char and 2 slashes
+        const splitter = bigPath.indexOf("/") > -1 ? "/" : "\\";
+        const tokens = bigPath.split(splitter);
+        const drive = bigPath.indexOf(":") > -1 ? tokens[0] : "";
+        const fileName = tokens[tokens.length - 1];
+        const len = drive.length + fileName.length;
+        const remLen = maxLen - len - 3; // remove the current length and also space for ellipsis char and 2 slashes
         //remove first and last elements from the array
         tokens.splice(0, 1);
         tokens.splice(tokens.length - 1, 1);
@@ -204,7 +204,7 @@ export function showToast(message, duration = 3000, error = false) {
         style: {
             background: colorValues.getPropertyValue(toastColor).trim(),
             fontSize: "14px",
-        }
+        },
     }).showToast();
 }
 

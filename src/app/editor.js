@@ -14,22 +14,23 @@ import packageInfo from "../../package.json";
 
 const isMacOS = getOS() === "MacOS";
 const codec = Codec("lzma");
-const brsCodeField = document.getElementById("brsCode")
-const saveButton = document.querySelector("button.save")
-const deleteButton = document.querySelector("button.delete")
-const runButton = document.querySelector("button.run")
-const clearAllButton = document.querySelector("button.clear-all")
-const breakButton = document.querySelector("button.break")
-const endButton = document.querySelector("button.end")
-const shareButton = document.querySelector("button.share")
+const brsCodeField = document.getElementById("brsCode");
+const saveButton = document.querySelector("button.save");
+const deleteButton = document.querySelector("button.delete");
+const runButton = document.querySelector("button.run");
+const clearAllButton = document.querySelector("button.clear-all");
+const breakButton = document.querySelector("button.break");
+const resumeButton = document.querySelector("button.resume");
+const endButton = document.querySelector("button.end");
+const shareButton = document.querySelector("button.share");
 const layoutContainer = document.querySelector("main.editor");
-const layoutSeparator = document.querySelector("div.layout-separator")
-const codeColumn = document.querySelector("div.code")
-const consoleColumn = document.querySelector("div.console")
-const codeSelect = document.getElementById("code-selector")
-const codeDialog = document.getElementById("code-dialog")
-const codeForm = document.getElementById("code-form")
-const deleteDialog = document.getElementById("delete-dialog")
+const layoutSeparator = document.querySelector("div.layout-separator");
+const codeColumn = document.querySelector("div.code");
+const consoleColumn = document.querySelector("div.console");
+const codeSelect = document.getElementById("code-selector");
+const codeDialog = document.getElementById("code-dialog");
+const codeForm = document.getElementById("code-form");
+const deleteDialog = document.getElementById("delete-dialog");
 
 const simulator = window.opener;
 let [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
@@ -45,8 +46,9 @@ const commands = {
     },
 };
 const terminal = new VanillaTerminal({
-    welcome: `<span style='color: #2e71ff'>BrightScript Console - ${packageInfo.name} v${packageInfo.version
-        } -  brs-engine v${brs.getVersion()}</span>`,
+    welcome: `<span style='color: #2e71ff'>BrightScript Console - ${packageInfo.name} v${
+        packageInfo.version
+    } -  brs-engine v${brs.getVersion()}</span>`,
     container: "console-logs",
     commands: commands,
     prompt: prompt,
@@ -66,11 +68,12 @@ deleteButton.addEventListener("click", deleteCode);
 runButton.addEventListener("click", runCode);
 clearAllButton.addEventListener("click", clearTerminal);
 breakButton.addEventListener("click", startDebug);
+resumeButton.addEventListener("click", resumeExecution);
 endButton.addEventListener("click", endExecution);
 shareButton.addEventListener("click", shareCode);
 layoutSeparator.addEventListener("mousedown", resizeColumn);
 
-let consoleLogsContainer = document.getElementById("console-logs")
+let consoleLogsContainer = document.getElementById("console-logs");
 let isResizing = false;
 let editorManager;
 let currentId = nanoid(10);
@@ -94,7 +97,7 @@ function main() {
     // Initialize the Code Mirror manager
     if (brsCodeField) {
         const preferences = api.getPreferences();
-        const theme = preferences?.simulator?.theme || 'purple';
+        const theme = preferences?.simulator?.theme || "purple";
         editorManager = new CodeMirrorManager(brsCodeField, theme);
         if (isMacOS) {
             // Remove binding for Ctrl+V on MacOS to allow remapping
@@ -128,13 +131,20 @@ function handleEngineEvents(event, data) {
     } else if (event === "started") {
         currentApp = data;
         console.info(`Execution started ${appId}`);
+        runButton.style.display = "none";
+        endButton.style.display = "inline";
+        breakButton.style.display = "inline";
     } else if (event === "debug") {
         if (data.level === "stop") {
             terminal.output("<br />");
             terminal.setPrompt();
+            resumeButton.style.display = "inline";
+            breakButton.style.display = "none";
         } else if (data.level === "continue") {
             terminal.output("<br />");
             terminal.idle();
+            resumeButton.style.display = "none";
+            breakButton.style.display = "inline";
         } else if (typeof data.content === "string") {
             updateTerminal(data.content, data.level);
         }
@@ -143,6 +153,10 @@ function handleEngineEvents(event, data) {
         currentApp = data;
         console.info(`Execution terminated! ${event}: ${data}`);
         terminal.idle();
+        runButton.style.display = "inline";
+        endButton.style.display = "none";
+        resumeButton.style.display = "none";
+        breakButton.style.display = "none";
     }
 }
 
@@ -332,6 +346,12 @@ function startDebug() {
     }
 }
 
+function resumeExecution() {
+    if (currentApp.running) {
+        brs.debug("cont");
+    }
+}
+
 function endExecution() {
     if (currentApp.running) {
         brs.terminate("EXIT_USER_NAV");
@@ -468,37 +488,33 @@ function getOS() {
         os = "Linux";
     }
     return os;
-};
+}
 
 // Theme Management
 window.__currentTheme = () =>
-    window.matchMedia('(prefers-color-scheme:dark)')?.matches
-        ? 'dark'
-        : 'light';
+    window.matchMedia("(prefers-color-scheme:dark)")?.matches ? "dark" : "light";
 window.__setTheme = () => {
     const preferences = api.getPreferences();
-    let theme = preferences.simulator.theme || 'purple';
-    if (theme === 'system') {
+    let theme = preferences.simulator.theme || "purple";
+    if (theme === "system") {
         theme = __currentTheme();
     }
-    document.documentElement.setAttribute('data-theme', theme);
-    document.getElementById('close-button-dark').style.display = theme === 'light' ? 'none' : '';
-    document.getElementById('close-button-light').style.display = theme === 'light' ? '' : 'none';
-    layoutContainer.style.colorScheme = theme === 'light' ? 'light' : 'dark';
+    document.documentElement.setAttribute("data-theme", theme);
+    document.getElementById("close-button-dark").style.display = theme === "light" ? "none" : "";
+    document.getElementById("close-button-light").style.display = theme === "light" ? "" : "none";
+    layoutContainer.style.colorScheme = theme === "light" ? "light" : "dark";
     if (editorManager) {
         editorManager.editor.setOption("theme", getThemeCss(theme));
     }
 };
-window
-    .matchMedia('(prefers-color-scheme: dark)')
-    .addEventListener('change', __setTheme);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", __setTheme);
 api.onPreferencesUpdated(__setTheme);
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    if (api.processPlatform() === 'darwin') {
-        document.getElementById('window-controls').style.visibility = 'hidden';
+document.addEventListener("DOMContentLoaded", (event) => {
+    if (api.processPlatform() === "darwin") {
+        document.getElementById("window-controls").style.visibility = "hidden";
     } else {
-        document.getElementById('close-button').addEventListener('click', event => {
+        document.getElementById("close-button").addEventListener("click", (event) => {
             api.closePreferences();
         });
     }
