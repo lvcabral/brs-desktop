@@ -197,16 +197,13 @@ a {
     text-decoration: none;
 }
 button {
-    font-family: inherit;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: inherit;
     height: 44px;
     padding: 0 16px;
     border-radius: 8px;
     border: 1px solid var(--button-border-color);
     outline: none;
-}
-button {
-    font-family: Arial, Helvetica, sans-serif;
     background: transparent;
     cursor: pointer;
 }

@@ -177,13 +177,11 @@ function populateCodeSelector(currentId = "") {
     var arrCode = new Array();
     for (var i = 0; i < localStorage.length; i++) {
         const codeId = localStorage.key(i);
-        console.log(codeId, codeId.length);
         if (codeId && codeId.length === 10) {
             let idx = arrCode.length;
             arrCode.push([]);
             let codeName = `Code #${i + 1}`;
             const code = localStorage.getItem(codeId);
-            console.log(code?.startsWith("@="));
             if (code?.startsWith("@=")) {
                 codeName = code.substring(2, code.indexOf("=@"));
             }
@@ -192,13 +190,11 @@ function populateCodeSelector(currentId = "") {
         }
     }
     arrCode.sort();
-    console.log(arrCode);
     codeSelect.length = 1;
     for (var i = 0; i < arrCode.length; i++) {
         const codeId = arrCode[i][1];
         const selected = codeId === currentId;
         codeSelect.options[i + 1] = new Option(arrCode[i][0], codeId, false, selected);
-        console.log(codeId, selected);
     }
 
     deleteButton.style.visibility = currentId === "" ? "hidden" : "visible";
