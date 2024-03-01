@@ -15,6 +15,7 @@ const PORT = 8085;
 let server;
 let clientId = 0;
 let clients = new Map();
+let lines = new Map();
 
 export let isTelnetEnabled = false;
 export function enableTelnet() {
@@ -28,7 +29,7 @@ export function enableTelnet() {
         clientId++;
         // listen for the actual data from the client
         client.on("data", (data) => {
-            processData(data, client, window);
+            processData(data, id, window);
         });
         // Handle exceptions from the client
         client.on("error", (e) => {
@@ -37,12 +38,14 @@ export function enableTelnet() {
         });
         client.on("close", function () {
             clients.delete(id);
+            lines.delete(id);
         });
         client.write(`Connected to ${app.getName()}\r\n`);
         consoleBuffer.forEach((value) => {
             client.write(value);
         });
         clients.set(id, client);
+        lines.set(id, "");
     });
     server.on("listening", () => {
         isTelnetEnabled = true;
@@ -86,37 +89,47 @@ export function updateTelnetStatus(enabled) {
     window.webContents.send("refreshMenu");
 }
 
-function processData(data, client, window) {
+function processData(data, id, window) {
     if (data?.length > 0) {
+        const client = clients.get(id);
+        let line = lines.get(id);
+        const hexData = data.toString('hex');
         if (data[0] === 0xff) {
             // Telnet command
-            if (data.toString('hex') === "fff4fffd06") {
-                // Interrupt
+            if (hexData === "fff4fffd06") {
+                // Interrupt - Ctrl+Break
                 client.write(Buffer.from("fffc06", "hex"));
                 window.webContents.send("debugCommand", "break");
-            } else if (data.toString('hex') === "fffd03fffd01") {
+            } else if (hexData === "fffd03fffd01") {
                 // Will not enter Character at a time mode
                 client.write(Buffer.from("fffc03fffc01", "hex"));
-            } else if (data.toString('hex') === "fffd12") {
+            } else if (hexData === "fffd12") {
                 // Won't logout
                 client.write(Buffer.from("fffc12", "hex"));
             }
             return;
+        } else if (data[0] === 0x03) {
+            // Break - Ctrl+C
+            window.webContents.send("debugCommand", "break");
+            return;
         }
-        let expr = data
-            .toString()
-            .trim()
-            .split(/(?<=^\S+)\s/);
+        line += data.toString();
+        if (!hexData.endsWith("0d") && !hexData.endsWith("0a")) {
+            lines.set(id, line);
+            return;
+        }
+        let expr = line.trim().split(/(?<=^\S+)\s/);
         let cmd = expr[0].toLowerCase();
         if (cmd.toLowerCase() === "close") {
             client.write("bye!\r\n");
             client.destroy();
         } else if (cmd === "quit") {
             window.webContents.send("closeChannel", "EXIT_BRIGHTSCRIPT_STOP");
-        } else if (cmd === "\x03") {
-            window.webContents.send("debugCommand", "break");
+        } else if (cmd === "") {
+            window.webContents.send("debugCommand", String.fromCharCode(10));
         } else {
             window.webContents.send("debugCommand", expr.join(" "));
         }
+        lines.set(id, "");
     }
 }
