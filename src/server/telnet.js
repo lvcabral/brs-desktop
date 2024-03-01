@@ -88,6 +88,21 @@ export function updateTelnetStatus(enabled) {
 
 function processData(data, client, window) {
     if (data?.length > 0) {
+        if (data[0] === 0xff) {
+            // Telnet command
+            if (data.toString('hex') === "fff4fffd06") {
+                // Interrupt
+                client.write(Buffer.from("fffc06", "hex"));
+                window.webContents.send("debugCommand", "break");
+            } else if (data.toString('hex') === "fffd03fffd01") {
+                // Will not enter Character at a time mode
+                client.write(Buffer.from("fffc03fffc01", "hex"));
+            } else if (data.toString('hex') === "fffd12") {
+                // Won't logout
+                client.write(Buffer.from("fffc12", "hex"));
+            }
+            return;
+        }
         let expr = data
             .toString()
             .trim()
