@@ -119,8 +119,16 @@ function main() {
             }
         });
         if (debugMode === "stop") {
+            runButton.style.display = "none";
+            endButton.style.display = "inline";
+            resumeButton.style.display = "inline";
+            breakButton.style.display = "none";
             terminal.output("<br />");
             terminal.setPrompt();
+        } else if (currentApp.running) {
+            runButton.style.display = "none";
+            endButton.style.display = "inline";
+            breakButton.style.display = "inline";
         }
     }
 }
@@ -325,7 +333,7 @@ export function runCode() {
     const code = editorManager.editor.getValue();
     if (code && code.trim() !== "") {
         try {
-            simulator.runCode(editorManager.editor.getValue());
+            api.send("runCode", editorManager.editor.getValue());
             terminal.output(`<br /><pre>Executing source code...</pre><br /><br />`);
             terminal.idle();
         } catch (e) {

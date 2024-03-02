@@ -282,10 +282,6 @@ function redrawEvent(redraw) {
 }
 
 // Exposed API to Child Windows
-window.runCode = (code) => {
-    api.send("runCode", code);
-};
-
 window.getEngineContext = () => {
     return [brs, currentApp, api.getConsoleBuffer(), debugMode];
 };
