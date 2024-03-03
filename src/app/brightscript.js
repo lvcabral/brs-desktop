@@ -16,10 +16,10 @@ export function defineMode(CodeMirror) {
             return new RegExp(`^((${words.join(")|(")}))\\b`, "i");
         }
 
-        let singleOperators = /^[\+\-\/\*&\\\^<>=]/;
+        let singleOperators = /^[+\-/*&\\^<>=]/;
         let doubleOperators = /^((<>)|(<=)|(>=)|(<<)|(>>))/;
         let singleDelimiters = /^[.,;:$%!#&@?]/;
-        let brackets = /^[\(\)\[\]\{\}]/;
+        let brackets = /^[\(\)\[\]\{}]/;
         let functions = /^[_A-Za-z]\w*(?=\()/;
         let identifiers = /^[_A-Za-z]\w*/;
 
