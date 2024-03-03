@@ -279,10 +279,6 @@ pre {
     height: 0;
     visibility: hidden;
 }
-.console .console-header button span {
-    font-size: 16px;
-    margin-right: 0.2em;
-}
 .console .console-header label span {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 16px;
