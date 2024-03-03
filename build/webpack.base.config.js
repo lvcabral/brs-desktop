@@ -12,7 +12,6 @@ const translateEnvToMode = (env) => {
 module.exports = env => {
   return {
     target: "electron-renderer",
-    mode: translateEnvToMode(env),
     node: {
       __dirname: false,
       __filename: false

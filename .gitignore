@@ -8,9 +8,4 @@ Thumbs.db
 /out
 
 # ignore everything in 'app' folder what had been generated from 'src' folder
-/app/*.js
-/app/*.html
-/app/**/*.map
-/app/audio
-/app/fonts
-/app/lib
+/app

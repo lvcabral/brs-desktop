@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { getPeerRoku, getSyncControl } from "./settings";
 import * as fsExtra from "fs-extra";
 import request from "postman-request";
@@ -18,6 +18,11 @@ ipcMain.on("keySent", (_, data) => {
         } else {
             postEcpRequest(device, `/keyup/${data.key}`);
         }
+    }
+    if (data.key === "poweroff") {
+        const window = BrowserWindow.fromId(1);
+        window.close();
+        app.quit()
     }
 });
 
@@ -42,34 +47,25 @@ export async function runOnPeerRoku(filePath) {
                     archive: readStream,
                 },
                 (err, response, body) => {
+                    let message = "";
+                    let isError = false;
                     if (err) {
-                        window.webContents.send(
-                            "console",
-                            `Error installing app: ${err} ${body}`,
-                            true
-                        );
+                        message = `Error installing app: ${err} ${body}`;
+                        isError = true;
                     } else if (response?.statusCode !== 200) {
-                        window.webContents.send(
-                            "console",
-                            `Response Installing app: ${response?.statusCode} ${body}`,
-                            false
-                        );
+                        message = `Response Installing app: ${response.statusCode} ${err ?? ""}`;
+                        if (isCompileError(body)) {
+                            message = `Error compiling app: ${response.statusCode} check telnet console for details`;
+                        }
+                        isError = true;
                     } else {
+                        message = `App installed on peer Roku at ${device.ip} with success!`;
                         if (response.body.indexOf("Identical to previous version") > -1) {
-                            window.webContents.send(
-                                "console",
-                                `Identical to previous version, starting "dev" app...`,
-                                false
-                            );
+                            message = `Identical to previous version, starting "dev" app...`;
                             postEcpRequest(device, "/launch/dev");
-                        } else {
-                            window.webContents.send(
-                                "console",
-                                `App installed on peer Roku at ${device.ip} with success!`,
-                                false
-                            );
                         }
                     }
+                    window.webContents.send("console", message, isError);
                     try {
                         // Prevent file locking
                         readStream?.close();
@@ -131,6 +127,10 @@ function postEcpRequest(device, path, callback) {
             }
         }
     );
+}
+
+function isCompileError(responseHtml) {
+    return !!/install\sfailure:\scompilation\sfailed/i.exec(responseHtml);
 }
 
 export function isValidIP(ip) {

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -46,10 +46,10 @@ statusWeb.onclick = function () {
     api.openExternal(`http://localhost:${installerPort}/`);
 };
 statusDevTools.onclick = function () {
-    api.send("openDevTools");
+    api.send("openConsole");
 };
 statusAudio.onclick = function () {
-    let muted = !brs.getAudioMute();
+    const muted = !brs.getAudioMute();
     brs.setAudioMute(muted);
     api.send("setAudioMute", muted);
     setAudioStatus(muted);
@@ -73,25 +73,26 @@ brs.subscribe("statusbar", (event, data) => {
         updateStatus(false);
     } else if (event === "redraw") {
         redrawStatus(data);
+    } else if (event === "control" && data.key === "volumemute" && data.mod === 0) {
+        const muted = brs.getAudioMute();
+        api.send("setAudioMute", muted);
+        setAudioStatus(muted);
+        showToast(`Audio is ${muted ? "off" : "on"}`);
     } else if (event === "resolution") {
-        statusResolution.innerText = `${data.width}x${data.height}`;
-        statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
-        statusResolution.style.display = "";
-        statusIconRes.style.display = "";
-        statusSepRes.style.display = "";
+        updateResolution(data.width, data.height);
     } else if (event === "display") {
         statusDisplay.innerText = `${getUIType(data)} (${data})`;
     } else if (event === "debug") {
-        if (data.level === "error") {
-            errorCount++;
-        } else if (data.level === "warning") {
-            warnCount++;
-        }
-        setStatusColor();
+        setStatusColor(data.level);
     }
 });
 // Set status bar colors
-export function setStatusColor() {
+export function setStatusColor(level = "") {
+    if (level === "error") {
+        errorCount++;
+    } else if (level === "warning") {
+        warnCount++;
+    }
     statusError.innerText = errorCount.toString();
     statusWarn.innerText = warnCount.toString();
     if (errorCount > 0) {
@@ -113,6 +114,15 @@ export function setStatusColor() {
         statusECP.className = "statusIcons";
         statusDevTools.className = "statusIcons";
     }
+}
+
+// Update Screen Resolution on Status Bar
+function updateResolution(width, height) {
+    statusResolution.innerText = `${width}x${height}`;
+    statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
+    statusResolution.style.display = "";
+    statusIconRes.style.display = "";
+    statusSepRes.style.display = "";
 }
 
 // Update Audio icon on Status Bar
@@ -164,12 +174,12 @@ export function clearCounters() {
 function shortenPath(bigPath, maxLen) {
     let path = bigPath;
     if (path.length > maxLen) {
-        const splitter = bigPath.indexOf("/") > -1 ? "/" : "\\"
-        const tokens = bigPath.split(splitter)
-        const drive = bigPath.indexOf(":") > -1 ? tokens[0] : ""
-        const fileName = tokens[tokens.length - 1]
-        const len = drive.length + fileName.length
-        const remLen = maxLen - len - 3 // remove the current length and also space for ellipsis char and 2 slashes
+        const splitter = bigPath.indexOf("/") > -1 ? "/" : "\\";
+        const tokens = bigPath.split(splitter);
+        const drive = bigPath.indexOf(":") > -1 ? tokens[0] : "";
+        const fileName = tokens[tokens.length - 1];
+        const len = drive.length + fileName.length;
+        const remLen = maxLen - len - 3; // remove the current length and also space for ellipsis char and 2 slashes
         //remove first and last elements from the array
         tokens.splice(0, 1);
         tokens.splice(tokens.length - 1, 1);
@@ -197,7 +207,7 @@ export function showToast(message, duration = 3000, error = false) {
         style: {
             background: colorValues.getPropertyValue(toastColor).trim(),
             fontSize: "14px",
-        }
+        },
     }).showToast();
 }
 

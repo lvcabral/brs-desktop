@@ -6,18 +6,18 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 const { contextBridge, ipcRenderer, shell } = require("electron");
-const { getCurrentWebContents, getGlobal } = require('@electron/remote')
+const { getCurrentWebContents, getGlobal } = require("@electron/remote");
 const customTitlebar = require("custom-electron-titlebar");
 const Mousetrap = require("mousetrap");
 const path = require("path");
 const isMacOS = process.platform === "darwin";
 
-let onPreferencesChangedHandler = () => { };
+let onPreferencesUpdatedHandler = () => {};
 let titleBar;
 let titleBarConfig;
 let titleColor;
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener("DOMContentLoaded", () => {
     // Detect Clipboard Copy to create Screenshot
     Mousetrap.bind(["command+c", "ctrl+c"], function () {
         getCurrentWebContents().send("copyScreenshot");
@@ -32,8 +32,11 @@ contextBridge.exposeInMainWorld("api", {
     getPreferences: () => {
         return ipcRenderer.sendSync("getPreferences");
     },
-    onPreferencesChanged: (handler) => {
-        onPreferencesChangedHandler = handler;
+    onPreferencesUpdated: (handler) => {
+        onPreferencesUpdatedHandler = handler;
+    },
+    getConsoleBuffer: () => {
+        return ipcRenderer.sendSync("getConsoleBuffer");
     },
     isStatusEnabled: () => {
         const settings = ipcRenderer.sendSync("getPreferences");
@@ -69,7 +72,7 @@ contextBridge.exposeInMainWorld("api", {
             icon: "./images/icon.png",
             containerOverflow: "hidden",
             enableMnemonics: true,
-            shadow: true
+            shadow: true,
         };
         titleBar = new customTitlebar.Titlebar(titleBarConfig);
     },
@@ -88,13 +91,16 @@ contextBridge.exposeInMainWorld("api", {
             titleBar.refreshMenu();
         }
     },
+    processPlatform: () => {
+        return process.platform;
+    },
     send: (channel, data) => {
         // whitelist channels
         let validChannels = [
             "telnet",
             "addRecentSource",
             "addRecentPackage",
-            "openDevTools",
+            "openConsole",
             "debugStarted",
             "setAudioMute",
             "deviceData",
@@ -103,8 +109,10 @@ contextBridge.exposeInMainWorld("api", {
             "saveFile",
             "saveIcon",
             "updateRegistry",
+            "showEditor",
             "keySent",
-            "reset"
+            "runCode",
+            "reset",
         ];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
@@ -131,7 +139,8 @@ contextBridge.exposeInMainWorld("api", {
             "serverStatus",
             "copyScreenshot",
             "saveScreenshot",
-            "fileSelected"
+            "fileSelected",
+            "openEditor",
         ];
         if (validChannels.includes(channel)) {
             // Deliberately strip event as it includes `sender`
@@ -139,7 +148,7 @@ contextBridge.exposeInMainWorld("api", {
         } else {
             console.warn(`api.receive() - invalid channel: ${channel}`);
         }
-    }
+    },
 });
 
 ipcRenderer.on("refreshMenu", () => {
@@ -152,5 +161,5 @@ ipcRenderer.on("refreshMenu", () => {
 });
 
 ipcRenderer.on("preferencesUpdated", (e, preferences) => {
-    onPreferencesChangedHandler(preferences);
+    onPreferencesUpdatedHandler(preferences);
 });

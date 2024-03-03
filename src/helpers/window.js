@@ -1,20 +1,22 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
-import { getSimulatorOption } from "./settings";
+import { getSimulatorOption, getTitleOverlayTheme } from "./settings";
 import path from "path";
 import jetpack from "fs-jetpack";
 
+const userDataDir = jetpack.cwd(app.getPath("userData"));
 const isMacOS = process.platform === "darwin";
+const isWindows = process.platform === "win32";
+
 export let appFocused = false;
 
 export function createWindow(name, options) {
-    const userDataDir = jetpack.cwd(app.getPath("userData"));
     const stateStoreFile = `window-state-${name}.json`;
     const defaultSize = {
         width: options.width,
@@ -23,65 +25,7 @@ export function createWindow(name, options) {
     let state = {};
     let win;
 
-    const restore = () => {
-        let restoredState = {};
-        try {
-            restoredState = userDataDir.read(stateStoreFile, "json");
-        } catch (err) {
-            // For some reason json can't be read (might be corrupted).
-            // No worries, we have defaults.
-        }
-        return Object.assign({}, defaultSize, restoredState);
-    };
-
-    const getWindowState = () => {
-        const bounds = win.getBounds();
-        return {
-            x: bounds.x,
-            y: bounds.y,
-            width: bounds.width,
-            height: bounds.height,
-            backgroundColor: global.sharedObject.backgroundColor,
-        };
-    };
-
-    const windowWithinBounds = (windowState, bounds) => {
-        return (
-            windowState.x >= bounds.x &&
-            windowState.y >= bounds.y &&
-            windowState.x + windowState.width <= bounds.x + bounds.width &&
-            windowState.y + windowState.height <= bounds.y + bounds.height
-        );
-    };
-
-    const resetToDefaults = () => {
-        const bounds = screen.getPrimaryDisplay().bounds;
-        return Object.assign({}, defaultSize, {
-            x: (bounds.width - defaultSize.width) / 2,
-            y: (bounds.height - defaultSize.height) / 2,
-        });
-    };
-
-    const ensureVisibleOnSomeDisplay = (windowState) => {
-        const visible = screen.getAllDisplays().some((display) => {
-            return windowWithinBounds(windowState, display.bounds);
-        });
-        if (!visible) {
-            // Window is partially or fully not visible now.
-            // Reset it to safe defaults.
-            return resetToDefaults();
-        }
-        return windowState;
-    };
-
-    const saveState = () => {
-        if (!win.isMinimized() && !win.isMaximized() && !win.isFullScreen()) {
-            Object.assign(state, getWindowState());
-        }
-        userDataDir.write(stateStoreFile, state, { atomic: true });
-    };
-
-    state = ensureVisibleOnSomeDisplay(restore());
+    state = restoreWindowState(stateStoreFile, defaultSize);
 
     win = new BrowserWindow(
         Object.assign(options, state, {
@@ -92,6 +36,7 @@ export function createWindow(name, options) {
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
                 webSecurity: true,
+                nativeWindowOpen: true
             },
             icon: __dirname + "/images/icon.ico",
             frame: false,
@@ -106,20 +51,53 @@ export function createWindow(name, options) {
         details.responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
         callback({ responseHeaders: details.responseHeaders });
     });
+
+    // Control Child Windows behavior
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        if (url.endsWith("editor.html")) {
+            const stateStoreFile = "window-state-editor.json";
+            const defaultSize = { width: 1440, height: 800 };
+            const state = restoreWindowState(stateStoreFile, defaultSize);
+            const userTheme = global.sharedObject.theme;
+            return {
+                action: 'allow',
+                overrideBrowserWindowOptions: Object.assign(state, {
+                    title: "Code Editor",
+                    titleBarStyle: isWindows || isMacOS ? "hidden" : null,
+                    titleBarOverlay: getTitleOverlayTheme(userTheme),
+                    minWidth: 600,
+                    minHeight: 600,
+                    webPreferences: {
+                        preload: path.join(__dirname, "./preload.js"),
+                        contextIsolation: true,
+                        enableRemoteModule: true,
+                        nodeIntegration: true,
+                        nodeIntegrationInWorker: true,
+                        webSecurity: true,
+                    },
+                })
+            };
+        }
+        return { action: "allow" };
+    });
+
+    // Window Focus Events
     win.on("focus", () => {
         appFocused = true;
-    })
+    });
     win.on("blur", () => {
         appFocused = false;
-    })
-    win.on("close", saveState);
+    });
+    win.on("close", () => {
+        saveWindowState(stateStoreFile, state, win);
+    });
     // App Renderer Events
-    ipcMain.on("openDevTools", () => {
-        openDevConsole(win);
+    ipcMain.on("openConsole", () => {
+        openCodeEditor();
     });
     ipcMain.on("debugStarted", () => {
-        if (getSimulatorOption("devToolsDebug")) {
-            openDevConsole(win);
+        if (getSimulatorOption("consoleOnDebug")) {
+            openCodeEditor();
         }
     });
     ipcMain.on("setBackgroundColor", (_, color) => {
@@ -137,6 +115,20 @@ export function createWindow(name, options) {
             global.sharedObject.deviceInfo.registry = data;
         }
     });
+    ipcMain.on("showEditor", () => {
+        const allWindows = BrowserWindow.getAllWindows();
+        allWindows.some((window) => {
+            if (window.getURL().endsWith("editor.html")) {
+                if (window.isMinimized()) {
+                    window.restore();
+                } else if (!window.isVisible()) {
+                    window.show();
+                }
+                window.focus({ steal: true });
+                return true;
+            }
+        });
+    });
     ipcMain.on("reset", () => {
         win.reload();
     });
@@ -152,7 +144,8 @@ export function createWindow(name, options) {
     }
     return win;
 }
-export function openDevConsole(window) {
+
+export function openDevTools(window) {
     window.openDevTools({ mode: 'detach' });
 }
 
@@ -207,3 +200,67 @@ export function reloadApp() {
         window.webContents.reloadIgnoringCache();
     }
 }
+
+export function openCodeEditor() {
+    const window = BrowserWindow.fromId(1);
+    if (window) {
+        window.webContents.send("openEditor");
+    }
+}
+
+export function saveWindowState(stateStoreFile, state, win) {
+    if (!win.isMinimized() && !win.isMaximized() && !win.isFullScreen() && win.isVisible()) {
+        Object.assign(state, getWindowState(win));
+    }
+    if (state.width && state.height) {
+        userDataDir.write(stateStoreFile, state, { atomic: true });
+    }
+};
+
+// Helper Functions
+function getWindowState(win) {
+    const bounds = win.getBounds();
+    return {
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height,
+        backgroundColor: global.sharedObject.backgroundColor,
+    };
+};
+
+function restoreWindowState(stateStoreFile, defaultSize) {
+    let restoredState = {};
+    try {
+        restoredState = userDataDir.read(stateStoreFile, "json");
+    } catch (err) {
+        // For some reason json can't be read (might be corrupted).
+        // No worries, we have defaults.
+    }
+    return ensureVisibleOnSomeDisplay({...defaultSize, ...restoredState}, defaultSize);
+};
+
+function ensureVisibleOnSomeDisplay(windowState, defaultSize) {
+    const visible = screen.getAllDisplays().some((display) => {
+        return windowWithinBounds(windowState, display.bounds);
+    });
+    if (!visible) {
+        // Window is partially or fully not visible now.
+        // Reset it to safe defaults.
+        const bounds = screen.getPrimaryDisplay().bounds;
+        return Object.assign({}, defaultSize, {
+            x: (bounds.width - defaultSize.width) / 2,
+            y: (bounds.height - defaultSize.height) / 2,
+        });
+    }
+    return windowState;
+};
+
+function windowWithinBounds(windowState, bounds) {
+    return (
+        windowState.x >= bounds.x &&
+        windowState.y >= bounds.y &&
+        windowState.x + windowState.width <= bounds.x + bounds.width &&
+        windowState.y + windowState.height <= bounds.y + bounds.height
+    );
+};

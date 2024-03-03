@@ -5,10 +5,10 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import "../css/main.css";
-import "../css/fontawesome.min.css";
+import "./styles/main.css";
+import "./styles/fontawesome.min.css";
 import "../helpers/hash";
-import { setStatusColor, setAudioStatus, showToast } from "./statusbar";
+import { setStatusColor, setAudioStatus, showToast, clearCounters } from "./statusbar";
 
 // Simulator display
 const display = document.getElementById("display");
@@ -36,6 +36,7 @@ if ("models" in customDeviceInfo) {
 // Initialize device and subscribe to events
 let currentApp = { id: "", running: false };
 let debugMode = "continue";
+let editor = null;
 const customKeys = new Map();
 customKeys.set("Comma", "rev");
 customKeys.set("Period", "fwd");
@@ -45,7 +46,7 @@ customKeys.set("KeyA", "a");
 customKeys.set("KeyZ", "b");
 
 brs.initialize(customDeviceInfo, {
-    debugToConsole: true,
+    debugToConsole: false,
     showStats: false,
     customKeys: customKeys,
 });
@@ -86,6 +87,14 @@ brs.subscribe("desktop", (event, data) => {
     }
 });
 // Events from Main process
+api.receive("openEditor", function () {
+    if (editor === null || editor.closed) {
+        editor = window.open("editor.html", "BrightScript Editor", "width=1440,height=800");
+    } else {
+        api.send("showEditor");
+    }
+});
+
 api.receive("setTheme", function (theme) {
     if (theme !== document.documentElement.getAttribute("data-theme")) {
         document.documentElement.setAttribute("data-theme", theme);
@@ -271,3 +280,13 @@ function redrawEvent(redraw) {
         }
     }
 }
+
+// Exposed API to Child Windows
+window.getEngineContext = () => {
+    return [brs, currentApp, api.getConsoleBuffer(), debugMode];
+};
+
+window.clearStatusCounters = () => {
+    clearCounters();
+    setStatusColor();
+};

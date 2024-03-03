@@ -67,10 +67,10 @@ This screen allows the user to configure multiple features, including some not a
 Here are **optional** arguments you can use when starting the simulator at the command line:
 
 ```shell
-"BrightScript Simulator" [-o <path>] [-f] [-m <dm>] [-e] [-t] [-w [<port>]] [-p <newpwd>] [-d]
+"BrightScript Simulator" [-o <path>] [-f] [-m <dm>] [-e] [-t] [-w [<port>]] [-p <newpwd>] [-c] [-d]
 
 "BrightScript Simulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--rc]
-                        [--web[=<port>]] [--pwd=<newpwd>] [--devtools]
+                        [--web[=<port>]] [--pwd=<newpwd>] [--console] [--devtools]
 ```
 
 |Argument                                |Description                                                                   |
@@ -82,4 +82,5 @@ Here are **optional** arguments you can use when starting the simulator at the c
 |**-r** or **--rc**                      | Enables a telnet server on port 8085 to allow **Remote Console** monitoring. |
 |**-w** `[<port>]` or **--web**`[=<port>]`| Enables **Web Installer** on port 80 optionally set and save a custom `<port>`.|
 |**-p** `<newpwd>` or **--pwd=**`<newpwd>`| Changes the **Web Installer** password and saves it on local storage.       |
+|**-c** or **--console**                 | Opens the **BrightScript console** when starting the simulator.              |
 |**-d** or **--devtools**                | Opens the **developer tools** when starting the simulator.                   |

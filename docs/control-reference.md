@@ -15,6 +15,7 @@ The simulator supports by default the following mapping of the keyboard and game
 | (space bar) |     5      |  Play/Pause  | Play/Pause button. Check app instructions for custom usage.           |
 | A           |    10      |     A        | A game buttom. Check app instructions for custom usage.               |
 | Z           |    11      |     B        | B game buttom. Check app instructions for custom usage.               |
+| F10         |    17      | Volume Mute  | Button to toggle the simulator volume mute on/off.                    |
 
 <p align="left">
 <img src="images/control-reference.png?raw=true"/>
