@@ -13,15 +13,15 @@ export function defineMode(CodeMirror) {
         const ERRORCLASS = "error";
 
         function wordRegexp(words) {
-            return new RegExp("^((" + words.join(")|(") + "))\\b", "i");
+            return new RegExp(`^((${words.join(")|(")}))\\b`, "i");
         }
 
-        let singleOperators = new RegExp("^[\\+\\-\\*/&\\\\\\^<>=]");
-        let doubleOperators = new RegExp("^((<>)|(<=)|(>=)|(<<)|(>>))");
-        let singleDelimiters = new RegExp("^[\\.,;:$%!#&@?]");
-        let brackets = new RegExp("^[\\(\\)\\[\\]\\{\\}]");
-        let functions = new RegExp("^[A-Za-z][_A-Za-z0-9]+(?=\\()");
-        let identifiers = new RegExp("^[A-Za-z][_A-Za-z0-9]*");
+        let singleOperators = /^[\+\-\/\*&\\\^<>=]/;
+        let doubleOperators = /^((<>)|(<=)|(>=)|(<<)|(>>))/;
+        let singleDelimiters = /^[.,;:$%!#&@?]/;
+        let brackets = /^[\(\)\[\]\{\}]/;
+        let functions = /^[A-Za-z][_A-Za-z0-9]+(?=\()/;
+        let identifiers = /^[A-Za-z][_A-Za-z0-9]*/;
 
         let openingKeywords = ["sub", "function"];
         let endKeywords = ["endsub", "endfunction"];
