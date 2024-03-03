@@ -175,8 +175,8 @@ export function defineMode(CodeMirror) {
 
             // Handle Number Literals
             if (
-                stream.match(/^((&H)|(&O))?[0-9\.]/i, false) &&
-                !stream.match(/^((&H)|(&O))?[0-9\.]+[a-z_]/i, false)
+                stream.match(/^((&H)|(&O))?[0-9.]/i, false) &&
+                !stream.match(/^((&H)|(&O))?[0-9.]+[a-z_]/i, false)
             ) {
                 let floatLiteral = false;
                 // Floats
@@ -420,7 +420,7 @@ export function defineMode(CodeMirror) {
             },
 
             indent: function (state, textAfter) {
-                let trueText = textAfter.replace(/^\s+|\s+$/g, "");
+                let trueText = textAfter.replace(/(^\s+)|(\s+$)/g, "");
                 if (
                     trueText.match(closing) ||
                     trueText.match(doubleClosing) ||
