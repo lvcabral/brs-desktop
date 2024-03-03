@@ -1,5 +1,35 @@
 # Changelog
 
+<a name="v1.2.0"></a>
+
+## [v1.2.0 - Editor and Console Window](https://github.com/lvcabral/brs-desktop/releases/tag/v1.2.0) - 02 Mar 2024
+
+### Release Changes
+
+* Implemented Code Editor and Console window by [@lvcabral](https://github.com/lvcabral) in [154](https://github.com/lvcabral/brs-desktop/pull/154)
+  * Added editor and console code based on [brs-fiddle](https://github.com/lvcabral/brs-fiddle)
+  * Removed app folder from git (all files are generated from `src` now)
+  * Linked code editor to main simulator display
+  * Removed display and hooked to the app.js
+  * Added Theme Support, Startup Setting and Command Line switch
+  * Clear Console also reset Status counters
+  * Editor improvements and fixes
+  * Change buttons to be displayed depending on the context
+  * Fixed Telnet behavior to handle IOC commands
+  * Added Telnet support for char by char when the client can't switch to line mode
+  * Several SonarCloud static analysis issues fixed
+* Upgraded `brs-engine` to [v1.3.1](https://github.com/lvcabral/brs-engine/releases/tag/v1.3.1) - some changes were:
+  * Added support to `volumemute` key
+  * Implemented support for `PowerOff` ECP key press
+  * Added `ifDraw2d` method `drawTransformedObject()` 
+  * Added to the MicroDebugger support for `Function`, `If`,  `For` and `While`
+  * Added `quit` command to the MicroDebugger
+  * Fixed MicroDebugger truncate String variable to max 94 characters
+  * Fixed MicroDebugger not exiting properly with `exit` command
+  * Fixed MicroDebugger formatting issues and the handling of linefeed
+
+[Full Changelog][v1.2.0]
+
 <a name="v1.1.0"></a>
 
 ## [v1.1.0 - Peer Roku Device](https://github.com/lvcabral/brs-desktop/releases/tag/v1.1.0) - 14 Feb 2024
@@ -198,6 +228,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v1.2.0]: https://github.com/lvcabral/brs-desktop/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/lvcabral/brs-desktop/compare/v1.0.0...v1.1.0
 [v1.0.0]: https://github.com/lvcabral/brs-desktop/compare/v0.10.30...v1.0.0
 [v0.10.31]: https://github.com/lvcabral/brs-desktop/compare/v0.10.30...v0.10.31

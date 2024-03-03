@@ -8,5 +8,3 @@
 - Create the annotated tag with the version: `git tag -a v1.x.x`
 - Push the updates with the tag: `git push --follow-tags`
 - The GitHub Actions workflow will be triggered and create a Draft release with installers.
-
-
