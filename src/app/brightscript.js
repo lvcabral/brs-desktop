@@ -20,8 +20,8 @@ export function defineMode(CodeMirror) {
         let doubleOperators = /^((<>)|(<=)|(>=)|(<<)|(>>))/;
         let singleDelimiters = /^[.,;:$%!#&@?]/;
         let brackets = /^[\(\)\[\]\{\}]/;
-        let functions = /^[A-Za-z][_A-Za-z0-9]+(?=\()/;
-        let identifiers = /^[A-Za-z][_A-Za-z0-9]*/;
+        let functions = /^[_A-Za-z]\w*(?=\()/;
+        let identifiers = /^[_A-Za-z]\w*/;
 
         let openingKeywords = ["sub", "function"];
         let endKeywords = ["endsub", "endfunction"];
