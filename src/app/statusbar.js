@@ -73,32 +73,26 @@ brs.subscribe("statusbar", (event, data) => {
         updateStatus(false);
     } else if (event === "redraw") {
         redrawStatus(data);
-    } else if (event === "control") {
-        if (data.key === "volumemute" && data.mod === 0) {
-            const muted = brs.getAudioMute();
-            api.send("setAudioMute", muted);
-            setAudioStatus(muted);
-            showToast(`Audio is ${muted ? "off" : "on"}`);
-        }
+    } else if (event === "control" && data.key === "volumemute" && data.mod === 0) {
+        const muted = brs.getAudioMute();
+        api.send("setAudioMute", muted);
+        setAudioStatus(muted);
+        showToast(`Audio is ${muted ? "off" : "on"}`);
     } else if (event === "resolution") {
-        statusResolution.innerText = `${data.width}x${data.height}`;
-        statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
-        statusResolution.style.display = "";
-        statusIconRes.style.display = "";
-        statusSepRes.style.display = "";
+        updateResolution(data.width, data.height);
     } else if (event === "display") {
         statusDisplay.innerText = `${getUIType(data)} (${data})`;
     } else if (event === "debug") {
-        if (data.level === "error") {
-            errorCount++;
-        } else if (data.level === "warning") {
-            warnCount++;
-        }
-        setStatusColor();
+        setStatusColor(data.level);
     }
 });
 // Set status bar colors
-export function setStatusColor() {
+export function setStatusColor(level = "") {
+    if (level === "error") {
+        errorCount++;
+    } else if (level === "warning") {
+        warnCount++;
+    }
     statusError.innerText = errorCount.toString();
     statusWarn.innerText = warnCount.toString();
     if (errorCount > 0) {
@@ -120,6 +114,15 @@ export function setStatusColor() {
         statusECP.className = "statusIcons";
         statusDevTools.className = "statusIcons";
     }
+}
+
+// Update Screen Resolution on Status Bar
+function updateResolution(width, height) {
+    statusResolution.innerText = `${width}x${height}`;
+    statusIconRes.innerHTML = "<i class='fa fa-ruler-combined'></i>";
+    statusResolution.style.display = "";
+    statusIconRes.style.display = "";
+    statusSepRes.style.display = "";
 }
 
 // Update Audio icon on Status Bar

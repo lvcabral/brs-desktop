@@ -46,9 +46,8 @@ const commands = {
     },
 };
 const terminal = new VanillaTerminal({
-    welcome: `<span style='color: #2e71ff'>BrightScript Console - ${packageInfo.name} v${
-        packageInfo.version
-    } -  brs-engine v${brs.getVersion()}</span>`,
+    welcome: `<span style='color: #2e71ff'>BrightScript Console - ${packageInfo.name} v${packageInfo.version
+        } -  brs-engine v${brs.getVersion()}</span>`,
     container: "console-logs",
     commands: commands,
     prompt: prompt,
@@ -79,58 +78,47 @@ let editorManager;
 let currentId = nanoid(10);
 
 function main() {
-    if (saveButton) {
-        saveButton.title = isMacOS ? "CMD+S" : "CTRL+S";
-    }
-    if (runButton) {
-        runButton.title = isMacOS ? "CMD+R" : "CTRL+R";
-    }
-    if (clearAllButton) {
-        clearAllButton.title = isMacOS ? "CMD+L" : "CTRL+L";
-    }
-    if (endButton) {
-        endButton.title = isMacOS ? "CTRL+ESC" : "HOME";
-    }
-    if (breakButton) {
-        breakButton.title = isMacOS ? "CTRL+C" : "CTRL+B";
-    }
+    updateButtons()
     // Initialize the Code Mirror manager
-    if (brsCodeField) {
-        const preferences = api.getPreferences();
-        const theme = preferences?.simulator?.theme || "purple";
-        editorManager = new CodeMirrorManager(brsCodeField, theme);
-        if (isMacOS) {
-            // Remove binding for Ctrl+V on MacOS to allow remapping
-            // https://github.com/codemirror/codemirror5/issues/5848
-            const cm = document.querySelector(".CodeMirror");
-            if (cm) delete cm.CodeMirror.constructor.keyMap.emacsy["Ctrl-V"];
-        }
+    const preferences = api.getPreferences();
+    const theme = preferences?.simulator?.theme || "purple";
+    editorManager = new CodeMirrorManager(brsCodeField, theme);
+    if (isMacOS) {
+        // Remove binding for Ctrl+V on MacOS to allow remapping
+        // https://github.com/codemirror/codemirror5/issues/5848
+        const cm = document.querySelector(".CodeMirror");
+        delete cm.CodeMirror.constructor.keyMap.emacsy["Ctrl-V"];
     }
     onResize();
     populateCodeSelector();
     // Subscribe to Engine events and initialize Console
-    if (brs) {
-        // Subscribe to Engine Events
-        brs.subscribe(appId, handleEngineEvents);
-        // Handle console commands
-        terminal.onInput((command, parameters, handled) => {
-            if (!handled) {
-                brs.debug(`${command} ${parameters.join(" ")}`);
-            }
-        });
-        if (debugMode === "stop") {
-            runButton.style.display = "none";
-            endButton.style.display = "inline";
-            resumeButton.style.display = "inline";
-            breakButton.style.display = "none";
-            terminal.output("<br />");
-            terminal.setPrompt();
-        } else if (currentApp.running) {
-            runButton.style.display = "none";
-            endButton.style.display = "inline";
-            breakButton.style.display = "inline";
+    brs.subscribe(appId, handleEngineEvents);
+    // Handle console commands
+    terminal.onInput((command, parameters, handled) => {
+        if (!handled) {
+            brs.debug(`${command} ${parameters.join(" ")}`);
         }
+    });
+    if (debugMode === "stop") {
+        runButton.style.display = "none";
+        endButton.style.display = "inline";
+        resumeButton.style.display = "inline";
+        breakButton.style.display = "none";
+        terminal.output("<br />");
+        terminal.setPrompt();
+    } else if (currentApp.running) {
+        runButton.style.display = "none";
+        endButton.style.display = "inline";
+        breakButton.style.display = "inline";
     }
+}
+
+function updateButtons() {
+    saveButton.title = isMacOS ? "CMD+S" : "CTRL+S";
+    runButton.title = isMacOS ? "CMD+R" : "CTRL+R";
+    clearAllButton.title = isMacOS ? "CMD+L" : "CTRL+L";
+    endButton.title = isMacOS ? "CTRL+ESC" : "HOME";
+    breakButton.title = isMacOS ? "CTRL+C" : "CTRL+B";
 }
 
 function handleEngineEvents(event, data) {
@@ -374,22 +362,13 @@ function clearTerminal() {
 }
 
 function hotKeys(event) {
-    if (
-        (isMacOS && event.code === "KeyR" && event.metaKey) ||
-        (!isMacOS && event.code === "KeyR" && event.ctrlKey)
-    ) {
+    if (isHotKey(event, "KeyR")) {
         event.preventDefault();
         runCode();
-    } else if (
-        (isMacOS && event.code === "KeyS" && event.metaKey) ||
-        (!isMacOS && event.code === "KeyS" && event.ctrlKey)
-    ) {
+    } else if (isHotKey(event, "KeyS")) {
         event.preventDefault();
         saveCode();
-    } else if (
-        (isMacOS && event.code === "KeyL" && event.metaKey) ||
-        (!isMacOS && event.code === "KeyL" && event.ctrlKey)
-    ) {
+    } else if (isHotKey(event, "KeyL")) {
         event.preventDefault();
         clearTerminal();
     } else if (currentApp.running) {
@@ -407,6 +386,11 @@ function hotKeys(event) {
             endExecution();
         }
     }
+}
+
+function isHotKey(event, keyCode) {
+    return (isMacOS && event.code === keyCode && event.metaKey) ||
+        (!isMacOS && event.code === keyCode && event.ctrlKey);
 }
 
 function resizeColumn() {
