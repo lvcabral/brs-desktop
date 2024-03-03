@@ -1,8 +1,6 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
-import { StringStream } from "codemirror";
-
 /*
 BrightScript Language Mode
 

@@ -237,7 +237,7 @@ function restoreWindowState(stateStoreFile, defaultSize) {
         // For some reason json can't be read (might be corrupted).
         // No worries, we have defaults.
     }
-    return ensureVisibleOnSomeDisplay(Object.assign({}, defaultSize, restoredState), defaultSize);
+    return ensureVisibleOnSomeDisplay({...defaultSize, ...restoredState}, defaultSize);
 };
 
 function ensureVisibleOnSomeDisplay(windowState, defaultSize) {
