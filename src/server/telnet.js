@@ -118,18 +118,22 @@ function processData(data, id, window) {
             lines.set(id, line);
             return;
         }
-        let expr = line.trim().split(/(?<=^\S+)\s/);
-        let cmd = expr[0].toLowerCase();
-        if (cmd.toLowerCase() === "close") {
-            client.write("bye!\r\n");
-            client.destroy();
-        } else if (cmd === "quit") {
-            window.webContents.send("closeChannel", "EXIT_BRIGHTSCRIPT_STOP");
-        } else if (cmd === "") {
-            window.webContents.send("debugCommand", String.fromCharCode(10));
-        } else {
-            window.webContents.send("debugCommand", expr.join(" "));
-        }
+        sendDebugCommand(line, client, window);
         lines.set(id, "");
+    }
+}
+
+function sendDebugCommand(line, client, window) {
+    const expr = line.trim().split(/(?<=^\S+)\s/);
+    const cmd = expr[0].toLowerCase();
+    if (cmd.toLowerCase() === "close") {
+        client.write("bye!\r\n");
+        client.destroy();
+    } else if (cmd === "quit") {
+        window.webContents.send("closeChannel", "EXIT_BRIGHTSCRIPT_STOP");
+    } else if (cmd === "") {
+        window.webContents.send("debugCommand", String.fromCharCode(10));
+    } else {
+        window.webContents.send("debugCommand", expr.join(" "));
     }
 }

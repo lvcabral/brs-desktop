@@ -196,8 +196,8 @@ function scrollToBottom() {
 }
 
 function populateCodeSelector(currentId = "") {
-    var arrCode = new Array();
-    for (var i = 0; i < localStorage.length; i++) {
+    const arrCode = new Array();
+    for (let i = 0; i < localStorage.length; i++) {
         const codeId = localStorage.key(i);
         if (codeId && codeId.length === 10) {
             let idx = arrCode.length;
@@ -213,7 +213,7 @@ function populateCodeSelector(currentId = "") {
     }
     arrCode.sort();
     codeSelect.length = 1;
-    for (var i = 0; i < arrCode.length; i++) {
+    for (let i = 0; i < arrCode.length; i++) {
         const codeId = arrCode[i][1];
         const selected = codeId === currentId;
         codeSelect.options[i + 1] = new Option(arrCode[i][0], codeId, false, selected);
@@ -459,7 +459,7 @@ function getShareUrl(suite) {
         return Promise.resolve(null);
     }
     //compress the object
-    var data = [suite.id, suite.code];
+    const data = [suite.id, suite.code];
     return codec.compress(data).then((text) => {
         return "https://brsfiddle.net?code=" + text;
     });

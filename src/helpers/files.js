@@ -14,17 +14,9 @@ import path from "path";
 import * as fsExtra from "fs-extra";
 
 export function loadFile(file, source) {
-    let window = BrowserWindow.fromId(1);
     if (file == undefined) return;
-    if (window.isMinimized()) {
-        window.restore();
-    } else if (!window.isVisible()) {
-        window.show();
-    } else if (!appFocused && !window.isAlwaysOnTop()) {
-        window.setAlwaysOnTop(true);
-        window.focus({ steal: true });
-        window.setAlwaysOnTop(false);
-    }
+    let window = BrowserWindow.fromId(1);
+    focusWindow(window);
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fsExtra.existsSync(file[0])) {
         filePath = file[0];
@@ -93,4 +85,16 @@ function packageBrs(name, code) {
     const filePath = path.join(app.getPath("userData"), `${name}.zip`);
     fsExtra.writeFileSync(filePath, zewZip);
     return filePath;
+}
+
+function focusWindow(window) {
+    if (window.isMinimized()) {
+        window.restore();
+    } else if (!window.isVisible()) {
+        window.show();
+    } else if (!appFocused && !window.isAlwaysOnTop()) {
+        window.setAlwaysOnTop(true);
+        window.focus({ steal: true });
+        window.setAlwaysOnTop(false);
+    }
 }

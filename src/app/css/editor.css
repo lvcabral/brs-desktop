@@ -447,7 +447,6 @@ select {
     outline: 0;
     font-family: Arial, Helvetica, sans-serif;
     color: var(--control-color);
-    background-color: var(--control-background-color) !important;
     /* Personalize */
     width: 15rem;
     height: 30px;
@@ -461,6 +460,7 @@ select {
     border-radius: 0.25em;
     box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);
     cursor: pointer;
+    background-color: var(--control-background-color) !important;
     /* Remove IE arrow */
     &::-ms-expand {
         display: none;
