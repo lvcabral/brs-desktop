@@ -171,6 +171,7 @@ api.receive("copyScreenshot", function () {
             console.log(`error copying screenshot to clipboard: ${err.message}`);
         });
     });
+    editor.showAscii(display.toDataURL("image/png"));
 });
 api.receive("saveScreenshot", function (file) {
     const img = display.toDataURL("image/png");

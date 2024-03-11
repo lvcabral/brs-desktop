@@ -9,6 +9,7 @@ import Codec from "json-url";
 import VanillaTerminal from "vanilla-terminal";
 import { nanoid } from "nanoid";
 import { CodeMirrorManager, getThemeCss } from "./codemirror";
+import { imgToAscii } from "./ascii";
 import Toastify from "toastify-js";
 import packageInfo from "../../package.json";
 
@@ -520,3 +521,12 @@ document.addEventListener("keydown", hotKeys, false);
 document.addEventListener("mousemove", onMouseMove, false);
 document.addEventListener("mouseup", onMouseUp, false);
 document.addEventListener("mousedown", onMouseDown, false);
+
+window.showAscii = (img) => {
+    if (img) {
+        const ita = new imgToAscii(img, 0.15);
+        ita.loadImage.then(() => {
+            terminal.output(`<pre style='font-size:6px;line-height: 4px;display: inline-block'>${ita.string}</pre>`);
+        });
+    }
+};
