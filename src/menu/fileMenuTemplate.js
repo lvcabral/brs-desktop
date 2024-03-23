@@ -5,8 +5,10 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
+import prompt from "electron-prompt";
 import * as dialog from "../helpers/dialog";
 import { closeChannel } from "../helpers/window";
+import { loadUrl } from "../helpers/files";
 import { loadPackage, loadSource, clearRecentFiles } from "./menuService";
 
 export const fileMenuTemplate = {
@@ -24,6 +26,34 @@ export const fileMenuTemplate = {
             accelerator: "CmdOrCtrl+Shift+O",
             click: () => {
                 dialog.openBrightScriptFile();
+            },
+        },
+        {
+            id: "open-url",
+            label: "Open from URL...",
+            accelerator: "CmdOrCtrl+U",
+            enabled: true,
+            click: (_, window) => {
+                prompt(
+                    {
+                        title: "Open from URL",
+                        label: "URL:",
+                        value: "",
+                        inputAttrs: {
+                            type: "url",
+                        },
+                        height: 177,
+                        icon: __dirname + "/images/icon.ico",
+                        type: "input",
+                    },
+                    window
+                )
+                    .then((url) => {
+                        if (url) {
+                            loadUrl(url);
+                        }
+                    })
+                    .catch(console.error);
             },
         },
         {

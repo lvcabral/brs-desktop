@@ -52,6 +52,46 @@ export function loadFile(file, source) {
     }
 }
 
+export async function loadUrl(url, source) {
+    let window = BrowserWindow.fromId(1);
+    focusWindow(window);
+    if (typeof url === "string" && isValidUrl(url)) {
+        console.log(url, url.trimEnd().slice(-3));
+    } else {
+        window.webContents.send("console", `Invalid Url: ${url}`, true);
+        return;
+    }
+    const fileName = path.parse(url).base;
+    let fileExt = path.parse(url).ext.toLowerCase();
+    if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
+        try {
+            const response = await fetch(url);
+            if (response.status === 200) {
+                let fileData = await response.arrayBuffer();
+                window.webContents.send(
+                    "fileSelected",
+                    url,
+                    fileData,
+                    !getSimulatorOption("keepDisplayOnExit"),
+                    getAudioMuted(),
+                    getSimulatorOption("debugOnCrash"),
+                    source ?? "desktop_app"
+                );
+            } else {
+                window.webContents.send(
+                    "console",
+                    `Error fetching ${fileName}: ${response.statusText} ${response.status}`,
+                    true
+                );
+            }
+        } catch (error) {
+            window.webContents.send("console", `Error fetching ${url}: ${error.message}`, true);
+        }
+    } else {
+        window.webContents.send("console", `File format not supported: ${fileExt}`, true);
+    }
+}
+
 export function saveFile(file, data) {
     fsExtra.writeFileSync(file, new Buffer.from(data, "base64"));
 }
@@ -77,9 +117,9 @@ function packageBrs(name, code) {
     minor_version=0
     build_version=0
     mm_icon_focus_hd=pkg:/images/channel-poster_hd.png
-    splash_screen_hd=pkg:/images/splash-screen_hd.jpg`
+    splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
     const zewZip = zipSync({
-        "manifest": [strToU8(manifest), {}],
+        manifest: [strToU8(manifest), {}],
         "source/main.brs": [strToU8(code), {}],
     });
     const filePath = path.join(app.getPath("userData"), `${name}.zip`);
@@ -96,5 +136,14 @@ function focusWindow(window) {
         window.setAlwaysOnTop(true);
         window.focus({ steal: true });
         window.setAlwaysOnTop(false);
+    }
+}
+
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (err) {
+        return false;
     }
 }
