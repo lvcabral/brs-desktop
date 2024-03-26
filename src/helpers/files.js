@@ -43,9 +43,7 @@ export async function loadUrl(url, source) {
     let window = BrowserWindow.fromId(1);
     focusWindow(window);
     resetPeerRoku();
-    if (typeof url === "string" && isValidUrl(url)) {
-        console.log(url, url.trimEnd().slice(-3));
-    } else {
+    if (!isValidUrl(url)) {
         window.webContents.send("console", `Invalid Url: ${url}`, true);
         return;
     }
@@ -99,7 +97,6 @@ minor_version=0
 build_version=0
 mm_icon_focus_hd=pkg:/images/channel-poster_hd.png
 splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
-    console.log(manifest, code);
     let poster = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
     const zewZip = zipSync({
         "manifest": [strToU8(manifest), {}],
