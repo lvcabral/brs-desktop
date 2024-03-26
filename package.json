@@ -83,7 +83,6 @@
         "electron-preferences": "lvcabral/electron-preferences#build",
         "electron-prompt": "^1.7.0",
         "fflate": "^0.8.2",
-        "fs-extra": "^11.2.0",
         "fs-jetpack": "^4.1.0",
         "json-url": "^3.0.0",
         "luxon": "^2.0.1",
