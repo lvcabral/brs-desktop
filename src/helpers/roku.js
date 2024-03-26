@@ -7,44 +7,52 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getPeerRoku, getSyncControl } from "./settings";
-import * as fsExtra from "fs-extra";
 import request from "postman-request";
 
+let sendECPKeys = false;
+
 ipcMain.on("keySent", (_, data) => {
-    if (getSyncControl()) {
+    if (sendECPKeys) {
         const device = getPeerRoku();
         if (data.mod === 0) {
             postEcpRequest(device, `/keydown/${data.key}`);
         } else {
             postEcpRequest(device, `/keyup/${data.key}`);
         }
-    }
-    if (data.key === "poweroff") {
-        const window = BrowserWindow.fromId(1);
-        window.close();
-        app.quit()
+        if (data.key === "poweroff") {
+            const window = BrowserWindow.fromId(1);
+            window.close();
+            app.quit()
+        }
     }
 });
 
-export async function runOnPeerRoku(filePath) {
+export function resetPeerRoku() {
+    sendECPKeys = false;
+}
+
+export async function runOnPeerRoku(fileData) {
     const window = BrowserWindow.fromId(1);
     const device = getPeerRoku();
+    sendECPKeys = false;
     if (isValidIP(device.ip)) {
         try {
             // Press home button twice to ensure we are on the home screen
             postEcpRequest(device, "/keypress/home");
             await new Promise(r => setTimeout(r, 500));
             postEcpRequest(device, "/keypress/home");
-            const readStream = fsExtra.createReadStream(filePath);
-            await new Promise((resolve) => {
-                readStream.on("open", resolve);
-            });
             postInstallerRequest(
                 device,
                 "/plugin_install",
                 {
                     mysubmit: "Replace",
-                    archive: readStream,
+                    archive: {
+                        value: fileData,
+                        options: {
+                            filename: "dev.zip",
+                            contentType: "application/zip",
+                        },
+                    },
                 },
                 (err, response, body) => {
                     let message = "";
@@ -64,14 +72,9 @@ export async function runOnPeerRoku(filePath) {
                             message = `Identical to previous version, starting "dev" app...`;
                             postEcpRequest(device, "/launch/dev");
                         }
+                        sendECPKeys = getSyncControl();
                     }
                     window.webContents.send("console", message, isError);
-                    try {
-                        // Prevent file locking
-                        readStream?.close();
-                    } catch (e) {
-                        console.info("Error closing read stream", e);
-                    }
                 }
             );
         } catch (error) {
