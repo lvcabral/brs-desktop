@@ -94,7 +94,7 @@
         "restana": "^3.4.2",
         "toastify-js": "^1.12.0",
         "vanilla-terminal": "lvcabral/vanilla-terminal",
-        "ws": "^7.5.0",
+        "ws": "^7.5.10",
         "xmlbuilder": "^13.0.2"
     },
     "devDependencies": {
