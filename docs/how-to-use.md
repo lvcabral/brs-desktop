@@ -64,6 +64,12 @@ This screen allows the user to configure multiple features, including some not a
 <img alt="Simulator Web and Desktop" src="images/app-settings.gif?raw=true"/>
 </p>
 
+## Editor and Console
+
+This screen can be used to write BrightScript code and run it directly in the Simulator, or just to debug any app currently running, using the Micro Debugger in the console.
+
+![Editor and Console](images/editor-console.png)
+
 ## Command Line Options
 
 Here are **optional** arguments you can use when starting the simulator at the command line:
