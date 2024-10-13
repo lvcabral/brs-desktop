@@ -12,6 +12,7 @@ This section will describe the options available on the application menu, please
 
 - Open App Package - Allows the user to select a zip/bpk file to load an app
 - Open Source File - Allows the user to select a brs file to run on the simulator
+- Open from URL - Downloads a file to run on the simulator (zip/bpk or brs)
 - Open Recent - Display a submenu with the recent opened files
 - Save Screenshot - Saves the current app screen image to a png file
 - Close App - Closes the current app
@@ -29,7 +30,7 @@ This section will describe the options available on the application menu, please
   - FHD 1080p - Configure display with resolution of 1920x1080
 - TV Overscan Modes - Allows simulation of TV overscan effect
   - Disabled - Shows the entire image with no cropping or guide lines
-  - Guide Lines - Shows guide lines delimiting a potential hidden area by the TV overscan
+  - Guide Lines - Shows a box delimiting a potential hidden area by the TV overscan
   - Enabled - Crops the image to simulate the TV overscan effect
 - BrightScript App Localization - Submenu with all languages available for app localization
 - Web Application Installer - See [documentation](remote-access.md#web-application-installer)
@@ -40,7 +41,8 @@ This section will describe the options available on the application menu, please
 ### View Menu
 
 - Full Screen - Enter full screen mode. If you double click the display area it also toggles full screen mode
-- Developer Tools - Open/Close the Developer Tools window. Clicking on the error icons in the side bar, also opens it.
+- Developer Tools - Open/Close the Developer Tools window (used to debug the Electron app and Javascript code).
+- Editor and Console - Opens the editor and console window for debugging the BrightScript app/code. Clicking on the error icons in the side bar, also opens it. (see details below)
 - Color Themes - Allows to select among the 3 available themes and the System theme</br>
 ![Screen Themes](images/screeshot-themes.png)
 - Always on Top - Toggles if the application will stay on top of other windows when it loses focus
@@ -50,7 +52,7 @@ This section will describe the options available on the application menu, please
 
 - Documentation - Opens project [README file](../README.md)
 - Control Keyboard Reference - Opens the [remote control reference documentation](control-reference.md)
-- Release Notes - Opens the [release page](https://github.com/lvcabral/brs-desktop/releases)
+- Release Notes - Opens the [CHANGELOG file](../CHANGELOG.md)
 - View License - Shows the [application license](../LICENSE)
 - About - Shows the about dialog box
 
