@@ -21,7 +21,6 @@ export function openChannelPackage() {
         .showOpenDialog(window, opts)
         .then((result) => {
             if (result.canceled) {
-                console.log("cancelled");
                 return;
             }
             loadFile(result.filePaths);
@@ -45,7 +44,6 @@ export function openBrightScriptFile() {
         .showOpenDialog(window, opts)
         .then((result) => {
             if (result.canceled) {
-                console.log("cancelled");
                 return;
             }
             loadFile(result.filePaths);

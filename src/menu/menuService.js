@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -16,7 +16,7 @@ import { isInstallerEnabled } from "../server/installer";
 import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getSimulatorOption, setDisplayOption } from "../helpers/settings";
-import { loadFile } from "../helpers/files";
+import { loadFile, loadUrl } from "../helpers/files";
 import path from "path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
@@ -27,7 +27,7 @@ const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
 
 let fileMenuIndex = 0;
-let recentMenuIndex = 2;
+let recentMenuIndex = 3;
 let recentFiles;
 let menuTemplate;
 // External Functions
@@ -102,8 +102,12 @@ export function clearRecentFiles() {
 
 export function loadPackage(id) {
     let pkg = getRecentPackage(id);
-    if (pkg) {
-        loadFile([pkg]);
+    if (typeof pkg === "string") {
+        if (pkg.startsWith("http")) {
+            loadUrl(pkg);
+        } else {
+            loadFile([pkg]);
+        }
     } else {
         console.log("No recent package to load!");
     }
@@ -111,8 +115,12 @@ export function loadPackage(id) {
 
 export function loadSource(id) {
     let brs = getRecentSource(id);
-    if (brs) {
-        loadFile([brs]);
+    if (typeof brs === "string") {
+        if (brs.startsWith("http")) {
+            loadUrl(brs);
+        } else {
+            loadFile([brs]);
+        }
     } else {
         console.log("No recent file to load!");
     }

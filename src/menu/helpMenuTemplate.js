@@ -34,7 +34,7 @@ export const helpMenuTemplate = {
         {
             label: "Release Notes",
             click: () => {
-                shell.openExternal(`${packageInfo.repository.url}/releases`);
+                shell.openExternal(`${packageInfo.repository.url}/blob/master/CHANGELOG.md`);
             },
         },
         {
