@@ -34,6 +34,7 @@ export const fileMenuTemplate = {
             accelerator: "CmdOrCtrl+U",
             enabled: true,
             click: (_, window) => {
+                const userTheme = global.sharedObject.theme;
                 prompt(
                     {
                         title: "Open from URL",
@@ -45,6 +46,7 @@ export const fileMenuTemplate = {
                         height: 177,
                         icon: __dirname + "/images/icon.ico",
                         type: "input",
+                        customStylesheet: __dirname + `/css/prompt-${userTheme}.css`,
                     },
                     window
                 )
