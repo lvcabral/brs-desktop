@@ -4,7 +4,7 @@
 /*
 BrightScript Language Mode
 
-https://developer.roku.com/en-gb/docs/references/brightscript/language/brightscript-language-reference.md
+https://developer.roku.com/docs/references/brightscript/language/brightscript-language-reference.md
 
 */
 
@@ -26,22 +26,27 @@ export function defineMode(CodeMirror) {
         let openingKeywords = ["sub", "function"];
         let endKeywords = ["endsub", "endfunction"];
 
-        let openingControl = ["while", "if", "for"];
+        let openingControl = ["while", "if", "for", "try"];
         let middleControl = [
-            "else",
+            "catch",
+            "continue for",
+            "continue while",
+            "else if",
             "elseif",
+            "else",
+            "exit for",
+            "exit while",
             "to",
             "step",
             "in",
-            "then",
-            "each",
             "as",
             "return",
             "stop",
+            "throw",
         ];
-        let endControl = ["next", "endif", "endfor", "endwhile"];
+        let endControl = ["next", "endif", "end if", "endfor", "end for", "endwhile", "end while", "endtry", "end try"];
         let wordOperators = wordRegexp(["and", "or", "not", "mod"]);
-        let commonkeywords = ["dim", "print", "library"];
+        let commonkeywords = ["dim", "print", "goto", "library"];
         let commontypes = [
             "object",
             "dynamic",
@@ -146,7 +151,7 @@ export function defineMode(CodeMirror) {
         let closingCtrl = wordRegexp(endControl);
         let doubleClosing = wordRegexp(["end"]);
         let doOpening = wordRegexp(["do"]);
-        let noIndentWords = wordRegexp(["on error resume next", "exit"]);
+        let noIndentWords = wordRegexp(["library"]);
         let comment = wordRegexp(["rem"]);
 
         function indent(_stream, state) {
