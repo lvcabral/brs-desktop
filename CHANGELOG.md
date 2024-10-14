@@ -1,5 +1,49 @@
 # Changelog
 
+<a name="v1.3.0"></a>
+
+## [v1.3.0 - Run App from URL](https://github.com/lvcabral/brs-desktop/releases/tag/v1.3.0) - 13 Oct 2024
+
+### Release Changes
+
+* Implemented option to Open from URL by [@lvcabral](https://github.com/lvcabral) in [163](https://github.com/lvcabral/brs-desktop/pull/163)
+  * New option in File menu that allows to download and run any app package (zip/bpk) or code file (brs)
+  * The downloaded file is also executed on the peer Roku device (if configured in the settings screen)
+  * Updated documentation with the new recent features
+* Upgraded `brs-engine` to [v1.7.0](https://github.com/lvcabral/brs-engine/releases) - main changes since last release:
+  * Added a way to add custom features to be checked by `roDeviceInfo.hasFeatures()`
+  * Created new document [docs/customization.md](https://github.com/lvcabral/brs-engine/blob/master/docs/customization.md)
+  * Implemented `try...catch` and `throw` by [@lvcabral](https://github.com/lvcabral) in [#318](https://github.com/lvcabral/brs-engine/pull/318)
+  * Implemented `goto` statement by [@lvcabral](https://github.com/lvcabral) in [#367](https://github.com/lvcabral/brs-engine/pull/367)
+  * Implemented `Continue For` and `Continue While` statements by [@lvcabral](https://github.com/lvcabral) in [#332](https://github.com/lvcabral/brs-engine/pull/332)
+  * Added: `roEVPDigest` component by [@lvcabral](https://github.com/lvcabral) in [#301](https://github.com/lvcabral/brs-engine/pull/301)
+  * Added: `roEVPCipher` component by [@lvcabral](https://github.com/lvcabral) in [#303](https://github.com/lvcabral/brs-engine/pull/303)
+  * Added: `roHMAC` component by [@lvcabral](https://github.com/lvcabral) in [#305](https://github.com/lvcabral/brs-engine/pull/305)
+  * Added: `roDeviceCrypto` component by [@lvcabral](https://github.com/lvcabral) in [#309](https://github.com/lvcabral/brs-engine/pull/309)
+  * Added: `roFunction` component and `Box()` runtime function by [@lvcabral](https://github.com/lvcabral) in [#310](https://github.com/lvcabral/brs-engine/pull/310)
+  * Implemented `pos()` and `tab()` for `print` statement by [@lvcabral](https://github.com/lvcabral) in [#339](https://github.com/lvcabral/brs-engine/pull/339)
+  * Implemented `slice()` method in `roArray` under `ifArraySlice`
+  * Implemented `ifArraySizeInfo` in `roArray` by [@lvcabral](https://github.com/lvcabral) in [#316](https://github.com/lvcabral/brs-engine/pull/316)
+  * Implemented `roImageMetadata` component by [@lvcabral](https://github.com/lvcabral) in [#325](https://github.com/lvcabral/brs-engine/pull/325)
+  * Implemented `roAudioMetadata` component by [@lvcabral](https://github.com/lvcabral) in [#326](https://github.com/lvcabral/brs-engine/pull/326)
+  * Implemented support for multi-dimensional indexes of `roArray` and `roList` by [@lvcabral](https://github.com/lvcabral) in [#331](https://github.com/lvcabral/brs-engine/pull/331)
+  * Implemented `ObjFun()` global function and support for `variadic` arguments on `Callable` by [@lvcabral](https://github.com/lvcabral) in [#375](https://github.com/lvcabral/brs-engine/pull/375)
+  * Added support for `formatJson()` undocumented flags 256 and 512 by [@lvcabral](https://github.com/lvcabral) in [#377](https://github.com/lvcabral/brs-engine/pull/377)
+  * Implemented Micro Debugger commands:  `classes`,  `bscs` and `stats` by [@lvcabral](https://github.com/lvcabral) in [#385](https://github.com/lvcabral/brs-engine/pull/385)  
+  * Improvements to `roPath` by [@lvcabral](https://github.com/lvcabral) in [#296](https://github.com/lvcabral/brs-engine/pull/296)
+  * Changed `roUrlEvent` and `roUniversalControlEvent` to be comparable by [@lvcabral](https://github.com/lvcabral) in [#299](https://github.com/lvcabral/brs-engine/pull/299)
+  * Updated Firmware Version to 11.5 as `continue for/while` is now supported by [@lvcabral](https://github.com/lvcabral) in [#357](https://github.com/lvcabral/brs-engine/pull/357)
+  * Fixed: `ifString.tokenize()` behavior to match Roku by [@lvcabral](https://github.com/lvcabral) in [#295](https://github.com/lvcabral/brs-engine/pull/295)
+  * Fixed: `String` comparison and concatenation by [@lvcabral](https://github.com/lvcabral) in [#298](https://github.com/lvcabral/brs-engine/pull/298)
+  * Allow to use AND/OR between Boolean and Numbers by [@lvcabral](https://github.com/lvcabral) in [#307](https://github.com/lvcabral/brs-engine/pull/307)
+  * Fixed Boxing on Numbers and Booleans by [@lvcabral](https://github.com/lvcabral) in [#313](https://github.com/lvcabral/brs-engine/pull/313)
+  * Fixed Boxing for Callable parameters and implemented Coercion properly by [@lvcabral](https://github.com/lvcabral) in [#327](https://github.com/lvcabral/brs-engine/pull/327)
+  * Fixed Callable signature check by [@lvcabral](https://github.com/lvcabral) in [#340](https://github.com/lvcabral/brs-engine/pull/340)
+  * Fixed conversion functions to Integer: `Int()`, `CInt()` and `Fix()` by [@lvcabral](https://github.com/lvcabral) in [#342](https://github.com/lvcabral/brs-engine/pull/342)
+  * Fixed Video seek causing a stack overflow crash by [@lvcabral](https://github.com/lvcabral) in [#349](https://github.com/lvcabral/brs-engine/pull/349)
+
+[Full Changelog][v1.3.0]
+
 <a name="v1.2.0"></a>
 
 ## [v1.2.0 - Editor and Console Window](https://github.com/lvcabral/brs-desktop/releases/tag/v1.2.0) - 02 Mar 2024
@@ -228,6 +272,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v1.3.0]: https://github.com/lvcabral/brs-desktop/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/lvcabral/brs-desktop/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/lvcabral/brs-desktop/compare/v1.0.0...v1.1.0
 [v1.0.0]: https://github.com/lvcabral/brs-desktop/compare/v0.10.30...v1.0.0
