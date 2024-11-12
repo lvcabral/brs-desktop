@@ -1,5 +1,18 @@
 # Changelog
 
+<a name="v1.3.1"></a>
+
+## [v1.3.1 - Checkbox to enable/disable Peer Roku](https://github.com/lvcabral/brs-desktop/releases/tag/v1.3.1) - 12 Nov 2024
+
+### Release Changes
+
+* Added checkbox to enable/disable peer Roku device by [@lvcabral](https://github.com/lvcabral) in [164](https://github.com/lvcabral/brs-desktop/pull/164)
+* Bump elliptic from 6.5.7 to 6.6.0 by @dependabot in [165](https://github.com/lvcabral/brs-desktop/pull/165)
+* Fixed build on MacOS by [@lvcabral](https://github.com/lvcabral) in [166](https://github.com/lvcabral/brs-desktop/pull/166)
+* Changed build to generate MacOS Universal installer (for both Intel and Arm machines)
+
+[Full Changelog][v1.3.1]
+
 <a name="v1.3.0"></a>
 
 ## [v1.3.0 - Run App from URL](https://github.com/lvcabral/brs-desktop/releases/tag/v1.3.0) - 13 Oct 2024
@@ -272,6 +285,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v1.3.1]: https://github.com/lvcabral/brs-desktop/compare/v1.3.0...v1.3.1
 [v1.3.0]: https://github.com/lvcabral/brs-desktop/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/lvcabral/brs-desktop/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/lvcabral/brs-desktop/compare/v1.0.0...v1.1.0
