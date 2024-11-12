@@ -51,6 +51,7 @@ jobs:
           args: "--universal"
 
       - name: Build/release Electron app for other platforms
+        if: matrix.os != 'macos-latest'
         uses: johannesjo/action-electron-builder@v1
         with:
           github_token: ${{ secrets.github_token }}
