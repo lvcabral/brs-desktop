@@ -1,8 +1,8 @@
 # Changelog
 
-<a name="v1.3.1"></a>
+<a name="v1.3.2"></a>
 
-## [v1.3.1 - Checkbox to enable/disable Peer Roku](https://github.com/lvcabral/brs-desktop/releases/tag/v1.3.1) - 12 Nov 2024
+## [v1.3.2 - Checkbox to enable/disable Peer Roku](https://github.com/lvcabral/brs-desktop/releases/tag/v1.3.2) - 12 Nov 2024
 
 ### Release Changes
 
@@ -11,7 +11,7 @@
 * Fixed build on MacOS by [@lvcabral](https://github.com/lvcabral) in [166](https://github.com/lvcabral/brs-desktop/pull/166)
 * Changed build to generate MacOS Universal installer (for both Intel and Arm machines)
 
-[Full Changelog][v1.3.1]
+[Full Changelog][v1.3.2]
 
 <a name="v1.3.0"></a>
 
@@ -285,7 +285,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
-[v1.3.1]: https://github.com/lvcabral/brs-desktop/compare/v1.3.0...v1.3.1
+[v1.3.2]: https://github.com/lvcabral/brs-desktop/compare/v1.3.0...v1.3.2
 [v1.3.0]: https://github.com/lvcabral/brs-desktop/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/lvcabral/brs-desktop/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/lvcabral/brs-desktop/compare/v1.0.0...v1.1.0
