@@ -14,16 +14,23 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, macos-13, ubuntu-latest, windows-latest]
 
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v1
 
+      - name: Install Python and setuptools
+        run: |
+          if: matrix.os == 'macos-latest'; then
+            python3 -m pip install --upgrade pip
+            python3 -m pip install setuptools
+          fi
+
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 19
+          node-version: 20
 
       - name: Build/release Electron app
         uses: johannesjo/action-electron-builder@v1
