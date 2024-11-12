@@ -32,6 +32,11 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install setuptools
 
+      - name: Install Homebrew packages
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install pkg-config cairo pango libpng jpeg giflib librsvg
+
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
