@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getPeerRoku, getSyncControl } from "./settings";
+import { getPeerRoku } from "./settings";
 import request from "postman-request";
 
 let sendECPKeys = false;
@@ -35,6 +35,9 @@ export async function runOnPeerRoku(fileData) {
     const window = BrowserWindow.fromId(1);
     const device = getPeerRoku();
     sendECPKeys = false;
+    if (!device.deploy) {
+        return;
+    }
     if (isValidIP(device.ip)) {
         try {
             // Press home button twice to ensure we are on the home screen
@@ -72,7 +75,7 @@ export async function runOnPeerRoku(fileData) {
                             message = `Identical to previous version, starting "dev" app...`;
                             postEcpRequest(device, "/launch/dev");
                         }
-                        sendECPKeys = getSyncControl();
+                        sendECPKeys = device.syncControl;
                     }
                     window.webContents.send("console", message, isError);
                 }
@@ -84,8 +87,10 @@ export async function runOnPeerRoku(fileData) {
                 true
             );
         }
-    } else if (device?.ip?.length) {
+    } else if (device.ip?.length) {
         window.webContents.send("console", `Invalid peer Roku IP address: ${device.ip}`, true);
+    } else {
+        window.webContents.send("console", `Missing peer Roku IP address!`, true);
     }
 }
 

@@ -512,10 +512,21 @@ export function getSettings(window) {
                             label: "Peer Roku Device",
                             fields: [
                                 {
-                                    label: "Device IP (default: empty)",
+                                    key: "deploy",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Deploy App to peer Roku device",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "If enabled, the simulator will side load the app on the peer Roku device in parallel",
+                                },
+                                {
+                                    label: "Device IP Address",
                                     key: "ip",
                                     type: "text",
-                                    help: "Roku IP to deploy the app in parallel with the simulator, if empty disable the feature",
+                                    help: "IP Address assigned to the peer Roku device",
                                 },
                                 {
                                     label: "Installer Password (default: rokudev)",
@@ -532,7 +543,7 @@ export function getSettings(window) {
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "If enabled, the simulator will replicate all control key strokes on the peer Roku device",
+                                    help: "If enabled, the simulator will replicate all pressed control keys on the peer Roku device",
                                 },
                             ],
                         },
@@ -774,15 +785,12 @@ export function setSimulatorOption(key, enable, menuId) {
 
 export function getPeerRoku() {
     return {
+        deploy: settings.value("peerRoku.deploy")?.includes("enabled") || false,
         ip: settings.value("peerRoku.ip"),
         username: "rokudev",
         password: settings.value("peerRoku.password"),
+        syncControl: settings.value("peerRoku.syncControl")?.includes("enabled") || false,
     }
-}
-
-export function getSyncControl() {
-    return settings.value("peerRoku.syncControl")?.includes("enabled") || false;
-
 }
 
 export function setLocaleId(locale) {
