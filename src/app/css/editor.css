@@ -187,15 +187,18 @@
     padding: 0;
     box-sizing: border-box;
 }
+
 body {
     font-size: 14px;
     font-family: Consolas, "Courier New", Courier, monospace;
     background: var(--background-color);
     color: var(--main-color);
 }
+
 a {
     text-decoration: none;
 }
+
 button {
     font-family: Arial, Helvetica, sans-serif;
     font-size: inherit;
@@ -207,15 +210,19 @@ button {
     background: transparent;
     cursor: pointer;
 }
+
 ul {
     list-style: none;
 }
+
 ul li {
     padding: 0;
 }
+
 pre {
     font-family: inherit;
 }
+
 .index-page {
     overflow: hidden;
     height: 100vh;
@@ -226,6 +233,7 @@ pre {
     max-height: fill-available;
     background: var(--background-color);
 }
+
 .editor {
     display: flex;
     width: 100%;
@@ -233,6 +241,54 @@ pre {
     position: fixed;
     top: 29px;
 }
+
+.more-options {
+    /* styles for the ellipsis button */
+    position: relative; /* add this */
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    background-color: var(--control-background-color);
+    border: 1px solid var(--control-border-color);
+    padding: 2px;
+    z-index: 1; /* set a higher z-index value */
+    top: calc(100% + 1px);
+    left: 0;
+    border-radius: 0.25em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown li {
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+.dropdown li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--control-color);
+    padding: 3px; /* add padding to the link */
+    width: 100%; /* make the link take up the full width */
+}
+
+.dropdown li a i {
+    margin-right: 8px;
+}
+
+.dropdown li a:hover {
+    color: var(--button-color);
+    background-color: var(--button-background-color);
+}
+
 .console {
     background: var(--background-color);
     display: flex;
@@ -240,6 +296,7 @@ pre {
     flex: 1 1 0%;
     min-width: 470px;
 }
+
 .console .console-header {
     width: 100%;
     height: 44px;
@@ -254,10 +311,12 @@ pre {
     -o-user-select: none;
     user-select: none;
 }
+
 .console .console-header h4 {
     font-size: 18px;
     color: var(--header-color);
 }
+
 .console .console-header button {
     padding: 0 8px;
     height: 26px;
@@ -266,19 +325,23 @@ pre {
     color: var(--button-color);
     background: var(--button-background-color);
 }
+
 .console .console-header button i {
     font-size: 16px;
 }
+
 .console .console-header button span {
     font-size: 16px;
     margin-right: 0.2em;
 }
+
 .console iframe {
     border: none;
     width: 0;
     height: 0;
     visibility: hidden;
 }
+
 .console .console-header label span {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 16px;
@@ -291,16 +354,20 @@ pre {
     color: var(--console-color) !important;
     padding: 0px !important;
 }
+
 .VanillaTerm .container {
     overflow-y: auto !important;
     padding: 9px !important;
 }
+
 .VanillaTerm .container ::selection {
     background-color: var(--console-selection-color) !important;
 }
+
 .VanillaTerm output pre {
     color: var(--console-color) !important;
 }
+
 .VanillaTerm .command {
     align-items: center;
 }
@@ -310,12 +377,14 @@ pre {
     height: calc(100vh - 78px);
     overflow: auto;
 }
+
 .code {
     background: var(--background-color);
     height: calc(100vh - 72px);
     width: 60%;
     min-width: 750px;
 }
+
 .code .code-header {
     background: var(--header-background-color);
     display: flex;
@@ -329,6 +398,7 @@ pre {
     -o-user-select: none;
     user-select: none;
 }
+
 .code .code-header button {
     padding: 0 8px;
     height: 26px;
@@ -337,17 +407,21 @@ pre {
     color: var(--button-color);
     background: var(--button-background-color);
 }
+
 .code .code-header button i {
     font-size: 16px;
 }
+
 .code .code-header button span {
     font-size: 16px;
     margin-right: 0.2em;
 }
+
 .code .code-header h4 {
     font-size: 18px;
     color: var(--header-color);
 }
+
 .code #brsCode {
     display: block;
     height: 100%;
@@ -358,38 +432,48 @@ pre {
     font-size: 18px;
     padding: 16px;
 }
+
 .code #brsCode:focus,
 .code #brsCode:active {
     outline-color: transparent;
     box-shadow: none;
 }
+
 @media (max-width: 1220px) {
     .code {
         min-width: unset;
     }
+
     .console {
         min-width: unset;
     }
+
     .editor {
         flex-direction: column;
     }
+
     .editor .code,
     .editor .console {
         width: 100%;
     }
+
     .editor .code {
         height: 50%;
     }
+
     .editor .console #console-logs {
         height: calc(50vh - 78px);
     }
+
     button {
         font-size: 14px;
     }
+
     button span {
         display: none;
     }
 }
+
 .layout-separator {
     width: 3px;
     margin: 0 -1px;
@@ -403,12 +487,13 @@ pre {
     -moz-transition: opacity 1s ease-in-out;
     -webkit-transition: opacity 1s ease-in-out;
 }
+
 .layout-separator:hover {
-    opacity: 1.0;
+    opacity: 1;
     background-color: var(--button-background-color);
-    transition: opacity .55s ease-in-out;
-    -moz-transition: opacity .55s ease-in-out;
-    -webkit-transition: opacity .55s ease-in-out;
+    transition: opacity 0.55s ease-in-out;
+    -moz-transition: opacity 0.55s ease-in-out;
+    -webkit-transition: opacity 0.55s ease-in-out;
 }
 
 input {
@@ -420,6 +505,7 @@ input {
     vertical-align: middle;
     transition: 0.25s linear background;
 }
+
 input::before {
     content: "";
     display: block;
@@ -435,6 +521,7 @@ input::before {
 :root {
     --arrow-icon: url(../images/caret_down.svg);
 }
+
 /* <select> styles */
 select {
     /* Reset */
@@ -457,14 +544,17 @@ select {
     box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);
     cursor: pointer;
     background-color: var(--control-background-color) !important;
+
     /* Remove IE arrow */
     &::-ms-expand {
         display: none;
     }
+
     /* Remove focus outline */
     &:focus {
         outline: none;
     }
+
     /* <option> colors */
     option {
         color: inherit;
@@ -487,6 +577,7 @@ select {
     -ms-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
 }
+
 .modal_dialog input {
     font-size: 16px;
     color: var(--input-color);
@@ -497,17 +588,21 @@ select {
     border: 1px solid var(--input-border-color);
     width: 100%;
 }
+
 .modal_dialog input:focus {
     outline: none !important;
     border: 1px solid var(--input-border-color);
     background-color: var(--input-active-color);
 }
+
 .modal_dialog_content {
     margin: 10px 0px;
 }
+
 .modal_dialog_input {
     margin: 20px 0px;
 }
+
 .modal_dialog button {
     font-size: 16px;
     color: var(--button-color);
@@ -520,6 +615,7 @@ select {
     outline: none;
     width: 100px;
 }
+
 .modal_dialog .modal_dialog_cancel {
     margin-left: 10px;
     border: 1px solid var(--button-border-color);
@@ -549,35 +645,44 @@ select {
     max-width: calc(50% - 20px);
     z-index: 2147483647;
 }
+
 .toastify.on {
     opacity: 1;
 }
+
 .toast-close {
     opacity: 0.4;
     padding: 0;
     margin-left: 16px;
 }
+
 .toastify-right {
     right: 15px;
 }
+
 .toastify-left {
     left: 15px;
 }
+
 .toastify-top {
     top: -150px;
 }
+
 .toastify-bottom {
     bottom: -150px;
 }
+
 .toastify-rounded {
     border-radius: 25px;
 }
+
 .toastify-avatar {
     width: 1.5em;
     height: 1.5em;
     margin: -7px 5px;
     border-radius: 2px;
 }
+
 .toastify-center {
     margin-left: auto;
     margin-right: auto;
@@ -586,6 +691,7 @@ select {
     max-width: fit-content;
     max-width: -moz-fit-content;
 }
+
 @media only screen and (max-width: 360px) {
     .toastify-right,
     .toastify-left {
@@ -596,10 +702,12 @@ select {
         max-width: fit-content;
     }
 }
+
 .toastify-error {
     color: #fff;
     background-color: rgba(182, 23, 23, 0.8);
 }
+
 .toastify-success {
     color: #fff;
     background-color: rgb(19, 185, 116, 0.8);
