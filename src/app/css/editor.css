@@ -443,29 +443,29 @@ pre {
     box-shadow: none;
 }
 
-@media (max-width: 1220px) {
-    .code {
+@media (max-width: 1150px) {
+    body:not(.code-hidden) .code {
         min-width: unset;
     }
 
-    .console {
+    body:not(.code-hidden) .console {
         min-width: unset;
     }
 
-    .editor {
+    body:not(.code-hidden) .editor {
         flex-direction: column;
     }
 
-    .editor .code,
-    .editor .console {
+    body:not(.code-hidden) .editor .code,
+    body:not(.code-hidden) .editor .console {
         width: 100%;
     }
 
-    .editor .code {
+    body:not(.code-hidden) .editor .code {
         height: 50%;
     }
 
-    .editor .console #console-logs {
+    body:not(.code-hidden) .editor .console #console-logs {
         height: calc(50vh - 78px);
     }
 

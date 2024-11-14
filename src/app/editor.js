@@ -196,6 +196,7 @@ function updateTerminal(text, level = "print") {
 
 function hideEditor(toggle) {
     editorContainer.classList.toggle("hidden", toggle);
+    document.body.classList.toggle("code-hidden", toggle);
 }
 
 function scrollToBottom() {
@@ -510,7 +511,7 @@ function onMouseDown(event) {
 }
 
 function onResize() {
-    if (window.innerWidth >= 1220) {
+    if (window.innerWidth >= 1150 || editorContainer.classList.contains("hidden")) {
         const { height } = codeColumn.getBoundingClientRect();
         editorManager.editor.setSize("100%", `${height - 15}px`);
     } else {
