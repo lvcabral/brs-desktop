@@ -382,7 +382,7 @@ pre {
     background: var(--background-color);
     height: calc(100vh - 72px);
     width: 60%;
-    min-width: 750px;
+    min-width: 682px;
 }
 
 .code .code-header {

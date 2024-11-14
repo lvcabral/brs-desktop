@@ -80,17 +80,13 @@ moreButton.addEventListener("click", function (event) {
         dropdown.style.display = "block";
     }
 });
-
 document.addEventListener("click", function (event) {
-    if (
-        !dropdown.contains(event.target) &&
-        event.target !== document.getElementById("more-options")
-    ) {
+    if (!dropdown.contains(event.target) && event.target !== moreButton) {
         dropdown.style.display = "none";
     }
 });
-document.getElementById("delete-option").addEventListener("click", deleteCode);
 document.getElementById("rename-option").addEventListener("click", renameCode);
+document.getElementById("delete-option").addEventListener("click", deleteCode);
 document.getElementById("export-option").addEventListener("click", exportCode);
 document.getElementById("import-option").addEventListener("click", importCode);
 
