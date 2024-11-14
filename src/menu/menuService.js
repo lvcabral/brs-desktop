@@ -16,7 +16,7 @@ import { isInstallerEnabled } from "../server/installer";
 import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getSimulatorOption, setDisplayOption } from "../helpers/settings";
-import { loadFile, loadUrl } from "../helpers/files";
+import { loadFile, loadUrl, editorCodeFile } from "../helpers/files";
 import path from "path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
@@ -169,6 +169,9 @@ ipcMain.on("addRecentPackage", (event, currentChannel) => {
 });
 
 ipcMain.on("addRecentSource", (event, filePath) => {
+    if (filePath === editorCodeFile) {
+        return;
+    }
     let idx = recentFiles.brs.indexOf(filePath);
     if (idx >= 0) {
         recentFiles.brs.splice(idx, 1);

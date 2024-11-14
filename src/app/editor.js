@@ -14,9 +14,9 @@ import packageInfo from "../../package.json";
 
 const isMacOS = getOS() === "MacOS";
 const codec = Codec("lzma");
+const editorContainer = document.querySelector(".code");
 const brsCodeField = document.getElementById("brsCode");
 const saveButton = document.querySelector("button.save");
-const deleteButton = document.querySelector("button.delete");
 const runButton = document.querySelector("button.run");
 const clearAllButton = document.querySelector("button.clear-all");
 const breakButton = document.querySelector("button.break");
@@ -29,8 +29,11 @@ const codeColumn = document.querySelector("div.code");
 const consoleColumn = document.querySelector("div.console");
 const codeSelect = document.getElementById("code-selector");
 const codeDialog = document.getElementById("code-dialog");
+const actionType = document.getElementById("actionType");
 const codeForm = document.getElementById("code-form");
 const deleteDialog = document.getElementById("delete-dialog");
+const moreButton = document.getElementById("more-options");
+const dropdown = document.getElementById("more-options-dropdown");
 
 const simulator = window.opener;
 let [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
@@ -46,8 +49,9 @@ const commands = {
     },
 };
 const terminal = new VanillaTerminal({
-    welcome: `<span style='color: #2e71ff'>BrightScript Console - ${packageInfo.name} v${packageInfo.version
-        } -  brs-engine v${brs.getVersion()}</span>`,
+    welcome: `<span style='color: #2e71ff'>BrightScript Console - ${packageInfo.name} v${
+        packageInfo.version
+    } -  brs-engine v${brs.getVersion()}</span>`,
     container: "console-logs",
     commands: commands,
     prompt: prompt,
@@ -63,7 +67,6 @@ terminal.idle();
 
 // Buttons Events
 saveButton.addEventListener("click", saveCode);
-deleteButton.addEventListener("click", deleteCode);
 runButton.addEventListener("click", runCode);
 clearAllButton.addEventListener("click", clearTerminal);
 breakButton.addEventListener("click", startDebug);
@@ -71,6 +74,24 @@ resumeButton.addEventListener("click", resumeExecution);
 endButton.addEventListener("click", endExecution);
 shareButton.addEventListener("click", shareCode);
 layoutSeparator.addEventListener("mousedown", resizeColumn);
+moreButton.addEventListener("click", function (event) {
+    event.stopPropagation();
+    if (dropdown.style.display === "block") {
+        dropdown.style.display = "none";
+    } else {
+        dropdown.style.display = "block";
+    }
+});
+document.addEventListener("click", function (event) {
+    if (!dropdown.contains(event.target) && event.target !== moreButton) {
+        dropdown.style.display = "none";
+    }
+});
+document.getElementById("rename-option").addEventListener("click", renameCode);
+document.getElementById("saveas-option").addEventListener("click", saveAsCode);
+document.getElementById("delete-option").addEventListener("click", deleteCode);
+document.getElementById("export-option").addEventListener("click", exportCode);
+document.getElementById("import-option").addEventListener("click", importCode);
 
 let consoleLogsContainer = document.getElementById("console-logs");
 let isResizing = false;
@@ -78,7 +99,7 @@ let editorManager;
 let currentId = nanoid(10);
 
 function main() {
-    updateButtons()
+    updateButtons();
     // Initialize the Code Mirror manager
     const preferences = api.getPreferences();
     const theme = preferences?.simulator?.theme || "purple";
@@ -89,7 +110,7 @@ function main() {
         const cm = document.querySelector(".CodeMirror");
         delete cm.CodeMirror.constructor.keyMap.emacsy["Ctrl-V"];
     }
-    onResize();
+    hideEditor(!(currentApp.title === undefined || currentApp.title === "editor_code.brs"));
     populateCodeSelector();
     // Subscribe to Engine events and initialize Console
     brs.subscribe(appId, handleEngineEvents);
@@ -124,6 +145,7 @@ function updateButtons() {
 function handleEngineEvents(event, data) {
     if (event === "loaded") {
         currentApp = data;
+        hideEditor(currentApp.title !== "editor_code.brs");
     } else if (event === "started") {
         currentApp = data;
         console.info(`Execution started ${appId}`);
@@ -153,6 +175,7 @@ function handleEngineEvents(event, data) {
         endButton.style.display = "none";
         resumeButton.style.display = "none";
         breakButton.style.display = "none";
+        hideEditor(false);
     }
 }
 
@@ -169,6 +192,12 @@ function updateTerminal(text, level = "print") {
         output = "<span style='color: #e95449;'>" + output + "</span>";
     }
     terminal.output(`<pre>${output}</pre>`);
+}
+
+function hideEditor(toggle) {
+    editorContainer.classList.toggle("hidden", toggle);
+    document.body.classList.toggle("code-hidden", toggle);
+    onResize();
 }
 
 function scrollToBottom() {
@@ -206,8 +235,6 @@ function populateCodeSelector(currentId = "") {
         const selected = codeId === currentId;
         codeSelect.options[i + 1] = new Option(arrCode[i][0], codeId, false, selected);
     }
-
-    deleteButton.style.visibility = currentId === "" ? "hidden" : "visible";
 }
 
 codeSelect.addEventListener("change", (e) => {
@@ -232,12 +259,76 @@ function loadCode(id) {
     }
 }
 
+function renameCode() {
+    if (currentId && localStorage.getItem(currentId)) {
+        actionType.value = "rename";
+        codeForm.codeName.value = codeSelect.options[codeSelect.selectedIndex].text;
+        codeDialog.showModal();
+    } else {
+        showToast("There is no code snippet selected to rename!", 3000, true);
+    }
+}
+
+function saveAsCode() {
+    if (currentId && localStorage.getItem(currentId)) {
+        actionType.value = "saveas";
+        codeForm.codeName.value = codeSelect.options[codeSelect.selectedIndex].text + " (Copy)";
+        codeDialog.showModal();
+    } else {
+        showToast("There is no code snippet selected to save as!", 3000, true);
+    }
+}
+
 function deleteCode() {
     if (currentId && localStorage.getItem(currentId)) {
         deleteDialog.showModal();
     } else {
-        showToast("There is no Source Code to delete!", 3000, true);
+        showToast("There is no code snippet selected to delete!", 3000, true);
     }
+}
+
+function exportCode() {
+    const codes = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        if (value.startsWith("@=")) {
+            const codeName = value.substring(2, value.indexOf("=@"));
+            const codeContent = value.substring(value.indexOf("=@") + 2);
+            codes[key] = { name: codeName, content: codeContent };
+        }
+    }
+    const json = JSON.stringify(codes, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "codesnippets.json";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importCode() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
+    input.onchange = (e) => {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const json = e.target.result;
+            const codes = JSON.parse(json);
+            for (const id in codes) {
+                const code = codes[id];
+                const value = `@=${code.name}=@${code.content}`;
+                localStorage.setItem(id, value);
+            }
+            populateCodeSelector(currentId);
+            showToast("Code snippets imported to the simulator local storage!", 3000);
+        };
+        reader.readAsText(file);
+    };
+    input.click();
 }
 
 deleteDialog.addEventListener("close", (e) => {
@@ -245,7 +336,7 @@ deleteDialog.addEventListener("close", (e) => {
         localStorage.removeItem(currentId);
         currentId = nanoid(10);
         resetApp();
-        showToast("Code deleted from the local storage!", 3000);
+        showToast("Code deleted from the simulator local storage.", 3000);
     }
     deleteDialog.returnValue = "";
 });
@@ -273,10 +364,10 @@ function shareCode() {
         };
         getShareUrl(data).then(function (shareLink) {
             navigator.clipboard.writeText(shareLink);
-            showToast("brsFiddle.net share URL copied to clipboard");
+            showToast("brsFiddle.net share URL copied to clipboard.");
         });
     } else {
-        showToast("There is no Source Code to share", 3000, true);
+        showToast("There is no Source Code to share!", 3000, true);
     }
 }
 
@@ -284,12 +375,13 @@ function saveCode() {
     const code = editorManager.editor.getValue();
     if (code && code.trim() !== "") {
         if (codeSelect.value === "0") {
+            actionType.value = "save";
             codeDialog.showModal();
         } else {
             const codeName = codeSelect.options[codeSelect.selectedIndex].text;
             localStorage.setItem(currentId, `@=${codeName}=@${code}`);
             showToast(
-                "Code saved in the simulator local storage!\nTo share it use the Share button.",
+                "Code saved in the simulator local storage.\nTo share it use the Share button.",
                 5000
             );
         }
@@ -300,22 +392,55 @@ function saveCode() {
 
 codeDialog.addEventListener("close", (e) => {
     if (codeDialog.returnValue === "ok") {
-        if (codeForm.codeName.value.trim().length >= 3) {
-            const codeName = codeForm.codeName.value.trim();
-            const code = editorManager.editor.getValue();
-            localStorage.setItem(currentId, `@=${codeName}=@${code}`);
-            populateCodeSelector(currentId);
+        const codeName = codeForm.codeName.value.trim();
+        if (codeName.length < 3) {
+            showToast("Code snippet name must have least 3 characters!", 3000, true);
+            resetDialog();
+            return;
+        }
+        if (codeNameExists(codeName)) {
+            showToast("There is already a code snippet with this Name!", 3000, true);
+            resetDialog();
+            return;
+        }
+        const code = editorManager.editor.getValue();
+        if (actionType.value === "saveas") {
+            currentId = nanoid(10);
+        }
+        localStorage.setItem(currentId, `@=${codeName}=@${code}`);
+        populateCodeSelector(currentId);
+        if (actionType.value === "rename") {
+            showToast("Code snippet renamed in the simulator local storage.", 5000);
+        } else {
             showToast(
-                "Code saved in your browser local storage!\nTo share it use the Share button.",
+                "Code saved in the simulator local storage!\nTo share it use the Share button.",
                 5000
             );
-        } else {
-            showToast("Code Snippet Name must have least 3 characters!", 3000, true);
         }
     }
+    resetDialog();
+});
+
+function resetDialog() {
     codeDialog.returnValue = "";
     codeForm.codeName.value = "";
-});
+}
+
+function codeNameExists(codeName) {
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.length === 10) {
+            const value = localStorage.getItem(key);
+            if (value?.startsWith("@=")) {
+                const itemName = value.substring(2, value.indexOf("=@"));
+                if (itemName.toLocaleLowerCase() === codeName.toLocaleLowerCase()) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
 
 export function runCode() {
     const code = editorManager.editor.getValue();
@@ -330,7 +455,7 @@ export function runCode() {
             scrollToBottom();
         }
     } else {
-        showToast("There is no Source Code to run", 3000, true);
+        showToast("There is no Source Code to run!", 3000, true);
     }
 }
 
@@ -338,7 +463,7 @@ function startDebug() {
     if (currentApp.running) {
         brs.debug("break");
     } else {
-        showToast("There is nothing running to debug", 3000, true);
+        showToast("There is nothing running to debug!", 3000, true);
     }
 }
 
@@ -352,7 +477,7 @@ function endExecution() {
     if (currentApp.running) {
         brs.terminate("EXIT_USER_NAV");
     } else {
-        showToast("There is nothing running to terminate", 3000, true);
+        showToast("There is nothing running to terminate!", 3000, true);
     }
 }
 
@@ -389,8 +514,10 @@ function hotKeys(event) {
 }
 
 function isHotKey(event, keyCode) {
-    return (isMacOS && event.code === keyCode && event.metaKey) ||
-        (!isMacOS && event.code === keyCode && event.ctrlKey);
+    return (
+        (isMacOS && event.code === keyCode && event.metaKey) ||
+        (!isMacOS && event.code === keyCode && event.ctrlKey)
+    );
 }
 
 function resizeColumn() {
@@ -427,7 +554,7 @@ function onMouseDown(event) {
 }
 
 function onResize() {
-    if (window.innerWidth >= 1220) {
+    if (window.innerWidth >= 1150 || editorContainer.classList.contains("hidden")) {
         const { height } = codeColumn.getBoundingClientRect();
         editorManager.editor.setSize("100%", `${height - 15}px`);
     } else {

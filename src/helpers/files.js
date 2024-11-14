@@ -13,6 +13,8 @@ import { zipSync, strToU8 } from "fflate";
 import path from "path";
 import fs from "fs";
 
+export const editorCodeFile = path.join(app.getPath("userData"), "editor_code.brs");
+
 export function loadFile(file, source) {
     resetPeerRoku();
     if (file == undefined) return;
@@ -83,9 +85,8 @@ ipcMain.on("saveIcon", (_, data) => {
     saveFile(iconPath, data[1]);
 });
 ipcMain.on("runCode", (_, code) => {
-    const filePath = path.join(app.getPath("userData"), "editor.brs");
-    fs.writeFileSync(filePath, code);
-    loadFile([filePath]);
+    fs.writeFileSync(editorCodeFile, code);
+    loadFile([editorCodeFile]);
 });
 
 function packageBrs(code) {
