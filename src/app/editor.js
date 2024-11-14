@@ -262,7 +262,7 @@ function renameCode() {
         codeForm.codeName.value = codeSelect.options[codeSelect.selectedIndex].text;
         codeDialog.showModal();
     } else {
-        showToast("There is no Source Code to rename!", 3000, true);
+        showToast("There is no code snippet selected to rename!", 3000, true);
     }
 }
 
@@ -270,7 +270,7 @@ function deleteCode() {
     if (currentId && localStorage.getItem(currentId)) {
         deleteDialog.showModal();
     } else {
-        showToast("There is no Source Code to delete!", 3000, true);
+        showToast("There is no code snippet selected to delete!", 3000, true);
     }
 }
 
