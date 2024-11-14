@@ -86,6 +86,10 @@
     --dialog-border-color: #5d5d5d;
 }
 
+.hidden {
+    display: none;
+}
+
 #titlebar {
     display: block;
     position: fixed;

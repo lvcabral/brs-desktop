@@ -14,6 +14,7 @@ import packageInfo from "../../package.json";
 
 const isMacOS = getOS() === "MacOS";
 const codec = Codec("lzma");
+const editorContainer = document.querySelector(".code");
 const brsCodeField = document.getElementById("brsCode");
 const saveButton = document.querySelector("button.save");
 const runButton = document.querySelector("button.run");
@@ -35,6 +36,8 @@ const dropdown = document.getElementById("more-options-dropdown");
 
 const simulator = window.opener;
 let [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
+
+hideEditor(!(currentApp.title === undefined || currentApp.title === "editor_code.brs"));
 
 const prompt = "Brightscript Debugger";
 const appId = packageInfo.name;
@@ -142,6 +145,7 @@ function updateButtons() {
 function handleEngineEvents(event, data) {
     if (event === "loaded") {
         currentApp = data;
+        hideEditor(!(currentApp.title === "editor_code.brs"));
     } else if (event === "started") {
         currentApp = data;
         console.info(`Execution started ${appId}`);
@@ -171,6 +175,7 @@ function handleEngineEvents(event, data) {
         endButton.style.display = "none";
         resumeButton.style.display = "none";
         breakButton.style.display = "none";
+        hideEditor(false);
     }
 }
 
@@ -187,6 +192,10 @@ function updateTerminal(text, level = "print") {
         output = "<span style='color: #e95449;'>" + output + "</span>";
     }
     terminal.output(`<pre>${output}</pre>`);
+}
+
+function hideEditor(toggle) {
+    editorContainer.classList.toggle("hidden", toggle);
 }
 
 function scrollToBottom() {
