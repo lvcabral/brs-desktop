@@ -37,8 +37,6 @@ const dropdown = document.getElementById("more-options-dropdown");
 const simulator = window.opener;
 let [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
 
-hideEditor(!(currentApp.title === undefined || currentApp.title === "editor_code.brs"));
-
 const prompt = "Brightscript Debugger";
 const appId = packageInfo.name;
 const commands = {
@@ -110,7 +108,7 @@ function main() {
         const cm = document.querySelector(".CodeMirror");
         delete cm.CodeMirror.constructor.keyMap.emacsy["Ctrl-V"];
     }
-    onResize();
+    hideEditor(!(currentApp.title === undefined || currentApp.title === "editor_code.brs"));
     populateCodeSelector();
     // Subscribe to Engine events and initialize Console
     brs.subscribe(appId, handleEngineEvents);
@@ -197,6 +195,7 @@ function updateTerminal(text, level = "print") {
 function hideEditor(toggle) {
     editorContainer.classList.toggle("hidden", toggle);
     document.body.classList.toggle("code-hidden", toggle);
+    onResize();
 }
 
 function scrollToBottom() {
