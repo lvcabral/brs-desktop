@@ -145,7 +145,7 @@ function updateButtons() {
 function handleEngineEvents(event, data) {
     if (event === "loaded") {
         currentApp = data;
-        hideEditor(!(currentApp.title === "editor_code.brs"));
+        hideEditor(currentApp.title !== "editor_code.brs");
     } else if (event === "started") {
         currentApp = data;
         console.info(`Execution started ${appId}`);
