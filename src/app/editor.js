@@ -304,7 +304,7 @@ function importCode() {
                 const value = `@=${code.name}=@${code.content}`;
                 localStorage.setItem(id, value);
             }
-            populateCodeSelector();
+            populateCodeSelector(currentId);
             showToast("Code snippets imported!", 3000);
         };
         reader.readAsText(file);
