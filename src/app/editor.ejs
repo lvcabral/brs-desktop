@@ -47,6 +47,7 @@
               <div class="dropdown" id="more-options-dropdown">
                 <ul>
                   <li><a href="#" id="rename-option"><i class="icon-edit"></i> Rename</a></li>
+                  <li><a href="#" id="saveas-option"><i class="icon-save"></i> Save as</a></li>
                   <li><a href="#" id="delete-option"><i class="icon-trash"></i> Delete</a></li>
                   <li><a href="#" id="export-option"><i class="icon-upload"></i> Export</a></li>
                   <li><a href="#" id="import-option"><i class="icon-download"></i> Import</a></li>
@@ -107,6 +108,7 @@
         <input type="text" name="codeName" class="modal_dialog_input" />
         <button value="ok">OK</button>
         <button value="cancel" class="modal_dialog_cancel">Cancel</button>
+        <input type="hidden" id="actionType" value="save" />
       </form>
     </dialog>
     <dialog id="delete-dialog" class="modal_dialog" closed>

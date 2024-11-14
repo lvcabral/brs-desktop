@@ -29,6 +29,7 @@ const codeColumn = document.querySelector("div.code");
 const consoleColumn = document.querySelector("div.console");
 const codeSelect = document.getElementById("code-selector");
 const codeDialog = document.getElementById("code-dialog");
+const actionType = document.getElementById("actionType");
 const codeForm = document.getElementById("code-form");
 const deleteDialog = document.getElementById("delete-dialog");
 const moreButton = document.getElementById("more-options");
@@ -87,6 +88,7 @@ document.addEventListener("click", function (event) {
     }
 });
 document.getElementById("rename-option").addEventListener("click", renameCode);
+document.getElementById("saveas-option").addEventListener("click", saveAsCode);
 document.getElementById("delete-option").addEventListener("click", deleteCode);
 document.getElementById("export-option").addEventListener("click", exportCode);
 document.getElementById("import-option").addEventListener("click", importCode);
@@ -256,12 +258,24 @@ function loadCode(id) {
         showToast("Could not find the code in the Local Storage!", 3000, true);
     }
 }
+
 function renameCode() {
     if (currentId && localStorage.getItem(currentId)) {
+        actionType.value = "rename";
         codeForm.codeName.value = codeSelect.options[codeSelect.selectedIndex].text;
         codeDialog.showModal();
     } else {
         showToast("There is no code snippet selected to rename!", 3000, true);
+    }
+}
+
+function saveAsCode() {
+    if (currentId && localStorage.getItem(currentId)) {
+        actionType.value = "saveas";
+        codeForm.codeName.value = codeSelect.options[codeSelect.selectedIndex].text + " (Copy)";
+        codeDialog.showModal();
+    } else {
+        showToast("There is no code snippet selected to save as!", 3000, true);
     }
 }
 
@@ -361,6 +375,7 @@ function saveCode() {
     const code = editorManager.editor.getValue();
     if (code && code.trim() !== "") {
         if (codeSelect.value === "0") {
+            actionType.value = "save";
             codeDialog.showModal();
         } else {
             const codeName = codeSelect.options[codeSelect.selectedIndex].text;
@@ -377,26 +392,55 @@ function saveCode() {
 
 codeDialog.addEventListener("close", (e) => {
     if (codeDialog.returnValue === "ok") {
-        if (codeForm.codeName.value.trim().length >= 3) {
-            const codeName = codeForm.codeName.value.trim();
-            const code = editorManager.editor.getValue();
-            localStorage.setItem(currentId, `@=${codeName}=@${code}`);
-            populateCodeSelector(currentId);
-            if (codeSelect.value !== "0") {
-                showToast("Code snippet renamed in the simulator local storage.", 5000);
-            } else {
-                showToast(
-                    "Code saved in the simulator local storage!\nTo share it use the Share button.",
-                    5000
-                );
-            }
+        const codeName = codeForm.codeName.value.trim();
+        if (codeName.length < 3) {
+            showToast("Code snippet name must have least 3 characters!", 3000, true);
+            resetDialog();
+            return;
+        }
+        if (codeNameExists(codeName)) {
+            showToast("There is already a code snippet with this Name!", 3000, true);
+            resetDialog();
+            return;
+        }
+        const code = editorManager.editor.getValue();
+        if (actionType.value === "saveas") {
+            currentId = nanoid(10);
+        }
+        localStorage.setItem(currentId, `@=${codeName}=@${code}`);
+        populateCodeSelector(currentId);
+        if (actionType.value === "rename") {
+            showToast("Code snippet renamed in the simulator local storage.", 5000);
         } else {
-            showToast("Code Snippet Name must have least 3 characters!", 3000, true);
+            showToast(
+                "Code saved in the simulator local storage!\nTo share it use the Share button.",
+                5000
+            );
         }
     }
+    resetDialog();
+});
+
+function resetDialog() {
     codeDialog.returnValue = "";
     codeForm.codeName.value = "";
-});
+}
+
+function codeNameExists(codeName) {
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.length === 10) {
+            const value = localStorage.getItem(key);
+            if (value?.startsWith("@=")) {
+                const itemName = value.substring(2, value.indexOf("=@"));
+                if (itemName.toLocaleLowerCase() === codeName.toLocaleLowerCase()) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
 
 export function runCode() {
     const code = editorManager.editor.getValue();
