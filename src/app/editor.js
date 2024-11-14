@@ -305,7 +305,7 @@ function importCode() {
                 localStorage.setItem(id, value);
             }
             populateCodeSelector(currentId);
-            showToast("Code snippets imported!", 3000);
+            showToast("Code snippets imported to the simulator local storage!", 3000);
         };
         reader.readAsText(file);
     };
@@ -317,7 +317,7 @@ deleteDialog.addEventListener("close", (e) => {
         localStorage.removeItem(currentId);
         currentId = nanoid(10);
         resetApp();
-        showToast("Code deleted from the local storage!", 3000);
+        showToast("Code deleted from the simulator local storage.", 3000);
     }
     deleteDialog.returnValue = "";
 });
@@ -345,10 +345,10 @@ function shareCode() {
         };
         getShareUrl(data).then(function (shareLink) {
             navigator.clipboard.writeText(shareLink);
-            showToast("brsFiddle.net share URL copied to clipboard");
+            showToast("brsFiddle.net share URL copied to clipboard.");
         });
     } else {
-        showToast("There is no Source Code to share", 3000, true);
+        showToast("There is no Source Code to share!", 3000, true);
     }
 }
 
@@ -361,7 +361,7 @@ function saveCode() {
             const codeName = codeSelect.options[codeSelect.selectedIndex].text;
             localStorage.setItem(currentId, `@=${codeName}=@${code}`);
             showToast(
-                "Code saved in the simulator local storage!\nTo share it use the Share button.",
+                "Code saved in the simulator local storage.\nTo share it use the Share button.",
                 5000
             );
         }
@@ -378,10 +378,10 @@ codeDialog.addEventListener("close", (e) => {
             localStorage.setItem(currentId, `@=${codeName}=@${code}`);
             populateCodeSelector(currentId);
             if (codeSelect.value !== "0") {
-                showToast("Code snippet renamed in your browser local storage!", 5000);
+                showToast("Code snippet renamed in the simulator local storage.", 5000);
             } else {
                 showToast(
-                    "Code saved in your browser local storage!\nTo share it use the Share button.",
+                    "Code saved in the simulator local storage!\nTo share it use the Share button.",
                     5000
                 );
             }
@@ -406,7 +406,7 @@ export function runCode() {
             scrollToBottom();
         }
     } else {
-        showToast("There is no Source Code to run", 3000, true);
+        showToast("There is no Source Code to run!", 3000, true);
     }
 }
 
@@ -414,7 +414,7 @@ function startDebug() {
     if (currentApp.running) {
         brs.debug("break");
     } else {
-        showToast("There is nothing running to debug", 3000, true);
+        showToast("There is nothing running to debug!", 3000, true);
     }
 }
 
@@ -428,7 +428,7 @@ function endExecution() {
     if (currentApp.running) {
         brs.terminate("EXIT_USER_NAV");
     } else {
-        showToast("There is nothing running to terminate", 3000, true);
+        showToast("There is nothing running to terminate!", 3000, true);
     }
 }
 
