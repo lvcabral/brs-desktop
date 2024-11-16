@@ -69,6 +69,19 @@ brs.subscribe("desktop", (event, data) => {
         if (data?.app) {
             selectedApp = data.app;
         }
+    } else if (event === "browser") {
+        if (data?.url) {
+            const newWindow = window.open(
+                data.url,
+                "_blank",
+                `width=${data.width},height=${data.height},popup`
+            );
+            if (newWindow) {
+                newWindow.focus();
+            } else {
+                showToast("Warning: It was not possible to open a new window!", true);
+            }
+        }
     } else if (event === "closed" || event === "error") {
         appTerminated();
         if (selectedApp !== "" && event === "closed") {
