@@ -112,6 +112,7 @@ contextBridge.exposeInMainWorld("api", {
             "showEditor",
             "keySent",
             "runCode",
+            "runUrl",
             "reset",
         ];
         if (validChannels.includes(channel)) {

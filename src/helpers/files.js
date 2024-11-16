@@ -88,7 +88,9 @@ ipcMain.on("runCode", (_, code) => {
     fs.writeFileSync(editorCodeFile, code);
     loadFile([editorCodeFile]);
 });
-
+ipcMain.on("runUrl", (_, url) => {
+    loadUrl(url);
+});
 function packageBrs(code) {
     let manifest = `
 title=BrightScript Engine

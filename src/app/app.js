@@ -54,16 +54,29 @@ api.send("deviceData", brs.deviceData);
 api.send("serialNumber", brs.getSerialNumber());
 api.send("engineVersion", brs.getVersion());
 
+let selectedApp = "";
+
 brs.subscribe("desktop", (event, data) => {
     if (event === "loaded") {
+        selectedApp = "";
         currentApp = data;
         appLoaded(data);
     } else if (event === "started") {
         currentApp = data;
         stats.style.visibility = "visible";
+    } else if (event === "launch") {
+        console.info(`App launched: ${data}`);
+        if (data?.app) {
+            selectedApp = data.app;
+        }
     } else if (event === "closed" || event === "error") {
-        showCloseMessage(event, data);
         appTerminated();
+        if (selectedApp !== "" && event === "closed") {
+            api.send("runUrl", selectedApp);
+        } else {
+            showCloseMessage(event, data);
+        }
+        selectedApp = "";
     } else if (event === "redraw") {
         redrawEvent(data);
     } else if (event === "control") {

@@ -247,8 +247,7 @@ pre {
 }
 
 .more-options {
-    /* styles for the ellipsis button */
-    position: relative; /* add this */
+    position: relative;
 }
 
 .dropdown {
@@ -257,7 +256,7 @@ pre {
     background-color: var(--control-background-color);
     border: 1px solid var(--control-border-color);
     padding: 2px;
-    z-index: 1; /* set a higher z-index value */
+    z-index: 1;
     top: calc(100% + 1px);
     left: 0;
     border-radius: 0.25em;
@@ -280,8 +279,8 @@ pre {
     align-items: center;
     text-decoration: none;
     color: var(--control-color);
-    padding: 3px; /* add padding to the link */
-    width: 100%; /* make the link take up the full width */
+    padding: 3px;
+    width: 100%;
 }
 
 .dropdown li a i {
