@@ -6,6 +6,8 @@ BrightScript Language Mode
 
 https://developer.roku.com/docs/references/brightscript/language/brightscript-language-reference.md
 
+Adapted from the Visual Basic mode for CodeMirror by Marcelo Lv Cabral
+
 */
 
 export function defineMode(CodeMirror) {
@@ -23,11 +25,11 @@ export function defineMode(CodeMirror) {
         let functions = /^[_A-Za-z]\w*(?=\()/;
         let identifiers = /^[_A-Za-z]\w*/;
 
-        let openingKeywords = ["sub", "function"];
-        let endKeywords = ["endsub", "endfunction"];
+        const openingKeywords = ["sub", "function"];
+        const endKeywords = ["endsub", "endfunction"];
 
-        let openingControl = ["while", "if", "for", "try"];
-        let middleControl = [
+        const openingControl = ["while", "if", "for", "try"];
+        const middleControl = [
             "catch",
             "continue for",
             "continue while",
@@ -39,15 +41,17 @@ export function defineMode(CodeMirror) {
             "to",
             "step",
             "in",
+            "then",
+            "each",
             "as",
             "return",
             "stop",
             "throw",
         ];
-        let endControl = ["next", "endif", "end if", "endfor", "end for", "endwhile", "end while", "endtry", "end try"];
-        let wordOperators = wordRegexp(["and", "or", "not", "mod"]);
-        let commonkeywords = ["dim", "print", "goto", "library"];
-        let commontypes = [
+        const endControl = ["next", "endif", "end if", "endfor", "end for", "endwhile", "end while", "endtry", "end try"];
+        const wordOperators = wordRegexp(["and", "or", "not", "mod"]);
+        const commonkeywords = ["dim", "print", "goto", "library"];
+        const commontypes = [
             "object",
             "dynamic",
             "boolean",
@@ -59,7 +63,7 @@ export function defineMode(CodeMirror) {
             "void",
         ];
 
-        let atomWords = ["true", "false", "invalid"];
+        const atomWords = ["true", "false", "invalid"];
         let builtinFuncsWords = [
             "box",
             "createobject",
