@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -149,13 +149,17 @@ api.receive("fileSelected", function (filePath, data, clear, mute, debug, source
             const settings = api.getPreferences();
             password = settings?.device?.developerPwd ?? "";
         }
-        brs.execute(filePath, data, {
-            clearDisplayOnExit: clear,
-            muteSound: mute,
-            execSource: source,
-            debugOnCrash: debug,
-            password: password,
-        });
+        brs.execute(
+            filePath,
+            data.buffer,
+            {
+                clearDisplayOnExit: clear,
+                muteSound: mute,
+                debugOnCrash: debug,
+                password: password,
+            },
+            new Map([["source", source]])
+        );
     } catch (error) {
         const errorMsg = `Error opening ${filePath}:${error.message}`;
         console.error(errorMsg);
@@ -271,7 +275,7 @@ function appLoaded(appData) {
     }
     api.updateTitle(`${appData.title} - ${defaultTitle}`);
     if (appData.id === "brs") {
-        api.send("addRecentSource", appData.file);
+        api.send("addRecentSource", appData.path);
     } else {
         api.send("addRecentPackage", appData);
     }

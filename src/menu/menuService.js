@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -146,18 +146,18 @@ export function isMenuItemEnabled(id) {
 }
 
 // Events
-ipcMain.on("addRecentPackage", (event, currentChannel) => {
-    let idx = recentFiles.ids.indexOf(currentChannel.id);
+ipcMain.on("addRecentPackage", (event, currentApp) => {
+    let idx = recentFiles.ids.indexOf(currentApp.id);
     if (idx >= 0) {
         recentFiles.ids.splice(idx, 1);
         recentFiles.zip.splice(idx, 1);
         recentFiles.names.splice(idx, 1);
         recentFiles.versions.splice(idx, 1);
     }
-    recentFiles.ids.unshift(currentChannel.id);
-    recentFiles.zip.unshift(currentChannel.file);
-    recentFiles.names.unshift(currentChannel.title);
-    recentFiles.versions.unshift(currentChannel.version);
+    recentFiles.ids.unshift(currentApp.id);
+    recentFiles.zip.unshift(currentApp.path);
+    recentFiles.names.unshift(currentApp.title);
+    recentFiles.versions.unshift(currentApp.version);
     if (recentFiles.ids.length > maxFiles) {
         recentFiles.ids.length = maxFiles;
         recentFiles.zip.length = maxFiles;

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -241,10 +241,10 @@ function updateStatus(data) {
         statusIconFile.innerHTML =
             data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
         statusFile.innerText = shortenPath(
-            data.file,
+            data.path,
             Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
         );
-        filePath = data.file;
+        filePath = data.path;
         if (data.version !== "") {
             statusVersion.innerText = data.version;
             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
