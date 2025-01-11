@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -53,6 +53,7 @@ const deviceInfo = {
     startTime: Date.now(),
     maxSimulStreams: 2,
     audioVolume: 40,
+    appList: [],
 };
 
 require("@electron/remote/main").initialize();
@@ -63,12 +64,6 @@ const argv = minimist(process.argv.slice(1), {
     boolean: ["c", "d", "e", "f", "r"],
     alias: { c: "console", d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" },
 });
-
-// Save userData in separate folders for each environment.
-if (env.name !== "production") {
-    const userDataPath = app.getPath("userData");
-    app.setPath("userData", `${userDataPath} (${env.name})`);
-}
 
 app.on("ready", () => {
     // setup the titlebar main process
