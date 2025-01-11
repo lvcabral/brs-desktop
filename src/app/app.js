@@ -149,9 +149,12 @@ api.receive("fileSelected", function (filePath, data, clear, mute, debug, source
             const settings = api.getPreferences();
             password = settings?.device?.developerPwd ?? "";
         }
+        if (fileExt !== "brs") {
+            data = data.buffer;
+        }
         brs.execute(
             filePath,
-            data.buffer,
+            data,
             {
                 clearDisplayOnExit: clear,
                 muteSound: mute,
