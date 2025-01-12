@@ -239,7 +239,7 @@ function updateStatus(data) {
         clearCounters();
         setStatusColor();
         statusIconFile.innerHTML =
-            data.id === "brs" ? "<i class='far fa-file'></i>" : "<i class='fa fa-cube'></i>";
+            data.path.toLowerCase().endsWith(".brs")? "<i class='fa fa-file'></i>" : "<i class='fa fa-cube'></i>";
         statusFile.innerText = shortenPath(
             data.path,
             Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
