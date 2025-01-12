@@ -533,8 +533,14 @@ function launchApp(appID, query) {
         zipPath = getRecentPackage(index);
     }
     if (zipPath && fs.existsSync(zipPath)) {
-        // TODO: Add query parameters to launch as deep link
-        loadFile([zipPath], "external-control");
+        const input = new Map();
+        input.set("source", "external-control");
+        if (query) {
+            for (let key in query) {
+                input.set(key, query[key]);
+            }
+        }
+        loadFile([zipPath], input);
     } else {
         window.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
     }

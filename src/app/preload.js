@@ -141,7 +141,7 @@ contextBridge.exposeInMainWorld("api", {
             "serverStatus",
             "copyScreenshot",
             "saveScreenshot",
-            "fileSelected",
+            "executeFile",
             "openEditor",
         ];
         if (validChannels.includes(channel)) {

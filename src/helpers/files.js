@@ -15,7 +15,7 @@ import fs from "fs";
 
 export const editorCodeFile = path.join(app.getPath("userData"), "editor_code.brs");
 
-export function loadFile(file, source) {
+export function loadFile(file, input) {
     resetPeerRoku();
     if (file == undefined) return;
     const window = BrowserWindow.fromId(1);
@@ -31,7 +31,7 @@ export function loadFile(file, source) {
     const fileExt = path.parse(filePath).ext.toLowerCase();
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
-            executeFile(window, fs.readFileSync(filePath), filePath, source);
+            executeFile(window, fs.readFileSync(filePath), filePath, input);
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);
         }
@@ -40,7 +40,7 @@ export function loadFile(file, source) {
     }
 }
 
-export async function loadUrl(url, source) {
+export async function loadUrl(url, input) {
     const window = BrowserWindow.fromId(1);
     focusWindow(window);
     resetPeerRoku();
@@ -55,7 +55,7 @@ export async function loadUrl(url, source) {
             const response = await fetch(url);
             if (response.status === 200) {
                 let fileData = await response.arrayBuffer();
-                executeFile(window, Buffer.from(fileData), url, source);
+                executeFile(window, Buffer.from(fileData), url, input);
             } else {
                 window.webContents.send(
                     "console",
@@ -108,16 +108,22 @@ splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
     return Buffer.from(zewZip);
 }
 
-function executeFile(window, fileData, filePath, source) {
+function executeFile(window, fileData, filePath, input) {
     let fileExt = path.parse(filePath).ext.toLowerCase();
+    if (input == undefined) {
+        input = new Map();
+    }
+    if (!input.has("source")) {
+        input.set("source", "desktop_app");
+    }
     window.webContents.send(
-        "fileSelected",
+        "executeFile",
         filePath,
         fileData,
         !getSimulatorOption("keepDisplayOnExit"),
         getAudioMuted(),
         getSimulatorOption("debugOnCrash"),
-        source ?? "desktop_app"
+        input
     );
     if (fileExt === ".brs") {
         runOnPeerRoku(packageBrs(fileData));

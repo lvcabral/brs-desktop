@@ -141,7 +141,7 @@ api.receive("setDeviceInfo", function (key, value) {
         }
     }
 });
-api.receive("fileSelected", function (filePath, data, clear, mute, debug, source) {
+api.receive("executeFile", function (filePath, data, clear, mute, debug, input) {
     try {
         const fileExt = filePath.split(".").pop()?.toLowerCase();
         let password = "";
@@ -161,7 +161,7 @@ api.receive("fileSelected", function (filePath, data, clear, mute, debug, source
                 debugOnCrash: debug,
                 password: password,
             },
-            new Map([["source", source]])
+            input
         );
     } catch (error) {
         const errorMsg = `Error opening ${filePath}:${error.message}`;
