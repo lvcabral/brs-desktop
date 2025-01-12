@@ -18,7 +18,7 @@ export const editorCodeFile = path.join(app.getPath("userData"), "editor_code.br
 export function loadFile(file, source) {
     resetPeerRoku();
     if (file == undefined) return;
-    let window = BrowserWindow.fromId(1);
+    const window = BrowserWindow.fromId(1);
     focusWindow(window);
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
@@ -28,11 +28,10 @@ export function loadFile(file, source) {
         return;
     }
     const fileName = path.parse(filePath).base;
-    let fileExt = path.parse(filePath).ext.toLowerCase();
+    const fileExt = path.parse(filePath).ext.toLowerCase();
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
-            let fileData = fs.readFileSync(filePath);
-            executeFile(window, fileData, filePath, source);
+            executeFile(window, fs.readFileSync(filePath), filePath, source);
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);
         }
@@ -42,7 +41,7 @@ export function loadFile(file, source) {
 }
 
 export async function loadUrl(url, source) {
-    let window = BrowserWindow.fromId(1);
+    const window = BrowserWindow.fromId(1);
     focusWindow(window);
     resetPeerRoku();
     if (!isValidUrl(url)) {
@@ -50,7 +49,7 @@ export async function loadUrl(url, source) {
         return;
     }
     const fileName = path.parse(url).base;
-    let fileExt = path.parse(url).ext.toLowerCase();
+    const fileExt = path.parse(url).ext.toLowerCase();
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
             const response = await fetch(url);
@@ -92,7 +91,7 @@ ipcMain.on("runUrl", (_, url) => {
     loadUrl(url);
 });
 function packageBrs(code) {
-    let manifest = `
+    const manifest = `
 title=BrightScript Engine
 subtitle=Generic Code Runner
 major_version=1
@@ -100,7 +99,7 @@ minor_version=0
 build_version=0
 mm_icon_focus_hd=pkg:/images/channel-poster_hd.png
 splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
-    let poster = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
+    const poster = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
     const zewZip = zipSync({
         "manifest": [strToU8(manifest), {}],
         "source/main.brs": [strToU8(code), {}],

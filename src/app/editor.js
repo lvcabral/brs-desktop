@@ -110,7 +110,7 @@ function main() {
         const cm = document.querySelector(".CodeMirror");
         delete cm.CodeMirror.constructor.keyMap.emacsy["Ctrl-V"];
     }
-    hideEditor(!(currentApp.title === undefined || currentApp.title === "editor_code.brs"));
+    hideEditor(!(currentApp.title === undefined || currentApp.title.endsWith("editor_code.brs")));
     populateCodeSelector();
     // Subscribe to Engine events and initialize Console
     brs.subscribe(appId, handleEngineEvents);
@@ -145,7 +145,7 @@ function updateButtons() {
 function handleEngineEvents(event, data) {
     if (event === "loaded") {
         currentApp = data;
-        hideEditor(currentApp.title !== "editor_code.brs");
+        hideEditor(!currentApp.title.endsWith("editor_code.brs"));
     } else if (event === "started") {
         currentApp = data;
         console.info(`Execution started ${appId}`);

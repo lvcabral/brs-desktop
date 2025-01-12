@@ -17,6 +17,7 @@ import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile, loadUrl, editorCodeFile } from "../helpers/files";
+import fs from "fs";
 import path from "path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
@@ -100,6 +101,35 @@ export function clearRecentFiles() {
     rebuildMenu();
 }
 
+export function updateAppList() {
+    const appList = [];
+    recentFiles.ids.forEach((id, index) => {
+        appList.push({
+            id: id,
+            title: recentFiles.names[index],
+            version: recentFiles.versions[index],
+            path: recentFiles.zip[index],
+            icon: getAppIconPath(id),
+        });
+    });
+    console.log("updateAppList", appList);
+    global.sharedObject.deviceInfo.appList = appList;
+    const window = BrowserWindow.fromId(1);
+    window?.webContents?.send("setDeviceInfo", "appList", appList);
+}
+
+export function getAppIconPath(appID) {
+    let iconPath = path.join(__dirname, "images", "channel-icon.png");
+    const index = getChannelIds().indexOf(appID);
+    if (index >= 0) {
+        const appIconPath = path.join(app.getPath("userData"), getRecentPackage(index).hashCode() + ".png");
+        if (fs.existsSync(appIconPath)) {
+            iconPath = appIconPath;
+        }
+    }
+    return iconPath;
+}
+
 export function loadPackage(id) {
     let pkg = getRecentPackage(id);
     if (typeof pkg === "string") {
@@ -147,7 +177,13 @@ export function isMenuItemEnabled(id) {
 
 // Events
 ipcMain.on("addRecentPackage", (event, currentApp) => {
-    let idx = recentFiles.ids.indexOf(currentApp.id);
+    const devFile = path.join(app.getPath("userData"), "dev.zip");
+    if (currentApp.id === "dev" && currentApp.path !== devFile) {
+        currentApp.id = currentApp.path.hashCode();
+    } else if (currentApp.id !== "dev" && currentApp.path === devFile) {
+        currentApp.id = "dev";
+    }
+    let idx = recentFiles.zip.indexOf(currentApp.path);
     if (idx >= 0) {
         recentFiles.ids.splice(idx, 1);
         recentFiles.zip.splice(idx, 1);
@@ -165,6 +201,7 @@ ipcMain.on("addRecentPackage", (event, currentApp) => {
         recentFiles.versions.length = maxFiles;
     }
     saveRecentFiles();
+    updateAppList();
     rebuildMenu();
 });
 

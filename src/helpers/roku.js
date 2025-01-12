@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -142,9 +142,15 @@ function isCompileError(responseHtml) {
 }
 
 export function isValidIP(ip) {
-    if (ip && ip.length >= 7) {
-        const ipFormat = /^(\d{1,3}\.){3}\d{1,3}$/;
-        return ipFormat.test(ip);
+    if (typeof ip !== "string") {
+        return false;
     }
-    return false;
+    const parts = ip.split(".");
+    return (
+        parts.length === 4 &&
+        parts.every((part) => {
+            const num = Number(part);
+            return !isNaN(num) && num >= 0 && num <= 255;
+        })
+    );
 }

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -13,10 +13,12 @@ import {
     getRecentId,
     getRecentName,
     getRecentVersion,
+    getAppIconPath,
     checkMenuItem,
 } from "../menu/menuService";
 import { loadFile } from "../helpers/files";
 import { setPreference, getModelName } from "../helpers/settings";
+import { isValidIP } from "../helpers/roku";
 import { Server as SSDP } from "node-ssdp";
 import xmlbuilder from "xmlbuilder";
 import fs from "fs";
@@ -57,11 +59,16 @@ export function enableECP() {
     ecp.get("/dial_SCPD.xml", sendScpdXML);
     ecp.get("/query/device-info", sendDeviceInfo);
     ecp.get("//query/device-info", sendDeviceInfo);
+    // TODO: Add missing ECP queries and check if can use brs-engine version
+    // ecp.get("/query/graphic-frame-rate", sendFrameRate);
     ecp.get("/query/apps", sendApps);
     ecp.get("/query/active-app", sendActiveApp);
     ecp.get("/query/icon/:appID", sendAppIcon);
     ecp.get("/query/registry/:appID", sendRegistry);
+    ecp.post("/input", sendInput);
     ecp.post("/launch/:appID", sendLaunchApp);
+    // TODO: Only close if the appId is the currently running app
+    //ecp.post("/exit-app/:appID", sendExitApp);
     ecp.post("/keypress/:key", sendKeyPress);
     ecp.post("/keydown/:key", sendKeyDown);
     ecp.post("/keyup/:key", sendKeyUp);
@@ -269,8 +276,23 @@ function sendRegistry(req, res) {
     res.send(genAppRegistry(req.params.appID, false));
 }
 
+function sendInput(req, res) {
+    const params = req.query ?? {};
+    const sourceIp = req.socket.remoteAddress;
+    if (sourceIp?.startsWith("::ffff:")) {
+        params.source_ip_addr = sourceIp.slice(7);
+    } else if (sourceIp?.startsWith("::1")) {
+        params.source_ip_addr = "127.0.0.1";
+    } else if (isValidIP(sourceIp)) {
+        params.source_ip_addr = sourceIp;
+    }
+    window.webContents.send("postInputParams", params);
+    res.end();
+}
+
 function sendLaunchApp(req, res) {
-    launchApp(req.params.appID);
+    console.log("Launch App:", req.params.appID, req.query);
+    launchApp(req.params.appID, req.query);
     res.end();
 }
 
@@ -306,6 +328,13 @@ function genDeviceRootXml() {
     xmlDevice.ele("modelURL", {}, "https://www.lvcabral.com/brs/");
     xmlDevice.ele("serialNumber", {}, device.serialNumber);
     xmlDevice.ele("UDN", {}, `uuid:${UDN}`);
+    const xmlIcons = xmlDevice.ele("iconList");
+    const xmlIcon = xmlIcons.ele("icon");
+    xmlIcon.ele("mimetype", {}, "image/png");
+    xmlIcon.ele("width", {}, "360");
+    xmlIcon.ele("height", {}, "219");
+    xmlIcon.ele("depth", {}, "8");
+    xmlIcon.ele("url", {}, "device-image.png");
     const xmlList = xmlDevice.ele("serviceList");
     const xmlService = xmlList.ele("service");
     xmlService.ele("serviceType", {}, "urn:roku-com:service:ecp:1");
@@ -373,7 +402,7 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("voice-search-enabled", {}, false);
     xml.ele("notifications-enabled", {}, true);
     xml.ele("notifications-first-use", {}, false);
-    xml.ele("supports-private-listeninig", {}, false);
+    xml.ele("supports-private-listening", {}, false);
     xml.ele("headphones-connected", {}, false);
     xml.ele("supports-ecs-textedit", {}, true);
     xml.ele("supports-ecs-microphone", {}, false);
@@ -422,20 +451,7 @@ function genAppsXml(encrypt) {
 }
 
 function genAppIcon(appID, encrypt) {
-    let image;
-    if (appID.toLowerCase() === "dev") {
-        appID = path.join(app.getPath("userData"), "dev.zip").hashCode();
-    }
-    let index = getChannelIds().indexOf(appID);
-    if (index >= 0) {
-        const iconPath = path.join(app.getPath("userData"), getRecentId(index) + ".png");
-        if (fs.existsSync(iconPath)) {
-            image = fs.readFileSync(iconPath);
-        }
-    }
-    if (image === undefined) {
-        image = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
-    }
+    const image = fs.readFileSync(getAppIconPath(appID));
     return encrypt ? image.toString("base64") : image;
 }
 
@@ -468,18 +484,18 @@ function genAppRegistry(plugin, encrypt) {
     if (index >= 0 || plugin.toLowerCase() === "dev") {
         const devId = path.join(app.getPath("userData"), "dev.zip").hashCode();
         const devIdx = plugins.indexOf(devId);
-        if (devIdx >= 0 ) {
+        if (devIdx >= 0) {
             plugins[devIdx] = "dev";
             plugins.sort();
         }
-        const regXml = xml.ele("registry")
+        const regXml = xml.ele("registry");
         regXml.ele("dev-id", {}, device.developerId);
         regXml.ele("plugins", {}, plugins.join());
         regXml.ele("space-available", {}, 32768);
         const secsXml = regXml.ele("sections");
         let curSection = "";
         let scXml, itsXml, itXml;
-        const registry = new Map([...device.registry].sort())
+        const registry = new Map([...device.registry].sort());
         registry.forEach((value, key) => {
             const sections = key.split(".");
             if (sections.length > 2 && sections[0] === device.developerId) {
@@ -508,16 +524,17 @@ function genAppRegistry(plugin, encrypt) {
 }
 
 // Helper Functions
-function launchApp(appID) {
+function launchApp(appID, query) {
+    let zipPath;
     if (appID.toLowerCase() === "dev") {
-        appID = path.join(app.getPath("userData"), "dev.zip").hashCode();
+        zipPath = path.join(app.getPath("userData"), "dev.zip");
+    } else {
+        const index = getChannelIds().indexOf(appID);
+        zipPath = getRecentPackage(index);
     }
-    let index = getChannelIds().indexOf(appID);
-    if (index >= 0) {
-        let zip = getRecentPackage(index);
-        if (zip) {
-            loadFile([zip], "external-control");
-        }
+    if (zipPath && fs.existsSync(zipPath)) {
+        // TODO: Add query parameters to launch as deep link
+        loadFile([zipPath], "external-control");
     } else {
         window.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
     }

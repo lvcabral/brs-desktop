@@ -105,7 +105,7 @@ brs.subscribe("desktop", (event, data) => {
             debugMode = data.level;
         }
     } else if (event === "icon") {
-        api.send("saveIcon", [currentApp.id, data]);
+        api.send("saveIcon", [currentApp.path.hashCode(), data]);
     } else if (event === "registry") {
         api.send("updateRegistry", data);
     } else if (event === "reset") {
@@ -184,6 +184,9 @@ api.receive("console", function (text, error) {
 });
 api.receive("debugCommand", function (cmd) {
     brs.debug(cmd);
+});
+api.receive("postInputParams", function (params) {
+    brs.sendInput(params);
 });
 api.receive("setCustomKeys", function (keys) {
     brs.setCustomKeys(keys);
@@ -277,7 +280,7 @@ function appLoaded(appData) {
         brs.enableStats(settings.simulator.options.includes("perfStats"));
     }
     api.updateTitle(`${appData.title} - ${defaultTitle}`);
-    if (appData.id === "brs") {
+    if (appData.path.toLowerCase().endsWith(".brs")) {
         api.send("addRecentSource", appData.path);
     } else {
         api.send("addRecentPackage", appData);

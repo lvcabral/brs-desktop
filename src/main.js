@@ -7,7 +7,6 @@
  *--------------------------------------------------------------------------------------------*/
 import path from "path";
 import url from "url";
-import env from "env";
 import os from "os";
 import minimist from "minimist";
 import jetpack from "fs-jetpack";
@@ -16,7 +15,14 @@ import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./server/installer";
 import { initECP, enableECP, updateECPStatus } from "./server/ecp";
 import { enableTelnet, updateTelnetStatus } from "./server/telnet";
-import { createMenu, enableMenuItem, checkMenuItem, isMenuItemEnabled, loadPackage } from "./menu/menuService";
+import {
+    createMenu,
+    enableMenuItem,
+    checkMenuItem,
+    isMenuItemEnabled,
+    loadPackage,
+    updateAppList,
+} from "./menu/menuService";
 import { loadFile } from "./helpers/files";
 import {
     getSettings,
@@ -26,7 +32,13 @@ import {
     setThemeSource,
     setTimeZone,
 } from "./helpers/settings";
-import { createWindow, openCodeEditor, openDevTools, setAspectRatio, saveWindowState } from "./helpers/window";
+import {
+    createWindow,
+    openCodeEditor,
+    openDevTools,
+    setAspectRatio,
+    saveWindowState,
+} from "./helpers/window";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 import { randomUUID } from "crypto";
 
@@ -62,7 +74,16 @@ require("@electron/remote/main").initialize();
 const argv = minimist(process.argv.slice(1), {
     string: ["o", "p", "m"],
     boolean: ["c", "d", "e", "f", "r"],
-    alias: { c: "console", d: "devtools", e: "ecp", f: "fullscreen", w: "web", p: "pwd", m: "mode", r: "rc" },
+    alias: {
+        c: "console",
+        d: "devtools",
+        e: "ecp",
+        f: "fullscreen",
+        w: "web",
+        p: "pwd",
+        m: "mode",
+        r: "rc",
+    },
 });
 
 app.on("ready", () => {
@@ -75,6 +96,7 @@ app.on("ready", () => {
         backgroundColor: "#251135",
         deviceInfo: deviceInfo,
     };
+    updateAppList();
     // Create Main Window
     let mainWindow = createWindow("main", {
         width: 1280,
