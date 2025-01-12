@@ -112,7 +112,6 @@ export function updateAppList() {
             icon: getAppIconPath(id),
         });
     });
-    console.log("updateAppList", appList);
     global.sharedObject.deviceInfo.appList = appList;
     const window = BrowserWindow.fromId(1);
     window?.webContents?.send("setDeviceInfo", "appList", appList);
