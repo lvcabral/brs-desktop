@@ -245,6 +245,11 @@ window.addEventListener(
         if (currentApp.running && debugMode === "pause") {
             brs.debug("cont");
         }
+        if (api.processPlatform() === "darwin") {
+            api.enableMenuItem("close-channel", currentApp.running);
+            api.enableMenuItem("save-screen", currentApp.running);
+            api.enableMenuItem("copy-screen", currentApp.running);
+        }
     },
     false
 );
@@ -257,6 +262,11 @@ window.addEventListener(
             if (settings?.simulator?.options?.includes("pauseOnBlur")) {
                 brs.debug("pause");
             }
+        }
+        if (api.processPlatform() === "darwin") {
+            api.enableMenuItem("close-channel", false);
+            api.enableMenuItem("save-screen", false);
+            api.enableMenuItem("copy-screen", false);
         }
     },
     false
