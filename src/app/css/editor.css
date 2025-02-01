@@ -68,7 +68,7 @@
     --header-color: #333333;
     --header-background-color: #cccccc;
     --help-color: #5d5d5d;
-    --console-color: #333333;
+    --console-color: #053369;
     --console-background-color: #eeeeee;
     --console-selection-color: #aaaaaa;
     --item-background-color: #094771;
@@ -272,6 +272,8 @@ pre {
 .dropdown li {
     margin-top: 3px;
     margin-bottom: 3px;
+    width: 100%;
+    white-space: nowrap;
 }
 
 .dropdown li a {
@@ -281,6 +283,7 @@ pre {
     color: var(--control-color);
     padding: 3px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .dropdown li a i {
@@ -368,6 +371,10 @@ pre {
 }
 
 .VanillaTerm output pre {
+    color: var(--console-color) !important;
+}
+
+.VanillaTerm output span {
     color: var(--console-color) !important;
 }
 

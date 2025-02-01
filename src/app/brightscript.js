@@ -48,7 +48,17 @@ export function defineMode(CodeMirror) {
             "stop",
             "throw",
         ];
-        const endControl = ["next", "endif", "end if", "endfor", "end for", "endwhile", "end while", "endtry", "end try"];
+        const endControl = [
+            "next",
+            "endif",
+            "end if",
+            "endfor",
+            "end for",
+            "endwhile",
+            "end while",
+            "endtry",
+            "end try",
+        ];
         const wordOperators = wordRegexp(["and", "or", "not", "mod"]);
         const commonkeywords = ["dim", "print", "goto", "library"];
         const commontypes = [
