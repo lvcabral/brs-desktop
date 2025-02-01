@@ -1887,7 +1887,7 @@ browserslist@^4.24.2:
     node-releases "^2.0.18"
     update-browserslist-db "^1.1.1"
 
-brs-engine@^1.8.2:
+brs-engine@^1.8.0:
   version "1.8.5"
   resolved "https://registry.yarnpkg.com/brs-engine/-/brs-engine-1.8.5.tgz#9e08d740cb375a692ec94048560a3c4c030db872"
   integrity sha512-r8uKH2KIOURhGFWt2QAdbi3LwsI6v40rHxm+DmLNYT3pecBrsly4VYwgF7WmnjwjiC+nxy4XKoteo3TD6sJu4A==
@@ -4468,10 +4468,10 @@ nanoid@^3.3.7:
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.7.tgz#d0c301a691bc8d54efa0a2226ccf3fe2fd656bd8"
   integrity sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==
 
-nanoid@^4.0.1:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-4.0.2.tgz#140b3c5003959adbebf521c170f282c5e7f9fb9e"
-  integrity sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==
+nanoid@^5.0.9:
+  version "5.0.9"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-5.0.9.tgz#977dcbaac055430ce7b1e19cf0130cea91a20e50"
+  integrity sha512-Aooyr6MXU6HpvvWXKoVoXwKMs/KyVakWwg7xQfv5/S/RIgJMy0Ifa45H9qqYy7pTCszrHzP21Uk4PZq2HpEM8Q==
 
 nanomatch@^1.2.13:
   version "1.2.13"
