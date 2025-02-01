@@ -8,7 +8,11 @@
 import { app, BrowserWindow, Menu, ipcMain } from "electron";
 import { macOSMenuTemplate } from "./macOSMenuTemplate";
 import { fileMenuTemplate } from "./fileMenuTemplate";
-import { editMenuTemplate, editSettingsMenuTemplate } from "./editMenuTemplate";
+import {
+    editMenuTemplate,
+    editSettingsMenuTemplate,
+    editContextMenuTemplate,
+} from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
@@ -121,7 +125,10 @@ export function getAppIconPath(appID) {
     let iconPath = path.join(__dirname, "images", "channel-icon.png");
     const index = getChannelIds().indexOf(appID);
     if (index >= 0) {
-        const appIconPath = path.join(app.getPath("userData"), getRecentPackage(index).hashCode() + ".png");
+        const appIconPath = path.join(
+            app.getPath("userData"),
+            getRecentPackage(index).hashCode() + ".png"
+        );
         if (fs.existsSync(appIconPath)) {
             iconPath = appIconPath;
         }
@@ -222,6 +229,12 @@ ipcMain.on("addRecentSource", (event, filePath) => {
 
 ipcMain.on("enableMenuItem", (event, id, enable) => {
     enableMenuItem(id, enable);
+});
+
+ipcMain.on("contextMenu", (event) => {
+    const menuTemplate = editContextMenuTemplate.submenu;
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    menu.popup(BrowserWindow.fromWebContents(event.sender));
 });
 
 // Internal functions

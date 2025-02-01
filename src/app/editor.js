@@ -102,6 +102,7 @@ let isResizing = false;
 let editorManager;
 let currentId = nanoid(10);
 let isCodeChanged = false;
+let unchangedCode = "";
 
 function main() {
     updateButtons();
@@ -123,7 +124,14 @@ function main() {
                 return;
             }
         }
-        markCodeAsChanged();
+        if (editorManager.editor.getValue() !== unchangedCode) {
+            markCodeAsChanged();
+        } else {
+            markCodeAsSaved();
+        }
+    });
+    editorManager.editor.on("contextmenu", (event) => {
+        api.send("contextMenu");
     });
     hideEditor(!(currentApp.title === undefined || currentApp.title.endsWith("editor_code.brs")));
     populateCodeSelector();
@@ -320,6 +328,19 @@ codeSelect.addEventListener("change", async (e) => {
         currentId = nanoid(10);
         resetApp();
     }
+    resetUndoHistory();
+});
+
+function resetUndoHistory() {
+    editorManager?.editor?.clearHistory();
+}
+
+api.receive("editorUndo", function () {
+    editorManager?.editor?.undo();
+});
+
+api.receive("editorRedo", function () {
+    editorManager?.editor?.redo();
 });
 
 function loadCode(id) {
@@ -365,6 +386,7 @@ async function deleteCode() {
             localStorage.removeItem(currentId);
             currentId = nanoid(10);
             resetApp();
+            unchangedCode = "";
             showToast("Code deleted from the browser local storage!", 3000);
         }
     } else {
@@ -456,6 +478,7 @@ function resetApp(id = "", code = "") {
         brs.terminate("EXIT_USER_NAV");
         clearTerminal();
     }
+    unchangedCode = code;
     editorManager.editor.setValue(code);
     editorManager.editor.focus();
     markCodeAsSaved();
@@ -498,6 +521,7 @@ function saveCode() {
         } else {
             const codeName = codeSelect.options[codeSelect.selectedIndex].text.replace(/^⏺︎ /, "");
             localStorage.setItem(currentId, `@=${codeName}=@${code}`);
+            unchangedCode = code;
             showToast(
                 "Code saved in the simulator local storage.\nTo share it use the Share button.",
                 5000
@@ -527,6 +551,7 @@ codeDialog.addEventListener("close", (e) => {
             currentId = nanoid(10);
         }
         localStorage.setItem(currentId, `@=${codeName}=@${code}`);
+        unchangedCode = code;
         populateCodeSelector(currentId);
         if (actionType.value === "rename") {
             showToast("Code snippet renamed in the simulator local storage.", 5000);
