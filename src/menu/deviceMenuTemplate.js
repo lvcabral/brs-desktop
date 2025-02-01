@@ -85,26 +85,8 @@ export const deviceMenuTemplate = {
                     },
                 },
                 {
-                    id: "en_GB",
-                    label: "British English (en-GB)",
-                    type: "radio",
-                    checked: false,
-                    click: (item, window) => {
-                        setLocaleId(item.id);
-                    },
-                },
-                {
-                    id: "fr_CA",
-                    label: "Canadian French (fr-CA)",
-                    type: "radio",
-                    checked: false,
-                    click: (item, window) => {
-                        setLocaleId(item.id);
-                    },
-                },
-                {
-                    id: "es_ES",
-                    label: "International Spanish (es-ES)",
+                    id: "de_DE",
+                    label: "German (de-DE)",
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
@@ -121,17 +103,8 @@ export const deviceMenuTemplate = {
                     },
                 },
                 {
-                    id: "de_DE",
-                    label: "German (de-DE)",
-                    type: "radio",
-                    checked: false,
-                    click: (item, window) => {
-                        setLocaleId(item.id);
-                    },
-                },
-                {
-                    id: "it_IT",
-                    label: "Italian (it-IT)",
+                    id: "fr_CA",
+                    label: "Canadian French (fr-CA)",
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
@@ -204,6 +177,7 @@ export const deviceMenuTemplate = {
         {
             id: "peer-roku-control",
             label: "Sync Control with Peer Roku",
+            accelerator: "CmdOrCtrl+Shift+P",
             type: "checkbox",
             checked: false,
             enabled: true,
