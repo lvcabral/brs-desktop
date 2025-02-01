@@ -91,6 +91,7 @@ document.getElementById("rename-option").addEventListener("click", renameCode);
 document.getElementById("saveas-option").addEventListener("click", saveAsCode);
 document.getElementById("delete-option").addEventListener("click", deleteCode);
 document.getElementById("export-option").addEventListener("click", exportCode);
+document.getElementById("export-all-option")?.addEventListener("click", exportAllCode);
 document.getElementById("import-option").addEventListener("click", importCode);
 
 let consoleLogsContainer = document.getElementById("console-logs");
@@ -286,8 +287,35 @@ function deleteCode() {
         showToast("There is no code snippet selected to delete!", 3000, true);
     }
 }
-
 function exportCode() {
+    const codes = {};
+    let codeContent = editorManager.editor.getValue();
+    if (codeContent && codeContent.trim() !== "") {
+        if (codeSelect.value !== "0") {
+            let codeName = codeSelect.options[codeSelect.selectedIndex].text;
+            codes[currentId] = { name: codeName, content: codeContent };
+            const safeFileName = codeName
+                .toLowerCase()
+                .replace(/\s+/g, "-")
+                .replace(/[^a-z0-9\-]/g, "");
+            const json = JSON.stringify(codes, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${safeFileName}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } else {
+            showToast("Please save your Code Snipped before exporting!", 3000, true);
+            return;
+        }
+    } else {
+        showToast("There is no Code Snippet to Export", 3000, true);
+    }
+}
+
+function exportAllCode() {
     const codes = {};
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -324,7 +352,13 @@ function importCode() {
                 localStorage.setItem(id, value);
             }
             populateCodeSelector(currentId);
-            showToast("Code snippets imported to the simulator local storage!", 3000);
+            if (Object.keys(codes).length === 1) {
+                showToast("Code snippet imported to the simulator local storage!", 3000);
+                const loadId = Object.keys(codes)[0];
+                loadCode(loadId);
+            } else {
+                showToast("Code snippets imported to the simulator local storage!", 3000);
+            }
         };
         reader.readAsText(file);
     };
@@ -364,7 +398,11 @@ function shareCode() {
         };
         getShareUrl(data).then(function (shareLink) {
             navigator.clipboard.writeText(shareLink);
-            showToast("brsFiddle.net share URL copied to clipboard.");
+            if (shareLink.length > 2048) {
+                showToast("URL copied to clipboard, but it's longer than 2048 bytes, consider exporting as a file instead!", 7000, true);
+            } else {
+                showToast("brsFiddle.net share URL copied to clipboard.");
+            }
         });
     } else {
         showToast("There is no Source Code to share!", 3000, true);
