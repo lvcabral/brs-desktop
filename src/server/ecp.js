@@ -59,8 +59,6 @@ export function enableECP() {
     ecp.get("/dial_SCPD.xml", sendScpdXML);
     ecp.get("/query/device-info", sendDeviceInfo);
     ecp.get("//query/device-info", sendDeviceInfo);
-    // TODO: Add missing ECP queries and check if can use brs-engine version
-    // ecp.get("/query/graphic-frame-rate", sendFrameRate);
     ecp.get("/query/apps", sendApps);
     ecp.get("/query/active-app", sendActiveApp);
     ecp.get("/query/icon/:appID", sendAppIcon);
@@ -68,8 +66,7 @@ export function enableECP() {
     ecp.post("/input", sendInput);
     ecp.post("/input/:appID", sendInput);
     ecp.post("/launch/:appID", sendLaunchApp);
-    // TODO: Only close if the appId is the currently running app
-    //ecp.post("/exit-app/:appID", sendExitApp);
+    ecp.post("/exit-app/:appID", sendExitApp);
     ecp.post("/keypress/:key", sendKeyPress);
     ecp.post("/keydown/:key", sendKeyDown);
     ecp.post("/keyup/:key", sendKeyUp);
@@ -292,8 +289,12 @@ function sendInput(req, res) {
 }
 
 function sendLaunchApp(req, res) {
-    console.log("Launch App:", req.params.appID, req.query);
     launchApp(req.params.appID, req.query);
+    res.end();
+}
+
+function sendExitApp(req, res) {
+    window?.webContents.send("closeChannel", "EXIT_USER_NAV", req.params.appID);
     res.end();
 }
 
@@ -543,7 +544,7 @@ function launchApp(appID, query) {
         }
         loadFile([zipPath], input);
     } else {
-        window.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
+        window?.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
     }
 }
 

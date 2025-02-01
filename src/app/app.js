@@ -169,8 +169,11 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
         showToast(errorMsg, 5000, true);
     }
 });
-api.receive("closeChannel", function (source) {
+api.receive("closeChannel", function (source, appID) {
     if (currentApp.running) {
+        if (appID && appID !== currentApp.id) {
+            return;
+        }
         brs.terminate(source);
     }
 });
