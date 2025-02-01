@@ -550,8 +550,8 @@ codeDialog.addEventListener("close", (e) => {
         if (actionType.value === "saveas") {
             currentId = nanoid(10);
         }
-        unchangedCode = code;
         localStorage.setItem(currentId, `@=${codeName}=@${code}`);
+        unchangedCode = code;
         populateCodeSelector(currentId);
         if (actionType.value === "rename") {
             showToast("Code snippet renamed in the simulator local storage.", 5000);
