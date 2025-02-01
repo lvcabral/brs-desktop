@@ -36,7 +36,7 @@ export function createWindow(name, options) {
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
                 webSecurity: true,
-                nativeWindowOpen: true
+                nativeWindowOpen: true,
             },
             icon: __dirname + "/images/icon.ico",
             frame: false,
@@ -60,7 +60,7 @@ export function createWindow(name, options) {
             const state = restoreWindowState(stateStoreFile, defaultSize);
             const userTheme = global.sharedObject.theme;
             return {
-                action: 'allow',
+                action: "allow",
                 overrideBrowserWindowOptions: Object.assign(state, {
                     title: "Code Editor",
                     titleBarStyle: isWindows || isMacOS ? "hidden" : null,
@@ -75,7 +75,7 @@ export function createWindow(name, options) {
                         nodeIntegrationInWorker: true,
                         webSecurity: true,
                     },
-                })
+                }),
             };
         }
         return { action: "allow" };
@@ -86,6 +86,13 @@ export function createWindow(name, options) {
         appFocused = true;
     });
     win.on("blur", () => {
+        if (!isMacOS) {
+            BrowserWindow.getAllWindows().forEach((window) => {
+                if (window.isMenuBarVisible()) {
+                    window.setMenuBarVisibility(false);
+                }
+            });
+        }
         appFocused = false;
     });
     win.on("close", () => {
@@ -146,7 +153,7 @@ export function createWindow(name, options) {
 }
 
 export function openDevTools(window) {
-    window.openDevTools({ mode: 'detach' });
+    window.openDevTools({ mode: "detach" });
 }
 
 export function setAspectRatio(changed = true) {
@@ -215,7 +222,7 @@ export function saveWindowState(stateStoreFile, state, win) {
     if (state.width && state.height) {
         userDataDir.write(stateStoreFile, state, { atomic: true });
     }
-};
+}
 
 // Helper Functions
 function getWindowState(win) {
@@ -227,7 +234,7 @@ function getWindowState(win) {
         height: bounds.height,
         backgroundColor: global.sharedObject.backgroundColor,
     };
-};
+}
 
 function restoreWindowState(stateStoreFile, defaultSize) {
     let restoredState = {};
@@ -237,8 +244,8 @@ function restoreWindowState(stateStoreFile, defaultSize) {
         // For some reason json can't be read (might be corrupted).
         // No worries, we have defaults.
     }
-    return ensureVisibleOnSomeDisplay({...defaultSize, ...restoredState}, defaultSize);
-};
+    return ensureVisibleOnSomeDisplay({ ...defaultSize, ...restoredState }, defaultSize);
+}
 
 function ensureVisibleOnSomeDisplay(windowState, defaultSize) {
     const visible = screen.getAllDisplays().some((display) => {
@@ -254,7 +261,7 @@ function ensureVisibleOnSomeDisplay(windowState, defaultSize) {
         });
     }
     return windowState;
-};
+}
 
 function windowWithinBounds(windowState, bounds) {
     return (
@@ -263,4 +270,4 @@ function windowWithinBounds(windowState, bounds) {
         windowState.x + windowState.width <= bounds.x + bounds.width &&
         windowState.y + windowState.height <= bounds.y + bounds.height
     );
-};
+}

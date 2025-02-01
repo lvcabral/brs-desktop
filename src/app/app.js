@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -54,16 +54,42 @@ api.send("deviceData", brs.deviceData);
 api.send("serialNumber", brs.getSerialNumber());
 api.send("engineVersion", brs.getVersion());
 
+let selectedApp = "";
+
 brs.subscribe("desktop", (event, data) => {
     if (event === "loaded") {
+        selectedApp = "";
         currentApp = data;
         appLoaded(data);
     } else if (event === "started") {
         currentApp = data;
         stats.style.visibility = "visible";
+    } else if (event === "launch") {
+        console.info(`App launched: ${data}`);
+        if (data?.app) {
+            selectedApp = data.app;
+        }
+    } else if (event === "browser") {
+        if (data?.url) {
+            const newWindow = window.open(
+                data.url,
+                "_blank",
+                `width=${data.width},height=${data.height},popup`
+            );
+            if (newWindow) {
+                newWindow.focus();
+            } else {
+                showToast("Warning: It was not possible to open a new window!", true);
+            }
+        }
     } else if (event === "closed" || event === "error") {
-        showCloseMessage(event, data);
         appTerminated();
+        if (selectedApp !== "" && event === "closed") {
+            api.send("runUrl", selectedApp);
+        } else {
+            showCloseMessage(event, data);
+        }
+        selectedApp = "";
     } else if (event === "redraw") {
         redrawEvent(data);
     } else if (event === "control") {
@@ -79,7 +105,7 @@ brs.subscribe("desktop", (event, data) => {
             debugMode = data.level;
         }
     } else if (event === "icon") {
-        api.send("saveIcon", [currentApp.id, data]);
+        api.send("saveIcon", [currentApp.path.hashCode(), data]);
     } else if (event === "registry") {
         api.send("updateRegistry", data);
     } else if (event === "reset") {
@@ -115,7 +141,7 @@ api.receive("setDeviceInfo", function (key, value) {
         }
     }
 });
-api.receive("fileSelected", function (filePath, data, clear, mute, debug, source) {
+api.receive("executeFile", function (filePath, data, clear, mute, debug, input) {
     try {
         const fileExt = filePath.split(".").pop()?.toLowerCase();
         let password = "";
@@ -123,21 +149,31 @@ api.receive("fileSelected", function (filePath, data, clear, mute, debug, source
             const settings = api.getPreferences();
             password = settings?.device?.developerPwd ?? "";
         }
-        brs.execute(filePath, data, {
-            clearDisplayOnExit: clear,
-            muteSound: mute,
-            execSource: source,
-            debugOnCrash: debug,
-            password: password,
-        });
+        if (fileExt !== "brs") {
+            data = data.buffer;
+        }
+        brs.execute(
+            filePath,
+            data,
+            {
+                clearDisplayOnExit: clear,
+                muteSound: mute,
+                debugOnCrash: debug,
+                password: password,
+            },
+            input
+        );
     } catch (error) {
         const errorMsg = `Error opening ${filePath}:${error.message}`;
         console.error(errorMsg);
         showToast(errorMsg, 5000, true);
     }
 });
-api.receive("closeChannel", function (source) {
+api.receive("closeChannel", function (source, appID) {
     if (currentApp.running) {
+        if (appID && appID !== currentApp.id) {
+            return;
+        }
         brs.terminate(source);
     }
 });
@@ -151,6 +187,9 @@ api.receive("console", function (text, error) {
 });
 api.receive("debugCommand", function (cmd) {
     brs.debug(cmd);
+});
+api.receive("postInputParams", function (params) {
+    brs.sendInput(params);
 });
 api.receive("setCustomKeys", function (keys) {
     brs.setCustomKeys(keys);
@@ -200,20 +239,28 @@ window.onload = window.onresize = function () {
 };
 
 // Window Focus Events
-window.onfocus = function () {
-    if (currentApp.running && debugMode === "pause") {
-        brs.debug("cont");
-    }
-};
-
-window.onblur = function () {
-    if (currentApp.running && debugMode === "continue") {
-        let settings = api.getPreferences();
-        if (settings?.simulator?.options?.includes("pauseOnBlur")) {
-            brs.debug("pause");
+window.addEventListener(
+    "focus",
+    function () {
+        if (currentApp.running && debugMode === "pause") {
+            brs.debug("cont");
         }
-    }
-};
+    },
+    false
+);
+
+window.addEventListener(
+    "blur",
+    function () {
+        if (currentApp.running && debugMode === "continue") {
+            let settings = api.getPreferences();
+            if (settings?.simulator?.options?.includes("pauseOnBlur")) {
+                brs.debug("pause");
+            }
+        }
+    },
+    false
+);
 
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {
@@ -244,8 +291,8 @@ function appLoaded(appData) {
         brs.enableStats(settings.simulator.options.includes("perfStats"));
     }
     api.updateTitle(`${appData.title} - ${defaultTitle}`);
-    if (appData.id === "brs") {
-        api.send("addRecentSource", appData.file);
+    if (appData.path.toLowerCase().endsWith(".brs")) {
+        api.send("addRecentSource", appData.path);
     } else {
         api.send("addRecentPackage", appData);
     }

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -984,12 +984,9 @@ function getRokuModelArray() {
 function getLocaleIdArray() {
     return [
         { value: "en_US", label: "US English (en-US)" },
-        { value: "en_GB", label: "British English (en-GB)" },
-        { value: "fr_CA", label: "Canadian French (fr-CA)" },
-        { value: "es_ES", label: "International Spanish (es-ES)" },
-        { value: "es_MX", label: "Mexican Spanish (es-MX)" },
         { value: "de_DE", label: "German (de-DE)" },
-        { value: "it_IT", label: "Italian (it-IT)" },
+        { value: "es_MX", label: "Mexican Spanish (es-MX)" },
+        { value: "fr_CA", label: "Canadian French (fr-CA)" },
         { value: "pt_BR", label: "Brazilian Portuguese (pt-BR)" },
     ];
 }

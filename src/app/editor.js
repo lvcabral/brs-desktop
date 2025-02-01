@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -110,7 +110,7 @@ function main() {
         const cm = document.querySelector(".CodeMirror");
         delete cm.CodeMirror.constructor.keyMap.emacsy["Ctrl-V"];
     }
-    hideEditor(!(currentApp.title === undefined || currentApp.title === "editor_code.brs"));
+    hideEditor(!(currentApp.title === undefined || currentApp.title.endsWith("editor_code.brs")));
     populateCodeSelector();
     // Subscribe to Engine events and initialize Console
     brs.subscribe(appId, handleEngineEvents);
@@ -145,7 +145,7 @@ function updateButtons() {
 function handleEngineEvents(event, data) {
     if (event === "loaded") {
         currentApp = data;
-        hideEditor(currentApp.title !== "editor_code.brs");
+        hideEditor(!currentApp.title.endsWith("editor_code.brs"));
     } else if (event === "started") {
         currentApp = data;
         console.info(`Execution started ${appId}`);
@@ -446,7 +446,7 @@ export function runCode() {
     const code = editorManager.editor.getValue();
     if (code && code.trim() !== "") {
         try {
-            api.send("runCode", editorManager.editor.getValue());
+            api.send("runCode", code);
             terminal.output(`<br /><pre>Executing source code...</pre><br /><br />`);
             terminal.idle();
         } catch (e) {

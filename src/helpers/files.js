@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -15,10 +15,10 @@ import fs from "fs";
 
 export const editorCodeFile = path.join(app.getPath("userData"), "editor_code.brs");
 
-export function loadFile(file, source) {
+export function loadFile(file, input) {
     resetPeerRoku();
     if (file == undefined) return;
-    let window = BrowserWindow.fromId(1);
+    const window = BrowserWindow.fromId(1);
     focusWindow(window);
     let filePath;
     if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
@@ -28,11 +28,10 @@ export function loadFile(file, source) {
         return;
     }
     const fileName = path.parse(filePath).base;
-    let fileExt = path.parse(filePath).ext.toLowerCase();
+    const fileExt = path.parse(filePath).ext.toLowerCase();
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
-            let fileData = fs.readFileSync(filePath);
-            executeFile(window, fileData, filePath, source);
+            executeFile(window, fs.readFileSync(filePath), filePath, input);
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);
         }
@@ -41,8 +40,8 @@ export function loadFile(file, source) {
     }
 }
 
-export async function loadUrl(url, source) {
-    let window = BrowserWindow.fromId(1);
+export async function loadUrl(url, input) {
+    const window = BrowserWindow.fromId(1);
     focusWindow(window);
     resetPeerRoku();
     if (!isValidUrl(url)) {
@@ -50,13 +49,13 @@ export async function loadUrl(url, source) {
         return;
     }
     const fileName = path.parse(url).base;
-    let fileExt = path.parse(url).ext.toLowerCase();
+    const fileExt = path.parse(url).ext.toLowerCase();
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
             const response = await fetch(url);
             if (response.status === 200) {
                 let fileData = await response.arrayBuffer();
-                executeFile(window, Buffer.from(fileData), url, source);
+                executeFile(window, Buffer.from(fileData), url, input);
             } else {
                 window.webContents.send(
                     "console",
@@ -88,9 +87,11 @@ ipcMain.on("runCode", (_, code) => {
     fs.writeFileSync(editorCodeFile, code);
     loadFile([editorCodeFile]);
 });
-
+ipcMain.on("runUrl", (_, url) => {
+    loadUrl(url);
+});
 function packageBrs(code) {
-    let manifest = `
+    const manifest = `
 title=BrightScript Engine
 subtitle=Generic Code Runner
 major_version=1
@@ -98,7 +99,7 @@ minor_version=0
 build_version=0
 mm_icon_focus_hd=pkg:/images/channel-poster_hd.png
 splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
-    let poster = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
+    const poster = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
     const zewZip = zipSync({
         "manifest": [strToU8(manifest), {}],
         "source/main.brs": [strToU8(code), {}],
@@ -107,21 +108,26 @@ splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
     return Buffer.from(zewZip);
 }
 
-function executeFile(window, fileData, filePath, source) {
+function executeFile(window, fileData, filePath, input) {
     let fileExt = path.parse(filePath).ext.toLowerCase();
+    if (input == undefined) {
+        input = new Map();
+    }
+    if (!input.has("source")) {
+        input.set("source", "desktop_app");
+    }
     window.webContents.send(
-        "fileSelected",
+        "executeFile",
         filePath,
         fileData,
         !getSimulatorOption("keepDisplayOnExit"),
         getAudioMuted(),
         getSimulatorOption("debugOnCrash"),
-        source ?? "desktop_app"
+        input
     );
     if (fileExt === ".brs") {
-        fileData = packageBrs(fileData);
-    }
-    if (fileExt !== ".bpk") {
+        runOnPeerRoku(packageBrs(fileData));
+    } else if (fileExt !== ".bpk") {
         runOnPeerRoku(fileData);
     }
 }

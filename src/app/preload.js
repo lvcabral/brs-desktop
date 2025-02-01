@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -112,6 +112,7 @@ contextBridge.exposeInMainWorld("api", {
             "showEditor",
             "keySent",
             "runCode",
+            "runUrl",
             "reset",
         ];
         if (validChannels.includes(channel)) {
@@ -126,6 +127,7 @@ contextBridge.exposeInMainWorld("api", {
             "postKeyDown",
             "postKeyUp",
             "postKeyPress",
+            "postInputParams",
             "closeChannel",
             "debugCommand",
             "setTheme",
@@ -139,7 +141,7 @@ contextBridge.exposeInMainWorld("api", {
             "serverStatus",
             "copyScreenshot",
             "saveScreenshot",
-            "fileSelected",
+            "executeFile",
             "openEditor",
         ];
         if (validChannels.includes(channel)) {
