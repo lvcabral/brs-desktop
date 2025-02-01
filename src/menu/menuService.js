@@ -15,7 +15,7 @@ import { helpMenuTemplate } from "./helpMenuTemplate";
 import { isInstallerEnabled } from "../server/installer";
 import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
-import { getSimulatorOption, setDisplayOption } from "../helpers/settings";
+import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile, loadUrl, editorCodeFile } from "../helpers/files";
 import fs from "fs";
 import path from "path";
@@ -304,6 +304,8 @@ function rebuildMenu(template = false) {
                 checkMenuItem("web-installer", isInstallerEnabled);
                 checkMenuItem("ecp-api", isECPEnabled);
                 checkMenuItem("telnet", isTelnetEnabled);
+                checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
+                checkMenuItem("peer-roku-control", getPeerRoku().syncControl);
             }
         }
     } else {

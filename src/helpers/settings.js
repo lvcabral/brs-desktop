@@ -673,6 +673,9 @@ export function showSettings() {
             }
             const userTheme = settings.value("simulator.theme");
             checkMenuItem(`theme-${userTheme}`, true);
+            checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
+            checkMenuItem("peer-roku-control", getPeerRoku().syncControl);
+
         }
     });
 }
@@ -777,6 +780,20 @@ export function setSimulatorOption(key, enable, menuId) {
             options = options.filter((item) => item !== key);
         }
         settings.value("simulator.options", options);
+        if (menuId) {
+            checkMenuItem(menuId, enable);
+        }
+    }
+}
+
+export function setPeerRoku(key, enable, menuId) {
+    let options = settings.value("peerRoku");
+    if (options) {
+        if (enable && !options[key]?.length) {
+            settings.value(`peerRoku.${key}`, ["enabled"]);
+        } else if (!enable && options[key]?.length) {
+            settings.value(`peerRoku.${key}`, []);
+        }
         if (menuId) {
             checkMenuItem(menuId, enable);
         }
