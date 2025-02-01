@@ -10,6 +10,8 @@ import "./styles/fontawesome.min.css";
 import "../helpers/hash";
 import { setStatusColor, setAudioStatus, showToast, clearCounters } from "./statusbar";
 
+const isMacOS = api.processPlatform() === "darwin";
+
 // Simulator display
 const display = document.getElementById("display");
 
@@ -245,7 +247,7 @@ window.addEventListener(
         if (currentApp.running && debugMode === "pause") {
             brs.debug("cont");
         }
-        if (api.processPlatform() === "darwin") {
+        if (isMacOS) {
             api.enableMenuItem("close-channel", currentApp.running);
             api.enableMenuItem("save-screen", currentApp.running);
             api.enableMenuItem("copy-screen", currentApp.running);
@@ -263,7 +265,7 @@ window.addEventListener(
                 brs.debug("pause");
             }
         }
-        if (api.processPlatform() === "darwin") {
+        if (isMacOS) {
             api.enableMenuItem("close-channel", false);
             api.enableMenuItem("save-screen", false);
             api.enableMenuItem("copy-screen", false);

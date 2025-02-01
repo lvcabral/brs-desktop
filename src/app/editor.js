@@ -12,7 +12,7 @@ import { CodeMirrorManager, getThemeCss } from "./codemirror";
 import Toastify from "toastify-js";
 import packageInfo from "../../package.json";
 
-const isMacOS = getOS() === "MacOS";
+const isMacOS = api.processPlatform() === "darwin";
 const codec = Codec("lzma");
 const editorContainer = document.querySelector(".code");
 const brsCodeField = document.getElementById("brsCode");
@@ -586,27 +586,6 @@ function showToast(message, duration = 3000, error = false) {
         stopOnFocus: true,
         className: error ? "toastify-error" : "toastify-success",
     }).showToast();
-}
-
-function getOS() {
-    const userAgent = window.navigator.userAgent;
-    const platform = window.navigator.platform;
-    let macosPlatforms = ["Macintosh", "MacIntel", "MacPPC", "Mac68K"];
-    const windowsPlatforms = ["Win32", "Win64", "Windows", "WinCE"];
-    const iosPlatforms = ["iPhone", "iPad", "iPod"];
-    let os = null;
-    if (macosPlatforms.includes(platform)) {
-        os = "MacOS";
-    } else if (iosPlatforms.includes(platform)) {
-        os = "iOS";
-    } else if (windowsPlatforms.includes(platform)) {
-        os = "Windows";
-    } else if (/Android/.test(userAgent)) {
-        os = "Android";
-    } else if (!os && /Linux/.test(platform)) {
-        os = "Linux";
-    }
-    return os;
 }
 
 // Theme Management
