@@ -236,20 +236,28 @@ window.onload = window.onresize = function () {
 };
 
 // Window Focus Events
-window.onfocus = function () {
-    if (currentApp.running && debugMode === "pause") {
-        brs.debug("cont");
-    }
-};
-
-window.onblur = function () {
-    if (currentApp.running && debugMode === "continue") {
-        let settings = api.getPreferences();
-        if (settings?.simulator?.options?.includes("pauseOnBlur")) {
-            brs.debug("pause");
+window.addEventListener(
+    "focus",
+    function () {
+        if (currentApp.running && debugMode === "pause") {
+            brs.debug("cont");
         }
-    }
-};
+    },
+    false
+);
+
+window.addEventListener(
+    "blur",
+    function () {
+        if (currentApp.running && debugMode === "continue") {
+            let settings = api.getPreferences();
+            if (settings?.simulator?.options?.includes("pauseOnBlur")) {
+                brs.debug("pause");
+            }
+        }
+    },
+    false
+);
 
 // Toggle Full Screen when Double Click
 display.ondblclick = function () {
