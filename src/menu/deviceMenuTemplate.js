@@ -8,7 +8,7 @@
 import { isECPEnabled, enableECP, disableECP } from "../server/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../server/telnet";
 import { isInstallerEnabled, enableInstaller, disableInstaller } from "../server/installer";
-import { setLocaleId, setDisplayOption } from "../helpers/settings";
+import { setLocaleId, setDisplayOption, setPeerRoku } from "../helpers/settings";
 import { reloadApp } from "../helpers/window";
 
 export const deviceMenuTemplate = {
@@ -187,6 +187,28 @@ export const deviceMenuTemplate = {
                 } else {
                     enableTelnet();
                 }
+            },
+        },
+        { type: "separator" },
+        {
+            id: "peer-roku-deploy",
+            label: "Deploy to Peer Roku",
+            accelerator: "CmdOrCtrl+P",
+            type: "checkbox",
+            checked: false,
+            enabled: true,
+            click: (item) => {
+                setPeerRoku("deploy", item.checked, item.id);
+            },
+        },
+        {
+            id: "peer-roku-control",
+            label: "Sync Control with Peer Roku",
+            type: "checkbox",
+            checked: false,
+            enabled: true,
+            click: (item) => {
+                setPeerRoku("syncControl", item.checked, item.id);
             },
         },
         { type: "separator" },

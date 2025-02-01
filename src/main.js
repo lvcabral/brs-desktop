@@ -25,6 +25,7 @@ import {
 } from "./menu/menuService";
 import { loadFile } from "./helpers/files";
 import {
+    getPeerRoku,
     getSettings,
     setDeviceInfo,
     setDisplayOption,
@@ -203,6 +204,10 @@ function loadSettings(mainWindow, startup) {
         setDeviceInfo("localization", "clockFormat");
         setDeviceInfo("localization", "countryCode");
         setTimeZone();
+    }
+    if (settings.preferences.peerRoku) {
+        checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
+        checkMenuItem("peer-roku-control", getPeerRoku().syncControl);
     }
 }
 
