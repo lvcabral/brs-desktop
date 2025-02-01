@@ -112,12 +112,12 @@
         <input type="hidden" id="actionType" value="save" />
       </form>
     </dialog>
-    <dialog id="delete-dialog" class="modal_dialog" closed>
-      <p class="modal_dialog_content">Do you really want to delete this code snippet?</p>
+    <dialog id="confirm-dialog" class="modal_dialog" closed>
+      <p id="dialog-text" class="modal_dialog_content"></p>
       <br />
       <form method="dialog">
-        <button value="ok">Yes</button>
-        <button value="cancel" class="modal_dialog_cancel">No</button>
+        <button id="confirm-button" value="ok">Yes</button>
+        <button id="cancel-button" value="cancel" class="modal_dialog_cancel">No</button>
       </form>
     </dialog>
   </main>
