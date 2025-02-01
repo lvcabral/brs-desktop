@@ -66,6 +66,7 @@ export function enableECP() {
     ecp.get("/query/icon/:appID", sendAppIcon);
     ecp.get("/query/registry/:appID", sendRegistry);
     ecp.post("/input", sendInput);
+    ecp.post("/input/:appID", sendInput);
     ecp.post("/launch/:appID", sendLaunchApp);
     // TODO: Only close if the appId is the currently running app
     //ecp.post("/exit-app/:appID", sendExitApp);
