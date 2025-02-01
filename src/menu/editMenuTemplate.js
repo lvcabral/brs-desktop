@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -12,11 +12,11 @@ const isMacOS = process.platform === "darwin";
 export const editMenuTemplate = {
     label: "&Edit",
     submenu: [
-        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:", visible: isMacOS, },
-        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:", visible: isMacOS, },
-        { type: "separator", visible: isMacOS, },
-        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:", visible: isMacOS, },
-        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:", visible: isMacOS, },
+        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:", visible: isMacOS },
+        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:", visible: isMacOS },
+        { type: "separator", visible: isMacOS },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:", visible: isMacOS },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:", visible: isMacOS },
         {
             id: "copy-screen",
             label: "Copy Screenshot",
@@ -26,8 +26,13 @@ export const editMenuTemplate = {
                 copyScreenshot();
             },
         },
-        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:", visible: isMacOS, },
-        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:", visible: isMacOS, },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:", visible: isMacOS },
+        {
+            label: "Select All",
+            accelerator: "CmdOrCtrl+A",
+            selector: "selectAll:",
+            visible: isMacOS,
+        },
         { type: "separator" },
         {
             id: "settings",
@@ -50,6 +55,31 @@ export const editSettingsMenuTemplate = {
         { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
         { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
         { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" },
+    ],
+};
+
+export const editContextMenuTemplate = {
+    label: "&Edit",
+    submenu: [
+        {
+            label: "Undo",
+            accelerator: "CmdOrCtrl+Z",
+            click: (_, window) => {
+                window.webContents.send("editorUndo");
+            },
+        },
+        {
+            label: "Redo",
+            accelerator: "CmdOrCtrl+Shift+Z",
+            click: (_, window) => {
+                window.webContents.send("editorRedo");
+            },
+        },
+        { type: "separator" },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" },
     ],
 };
