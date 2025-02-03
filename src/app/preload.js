@@ -114,6 +114,7 @@ contextBridge.exposeInMainWorld("api", {
             "keySent",
             "runCode",
             "runUrl",
+            "currentApp",
             "reset",
         ];
         if (validChannels.includes(channel)) {

@@ -71,28 +71,8 @@ export function getChannelIds() {
     return recentFiles.ids;
 }
 
-export function getPackages() {
-    return recentFiles.zip;
-}
-
 export function getRecentPackage(index) {
     return recentFiles.zip[index];
-}
-
-export function getRecentId(index) {
-    const devFile = path.join(app.getPath("userData"), "dev.zip");
-    if (devFile.hashCode() === recentFiles.ids[index]) {
-        return "dev";
-    }
-    return recentFiles.ids[index];
-}
-
-export function getRecentName(index) {
-    return recentFiles.names[index];
-}
-
-export function getRecentVersion(index) {
-    return recentFiles.versions[index];
 }
 
 export function getRecentSource(index) {
