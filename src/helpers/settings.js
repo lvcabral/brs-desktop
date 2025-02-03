@@ -18,6 +18,7 @@ import {
     setPort,
     isInstallerEnabled,
     setPassword,
+    subscribeInstaller,
 } from "../server/installer";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
 
@@ -876,7 +877,8 @@ export function getModelName(model) {
     return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }
 
-// Services Status
+// Server Events
+
 subscribeECP("settings", updateECPStatus);
 
 export function updateECPStatus(event, enabled) {
@@ -885,6 +887,18 @@ export function updateECPStatus(event, enabled) {
         checkMenuItem("ecp-api", enabled);
         const window = BrowserWindow.fromId(1);
         window?.webContents.send("serverStatus", "ECP", enabled, ECPPORT);
+        window?.webContents.send("refreshMenu");
+    }
+}
+
+subscribeInstaller("settings", updateInstallerStatus);
+
+export function updateInstallerStatus(event, data) {
+    if (event === "enabled") {
+        setPreference("services.installer", data.enabled ? ["enabled"] : []);
+        checkMenuItem("web-installer", data.enabled);
+        const window = BrowserWindow.fromId(1);
+        window?.webContents.send("serverStatus", "Web", data.enabled, data.port);
         window?.webContents.send("refreshMenu");
     }
 }

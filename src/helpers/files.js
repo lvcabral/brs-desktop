@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getAudioMuted, getSimulatorOption } from "./settings";
+import { subscribeInstaller } from "../server/installer";
 import { runOnPeerRoku, resetPeerRoku } from "./roku";
 import { appFocused } from "./window";
 import { subscribeECP } from "../server/ecp";
@@ -103,7 +104,7 @@ mm_icon_focus_hd=pkg:/images/channel-poster_hd.png
 splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
     const poster = fs.readFileSync(path.join(__dirname, "images", "channel-icon.png"));
     const zewZip = zipSync({
-        "manifest": [strToU8(manifest), {}],
+        manifest: [strToU8(manifest), {}],
         "source/main.brs": [strToU8(code), {}],
         "images/channel-poster_hd.png": [poster, {}],
     });
@@ -146,6 +147,8 @@ function focusWindow(window) {
     }
 }
 
+// Server Events
+
 subscribeECP("files", launchApp);
 
 function launchApp(event, data) {
@@ -169,7 +172,21 @@ function launchApp(event, data) {
             }
             loadFile([zipPath], input);
         } else {
-            window?.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
+            window?.webContents.send(
+                "console",
+                `ECP Launch: File not found! App Id=${appID}`,
+                true
+            );
         }
+    }
+}
+
+subscribeInstaller("files", installApp);
+
+function installApp(event, data) {
+    if (event === "install") {
+        const input = new Map();
+        input.set("source", data.source);
+        loadFile([data.file], input);
     }
 }

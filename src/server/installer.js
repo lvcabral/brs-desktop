@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -11,9 +11,6 @@ import fs from "fs";
 import path from "path";
 import http from "http";
 import crypt from "crypto";
-import { loadFile } from "../helpers/files";
-import { setPreference } from "../helpers/settings";
-import { checkMenuItem } from "../menu/menuService";
 
 const credentials = {
     userName: "rokudev",
@@ -92,10 +89,8 @@ export function enableInstaller() {
                                 done = "file";
                             });
                             writeStream.on("finish", () => {
-                                const input = new Map();
-                                input.set("source", "auto-run-dev");
-                                loadFile([saveTo], input);
-                            })
+                                notifyAll("install", { file: saveTo, source: "auto-run-dev" });
+                            });
                         } catch (error) {
                             res.writeHead(500);
                             res.end(
@@ -198,7 +193,7 @@ export function enableInstaller() {
         })
         .listen(port, () => {
             isInstallerEnabled = true;
-            updateInstallerStatus(isInstallerEnabled);
+            notifyAll("enabled", { enabled: true, port: port });
         });
     server.on("error", (e) => {
         if (e.code === "EADDRINUSE") {
@@ -216,16 +211,22 @@ export function disableInstaller() {
             server.close();
         }
         isInstallerEnabled = false;
-        updateInstallerStatus(isInstallerEnabled);
+        notifyAll("enabled", { enabled: false, port: port });
     }
 }
 
-export function updateInstallerStatus(enabled) {
-    setPreference("services.installer", enabled ? ["enabled"] : []);
-    checkMenuItem("web-installer", enabled);
-    const window = BrowserWindow.fromId(1);
-    window.webContents.send("serverStatus", "Web", enabled, port);
-    window.webContents.send("refreshMenu");
+// Observers Handling
+const observers = new Map();
+export function subscribeInstaller(observerId, observerCallback) {
+    observers.set(observerId, observerCallback);
+}
+export function unsubscribeInstaller(observerId) {
+    observers.delete(observerId);
+}
+function notifyAll(eventName, eventData) {
+    observers.forEach((callback, id) => {
+        callback(eventName, eventData);
+    });
 }
 
 // Helper Functions
