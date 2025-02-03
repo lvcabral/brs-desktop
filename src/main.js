@@ -13,7 +13,7 @@ import jetpack from "fs-jetpack";
 import { app, screen } from "electron";
 import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./server/installer";
-import { initECP, enableECP, updateECPStatus } from "./server/ecp";
+import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet, updateTelnetStatus } from "./server/telnet";
 import {
     createMenu,
@@ -32,6 +32,7 @@ import {
     setRemoteKeys,
     setThemeSource,
     setTimeZone,
+    updateECPStatus,
 } from "./helpers/settings";
 import {
     createWindow,

@@ -10,7 +10,7 @@ import { DateTime } from "luxon";
 import path from "path";
 import ElectronPreferences from "electron-preferences";
 import { setAspectRatio } from "./window";
-import { enableECP, disableECP } from "../server/ecp";
+import { enableECP, disableECP, subscribeECP, ECPPORT } from "../server/ecp";
 import { enableTelnet, disableTelnet } from "../server/telnet";
 import {
     enableInstaller,
@@ -91,7 +91,7 @@ export function getSettings(window) {
         },
         browserWindowOverrides: {
             title: "Settings",
-            titleBarStyle: isWindows || isMacOS ? "hidden": null,
+            titleBarStyle: isWindows || isMacOS ? "hidden" : null,
             titleBarOverlay: getTitleOverlayTheme("purple"),
             frame: false,
             parent: window,
@@ -675,7 +675,6 @@ export function showSettings() {
             checkMenuItem(`theme-${userTheme}`, true);
             checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
             checkMenuItem("peer-roku-control", getPeerRoku().syncControl);
-
         }
     });
 }
@@ -807,7 +806,7 @@ export function getPeerRoku() {
         username: "rokudev",
         password: settings.value("peerRoku.password"),
         syncControl: settings.value("peerRoku.syncControl")?.includes("enabled") || false,
-    }
+    };
 }
 
 export function setLocaleId(locale) {
@@ -875,6 +874,19 @@ ipcMain.on("serialNumber", (_, serialNumber) => {
 export function getModelName(model) {
     const modelName = global.sharedObject.deviceInfo.models.get(model);
     return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
+}
+
+// Services Status
+subscribeECP("settings", updateECPStatus);
+
+export function updateECPStatus(event, enabled) {
+    if (event === "enabled") {
+        setPreference("services.ecp", enabled ? ["enabled"] : []);
+        checkMenuItem("ecp-api", enabled);
+        const window = BrowserWindow.fromId(1);
+        window?.webContents.send("serverStatus", "ECP", enabled, ECPPORT);
+        window?.webContents.send("refreshMenu");
+    }
 }
 
 // Settings Helper Functions
@@ -958,9 +970,17 @@ function convertChar(keyChar) {
         return `Key${keyChar}`;
     } else {
         const keyMap = new Map([
-            ["`", "Backquote"], ["-", "Minus"], ["=", "Equal"], ["[", "BracketLeft"],
-            ["]", "BracketRight"], [";", "Semicolon"], ["'", "quote"], [",", "Comma"],
-            [".", "Period"], ["\\", "Backslash"], ["/", "Slash"]
+            ["`", "Backquote"],
+            ["-", "Minus"],
+            ["=", "Equal"],
+            ["[", "BracketLeft"],
+            ["]", "BracketRight"],
+            [";", "Semicolon"],
+            ["'", "quote"],
+            [",", "Comma"],
+            [".", "Period"],
+            ["\\", "Backslash"],
+            ["/", "Slash"],
         ]);
         return keyMap.get(keyChar) ?? keyChar;
     }

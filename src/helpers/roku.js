@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getPeerRoku } from "./settings";
+import { isValidIP } from "./util";
 import request from "postman-request";
 
 let sendECPKeys = false;
@@ -139,18 +140,4 @@ function postEcpRequest(device, path, callback) {
 
 function isCompileError(responseHtml) {
     return !!/install\sfailure:\scompilation\sfailed/i.exec(responseHtml);
-}
-
-export function isValidIP(ip) {
-    if (typeof ip !== "string") {
-        return false;
-    }
-    const parts = ip.split(".");
-    return (
-        parts.length === 4 &&
-        parts.every((part) => {
-            const num = Number(part);
-            return !isNaN(num) && num >= 0 && num <= 255;
-        })
-    );
 }

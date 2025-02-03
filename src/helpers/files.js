@@ -9,6 +9,8 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import { getAudioMuted, getSimulatorOption } from "./settings";
 import { runOnPeerRoku, resetPeerRoku } from "./roku";
 import { appFocused } from "./window";
+import { subscribeECP } from "../server/ecp";
+import { isValidUrl } from "./util";
 import { zipSync, strToU8 } from "fflate";
 import path from "path";
 import fs from "fs";
@@ -144,11 +146,30 @@ function focusWindow(window) {
     }
 }
 
-function isValidUrl(string) {
-    try {
-        new URL(string);
-        return true;
-    } catch (err) {
-        return false;
+subscribeECP("files", launchApp);
+
+function launchApp(event, data) {
+    if (event === "launch") {
+        const appID = data.appID;
+        const query = data.query;
+        let zipPath;
+        if (appID.toLowerCase() === "dev") {
+            zipPath = path.join(app.getPath("userData"), "dev.zip");
+        } else {
+            const index = getChannelIds().indexOf(appID);
+            zipPath = getRecentPackage(index);
+        }
+        if (zipPath && fs.existsSync(zipPath)) {
+            const input = new Map();
+            input.set("source", "external-control");
+            if (query) {
+                for (let key in query) {
+                    input.set(key, query[key]);
+                }
+            }
+            loadFile([zipPath], input);
+        } else {
+            window?.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
+        }
     }
 }

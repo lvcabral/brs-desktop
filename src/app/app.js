@@ -311,6 +311,7 @@ function appLoaded(appData) {
     api.enableMenuItem("close-channel", true);
     api.enableMenuItem("save-screen", true);
     api.enableMenuItem("copy-screen", true);
+    api.send("currentApp", appData);
 }
 
 function appTerminated() {
@@ -320,6 +321,7 @@ function appTerminated() {
     api.enableMenuItem("close-channel", false);
     api.enableMenuItem("save-screen", false);
     api.enableMenuItem("copy-screen", false);
+    api.send("currentApp", currentApp);
 }
 
 function redrawEvent(redraw) {
