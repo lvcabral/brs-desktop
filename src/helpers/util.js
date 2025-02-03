@@ -61,10 +61,10 @@ export async function getGateway() {
     const gateWayData = { ip: "127.0.0.1", name: "eth1", type: "WiredConnection" };
     try {
         const gw = await getActiveInterface();
-        console.log(`Gateway: ${gw.gateway_ip} - Interface: ${gw.name} - Type: ${gw.type}`);
         gateWayData.ip = gw.gateway_ip ?? gateWayData.ip;
         gateWayData.name = gw.name ?? gateWayData.name;
         gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";
+        console.log(`Gateway: ${gateWayData.ip} - Interface: ${gateWayData.name} - Type: ${gateWayData.type}`);
     } catch (err) {
         console.error(`Unable to get the Network Gateway: ${err.message}`);
     }

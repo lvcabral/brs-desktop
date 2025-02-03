@@ -10,7 +10,7 @@ import url from "url";
 import dns from "dns";
 import minimist from "minimist";
 import jetpack from "fs-jetpack";
-import { app, screen } from "electron";
+import { app, screen, BrowserWindow } from "electron";
 import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
@@ -43,7 +43,7 @@ import {
     setAspectRatio,
     saveWindowState,
 } from "./helpers/window";
-import { getGateway, getLocalIps, getConnectionType, testNet } from "./helpers/util";
+import { getGateway, getLocalIps } from "./helpers/util";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 import { randomUUID } from "crypto";
 
@@ -69,8 +69,8 @@ const deviceInfo = {
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     connectionInfo: {
         type: "127.0.0.1",
-        name: "WiredConnection",
-        gateway: "eth1",
+        name: "eth1",
+        gateway: "WiredConnection",
         dns: dns.getServers(),
         quality: "Excellent",
     },
@@ -86,6 +86,8 @@ getGateway().then((gateway) => {
     deviceInfo.connectionInfo.gateway = gateway.ip;
     deviceInfo.connectionInfo.name = gateway.name;
     deviceInfo.connectionInfo.type = gateway.type;
+    const window = BrowserWindow.fromId(1);
+    window?.webContents.send("setDeviceInfo", "connectionInfo", deviceInfo.connectionInfo);
 });
 
 // Parse CLI parameters

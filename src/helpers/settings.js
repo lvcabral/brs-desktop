@@ -691,7 +691,7 @@ export function setDeviceInfo(section, key, notifyApp) {
         global.sharedObject.deviceInfo[key] = newValue;
         if (notifyApp) {
             const window = BrowserWindow.fromId(1);
-            window.webContents.send("setDeviceInfo", key, newValue);
+            window?.webContents.send("setDeviceInfo", key, newValue);
         }
     }
 }
