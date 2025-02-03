@@ -1,17 +1,15 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import * as telnet from "net";
-import { setPreference } from "../helpers/settings";
-import { checkMenuItem } from "../menu/menuService";
 import { consoleBuffer } from "../helpers/console";
+import * as telnet from "net";
 
-const PORT = 8085;
+export const TELNET_PORT = 8085;
 let server;
 let clientId = 0;
 let clients = new Map();
@@ -49,7 +47,7 @@ export function enableTelnet() {
     });
     server.on("listening", () => {
         isTelnetEnabled = true;
-        updateTelnetStatus(isTelnetEnabled);
+        notifyAll("enabled", true);
         ipcMain.on("telnet", (event, text) => {
             if (text !== undefined) {
                 clients.forEach((client, id) => {
@@ -62,7 +60,7 @@ export function enableTelnet() {
         ipcMain.removeAllListeners("telnet");
         window.webContents.send("console", `Remote console server error: ${error.message}`, true);
     });
-    server.listen(PORT);
+    server.listen(TELNET_PORT);
 }
 
 export function disableTelnet() {
@@ -77,17 +75,25 @@ export function disableTelnet() {
             clients = new Map();
         }
         isTelnetEnabled = false;
-        updateTelnetStatus(isTelnetEnabled);
+        notifyAll("enabled", false);
     }
 }
 
-export function updateTelnetStatus(enabled) {
-    setPreference("services.telnet", enabled ? ["enabled"] : []);
-    checkMenuItem("telnet", enabled);
-    const window = BrowserWindow.fromId(1);
-    window.webContents.send("serverStatus", "Telnet", enabled, PORT);
-    window.webContents.send("refreshMenu");
+// Observers Handling
+const observers = new Map();
+export function subscribeTelnet(observerId, observerCallback) {
+    observers.set(observerId, observerCallback);
 }
+export function unsubscribeTelnet(observerId) {
+    observers.delete(observerId);
+}
+function notifyAll(eventName, eventData) {
+    observers.forEach((callback, id) => {
+        callback(eventName, eventData);
+    });
+}
+
+// Data Processing
 
 function processData(data, id, window) {
     if (data?.length > 0) {

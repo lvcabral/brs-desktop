@@ -148,7 +148,7 @@ export function setServerStatus(server, enabled, port) {
         } else {
             statusECP.style.display = "none";
         }
-    } else if (server === "Web") {
+    } else if (server === "Installer") {
         if (enabled) {
             installerPort = port;
             statusWebText.innerText = port.toString();
@@ -238,8 +238,9 @@ function updateStatus(data) {
     if (data) {
         clearCounters();
         setStatusColor();
-        statusIconFile.innerHTML =
-            data.path.toLowerCase().endsWith(".brs")? "<i class='fa fa-file'></i>" : "<i class='fa fa-cube'></i>";
+        statusIconFile.innerHTML = data.path.toLowerCase().endsWith(".brs")
+            ? "<i class='fa fa-file'></i>"
+            : "<i class='fa fa-cube'></i>";
         statusFile.innerText = shortenPath(
             data.path,
             Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)

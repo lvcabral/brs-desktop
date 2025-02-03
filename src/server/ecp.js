@@ -15,8 +15,8 @@ import path from "path";
 const WebSocket = require("ws");
 const url = require("url");
 
-export const ECPPORT = 8060;
-export const SSDPPORT = 1900;
+export const ECP_PORT = 8060;
+export const SSDP_PORT = 1900;
 const DEBUG = false;
 const MAC = getMacAddress();
 const UDN = "138aedd0-d6ad-11eb-b8bc-" + MAC.replace(/:\s*/g, "");
@@ -69,7 +69,7 @@ export function enableECP() {
             return next();
         });
     }
-    ecp.start(ECPPORT)
+    ecp.start(ECP_PORT)
         .catch((error) => {
             window.webContents.send("console", `ECP server error:${error.message}`, true);
         })
@@ -77,14 +77,14 @@ export function enableECP() {
             // Create SSDP Server
             ssdp = new SSDP({
                 location: {
-                    port: ECPPORT,
+                    port: ECP_PORT,
                     path: "/",
                 },
                 adInterval: 120000,
                 ttl: 3600,
                 udn: `uuid:roku:ecp:${device.serialNumber}`,
                 ssdpSig: "Roku UPnP/1.0 Roku/9.1.0",
-                ssdpPort: SSDPPORT,
+                ssdpPort: SSDP_PORT,
                 suppressRootDeviceAdvertisements: true,
                 headers: { "device-group.roku.com": "46F5CCE2472F2B14D77" },
             });
