@@ -12,7 +12,7 @@ import minimist from "minimist";
 import jetpack from "fs-jetpack";
 import { app, screen } from "electron";
 import { DateTime } from "luxon";
-import { setPassword, setPort, enableInstaller, updateInstallerStatus } from "./server/installer";
+import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet, updateTelnetStatus } from "./server/telnet";
 import {
@@ -33,6 +33,7 @@ import {
     setThemeSource,
     setTimeZone,
     updateECPStatus,
+    updateInstallerStatus,
 } from "./helpers/settings";
 import {
     createWindow,
@@ -144,9 +145,13 @@ app.on("ready", () => {
     mainWindow.webContents.on("dom-ready", () => {
         let settings = getSettings(mainWindow);
         if (!firstLoad) {
-            updateECPStatus(settings.value("services.ecp").includes("enabled"));
-            updateTelnetStatus(settings.value("services.telnet").includes("enabled"));
-            updateInstallerStatus(settings.value("services.installer").includes("enabled"));
+            const status = "enabled";
+            updateECPStatus(status, settings.value("services.ecp").includes(status));
+            updateTelnetStatus(settings.value("services.telnet").includes(status));
+            updateInstallerStatus(status, {
+                enabled: settings.value("services.installer").includes(status),
+                port: settings.value("services.webPort"),
+            });
         }
         if (settings.preferences.remote) {
             setRemoteKeys(settings.defaults.remote, settings.preferences.remote);
