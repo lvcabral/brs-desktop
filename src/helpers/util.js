@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import os from "os";
 import network from "network";
+const isWindows = process.platform === "win32";
 
 export function isValidIP(ip) {
     if (typeof ip !== "string") {
@@ -57,12 +58,12 @@ export function getLocalIps() {
 }
 
 export async function getGateway() {
-    const gateWayData = { ip: "", name: "", type: "" };
+    const gateWayData = { ip: "127.0.0.1", name: "eth1", type: "WiredConnection" };
     try {
         const gw = await getActiveInterface();
         console.log(`Gateway: ${gw.gateway_ip} - Interface: ${gw.name} - Type: ${gw.type}`);
-        gateWayData.ip = gw.gateway_ip ?? "127.0.0.1";
-        gateWayData.name = gw.name ?? "eth1";
+        gateWayData.ip = gw.gateway_ip ?? gateWayData.ip;
+        gateWayData.name = gw.name ?? gateWayData.name;
         gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";
     } catch (err) {
         console.error(`Unable to get the Network Gateway: ${err.message}`);
@@ -70,15 +71,29 @@ export async function getGateway() {
     return gateWayData;
 }
 
-async function getActiveInterface()
-{
+async function getActiveInterface() {
     return await new Promise((resolve, reject) => {
-        network.get_active_interface((err, obj) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(obj);
-            }
-        });
+        if (!isWindows) {
+            network.get_active_interface((err, obj) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(obj);
+                }
+            });
+        } else {
+            network.get_interfaces_list((err, list) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    for (let iface of list) {
+                        if (iface.gateway_ip) {
+                            resolve(iface);
+                            break;
+                        }
+                    }
+                }
+            });
+        }
     });
 }
