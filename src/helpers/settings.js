@@ -10,8 +10,8 @@ import { DateTime } from "luxon";
 import path from "path";
 import ElectronPreferences from "electron-preferences";
 import { setAspectRatio } from "./window";
-import { enableECP, disableECP, subscribeECP, ECPPORT } from "../server/ecp";
-import { enableTelnet, disableTelnet } from "../server/telnet";
+import { enableECP, disableECP, subscribeECP, ECP_PORT } from "../server/ecp";
+import { enableTelnet, disableTelnet, subscribeTelnet, TELNET_PORT } from "../server/telnet";
 import {
     enableInstaller,
     disableInstaller,
@@ -883,11 +883,7 @@ subscribeECP("settings", updateECPStatus);
 
 export function updateECPStatus(event, enabled) {
     if (event === "enabled") {
-        setPreference("services.ecp", enabled ? ["enabled"] : []);
-        checkMenuItem("ecp-api", enabled);
-        const window = BrowserWindow.fromId(1);
-        window?.webContents.send("serverStatus", "ECP", enabled, ECPPORT);
-        window?.webContents.send("refreshMenu");
+        updateServerStatus("ECP", "ecp-api", enabled, ECP_PORT);
     }
 }
 
@@ -895,12 +891,24 @@ subscribeInstaller("settings", updateInstallerStatus);
 
 export function updateInstallerStatus(event, data) {
     if (event === "enabled") {
-        setPreference("services.installer", data.enabled ? ["enabled"] : []);
-        checkMenuItem("web-installer", data.enabled);
-        const window = BrowserWindow.fromId(1);
-        window?.webContents.send("serverStatus", "Web", data.enabled, data.port);
-        window?.webContents.send("refreshMenu");
+        updateServerStatus("Installer", "web-installer", data.enabled, data.port);
     }
+}
+
+subscribeTelnet("settings", updateTelnetStatus);
+
+export function updateTelnetStatus(event, enabled) {
+    if (event === "enabled") {
+        updateServerStatus("Telnet", "telnet", enabled, TELNET_PORT);
+    }
+}
+
+function updateServerStatus(service, menuItem, enabled, port) {
+    setPreference(`services.${service.toLowerCase()}`, enabled ? ["enabled"] : []);
+    checkMenuItem(menuItem, enabled);
+    const window = BrowserWindow.fromId(1);
+    window?.webContents.send("serverStatus", service, enabled, port);
+    window?.webContents.send("refreshMenu");
 }
 
 // Settings Helper Functions

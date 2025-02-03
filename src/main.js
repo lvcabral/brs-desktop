@@ -14,7 +14,7 @@ import { app, screen } from "electron";
 import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
-import { enableTelnet, updateTelnetStatus } from "./server/telnet";
+import { enableTelnet } from "./server/telnet";
 import {
     createMenu,
     enableMenuItem,
@@ -34,6 +34,7 @@ import {
     setTimeZone,
     updateECPStatus,
     updateInstallerStatus,
+    updateTelnetStatus,
 } from "./helpers/settings";
 import {
     createWindow,
@@ -147,7 +148,7 @@ app.on("ready", () => {
         if (!firstLoad) {
             const status = "enabled";
             updateECPStatus(status, settings.value("services.ecp").includes(status));
-            updateTelnetStatus(settings.value("services.telnet").includes(status));
+            updateTelnetStatus(status, settings.value("services.telnet").includes(status));
             updateInstallerStatus(status, {
                 enabled: settings.value("services.installer").includes(status),
                 port: settings.value("services.webPort"),
