@@ -74,6 +74,7 @@
         "busboy": "^0.3.1",
         "codemirror": "^5.65.12",
         "custom-electron-titlebar": "^4.2.8",
+        "default-gateway": "^6.0.3",
         "electron-about-window": "^1.14.0",
         "electron-preferences": "lvcabral/electron-preferences#build",
         "electron-prompt": "^1.7.0",
