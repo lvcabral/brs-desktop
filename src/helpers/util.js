@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import os from "os";
-import defaultGateway from "default-gateway";
+import network from "network";
 
 export function isValidIP(ip) {
     if (typeof ip !== "string") {
@@ -56,16 +56,29 @@ export function getLocalIps() {
     return ips;
 }
 
-export function getGateway() {
-    const gateWayData = { ip: "127.0.0.1", name: "eth1" };
+export async function getGateway() {
+    const gateWayData = { ip: "", name: "", type: "" };
     try {
-        const gw = defaultGateway.v4.sync();
-        console.log(`Gateway: ${gw.gateway} - Interface: ${gw.interface}`);
-        gateWayData.ip = gw.gateway;
-        gateWayData.name = gw.interface ?? "eth1";
+        const gw = await getActiveInterface();
+        console.log(`Gateway: ${gw.gateway_ip} - Interface: ${gw.name} - Type: ${gw.type}`);
+        gateWayData.ip = gw.gateway_ip ?? "127.0.0.1";
+        gateWayData.name = gw.name ?? "eth1";
+        gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";
     } catch (err) {
         console.error(`Unable to get the Network Gateway: ${err.message}`);
     }
     return gateWayData;
 }
 
+async function getActiveInterface()
+{
+    return await new Promise((resolve, reject) => {
+        network.get_active_interface((err, obj) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(obj);
+            }
+        });
+    });
+}

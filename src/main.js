@@ -43,15 +43,16 @@ import {
     setAspectRatio,
     saveWindowState,
 } from "./helpers/window";
-import { getGateway, getLocalIps } from "./helpers/util";
+import { getGateway, getLocalIps, getConnectionType, testNet } from "./helpers/util";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 import { randomUUID } from "crypto";
 
 const isMacOS = process.platform === "darwin";
 
+require("@electron/remote/main").initialize();
+
 // Device Information Object
 const dt = DateTime.now().setZone("system");
-const gw = getGateway();
 const deviceInfo = {
     developerId: "brs-dev-id", // Unique id to segregate registry data
     friendlyName: app.getName(),
@@ -67,9 +68,9 @@ const deviceInfo = {
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     connectionInfo: {
-        type: "WiredConnection",
-        name: gw.name,
-        gateway: gw.ip,
+        type: "127.0.0.1",
+        name: "WiredConnection",
+        gateway: "eth1",
         dns: dns.getServers(),
         quality: "Excellent",
     },
@@ -80,7 +81,12 @@ const deviceInfo = {
     appList: [],
 };
 
-require("@electron/remote/main").initialize();
+// Get Network Gateway
+getGateway().then((gateway) => {
+    deviceInfo.connectionInfo.gateway = gateway.ip;
+    deviceInfo.connectionInfo.name = gateway.name;
+    deviceInfo.connectionInfo.type = gateway.type;
+});
 
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
