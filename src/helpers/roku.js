@@ -28,6 +28,20 @@ ipcMain.on("keySent", (_, data) => {
     }
 });
 
+ipcMain.on("currentApp", (_, data) => {
+    if (data.id === "") {
+        // Terminate current app
+        const device = getPeerRoku();
+        if (!device.deploy) {
+            return;
+        }
+        if (isValidIP(device.ip)) {
+            postEcpRequest(device, "/exit-app/dev");
+            postEcpRequest(device, "/keypress/home");
+        }
+    }
+});
+
 export function resetPeerRoku() {
     sendECPKeys = false;
 }
