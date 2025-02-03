@@ -54,15 +54,18 @@ export function getLocalIps() {
             ++alias;
         });
     });
+    if (ips.length === 0) {
+        ips.push("eth1,127.0.0.1");
+    }
     return ips;
 }
 
 export async function getGateway() {
-    const gateWayData = { ip: "127.0.0.1", name: "eth1", type: "WiredConnection" };
+    const gateWayData = { ip: "", name: "", type: "" };
     try {
         const gw = await getActiveInterface();
-        gateWayData.ip = gw.gateway_ip ?? gateWayData.ip;
-        gateWayData.name = gw.name ?? gateWayData.name;
+        gateWayData.ip = gw.gateway_ip ?? "";
+        gateWayData.name = gw.name ?? "";
         gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";
         console.log(`Gateway: ${gateWayData.ip} - Interface: ${gateWayData.name} - Type: ${gateWayData.type}`);
     } catch (err) {
@@ -93,6 +96,7 @@ async function getActiveInterface() {
                         }
                     }
                 }
+                reject(new Error("No active interface found"));
             });
         }
     });

@@ -53,6 +53,7 @@ require("@electron/remote/main").initialize();
 
 // Device Information Object
 const dt = DateTime.now().setZone("system");
+const localIps = getLocalIps();
 const deviceInfo = {
     developerId: "brs-dev-id", // Unique id to segregate registry data
     friendlyName: app.getName(),
@@ -68,13 +69,13 @@ const deviceInfo = {
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     connectionInfo: {
-        type: "127.0.0.1",
-        name: "eth1",
-        gateway: "WiredConnection",
+        type: "WiredConnection",
+        name: localIps[0].split(",")[0],
+        gateway: "127.0.0.1",
         dns: dns.getServers(),
         quality: "Excellent",
     },
-    localIps: getLocalIps(),
+    localIps: localIps,
     startTime: Date.now(),
     maxSimulStreams: 2,
     audioVolume: 40,
@@ -83,11 +84,13 @@ const deviceInfo = {
 
 // Get Network Gateway
 getGateway().then((gateway) => {
-    deviceInfo.connectionInfo.gateway = gateway.ip;
-    deviceInfo.connectionInfo.name = gateway.name;
-    deviceInfo.connectionInfo.type = gateway.type;
-    const window = BrowserWindow.fromId(1);
-    window?.webContents.send("setDeviceInfo", "connectionInfo", deviceInfo.connectionInfo);
+    if (gateway.ip !== "") {
+        deviceInfo.connectionInfo.gateway = gateway.ip;
+        deviceInfo.connectionInfo.name = gateway.name;
+        deviceInfo.connectionInfo.type = gateway.type;
+        const window = BrowserWindow.fromId(1);
+        window?.webContents.send("setDeviceInfo", "connectionInfo", deviceInfo.connectionInfo);
+    }
 });
 
 // Parse CLI parameters
