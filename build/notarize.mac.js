@@ -13,7 +13,7 @@ exports.default = async function notarizing(context) {
   return await notarize({
     tool: 'notarytool',
     teamId: process.env.APPLE_TEAM_ID,
-    appBundleId: 'com.yourcompany.yourAppId',
+    appBundleId: "com.lvcabral.brs-desktop.app",
     appPath: `${appOutDir}/${appName}.app`,
     appleId: process.env.APPLE_ID,
     appleIdPassword: process.env.APPLE_PASSWORD,
