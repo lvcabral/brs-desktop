@@ -88,6 +88,7 @@ getGateway().then((gateway) => {
         deviceInfo.connectionInfo.gateway = gateway.ip;
         deviceInfo.connectionInfo.name = gateway.name;
         deviceInfo.connectionInfo.type = gateway.type;
+        deviceInfo.connectionInfo.ssid = gateway.ssid;
         const window = BrowserWindow.fromId(1);
         window?.webContents.send("setDeviceInfo", "connectionInfo", deviceInfo.connectionInfo);
     }

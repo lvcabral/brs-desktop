@@ -7,6 +7,8 @@
  *--------------------------------------------------------------------------------------------*/
 import os from "os";
 import network from "network";
+import { exec } from "child_process";
+
 const isWindows = process.platform === "win32";
 
 export function isValidIP(ip) {
@@ -61,13 +63,16 @@ export function getLocalIps() {
 }
 
 export async function getGateway() {
-    const gateWayData = { ip: "", name: "", type: "" };
+    const gateWayData = { ip: "", name: "", type: "", ssid: "" };
     try {
         const gw = await getActiveInterface();
         gateWayData.ip = gw.gateway_ip ?? "";
         gateWayData.name = gw.name ?? "";
         gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";
-        console.log(`Gateway: ${gateWayData.ip} - Interface: ${gateWayData.name} - Type: ${gateWayData.type}`);
+        if (gateWayData.type === "WiFiConnection") {
+            getSSID();
+        }
+        console.log(`Gateway: ${gateWayData.ip} - Interface: ${gateWayData.name} - Type: ${gateWayData.type} - SSID: ${gateWayData.ssid}`);
     } catch (err) {
         console.error(`Unable to get the Network Gateway: ${err.message}`);
     }
@@ -101,3 +106,36 @@ async function getActiveInterface() {
         }
     });
 }
+
+
+function getSSID() {
+  const platform = os.platform();
+  let command;
+
+  if (platform === 'win32') {
+    command = 'netsh wlan show interfaces';
+  } else if (platform === 'darwin') {
+    command = '/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I';
+  } else if (platform === 'linux') {
+    command = 'iwgetid -r';
+  }
+
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return;
+    }
+    let ssid;
+    if (platform === 'win32') {
+      const match = stdout.match(/SSID\s*:\s*(.+)/);
+      ssid = match ? match[1] : null;
+    } else if (platform === 'darwin') {
+      const match = stdout.match(/ SSID: (.+)/);
+      ssid = match ? match[1] : null;
+    } else if (platform === 'linux') {
+      ssid = stdout.trim();
+    }
+    console.log(`Connected to SSID: ${ssid}`);
+  });
+}
+
