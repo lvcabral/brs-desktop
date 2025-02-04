@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import os from "os";
 import network from "network";
-import { exec } from "child_process";
+import { execSync } from "child_process";
 
 const isWindows = process.platform === "win32";
 
@@ -122,21 +122,16 @@ function getSSID() {
         command = "iwgetid -r";
     }
 
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`exec error: ${error}`);
-            return;
-        }
-        let ssid;
-        if (platform === "win32") {
-            const match = stdout.match(/SSID\s*:\s*(.+)/);
-            ssid = match ? match[1] : null;
-        } else if (platform === "darwin") {
-            const match = stdout.match(/ SSID: (.+)/);
-            ssid = match ? match[1] : null;
-        } else if (platform === "linux") {
-            ssid = stdout.trim();
-        }
-        return ssid;
-    });
+    let ssid;
+    const result = execSync(command).toString();
+    if (platform === "win32") {
+        const match = result.match(/SSID\s*:\s*(.+)/);
+        ssid = match ? match[1] : null;
+    } else if (platform === "darwin") {
+        const match = result.match(/ SSID: (.+)/);
+        ssid = match ? match[1] : null;
+    } else if (platform === "linux") {
+        ssid = result.trim();
+    }
+    return ssid;
 }
