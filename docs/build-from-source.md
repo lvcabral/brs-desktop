@@ -6,17 +6,17 @@ To build the project you will need `NodeJS`, so you'll need to [install that fir
 
 Once that's ready, install [yarn](https://yarnpkg.com).  Installing it with `npm` is probably the simplest:
 
-```shell
+```console
 $ npm install -g yarn
 ```
 ## Setup
 1. Clone this repo:
-   ```
+   ```console
    $ git clone https://github.com/lvcabral/brs-desktop.git
    ```
 
 2. Install dependencies:
-    ```shell
+    ```console
     $ yarn install     # or just `yarn`
     ```
 
@@ -25,7 +25,7 @@ $ npm install -g yarn
 
 If you want to run the application without packaging it, for debugging, just execute:
 
-```shell
+```console
 $ yarn start
 ```
 
@@ -38,30 +38,30 @@ Below the list of available build commands for each platform:
 #### macOS 64 bits (.dmg)
 
 Run from macOS `terminal`:
-```shell
+```console
 $ yarn dist
 ```
 #### Windows 32 & 64 bits (single installer)
 
 Run from Windows `command` or `PowerShell` prompt:
-```shell
+```console
 C:\git\brs-desktop> yarn dist-win
 ```
 #### Linux 32 bits (AppImage)
 
 Run from Linux `terminal`:
-```shell
+```console
 $ yarn dist-linux32
 ```
 #### Linux 64 bits (AppImage)
 
 Run from Linux `terminal`:
-```shell
+```console
 $ yarn dist-linux64
 ```
 #### Linux 64 bits (Debian)
 
 Run from Linux `terminal`:
-```shell
+```console
 $ yarn dist-deb64
 ```

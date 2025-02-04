@@ -2,22 +2,23 @@
 
 The simulator supports by default the following mapping of the keyboard and game pads to Roku remote control:
 
-| Keyboard    | Game Pad   | Roku Control | Description                                                           |
-|-------------|------------|--------------|-----------------------------------------------------------------------|
-| Escape      |     1      |    Back      | Return to the previous screen, some apps will close at the main menu. |
-| Home        |   7 or 9   |    Home      | Close the currently loaded app.                                       |
-| Arrow Keys  |Joys & D-Pad|    D-Pad     | Directional controls to navigate on menus and control game characters.|
-| Backspace   |   6 or 8   |    Replay    | Instant replay button. Check app instructions for custom usage.       |
-| Enter       |     0      |    OK        | Select options from a menu. Check app instructions for custom usage.  |
-| * or Insert |   4 or 16  |    Info      | Open app settings. Check app instructions for custom usage.           |
-| , (comma)   |     2      |    Rewind    | Reverse scan button. Check app instructions for custom usage.         |
-| . (dot)     |     3      | Fast Forward | Forward scan button. Check app instructions for custom usage.         |
-| (space bar) |     5      |  Play/Pause  | Play/Pause button. Check app instructions for custom usage.           |
-| A           |    10      |     A        | A game buttom. Check app instructions for custom usage.               |
-| Z           |    11      |     B        | B game buttom. Check app instructions for custom usage.               |
-| F10         |    17      | Volume Mute  | Button to toggle the simulator volume mute on/off.                    |
+| Browser Keys  | Game Pad   | Roku Control  | Description                                                           |
+|---------------|    :---:   |     :---:     |-----------------------------------------------------------------------|
+| Esc/Del       |      1     |     Back      | Return to the previous screen, some apps will close at the main menu. |
+| Home/Shift+Esc|      8     |     Home      | Close the currently loaded app.                                       |
+| Arrow Keys    |D-Pad & Joys|     D-Pad     | Directional controls to navigate on menus and control games.          |
+| Backspace     |   6 or 16  |     Replay    | Instant replay button.                                                |
+| Enter         |     0      |     OK        | Select button.                                                        |
+| Insert        |   4 or 7   |     Info      | Information/Settings button                                           |
+| PageDown      |     2      |     Rewind    | Reverse scan button.                                                  |
+| PageUp        |     3      |  Fast Forward | Forward scan button.                                                  |
+| End           |   5 or 9   |  Play/Pause   | Play/Pause button.                                                    |
+| Ctrl+A        |     10     |     A         | A game button.                                                        |
+| Ctrl+Z        |     11     |     B         | B game button.                                                        |
+| F10           |     17     |  Volume Mute  | Button to toggle the simulator audio mute on/off.                     |
 
-<p align="left">
+
+<p align="center">
 <img src="images/control-reference.png?raw=true"/>
 </p>
 

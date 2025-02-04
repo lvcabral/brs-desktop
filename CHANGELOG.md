@@ -1,14 +1,65 @@
 # Changelog
 
+<a name="v1.4.0"></a>
+
+## [v1.4.0 - Editor Improvements](https://github.com/lvcabral/brs-desktop/releases/tag/v1.4.0) - 03 Feb 2025
+
+### Release Changes
+
+* Replaced the Delete button by new code snippet tools button by [@lvcabral](https://github.com/lvcabral) in [#167](https://github.com/lvcabral/brs-desktop/pull/167)
+* Added support for ECP `launch`, `input` and `exit-app` endpoints by [@lvcabral](https://github.com/lvcabral) in [#170](https://github.com/lvcabral/brs-desktop/pull/170)
+* Added Peer Roku device menu options by [@lvcabral](https://github.com/lvcabral) in [#172](https://github.com/lvcabral/brs-desktop/pull/172)
+* Remove locales not supported on Roku by [@lvcabral](https://github.com/lvcabral) in [#173](https://github.com/lvcabral/brs-desktop/pull/173)
+* Editor: Save single snippet and alert to changes by [@lvcabral](https://github.com/lvcabral) in [#174](https://github.com/lvcabral/brs-desktop/pull/174)
+* Added editor context menu and improved change control by [@lvcabral](https://github.com/lvcabral) in [#176](https://github.com/lvcabral/brs-desktop/pull/176)
+* Removed ECP service circular dependencies by [@lvcabral](https://github.com/lvcabral) in [#177](https://github.com/lvcabral/brs-desktop/pull/177)
+* Removed Installer service circular dependencies by [@lvcabral](https://github.com/lvcabral) in [#178](https://github.com/lvcabral/brs-desktop/pull/178)
+* Removed Telnet service circular dependencies by [@lvcabral](https://github.com/lvcabral) in [#179](https://github.com/lvcabral/brs-desktop/pull/179)
+* Close app on peer Roku device when closed on simulator by [@lvcabral](https://github.com/lvcabral) in [#180](https://github.com/lvcabral/brs-desktop/pull/180)
+* Improved `roDeviceInfo.getConnectionInfo()` by getting actual network information by [@lvcabral](https://github.com/lvcabral) in [#181](https://github.com/lvcabral/brs-desktop/pull/181)
+* Upgraded `brs-engine` to [v1.8.5](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.5) - main changes since last release:
+  * Implemented BrightScript features up to Roku OS 14.0 by [@lvcabral](https://github.com/lvcabral) in [#420](https://github.com/lvcabral/brs-engine/pull/420)
+  * Several Registry improvements by [@lvcabral](https://github.com/lvcabral) in [#407](https://github.com/lvcabral/brs-engine/pull/407)
+  * Several App handling/management improvements by [@lvcabral](https://github.com/lvcabral) in [#413](https://github.com/lvcabral/brs-engine/pull/413)
+  * Added `Platform` info to the result of `roDeviceInfo.getModelDetails()` by [@lvcabral](https://github.com/lvcabral) in [#414](https://github.com/lvcabral/brs-engine/pull/414)
+  * Allowed `m` object to be re-assigned in Function scope by [@lvcabral](https://github.com/lvcabral) in [#417](https://github.com/lvcabral/brs-engine/pull/417)
+  * Implemented `global` static object by [@lvcabral](https://github.com/lvcabral) in [#418](https://github.com/lvcabral/brs-engine/pull/418)
+  * Add new supported control buttons and ECP command by [@lvcabral](https://github.com/lvcabral) in [#421](https://github.com/lvcabral/brs-engine/pull/421)
+  * Fixed `CreateObject` behavior to match Roku by [@lvcabral](https://github.com/lvcabral) in [#423](https://github.com/lvcabral/brs-engine/pull/423)
+  * Implemented `roSystemLog` and refactored `roMessagePort` by [@lvcabral](https://github.com/lvcabral) in [#426](https://github.com/lvcabral/brs-engine/pull/426)
+  * Implemented `roDeviceInfoEvent` by [@lvcabral](https://github.com/lvcabral) in [#429](https://github.com/lvcabral/brs-engine/pull/429)
+  * Implement `roCECStatus` component by [@lvcabral](https://github.com/lvcabral) in [#430](https://github.com/lvcabral/brs-engine/pull/430)
+  * Add fake server support to `roChannelStore` by [@lvcabral](https://github.com/lvcabral) in [#431](https://github.com/lvcabral/brs-engine/pull/431)
+  * Fixed `Int32` constructor handling of overflow to match Roku by [@lvcabral](https://github.com/lvcabral) in [#435](https://github.com/lvcabral/brs-engine/pull/435)
+  * Added new `roDateTime` methods: `asSecondsLong` and `fromSecondsLong` by [@lvcabral](https://github.com/lvcabral) in [#437](https://github.com/lvcabral/brs-engine/pull/437)
+  * Fixed `Int32` and `Int64` hex parsing and formatting by [@lvcabral](https://github.com/lvcabral) in [#438](https://github.com/lvcabral/brs-engine/pull/438)
+  * Improved `sprintf` formatting by [@lvcabral](https://github.com/lvcabral) in [#443](https://github.com/lvcabral/brs-engine/pull/443)
+  * Improved `IfToStr` type checking by [@lvcabral](https://github.com/lvcabral) in [#449](https://github.com/lvcabral/brs-engine/pull/449)
+  * Fixed `roVideoPlayer` method `getAudioTracks` by [@lvcabral](https://github.com/lvcabral) in [#457](https://github.com/lvcabral/brs-engine/pull/457)
+  * Added `serialNumber` to device info object and to response of `GetModelDetails()`
+  * Fixed behavior of `End` statement to terminate the app
+  * Improved and documented MicroDebugger functions
+  * Improvements on WAV handling
+  * Improved component `roURLTransfer` by [@lvcabral](https://github.com/lvcabral) in [#461](https://github.com/lvcabral/brs-engine/pull/461)
+  * Implemented `roHdmiStatus` and `roHdmiStatusEvent` components by [@lvcabral](https://github.com/lvcabral) in [#463](https://github.com/lvcabral/brs-engine/pull/463)
+  * Implemented `roTextureRequest` and `roTextureManager` by [@lvcabral](https://github.com/lvcabral) in [#465](https://github.com/lvcabral/brs-engine/pull/465)
+  * Implemented `roSocketAddress` by [@lvcabral](https://github.com/lvcabral) in [#460](https://github.com/lvcabral/brs-engine/pull/460)
+  * Implemented **mocked** `roStreamSocket` component by [@lvcabral](https://github.com/lvcabral) in [#462](https://github.com/lvcabral/brs-engine/pull/462)
+  * Implemented **mocked** `roDataGramSocket` and extracted common interfaces into `ifSocket` by [@lvcabral](https://github.com/lvcabral) in [#466](https://github.com/lvcabral/brs-engine/pull/466)
+* Fixed: Some menu options were disabled when Settings is opened with app running by [@lvcabral](https://github.com/lvcabral) in [#171](https://github.com/lvcabral/brs-desktop/pull/171)
+* Bump nanoid from 3.3.7 to 5.0.9 by **@dependabot** in [#]175](https://github.com/lvcabral/brs-desktop/pull/175)
+
+[Full Changelog][v1.4.0]
+
 <a name="v1.3.2"></a>
 
 ## [v1.3.2 - Checkbox to enable/disable Peer Roku](https://github.com/lvcabral/brs-desktop/releases/tag/v1.3.2) - 12 Nov 2024
 
 ### Release Changes
 
-* Added checkbox to enable/disable peer Roku device by [@lvcabral](https://github.com/lvcabral) in [164](https://github.com/lvcabral/brs-desktop/pull/164)
-* Bump elliptic from 6.5.7 to 6.6.0 by @dependabot in [165](https://github.com/lvcabral/brs-desktop/pull/165)
-* Fixed build on MacOS by [@lvcabral](https://github.com/lvcabral) in [166](https://github.com/lvcabral/brs-desktop/pull/166)
+* Added checkbox to enable/disable peer Roku device by [@lvcabral](https://github.com/lvcabral) in [#164](https://github.com/lvcabral/brs-desktop/pull/164)
+* Bump elliptic from 6.5.7 to 6.6.0 by @dependabot in [#165](https://github.com/lvcabral/brs-desktop/pull/165)
+* Fixed build on MacOS by [@lvcabral](https://github.com/lvcabral) in [#166](https://github.com/lvcabral/brs-desktop/pull/166)
 * Changed build to generate MacOS Universal installer (for both Intel and Arm machines)
 
 [Full Changelog][v1.3.2]
@@ -19,7 +70,7 @@
 
 ### Release Changes
 
-* Implemented option to Open from URL by [@lvcabral](https://github.com/lvcabral) in [163](https://github.com/lvcabral/brs-desktop/pull/163)
+* Implemented option to Open from URL by [@lvcabral](https://github.com/lvcabral) in [#163](https://github.com/lvcabral/brs-desktop/pull/163)
   * New option in File menu that allows to download and run any app package (zip/bpk) or code file (brs)
   * The downloaded file is also executed on the peer Roku device (if configured in the settings screen)
   * Updated documentation with the new recent features
@@ -42,7 +93,7 @@
   * Implemented support for multi-dimensional indexes of `roArray` and `roList` by [@lvcabral](https://github.com/lvcabral) in [#331](https://github.com/lvcabral/brs-engine/pull/331)
   * Implemented `ObjFun()` global function and support for `variadic` arguments on `Callable` by [@lvcabral](https://github.com/lvcabral) in [#375](https://github.com/lvcabral/brs-engine/pull/375)
   * Added support for `formatJson()` undocumented flags 256 and 512 by [@lvcabral](https://github.com/lvcabral) in [#377](https://github.com/lvcabral/brs-engine/pull/377)
-  * Implemented Micro Debugger commands:  `classes`,  `bscs` and `stats` by [@lvcabral](https://github.com/lvcabral) in [#385](https://github.com/lvcabral/brs-engine/pull/385)  
+  * Implemented Micro Debugger commands:  `classes`,  `bscs` and `stats` by [@lvcabral](https://github.com/lvcabral) in [#385](https://github.com/lvcabral/brs-engine/pull/385)
   * Improvements to `roPath` by [@lvcabral](https://github.com/lvcabral) in [#296](https://github.com/lvcabral/brs-engine/pull/296)
   * Changed `roUrlEvent` and `roUniversalControlEvent` to be comparable by [@lvcabral](https://github.com/lvcabral) in [#299](https://github.com/lvcabral/brs-engine/pull/299)
   * Updated Firmware Version to 11.5 as `continue for/while` is now supported by [@lvcabral](https://github.com/lvcabral) in [#357](https://github.com/lvcabral/brs-engine/pull/357)
@@ -63,7 +114,7 @@
 
 ### Release Changes
 
-* Implemented Code Editor and Console window by [@lvcabral](https://github.com/lvcabral) in [154](https://github.com/lvcabral/brs-desktop/pull/154)
+* Implemented Code Editor and Console window by [@lvcabral](https://github.com/lvcabral) in [#154](https://github.com/lvcabral/brs-desktop/pull/154)
   * Added editor and console code based on [brs-fiddle](https://github.com/lvcabral/brs-fiddle)
   * Removed app folder from git (all files are generated from `src` now)
   * Linked code editor to main simulator display
@@ -285,6 +336,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v1.4.0]: https://github.com/lvcabral/brs-desktop/compare/v1.3.2...v1.4.0
 [v1.3.2]: https://github.com/lvcabral/brs-desktop/compare/v1.3.0...v1.3.2
 [v1.3.0]: https://github.com/lvcabral/brs-desktop/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/lvcabral/brs-desktop/compare/v1.1.0...v1.2.0

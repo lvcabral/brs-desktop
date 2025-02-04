@@ -1,6 +1,6 @@
 # Remote Access Services
 
-The **BrightScript Simulator** desktop app, the same way all Roku devices, implements some remote access services in order to enable automation and monitoring of the apps being executed. It allows among other possibilities, to integrate the simulator to the [VSCode BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=celsoaf.brightscript). Below you will find a quick referece documentation about the services available.
+The **BrightScript Simulator** desktop app, the same way all Roku devices, implements some remote access services in order to enable automation and monitoring of the apps being executed. It allows among other possibilities, to integrate the simulator to the [VSCode BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=celsoaf.brightscript). Below you will find a quick reference documentation about the services available.
 
 ## Web Application Installer
 
@@ -16,7 +16,7 @@ The **Web Installer** default user and password are both `rokudev`, the password
 
 ## ECP (External Control Protocol)
 
-Once it's enabled the **ECP API** allows the simulator to be controlled over the network by providing a number of external control commands. When the **ECP** is enabled it is discoverable using **SSDP** (Simple Service Discovery Protocol) just like a Roku device. **ECP** is a simple _RESTful API_ that can be accessed by programs in virtually any programming environment. Please check the [ECP official documentation](https://developer.roku.com/en-ca/docs/developer-program/debugging/external-control-api.md) for detailed documentation of the protocol.
+Once it's enabled the **ECP API** allows the simulator to be controlled over the network by providing a number of external control commands. When the **ECP** is enabled it is discoverable using **SSDP** (Simple Service Discovery Protocol) just like a Roku device. **ECP** is a simple _RESTful API_ that can be accessed by programs in virtually any programming environment. Please check the [ECP official documentation](https://developer.roku.com/docs/developer-program/dev-tools/external-control-api.md) for detailed documentation of the protocol.
 
 The **ECP** listens to the _TCP_ port 8060 and is disabled by default, it can be enabled either by using the options under the [Device Menu](how-to-use.md#device-menu) or via the [command line option](how-to-use.md#command-line-options) `--ecp`. An icon on the status bar with the port number indicates that the service is active, if the icon is clicked it shows the XML result of the `query/device-info` command on the default browser.
 
@@ -24,16 +24,19 @@ The **ECP** listens to the _TCP_ port 8060 and is disabled by default, it can be
 
 The **BrightScript Simulator** desktop app only implements a subset of **ECP** commands, here a list of supported commands:
 
-| Command             | Description                                                                                                       |
-|---------------------|-------------------------------------------------------------------------------------------------------------------|
-| query/device-info   | Retrieves device information similar to that returned by roDeviceInfo. (HTTP GET) |
-| query/apps          | Returns a map of all the recent opened apps paired with their application ID. (HTTP GET) |
-| query/active-app    | Returns a child element named 'app' with the active application, in the same format as 'query/apps'. (HTTP GET) |
-| query/icon/`appID`  | Returns an icon corresponding to the application identified by appID. (HTTP GET) |
-| launch/`appID`      | Launches the app identified by appID. (HTTP POST) |
-| keypress/`key`      | Equivalent to pressing down and releasing the remote control key identified after the slash. (HTTP POST) |
-| keydown/`key`       | Equivalent to pressing the remote control key identified after the slash. (HTTP POST) |
-| keyup/`key`         | Equivalent to releasing the remote control key identified after the slash. (HTTP POST) |
+| Command               | Description                                                                                                       |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------|
+| query/device-info     | Retrieves device information similar to that returned by roDeviceInfo. (HTTP GET) |
+| query/apps            | Returns a map of all the recent opened apps paired with their application ID. (HTTP GET) |
+| query/active-app      | Returns a child element named 'app' with the active application, in the same format as 'query/apps'. (HTTP GET) |
+| query/icon/`appID`    | Returns an icon corresponding to the application identified by appID. (HTTP GET) |
+| query/registry/`appID`| Lists the entries in the device registry for apps. (HTTP GET) |
+| query/input           | Sends custom events to the current application. It takes a user defined list of name-value pairs sent as query string URI parameters. (HTTP POST) |
+| launch/`appID`        | Launches the app identified by appID. (HTTP POST) |
+| exit-app/`appID`      | Terminates the app identified by appID if running. (HTTP POST) |
+| keypress/`key`        | Equivalent to pressing down and releasing the remote control key identified after the slash. (HTTP POST) |
+| keydown/`key`         | Equivalent to pressing the remote control key identified after the slash. (HTTP POST) |
+| keyup/`key`           | Equivalent to releasing the remote control key identified after the slash. (HTTP POST) |
 
 **Note:** The Application ID in the simulator is a simple hash of the full path of the app zip/bpk file.
 
