@@ -7,10 +7,10 @@
  *--------------------------------------------------------------------------------------------*/
 import path from "path";
 import url from "url";
-import os from "os";
+import dns from "dns";
 import minimist from "minimist";
 import jetpack from "fs-jetpack";
-import { app, screen } from "electron";
+import { app, screen, BrowserWindow } from "electron";
 import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
@@ -43,13 +43,17 @@ import {
     setAspectRatio,
     saveWindowState,
 } from "./helpers/window";
+import { getGateway, getLocalIps } from "./helpers/util";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 import { randomUUID } from "crypto";
 
 const isMacOS = process.platform === "darwin";
 
+require("@electron/remote/main").initialize();
+
 // Device Information Object
 const dt = DateTime.now().setZone("system");
+const localIps = getLocalIps();
 const deviceInfo = {
     developerId: "brs-dev-id", // Unique id to segregate registry data
     friendlyName: app.getName(),
@@ -64,15 +68,31 @@ const deviceInfo = {
     locale: "en_US",
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
-    connectionType: "WiFiConnection", // Options: "WiFiConnection", "WiredConnection", ""
-    localIps: getLocalIps(),
+    connectionInfo: {
+        type: "WiredConnection",
+        name: localIps[0].split(",")[0],
+        gateway: "127.0.0.1",
+        dns: dns.getServers(),
+        quality: "Excellent",
+    },
+    localIps: localIps,
     startTime: Date.now(),
     maxSimulStreams: 2,
     audioVolume: 40,
     appList: [],
 };
 
-require("@electron/remote/main").initialize();
+// Get Network Gateway
+getGateway().then((gateway) => {
+    if (gateway.ip !== "") {
+        deviceInfo.connectionInfo.gateway = gateway.ip;
+        deviceInfo.connectionInfo.name = gateway.name;
+        deviceInfo.connectionInfo.type = gateway.type;
+        deviceInfo.connectionInfo.ssid = gateway.ssid;
+        const window = BrowserWindow.fromId(1);
+        window?.webContents.send("setDeviceInfo", "connectionInfo", deviceInfo.connectionInfo);
+    }
+});
 
 // Parse CLI parameters
 const argv = minimist(process.argv.slice(1), {
@@ -339,30 +359,4 @@ function setupEvents(mainWindow) {
             }
         });
     });
-}
-
-// Helper Functions
-function getLocalIps() {
-    const ifaces = os.networkInterfaces();
-    const ips = [];
-    Object.keys(ifaces).forEach(function (ifname) {
-        let alias = 0;
-        ifaces[ifname].forEach(function (iface) {
-            if ("IPv4" !== iface.family || iface.internal !== false) {
-                // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-                return;
-            }
-            if (alias >= 1) {
-                // this single interface has multiple ipv4 addresses
-                console.log(`${ifname}:${alias}`, iface.address);
-                ips.push(`${ifname}:${alias},${iface.address}`);
-            } else {
-                // this interface has only one ipv4 address
-                console.log(ifname, iface.address);
-                ips.push(`${ifname},${iface.address}`);
-            }
-            ++alias;
-        });
-    });
-    return ips;
 }

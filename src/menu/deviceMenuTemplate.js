@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -9,7 +9,7 @@ import { isECPEnabled, enableECP, disableECP } from "../server/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../server/telnet";
 import { isInstallerEnabled, enableInstaller, disableInstaller } from "../server/installer";
 import { setLocaleId, setDisplayOption, setPeerRoku } from "../helpers/settings";
-import { reloadApp } from "../helpers/window";
+import { reloadDevice } from "../helpers/window";
 
 export const deviceMenuTemplate = {
     id: "device-menu",
@@ -190,7 +190,7 @@ export const deviceMenuTemplate = {
             label: "Reset Device",
             accelerator: "CmdOrCtrl+Shift+R",
             click: (item, window) => {
-                reloadApp();
+                reloadDevice();
             },
         },
     ],

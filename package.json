@@ -84,6 +84,7 @@
         "minimist": "^1.2.5",
         "mousetrap": "^1.6.5",
         "nanoid": "^5.0.9",
+        "network": "^0.7.0",
         "node-ssdp": "^4.0.1",
         "postman-request": "^2.88.1-postman.33",
         "restana": "^4.9.9",
