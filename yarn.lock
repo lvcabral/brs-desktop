@@ -975,6 +975,24 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@lvcabral/electron-preferences@lvcabral/electron-preferences#build":
+  version "2.8.3-custom"
+  resolved "https://codeload.github.com/lvcabral/electron-preferences/tar.gz/845ad411fca2b441c92368b6a29672d4aa2be67f"
+  dependencies:
+    eventemitter2 "^6.4.9"
+    load-json-file "^6.2.0"
+    lodash "^4.17.21"
+    prop-types "^15.8.1"
+    react-color "^2.19.3"
+    react-modal "^3.16.1"
+    serialize-javascript "^6.0.0"
+    write-json-file "^4.3.0"
+
+"@lvcabral/terminal@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@lvcabral/terminal/-/terminal-0.1.0.tgz#def43b598061aaaf85af326e79fe3218844b95d3"
+  integrity sha512-+TxQQ95qca+5Xti2ovFKKpCYT5Thio8i5rKAE5mHPi3c4hudYwAoi/YdrR9ONnXoxiPyYHaYd7x/oDKX/wnlTw==
+
 "@lvcabral/zip@lvcabral/zip":
   version "0.5.3"
   resolved "https://codeload.github.com/lvcabral/zip/tar.gz/e8aba01e413ef31ea2825e88d79bc8bd785712bf"
@@ -2767,19 +2785,6 @@ electron-notarize@^1.2.2:
   dependencies:
     debug "^4.1.1"
     fs-extra "^9.0.1"
-
-electron-preferences@lvcabral/electron-preferences#build:
-  version "2.8.3-custom"
-  resolved "https://codeload.github.com/lvcabral/electron-preferences/tar.gz/845ad411fca2b441c92368b6a29672d4aa2be67f"
-  dependencies:
-    eventemitter2 "^6.4.9"
-    load-json-file "^6.2.0"
-    lodash "^4.17.21"
-    prop-types "^15.8.1"
-    react-color "^2.19.3"
-    react-modal "^3.16.1"
-    serialize-javascript "^6.0.0"
-    write-json-file "^4.3.0"
 
 electron-prompt@^1.7.0:
   version "1.7.0"
@@ -5712,16 +5717,7 @@ streamsearch@0.1.2:
   resolved "https://registry.yarnpkg.com/streamsearch/-/streamsearch-0.1.2.tgz#808b9d0e56fc273d809ba57338e929919a1a9f1a"
   integrity sha512-jos8u++JKm0ARcSUTAZXOVC0mSox7Bhn6sBgty73P1f3JGf7yG2clTbBNHUdde/kdvP2FESam+vM6l8jBrNxHA==
 
-"string-width-cjs@npm:string-width@^4.2.0":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
-  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
-  dependencies:
-    emoji-regex "^8.0.0"
-    is-fullwidth-code-point "^3.0.0"
-    strip-ansi "^6.0.1"
-
-"string-width@^1.0.2 || 2 || 3 || 4", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
+"string-width-cjs@npm:string-width@^4.2.0", "string-width@^1.0.2 || 2 || 3 || 4", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -5766,7 +5762,7 @@ string_decoder@~1.1.1:
   dependencies:
     safe-buffer "~5.1.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -5786,13 +5782,6 @@ strip-ansi@^4.0.0:
   integrity sha512-4XaJ2zQdCzROZDivEVIDPkcQn8LMFSa8kj8Gxb/Lnwzv9A8VctNZ+lfivC/sV3ivW8ElJTERXZoPBRrZKkNKow==
   dependencies:
     ansi-regex "^3.0.0"
-
-strip-ansi@^6.0.0, strip-ansi@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
-  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
-  dependencies:
-    ansi-regex "^5.0.1"
 
 strip-ansi@^7.0.1, strip-ansi@^7.1.0:
   version "7.1.0"
@@ -6189,10 +6178,6 @@ v8-to-istanbul@^9.0.0:
     "@types/istanbul-lib-coverage" "^2.0.1"
     convert-source-map "^2.0.0"
 
-vanilla-terminal@lvcabral/vanilla-terminal:
-  version "0.0.12"
-  resolved "https://codeload.github.com/lvcabral/vanilla-terminal/tar.gz/a265bff0acf6d8dd44474705abfb90d77c573036"
-
 verror@1.10.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/verror/-/verror-1.10.0.tgz#3a105ca17053af55d6e270c1f8288682e18da400"
@@ -6340,16 +6325,7 @@ wmic@^1.0.1:
     async "^3.2.0"
     iconv-lite "^0.5.0"
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
-  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
-  dependencies:
-    ansi-styles "^4.0.0"
-    string-width "^4.1.0"
-    strip-ansi "^6.0.0"
-
-wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==

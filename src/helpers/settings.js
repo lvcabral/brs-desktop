@@ -8,7 +8,7 @@
 import { app, BrowserWindow, nativeTheme, ipcMain } from "electron";
 import { DateTime } from "luxon";
 import path from "path";
-import ElectronPreferences from "electron-preferences";
+import ElectronPreferences from "@lvcabral/electron-preferences";
 import { setAspectRatio } from "./window";
 import { enableECP, disableECP, subscribeECP, ECP_PORT } from "../server/ecp";
 import { enableTelnet, disableTelnet, subscribeTelnet, TELNET_PORT } from "../server/telnet";
