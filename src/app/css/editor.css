@@ -355,31 +355,37 @@ pre {
     color: var(--header-color);
 }
 
-.VanillaTerm {
+.WebTerm {
     background-color: var(--console-background-color) !important;
     color: var(--console-color) !important;
     padding: 0px !important;
 }
 
-.VanillaTerm .container {
+.WebTerm .container {
     overflow-y: auto !important;
     padding: 9px !important;
 }
 
-.VanillaTerm .container ::selection {
+.WebTerm .container ::selection {
     background-color: var(--console-selection-color) !important;
 }
 
-.VanillaTerm output pre {
+.WebTerm output pre {
     color: var(--console-color) !important;
 }
 
-.VanillaTerm output span {
+.WebTerm output span {
     color: var(--console-color) !important;
 }
 
-.VanillaTerm .command {
+.WebTerm .command {
     align-items: center;
+}
+
+.WebTerm .command input {
+    border-radius: unset;
+    box-shadow: none;
+    padding-top: 5px !important;
 }
 
 .editor .console #console-logs {
