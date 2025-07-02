@@ -41,8 +41,7 @@ module.exports = env => {
           { context: "src/app/", from: "videos/**", to: "../app" },
           { context: "node_modules/brs-engine/browser/lib", from: fileApi, to: "lib" },
           { context: "node_modules/brs-engine/browser/lib", from: fileWrk, to: "lib" },
-          { context: "node_modules/brs-engine/browser/", from: "audio/**", to: "../app" },
-          { context: "node_modules/brs-engine/browser/", from: "fonts/**", to: "../app" },
+          { context: "node_modules/brs-engine/browser/", from: "assets/**", to: "../app" },
         ]
       })
     ],
