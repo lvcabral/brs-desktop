@@ -3,7 +3,7 @@
 [data-theme^="purple"],
 [data-theme] [data-theme^="purple"] {
     --main-color: #dac7ea;
-    --background-color: #251135;
+    --background-color: #000000;
     --link-color: #aa46f7;
     --title-color: #dac7ea;
     --title-background-color: #3d1b56;
@@ -20,7 +20,7 @@
 [data-theme^="light"],
 [data-theme] [data-theme^="light"] {
     --main-color: #000000;
-    --background-color: #ffffff;
+    --background-color: #000000;
     --link-color: #0000ff;
     --title-color: #333333;
     --title-background-color: #dddddd;
@@ -37,7 +37,7 @@
 [data-theme^="dark"],
 [data-theme] [data-theme^="dark"] {
     --main-color: #d4d4d4;
-    --background-color: #1e1e1e;
+    --background-color: #000000;
     --link-color: #3e5763;
     --title-color: #cccccc;
     --title-background-color: #252526;

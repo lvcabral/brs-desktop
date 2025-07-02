@@ -46,6 +46,12 @@ customKeys.set("Space", "play");
 customKeys.set("NumpadMultiply", "info");
 customKeys.set("KeyA", "a");
 customKeys.set("KeyZ", "b");
+// Support for Games with multi_key_events=1 in the manifest
+customKeys.set("ShiftLeft", "playonly");
+customKeys.set("Shift+ArrowRight", "right");
+customKeys.set("Shift+ArrowLeft", "left");
+customKeys.set("Shift+ArrowUp", "up");
+customKeys.set("Shift+ArrowDown", "down");
 
 brs.initialize(customDeviceInfo, {
     debugToConsole: false,
@@ -234,6 +240,57 @@ api.receive("setAudioMute", function (mute) {
     brs.setAudioMute(mute);
     setAudioStatus(mute);
 });
+
+// Splash video handling
+function initSplashVideo() {
+    const player = document.getElementById("player");
+    if (!player) {
+        return;
+    }
+    // Store original player state
+    const originalControls = player.controls;
+    const originalAutoplay = player.autoplay;
+    const originalMuted = player.muted;
+
+    // Configure player for splash video
+    player.src = "./videos/brs-bouncing.mp4";
+    player.controls = false;
+    player.autoplay = true;
+    player.muted = true;
+
+    // Function to restore player state
+    const restorePlayer = () => {
+        // Clear the canvas to remove the video content
+        const canvas = document.getElementById("display");
+        if (canvas) {
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Restore original state
+        player.pause();
+        player.removeAttribute("src"); // empty source
+        player.load(); // reset everything, silent without errors!
+        player.style.display = "none";
+        player.controls = originalControls;
+        player.autoplay = originalAutoplay;
+        player.muted = originalMuted;
+    };
+
+    // Hide video when it ends or and error occurs
+    player.addEventListener("ended", restorePlayer, { once: true });
+    player.addEventListener("error", restorePlayer, { once: true });
+
+    // Start playing the video
+    player.play();
+}
+
+// Initialize splash video when DOM is loaded
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initSplashVideo);
+} else {
+    initSplashVideo();
+}
 
 // Window Resize Event
 window.onload = window.onresize = function () {

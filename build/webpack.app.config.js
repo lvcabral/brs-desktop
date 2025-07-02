@@ -38,6 +38,7 @@ module.exports = env => {
           { context: "src/app/", from: "fonts/**", to: "../app" },
           { context: "src/app/", from: "css/**", to: "../app" },
           { context: "src/app/", from: "web/**", to: "../app" },
+          { context: "src/app/", from: "videos/**", to: "../app" },
           { context: "node_modules/brs-engine/browser/lib", from: fileApi, to: "lib" },
           { context: "node_modules/brs-engine/browser/lib", from: fileWrk, to: "lib" },
           { context: "node_modules/brs-engine/browser/", from: "audio/**", to: "../app" },
