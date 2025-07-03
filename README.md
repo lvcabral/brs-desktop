@@ -57,6 +57,6 @@ Below you will find the links for the documentation of this project, how to use,
 
 ## License
 
-Copyright © 2019-2024 Marcelo Lv Cabral. All rights reserved.
+Copyright © 2019-2025 Marcelo Lv Cabral. All rights reserved.
 
 Licensed under [MIT](LICENSE) License.

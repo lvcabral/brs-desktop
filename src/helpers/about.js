@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2023 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -21,7 +21,7 @@ const aboutOptions = {
     copyright: `Copyright ${packageInfo.copyright}`,
     homepage: `${packageInfo.repository.url}#readme`,
     win_options: {},
-    use_version_info: ['electron', 'chrome', 'node'].map(e => [e, process.versions[e]]),
+    use_version_info: ["electron", "chrome", "node"].map((e) => [e, process.versions[e]]),
     bug_link_text: "got bugs?",
     show_close_button: !isMacOS || isBeforeBigSur ? false : "Close",
 };
