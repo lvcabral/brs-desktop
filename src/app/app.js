@@ -28,12 +28,18 @@ let backColor = colorValues.getPropertyValue("--background-color").trim();
 api.setBackgroundColor(backColor);
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
 const customDeviceInfo = api.getDeviceInfo();
-// On device reset, prevent sending back registry and models
+// On device reset, prevent sending back items not customizable
 if ("registry" in customDeviceInfo) {
+    delete customDeviceInfo.registry;
+}
+if ("registryBuffer" in customDeviceInfo) {
     delete customDeviceInfo.registry;
 }
 if ("models" in customDeviceInfo) {
     delete customDeviceInfo.models;
+}
+if ("assets" in customDeviceInfo) {
+    delete customDeviceInfo.assets;
 }
 // Initialize device and subscribe to events
 let currentApp = { id: "", running: false };
@@ -58,7 +64,24 @@ brs.initialize(customDeviceInfo, {
     showStats: false,
     customKeys: customKeys,
 });
-api.send("deviceData", brs.deviceData);
+
+// Send deviceData via IPC
+const clonedDeviceData = Object.assign({}, brs.deviceData);
+delete clonedDeviceData.assets; // Remove assets to avoid issues with structured cloning
+delete clonedDeviceData.registryBuffer; // Remove registryBuffer to avoid issues with structured cloning
+
+try {
+    api.send("deviceData", clonedDeviceData);
+} catch (error) {
+    console.warn(
+        "Sending deviceData object via IPC failed, using JSON serialization workaround:",
+        error.message
+    );
+    // Use JSON serialization as a fallback in case of structured cloning issues
+    const jsonSerializedData = JSON.parse(JSON.stringify(clonedDeviceData));
+    api.send("deviceData", jsonSerializedData);
+}
+
 api.send("serialNumber", brs.getSerialNumber());
 api.send("engineVersion", brs.getVersion());
 
