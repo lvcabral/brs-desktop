@@ -8,7 +8,7 @@
 import { app, BrowserWindow, nativeTheme, ipcMain } from "electron";
 import { DateTime } from "luxon";
 import path from "path";
-import ElectronPreferences from "electron-preferences";
+import ElectronPreferences from "@lvcabral/electron-preferences";
 import { setAspectRatio } from "./window";
 import { enableECP, disableECP, subscribeECP, ECP_PORT } from "../server/ecp";
 import { enableTelnet, disableTelnet, subscribeTelnet, TELNET_PORT } from "../server/telnet";
@@ -79,12 +79,17 @@ export function getSettings(window) {
                 maxSimulStreams: global.sharedObject.deviceInfo.maxSimulStreams,
                 audioVolume: global.sharedObject.deviceInfo.audioVolume,
                 muted: [false],
+                audioLanguage: global.sharedObject.deviceInfo.audioLanguage,
             },
             localization: {
                 locale: global.sharedObject.deviceInfo.locale,
                 countryCode: global.sharedObject.deviceInfo.countryCode,
                 clockFormat: global.sharedObject.deviceInfo.clockFormat,
                 timeZone: "system",
+            },
+            captions: {
+                captionMode: global.sharedObject.deviceInfo.captionMode,
+                captionLanguage: global.sharedObject.deviceInfo.captionLanguage,
             },
             peerRoku: {
                 password: "rokudev",
@@ -450,6 +455,13 @@ export function getSettings(window) {
                                         },
                                     ],
                                 },
+                                {
+                                    label: "Audio Preferred Language",
+                                    key: "audioLanguage",
+                                    type: "dropdown",
+                                    options: getTracksLanguageArray(),
+                                    help: "Sets the preferred language for audio tracks in video playback",
+                                },
                             ],
                         },
                     ],
@@ -464,11 +476,11 @@ export function getSettings(window) {
                         {
                             fields: [
                                 {
-                                    label: "Channels UI Locale",
+                                    label: "Language",
                                     key: "locale",
-                                    type: "radio",
+                                    type: "dropdown",
                                     options: getLocaleIdArray(),
-                                    help: "Configure the localization, this setting only affects apps not the simulator UI",
+                                    help: "Configure the current locale, this setting only affects BrightScript apps not the simulator UI",
                                 },
                                 {
                                     label: "Clock Format",
@@ -486,17 +498,60 @@ export function getSettings(window) {
                                     ],
                                 },
                                 {
-                                    label: "Channel Store Country",
+                                    label: "Device Country",
                                     key: "countryCode",
                                     type: "dropdown",
                                     options: getCountryArray(),
-                                    help: "Configure the country store associated with the device returned by ifDeviceInfo.GetCountryCode()",
+                                    help: "Configure the device country (app store), this is returned by ifDeviceInfo.GetCountryCode()",
                                 },
                                 {
                                     label: "Time Zone",
                                     key: "timeZone",
                                     type: "dropdown",
                                     options: getTimezonArray(),
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+            {
+                id: "captions",
+                label: "Captions",
+                icon: "closed-caption",
+                form: {
+                    groups: [
+                        {
+                            fields: [
+                                {
+                                    label: "Captions Mode",
+                                    key: "captionMode",
+                                    type: "radio",
+                                    options: [
+                                        {
+                                            value: "Off",
+                                            label: "Off",
+                                        },
+                                        {
+                                            value: "On",
+                                            label: "On Always",
+                                        },
+                                        {
+                                            value: "Instant replay",
+                                            label: "On Replay",
+                                        },
+                                        {
+                                            value: "When mute",
+                                            label: "On Mute",
+                                        },
+                                    ],
+                                },
+                                {
+                                    label: "Captions Preferred Language",
+                                    key: "captionLanguage",
+                                    type: "dropdown",
+                                    options: getTracksLanguageArray(),
+                                    help: "Sets the preferred language for closed caption tracks in video playback",
                                 },
                             ],
                         },
@@ -565,11 +620,14 @@ export function getSettings(window) {
         if (preferences.audio) {
             setDeviceInfo("audio", "maxSimulStreams", true);
             setDeviceInfo("audio", "audioVolume", true);
+            setDeviceInfo("audio", "audioLanguage", true);
             window.webContents.send("setAudioMute", preferences.audio.muted[0]);
         }
         if (preferences.localization) {
             const localeId = preferences.localization.locale;
-            if (global.sharedObject.deviceInfo.locale !== localeId) {
+            if (localeId === "") {
+                setPreference("localization.locale", global.sharedObject.deviceInfo.locale);
+            } else if (global.sharedObject.deviceInfo.locale !== localeId) {
                 global.sharedObject.deviceInfo.locale = localeId;
                 checkMenuItem(localeId, true);
                 window.webContents.send("setLocale", localeId);
@@ -577,6 +635,10 @@ export function getSettings(window) {
             setDeviceInfo("localization", "clockFormat", true);
             setDeviceInfo("localization", "countryCode", true);
             setTimeZone(true);
+        }
+        if (preferences.captions) {
+            setDeviceInfo("captions", "captionMode", true);
+            setDeviceInfo("captions", "captionLanguage", true);
         }
     });
     nativeTheme.on("updated", () => {
@@ -1042,11 +1104,38 @@ function getRokuModelArray() {
 
 function getLocaleIdArray() {
     return [
-        { value: "en_US", label: "US English (en-US)" },
-        { value: "de_DE", label: "German (de-DE)" },
-        { value: "es_MX", label: "Mexican Spanish (es-MX)" },
-        { value: "fr_CA", label: "Canadian French (fr-CA)" },
-        { value: "pt_BR", label: "Brazilian Portuguese (pt-BR)" },
+        { label: "US English (en-US)", value: "en_US" },
+        { label: "British English (en-GB)", value: "en_GB" },
+        { label: "Canadian English (en-CA)", value: "en_CA" },
+        { label: "Australian English (en-AU)", value: "en_AU" },
+        { label: "Canadian French (fr-CA)", value: "fr_CA" },
+        { label: "International Spanish (es-ES)", value: "es_ES" },
+        { label: "Mexican Spanish (es-MX)", value: "es_MX" },
+        { label: "German (de-DE)", value: "de_DE" },
+        { label: "Italian (it-IT)", value: "it_IT" },
+        { label: "Brazilian Portuguese (pt-BR)", value: "pt_BR" },
+    ];
+}
+
+function getTracksLanguageArray() {
+    return [
+        { label: "English", value: "en" },
+        { label: "Spanish", value: "es" },
+        { label: "French", value: "fr" },
+        { label: "German", value: "de" },
+        { label: "Italian", value: "it" },
+        { label: "Portuguese", value: "pt" },
+        { label: "Russian", value: "ru" },
+        { label: "Turkish", value: "tr" },
+        { label: "Polish", value: "pl" },
+        { label: "Ukrainian", value: "uk" },
+        { label: "Romansh", value: "rm" },
+        { label: "Dutch", value: "nl" },
+        { label: "Croatian", value: "hr" },
+        { label: "Hungarian", value: "hu" },
+        { label: "Greek", value: "el" },
+        { label: "Czech", value: "cs" },
+        { label: "Swedish", value: "sv" },
     ];
 }
 

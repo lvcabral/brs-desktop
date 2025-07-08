@@ -68,6 +68,8 @@ const deviceInfo = {
     locale: "en_US",
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
+    captionMode: "Off",
+    captionLanguage: "en",
     connectionInfo: {
         type: "WiredConnection",
         name: localIps[0].split(",")[0],
@@ -78,7 +80,8 @@ const deviceInfo = {
     localIps: localIps,
     startTime: Date.now(),
     maxSimulStreams: 2,
-    audioVolume: 40,
+    audioVolume: 50,
+    audioLanguage: "en",
     appList: [],
 };
 
@@ -221,6 +224,7 @@ function loadSettings(mainWindow, startup) {
     if (settings.preferences.audio) {
         setDeviceInfo("audio", "maxSimulStreams");
         setDeviceInfo("audio", "audioVolume");
+        setDeviceInfo("audio", "audioLanguage");
     }
     if (settings.preferences.localization) {
         const localeId = settings.value("localization.locale");
@@ -231,6 +235,10 @@ function loadSettings(mainWindow, startup) {
         setDeviceInfo("localization", "clockFormat");
         setDeviceInfo("localization", "countryCode");
         setTimeZone();
+    }
+    if (settings.preferences.captions) {
+        setDeviceInfo("captions", "captionMode");
+        setDeviceInfo("captions", "captionLanguage");
     }
     if (settings.preferences.peerRoku) {
         checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
