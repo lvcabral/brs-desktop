@@ -109,7 +109,7 @@
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.7.3",
         "dotenv": "^16.4.7",
-        "electron": "^27.3.11",
+        "electron": "^35.7.5",
         "electron-builder": "^24.13.2",
         "electron-notarize": "^1.2.2",
         "friendly-errors-webpack-plugin": "^1.7.0",
