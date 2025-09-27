@@ -508,7 +508,7 @@ export function getSettings(window) {
                                     label: "Time Zone",
                                     key: "timeZone",
                                     type: "dropdown",
-                                    options: getTimezonArray(),
+                                    options: getTimezoneArray(),
                                 },
                             ],
                         },
@@ -1168,7 +1168,7 @@ function getCountryArray() {
     ];
 }
 
-function getTimezonArray() {
+function getTimezoneArray() {
     const dt = DateTime.now().setZone("system");
     const tzArray = [
         { label: `System: ${dt.zoneName}`, value: "system" },
