@@ -128,6 +128,9 @@ brs.subscribe("desktop", (event, data) => {
         redrawEvent(data);
     } else if (event === "control") {
         api.send("keySent", data);
+    } else if (event === "captionMode") {
+        api.send("setCaptionMode", data);
+        showToast(`Caption mode changed to: ${data}`);
     } else if (event === "debug") {
         if (data.level === "stop") {
             api.send("debugStarted");

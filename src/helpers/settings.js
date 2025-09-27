@@ -914,6 +914,11 @@ ipcMain.on("setAudioMute", (event, mute) => {
     settings.value("audio.muted", mute ? [mute] : []);
 });
 
+ipcMain.on("setCaptionMode", (event, mode) => {
+    global.sharedObject.deviceInfo.captionMode = mode;
+    setPreference("captions.captionMode", mode);
+});
+
 ipcMain.on("deviceData", (_, deviceData) => {
     if (deviceData) {
         const appDeviceInfo = global.sharedObject.deviceInfo;

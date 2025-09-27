@@ -103,6 +103,7 @@ contextBridge.exposeInMainWorld("api", {
             "openConsole",
             "debugStarted",
             "setAudioMute",
+            "setCaptionMode",
             "deviceData",
             "serialNumber",
             "engineVersion",
