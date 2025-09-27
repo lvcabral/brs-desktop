@@ -85,8 +85,44 @@ export const deviceMenuTemplate = {
                     },
                 },
                 {
-                    id: "de_DE",
-                    label: "German (de-DE)",
+                    id: "en_GB",
+                    label: "British English (en-GB)",
+                    type: "radio",
+                    checked: true,
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
+                },
+                {
+                    id: "en_AU",
+                    label: "Australian English (en-AU)",
+                    type: "radio",
+                    checked: true,
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
+                },
+                {
+                    id: "en_CA",
+                    label: "Canadian English (en-CA)",
+                    type: "radio",
+                    checked: true,
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
+                },
+                {
+                    id: "fr_CA",
+                    label: "Canadian French (fr-CA)",
+                    type: "radio",
+                    checked: false,
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
+                },
+                {
+                    id: "es_ES",
+                    label: "International Spanish (es-ES)",
                     type: "radio",
                     checked: false,
                     click: (item, window) => {
@@ -103,8 +139,17 @@ export const deviceMenuTemplate = {
                     },
                 },
                 {
-                    id: "fr_CA",
-                    label: "Canadian French (fr-CA)",
+                    id: "de_DE",
+                    label: "German (de-DE)",
+                    type: "radio",
+                    checked: false,
+                    click: (item, window) => {
+                        setLocaleId(item.id);
+                    },
+                },
+                {
+                    id: "it_IT",
+                    label: "Italian (it-IT)",
                     type: "radio",
                     checked: false,
                     click: (item, window) => {

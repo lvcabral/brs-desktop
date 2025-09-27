@@ -1106,8 +1106,8 @@ function getLocaleIdArray() {
     return [
         { label: "US English (en-US)", value: "en_US" },
         { label: "British English (en-GB)", value: "en_GB" },
-        { label: "Canadian English (en-CA)", value: "en_CA" },
         { label: "Australian English (en-AU)", value: "en_AU" },
+        { label: "Canadian English (en-CA)", value: "en_CA" },
         { label: "Canadian French (fr-CA)", value: "fr_CA" },
         { label: "International Spanish (es-ES)", value: "es_ES" },
         { label: "Mexican Spanish (es-MX)", value: "es_MX" },
