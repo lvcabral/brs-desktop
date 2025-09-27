@@ -434,7 +434,7 @@ export function getSettings(window) {
                                     key: "maxSimulStreams",
                                     type: "slider",
                                     min: 1,
-                                    max: 3,
+                                    max: 2,
                                     help: "Maximum number of audio streams that can be mixed together and played simultaneously",
                                 },
                                 {
