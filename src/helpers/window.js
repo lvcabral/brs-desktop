@@ -202,9 +202,16 @@ export function closeChannel() {
 }
 
 export function reloadDevice() {
-    const window = BrowserWindow.fromId(1);
-    if (window) {
-        window.webContents.reloadIgnoringCache();
+    // Close all windows except the main window before reloading
+    const allWindows = BrowserWindow.getAllWindows();
+    const mainWindow = BrowserWindow.fromId(1);
+    allWindows.forEach((window) => {
+        if (window.id !== 1 && !window.isDestroyed()) {
+            window.close();
+        }
+    });
+    if (mainWindow) {
+        mainWindow.webContents.reloadIgnoringCache();
     }
 }
 

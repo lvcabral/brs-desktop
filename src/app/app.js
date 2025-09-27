@@ -33,13 +33,16 @@ if ("registry" in customDeviceInfo) {
     delete customDeviceInfo.registry;
 }
 if ("registryBuffer" in customDeviceInfo) {
-    delete customDeviceInfo.registry;
+    delete customDeviceInfo.registryBuffer;
 }
 if ("models" in customDeviceInfo) {
     delete customDeviceInfo.models;
 }
 if ("assets" in customDeviceInfo) {
     delete customDeviceInfo.assets;
+}
+if ("captionStyle" in customDeviceInfo) {
+    delete customDeviceInfo.captionStyle;
 }
 // Initialize device and subscribe to events
 let currentApp = { id: "", running: false };
