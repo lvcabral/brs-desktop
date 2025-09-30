@@ -89,6 +89,13 @@ export function getSettings(window) {
             },
             captions: {
                 captionMode: global.sharedObject.deviceInfo.captionMode,
+                textFont: "default",
+                textEffect: "default",
+                textSize: "default",
+                textColor: "default",
+                textOpacity: "default",
+                backgroundColor: "default",
+                backgroundOpacity: "default",
                 captionLanguage: global.sharedObject.deviceInfo.captionLanguage,
             },
             peerRoku: {
@@ -354,6 +361,7 @@ export function getSettings(window) {
                 form: {
                     groups: [
                         {
+                            label: "Display Settings",
                             fields: [
                                 {
                                     label: "Display Mode",
@@ -474,6 +482,7 @@ export function getSettings(window) {
                 form: {
                     groups: [
                         {
+                            label: "Localization Settings",
                             fields: [
                                 {
                                     label: "Language",
@@ -517,7 +526,7 @@ export function getSettings(window) {
             },
             {
                 id: "captions",
-                label: "Captions",
+                label: "Captioning",
                 icon: "closed-caption",
                 form: {
                     groups: [
@@ -526,7 +535,7 @@ export function getSettings(window) {
                                 {
                                     label: "Captions Mode",
                                     key: "captionMode",
-                                    type: "radio",
+                                    type: "dropdown",
                                     options: [
                                         {
                                             value: "Off",
@@ -547,7 +556,49 @@ export function getSettings(window) {
                                     ],
                                 },
                                 {
-                                    label: "Captions Preferred Language",
+                                    label: "Text Style",
+                                    key: "textFont",
+                                    type: "dropdown",
+                                    options: getTextFontArray(),
+                                },
+                                {
+                                    label: "Text Edge Effect",
+                                    key: "textEffect",
+                                    type: "dropdown",
+                                    options: getTextEffectArray(),
+                                },
+                                {
+                                    label: "Text Size",
+                                    key: "textSize",
+                                    type: "dropdown",
+                                    options: getTextSizeArray(),
+                                },
+                                {
+                                    label: "Text Color",
+                                    key: "textColor",
+                                    type: "dropdown",
+                                    options: getCaptionColorArray(),
+                                },
+                                {
+                                    label: "Text Opacity",
+                                    key: "textOpacity",
+                                    type: "dropdown",
+                                    options: getTextOpacityArray(),
+                                },
+                                {
+                                    label: "Background Color",
+                                    key: "backgroundColor",
+                                    type: "dropdown",
+                                    options: getCaptionColorArray(),
+                                },
+                                {
+                                    label: "Background Opacity",
+                                    key: "backgroundOpacity",
+                                    type: "dropdown",
+                                    options: getBackgroundOpacityArray(),
+                                },
+                                {
+                                    label: "Preferred Language",
                                     key: "captionLanguage",
                                     type: "dropdown",
                                     options: getTracksLanguageArray(),
@@ -639,6 +690,7 @@ export function getSettings(window) {
         if (preferences.captions) {
             setDeviceInfo("captions", "captionMode", true);
             setDeviceInfo("captions", "captionLanguage", true);
+            saveCaptionStyle();
         }
     });
     nativeTheme.on("updated", () => {
@@ -755,6 +807,36 @@ export function setDeviceInfo(section, key, notifyApp) {
             const window = BrowserWindow.fromId(1);
             window?.webContents.send("setDeviceInfo", key, newValue);
         }
+    }
+}
+
+export function saveCaptionStyle() {
+    const window = BrowserWindow.fromId(1);
+    const captionStyle = global.sharedObject.deviceInfo.captionStyle;
+    if (Array.isArray(captionStyle)) {
+        // Map of caption preference keys to their corresponding style IDs
+        const captionStyleMappings = [
+            { id: "text/font", preference: "textFont" },
+            { id: "text/effect", preference: "textEffect" },
+            { id: "text/size", preference: "textSize" },
+            { id: "text/color", preference: "textColor" },
+            { id: "text/opacity", preference: "textOpacity" },
+            { id: "background/color", preference: "backgroundColor" },
+            { id: "background/opacity", preference: "backgroundOpacity" }
+        ];
+        // Update or add each caption style setting
+        captionStyleMappings.forEach(mapping => {
+            const preferenceValue = settings.preferences.captions[mapping.preference];
+            if (preferenceValue) {
+                const index = captionStyle.findIndex((style) => style.id === mapping.id);
+                if (index !== -1) {
+                    captionStyle[index].style = preferenceValue;
+                } else {
+                    captionStyle.push({ id: mapping.id, style: preferenceValue });
+                }
+            }
+        });
+        window.webContents.send("setCaptionStyle", captionStyle);
     }
 }
 
@@ -1119,6 +1201,72 @@ function getLocaleIdArray() {
         { label: "German (de-DE)", value: "de_DE" },
         { label: "Italian (it-IT)", value: "it_IT" },
         { label: "Brazilian Portuguese (pt-BR)", value: "pt_BR" },
+    ];
+}
+function getTextFontArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Serif fixed width", value: "serif fixed width" },
+        { label: "Serif proportional", value: "serif proportional" },
+        { label: "Sans Serif fixed width", value: "sans serif fixed width" },
+        { label: "Sans Serif proportional", value: "sans serif proportional" },
+        { label: "Casual", value: "casual" },
+        { label: "Cursive", value: "cursive" },
+        { label: "Small Caps", value: "small caps" },
+    ];
+}
+function getTextEffectArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "None", value: "none" },
+        { label: "Raised", value: "raised" },
+        { label: "Depressed", value: "depressed" },
+        { label: "Uniform", value: "uniform" },
+        { label: "Drop shadow (left)", value: "drop shadow (left)" },
+        { label: "Drop shadow (right)", value: "drop shadow (right)" },
+    ];
+}
+function getTextSizeArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Extra Large", value: "extra large" },
+        { label: "Large", value: "large" },
+        { label: "Medium", value: "medium" },
+        { label: "Small", value: "small" },
+        { label: "Small", value: "small" },
+        { label: "Extra Small", value: "extra small" },];
+}
+function getCaptionColorArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Bright White", value: "bright white" },
+        { label: "White", value: "white" },
+        { label: "Black", value: "black" },
+        { label: "Red", value: "red" },
+        { label: "Green", value: "green" },
+        { label: "Blue", value: "blue" },
+        { label: "Yellow", value: "yellow" },
+        { label: "Magenta", value: "magenta" },
+        { label: "Cyan", value: "cyan" },
+    ];
+}
+function getTextOpacityArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "25%", value: "25%" },
+        { label: "50%", value: "50%" },
+        { label: "75%", value: "75%" },
+        { label: "100%", value: "100%" },
+    ];
+}
+function getBackgroundOpacityArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Off", value: "off" },
+        { label: "25%", value: "25%" },
+        { label: "50%", value: "50%" },
+        { label: "75%", value: "75%" },
+        { label: "100%", value: "100%" },
     ];
 }
 

@@ -41,9 +41,6 @@ if ("models" in customDeviceInfo) {
 if ("assets" in customDeviceInfo) {
     delete customDeviceInfo.assets;
 }
-if ("captionStyle" in customDeviceInfo) {
-    delete customDeviceInfo.captionStyle;
-}
 // Initialize device and subscribe to events
 let currentApp = { id: "", running: false };
 let debugMode = "continue";
@@ -149,6 +146,7 @@ brs.subscribe("desktop", (event, data) => {
         api.send("reset");
     }
 });
+
 // Events from Main process
 api.receive("openEditor", function () {
     if (editor === null || editor.closed) {
@@ -157,7 +155,6 @@ api.receive("openEditor", function () {
         api.send("showEditor");
     }
 });
-
 api.receive("setTheme", function (theme) {
     if (theme !== document.documentElement.getAttribute("data-theme")) {
         document.documentElement.setAttribute("data-theme", theme);
@@ -177,6 +174,9 @@ api.receive("setDeviceInfo", function (key, value) {
             api.send("serialNumber", brs.getSerialNumber());
         }
     }
+});
+api.receive("setCaptionStyle", function (newStyles) {
+    brs.setCaptionStyle(newStyles);
 });
 api.receive("executeFile", function (filePath, data, clear, mute, debug, input) {
     try {

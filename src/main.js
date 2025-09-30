@@ -32,6 +32,7 @@ import {
     setRemoteKeys,
     setThemeSource,
     setTimeZone,
+    saveCaptionStyle,
     updateECPStatus,
     updateInstallerStatus,
     updateTelnetStatus,
@@ -69,6 +70,7 @@ const deviceInfo = {
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
     captionMode: "Off",
+    captionStyle: [],
     captionLanguage: "en",
     connectionInfo: {
         type: "WiredConnection",
@@ -239,6 +241,7 @@ function loadSettings(mainWindow, startup) {
     if (settings.preferences.captions) {
         setDeviceInfo("captions", "captionMode");
         setDeviceInfo("captions", "captionLanguage");
+        saveCaptionStyle();
     }
     if (settings.preferences.peerRoku) {
         checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
