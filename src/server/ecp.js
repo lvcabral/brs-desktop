@@ -561,7 +561,7 @@ function getRokuOS(firmware, version = true) {
             const versions = "0123456789ACDEFGHJKLMNPRSTUVWXY";
             const major = versions.indexOf(firmware.charAt(2));
             const minor = firmware.slice(4, 5);
-            const revision = firmware.slice(7, 8);
+            const revision = firmware.slice(5, 6);
             return `${major}.${minor}.${revision}`;
         } else {
             return firmware.slice(8, 12);
