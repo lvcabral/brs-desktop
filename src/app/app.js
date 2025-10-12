@@ -179,6 +179,12 @@ api.receive("setCaptionStyle", function (newStyles) {
     brs.setCaptionStyle(newStyles);
 });
 api.receive("executeFile", function (filePath, data, clear, mute, debug, input) {
+    // Close the SceneGraph warning dialog if it's still open
+    const dialog = document.getElementById("scenegraph-warning-dialog");
+    if (dialog && dialog.style.display === "flex") {
+        dialog.style.display = "none";
+    }
+
     try {
         const fileExt = filePath.split(".").pop()?.toLowerCase();
         let password = "";
@@ -309,7 +315,7 @@ function startSplashVideo() {
     // Add event listeners
     player.addEventListener("ended", restorePlayer, { once: true });
     player.addEventListener("error", restorePlayer, { once: true });
-    
+
     // Start playing
     player.play().catch(error => {
         console.warn("Could not play splash video:", error);
