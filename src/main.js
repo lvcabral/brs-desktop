@@ -120,7 +120,7 @@ app.on("ready", () => {
     setupTitlebar();
     createMenu();
     // Shared Object with Front End
-    global.sharedObject = {
+    globalThis.sharedObject = {
         theme: "purple",
         backgroundColor: "#251135",
         deviceInfo: deviceInfo,
@@ -130,7 +130,7 @@ app.on("ready", () => {
     let mainWindow = createWindow("main", {
         width: 1280,
         height: 770,
-        backgroundColor: global.sharedObject.backgroundColor,
+        backgroundColor: globalThis.sharedObject.backgroundColor,
     });
     // Configure Window and load content
     const winBounds = mainWindow.getBounds();

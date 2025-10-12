@@ -102,7 +102,7 @@ brs.subscribe("desktop", (event, data) => {
         }
     } else if (event === "browser") {
         if (data?.url) {
-            const newWindow = window.open(
+            const newWindow = globalThis.open(
                 data.url,
                 "_blank",
                 `width=${data.width},height=${data.height},popup`
@@ -150,7 +150,7 @@ brs.subscribe("desktop", (event, data) => {
 // Events from Main process
 api.receive("openEditor", function () {
     if (editor === null || editor.closed) {
-        editor = window.open("editor.html", "BrightScript Editor", "width=1440,height=800");
+        editor = globalThis.open("editor.html", "BrightScript Editor", "width=1440,height=800");
     } else {
         api.send("showEditor");
     }
@@ -330,12 +330,12 @@ if (document.readyState === "loading") {
 }
 
 // Window Resize Event
-window.onload = window.onresize = function () {
+globalThis.onload = globalThis.onresize = function () {
     brs.redraw(api.isFullScreen());
 };
 
 // Window Focus Events
-window.addEventListener(
+globalThis.addEventListener(
     "focus",
     function () {
         if (currentApp.running && debugMode === "pause") {
@@ -350,7 +350,7 @@ window.addEventListener(
     false
 );
 
-window.addEventListener(
+globalThis.addEventListener(
     "blur",
     function () {
         if (currentApp.running && debugMode === "continue") {
@@ -481,11 +481,11 @@ function initSceneGraphWarningDialog() {
 }
 
 // Exposed API to Child Windows
-window.getEngineContext = () => {
+globalThis.getEngineContext = () => {
     return [brs, currentApp, api.getConsoleBuffer(), debugMode];
 };
 
-window.clearStatusCounters = () => {
+globalThis.clearStatusCounters = () => {
     clearCounters();
     setStatusColor();
 };

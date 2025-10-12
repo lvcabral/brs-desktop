@@ -57,10 +57,10 @@ export function getSettings(window) {
                 telnet: ["enabled"],
             },
             device: {
-                deviceModel: global.sharedObject.deviceInfo.deviceModel,
-                clientId: global.sharedObject.deviceInfo.clientId,
-                RIDA: global.sharedObject.deviceInfo.RIDA,
-                developerId: global.sharedObject.deviceInfo.developerId,
+                deviceModel: globalThis.sharedObject.deviceInfo.deviceModel,
+                clientId: globalThis.sharedObject.deviceInfo.clientId,
+                RIDA: globalThis.sharedObject.deviceInfo.RIDA,
+                developerId: globalThis.sharedObject.deviceInfo.developerId,
                 developerPwd: "",
             },
             display: {
@@ -76,19 +76,19 @@ export function getSettings(window) {
                 keyPlayPause: "End",
             },
             audio: {
-                maxSimulStreams: global.sharedObject.deviceInfo.maxSimulStreams,
-                audioVolume: global.sharedObject.deviceInfo.audioVolume,
+                maxSimulStreams: globalThis.sharedObject.deviceInfo.maxSimulStreams,
+                audioVolume: globalThis.sharedObject.deviceInfo.audioVolume,
                 muted: [false],
-                audioLanguage: global.sharedObject.deviceInfo.audioLanguage,
+                audioLanguage: globalThis.sharedObject.deviceInfo.audioLanguage,
             },
             localization: {
-                locale: global.sharedObject.deviceInfo.locale,
-                countryCode: global.sharedObject.deviceInfo.countryCode,
-                clockFormat: global.sharedObject.deviceInfo.clockFormat,
+                locale: globalThis.sharedObject.deviceInfo.locale,
+                countryCode: globalThis.sharedObject.deviceInfo.countryCode,
+                clockFormat: globalThis.sharedObject.deviceInfo.clockFormat,
                 timeZone: "system",
             },
             captions: {
-                captionMode: global.sharedObject.deviceInfo.captionMode,
+                captionMode: globalThis.sharedObject.deviceInfo.captionMode,
                 textFont: "default",
                 textEffect: "default",
                 textSize: "default",
@@ -96,7 +96,7 @@ export function getSettings(window) {
                 textOpacity: "default",
                 backgroundColor: "default",
                 backgroundOpacity: "default",
-                captionLanguage: global.sharedObject.deviceInfo.captionLanguage,
+                captionLanguage: globalThis.sharedObject.deviceInfo.captionLanguage,
             },
             peerRoku: {
                 password: "rokudev",
@@ -677,9 +677,9 @@ export function getSettings(window) {
         if (preferences.localization) {
             const localeId = preferences.localization.locale;
             if (localeId === "") {
-                setPreference("localization.locale", global.sharedObject.deviceInfo.locale);
-            } else if (global.sharedObject.deviceInfo.locale !== localeId) {
-                global.sharedObject.deviceInfo.locale = localeId;
+                setPreference("localization.locale", globalThis.sharedObject.deviceInfo.locale);
+            } else if (globalThis.sharedObject.deviceInfo.locale !== localeId) {
+                globalThis.sharedObject.deviceInfo.locale = localeId;
                 checkMenuItem(localeId, true);
                 window.webContents.send("setLocale", localeId);
             }
@@ -697,7 +697,7 @@ export function getSettings(window) {
         if (settings.value("simulator.theme") === "system") {
             const userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
             window.webContents.send("setTheme", userTheme);
-            global.sharedObject.theme = userTheme;
+            globalThis.sharedObject.theme = userTheme;
         }
     });
     return settings;
@@ -754,7 +754,7 @@ export function showSettings() {
     if (isMacOS) {
         createShortMenu();
     } else {
-        const userTheme = global.sharedObject.theme;
+        const userTheme = globalThis.sharedObject.theme;
         if (isWindows) {
             settings.browserWindowOverrides.titleBarOverlay = getTitleOverlayTheme(userTheme);
         }
@@ -799,10 +799,10 @@ export function setPreference(key, value) {
 }
 
 export function setDeviceInfo(section, key, notifyApp) {
-    const oldValue = global.sharedObject.deviceInfo[key];
+    const oldValue = globalThis.sharedObject.deviceInfo[key];
     const newValue = settings.value(`${section}.${key}`);
     if (newValue && newValue !== oldValue) {
-        global.sharedObject.deviceInfo[key] = newValue;
+        globalThis.sharedObject.deviceInfo[key] = newValue;
         if (notifyApp) {
             const window = BrowserWindow.fromId(1);
             window?.webContents.send("setDeviceInfo", key, newValue);
@@ -812,7 +812,7 @@ export function setDeviceInfo(section, key, notifyApp) {
 
 export function saveCaptionStyle() {
     const window = BrowserWindow.fromId(1);
-    const captionStyle = global.sharedObject.deviceInfo.captionStyle;
+    const captionStyle = globalThis.sharedObject.deviceInfo.captionStyle;
     if (Array.isArray(captionStyle)) {
         // Map of caption preference keys to their corresponding style IDs
         const captionStyleMappings = [
@@ -863,8 +863,8 @@ export function setDisplayOption(option, mode, notifyApp) {
     } else {
         mode = current;
     }
-    if (option in global.sharedObject.deviceInfo) {
-        global.sharedObject.deviceInfo[option] = mode;
+    if (option in globalThis.sharedObject.deviceInfo) {
+        globalThis.sharedObject.deviceInfo[option] = mode;
     }
     if (mode !== current && (mode === "480p" || current === "480p")) {
         setAspectRatio();
@@ -889,7 +889,7 @@ export function setThemeSource(userTheme, notifyApp) {
     if (userTheme === "system") {
         userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
     }
-    global.sharedObject.theme = userTheme;
+    globalThis.sharedObject.theme = userTheme;
     if (notifyApp) {
         const window = BrowserWindow.fromId(1);
         window.webContents.send("setTheme", userTheme);
@@ -957,14 +957,14 @@ export function getPeerRoku() {
 export function setLocaleId(locale) {
     const window = BrowserWindow.fromId(1);
     setPreference("localization.locale", locale);
-    global.sharedObject.deviceInfo.locale = locale;
+    globalThis.sharedObject.deviceInfo.locale = locale;
     window.webContents.send("setLocale", locale);
 }
 
 export function setTimeZone(notifyApp) {
     let timeZone = settings.value("localization.timeZone");
     if (timeZone) {
-        const di = global.sharedObject.deviceInfo;
+        const di = globalThis.sharedObject.deviceInfo;
         const dt = DateTime.now().setZone(timeZone.replace("Other/", ""));
         if (dt.invalidReason) {
             console.warn(`Warning: ${dt.invalidReason} - ${dt.invalidExplanation}`);
@@ -997,13 +997,13 @@ ipcMain.on("setAudioMute", (event, mute) => {
 });
 
 ipcMain.on("setCaptionMode", (event, mode) => {
-    global.sharedObject.deviceInfo.captionMode = mode;
+    globalThis.sharedObject.deviceInfo.captionMode = mode;
     setPreference("captions.captionMode", mode);
 });
 
 ipcMain.on("deviceData", (_, deviceData) => {
     if (deviceData) {
-        const appDeviceInfo = global.sharedObject.deviceInfo;
+        const appDeviceInfo = globalThis.sharedObject.deviceInfo;
         Object.keys(deviceData).forEach((key) => {
             const ignoreKeys = ["audioCodecs", "fonts", "fontPath", "defaultFont"];
             if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
@@ -1018,11 +1018,11 @@ ipcMain.on("deviceData", (_, deviceData) => {
 });
 
 ipcMain.on("serialNumber", (_, serialNumber) => {
-    global.sharedObject.deviceInfo.serialNumber = serialNumber;
+    globalThis.sharedObject.deviceInfo.serialNumber = serialNumber;
 });
 
 export function getModelName(model) {
-    const modelName = global.sharedObject.deviceInfo.models.get(model);
+    const modelName = globalThis.sharedObject.deviceInfo.models.get(model);
     return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }
 
@@ -1101,7 +1101,7 @@ function saveServicesSettings(services, window) {
 }
 
 function saveDisplaySettings(window) {
-    const oldValue = global.sharedObject.deviceInfo.displayMode;
+    const oldValue = globalThis.sharedObject.deviceInfo.displayMode;
     const newValue = settings.value("display.displayMode");
     if (newValue && newValue !== oldValue) {
         setDisplayOption("displayMode", undefined, true);
@@ -1181,8 +1181,8 @@ export function getTitleOverlayTheme(userTheme) {
 
 function getRokuModelArray() {
     const modelArray = [];
-    if (global.sharedObject.deviceInfo?.models?.size) {
-        global.sharedObject.deviceInfo.models.forEach(function (value, key) {
+    if (globalThis.sharedObject.deviceInfo?.models?.size) {
+        globalThis.sharedObject.deviceInfo.models.forEach(function (value, key) {
             modelArray.push({ label: `${value[0]} - ${key}`, value: key });
         });
     }

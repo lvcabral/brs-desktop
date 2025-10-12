@@ -96,7 +96,7 @@ export function updateAppList() {
             icon: getAppIconPath(id),
         });
     });
-    global.sharedObject.deviceInfo.appList = appList;
+    globalThis.sharedObject.deviceInfo.appList = appList;
     const window = BrowserWindow.fromId(1);
     window?.webContents?.send("setDeviceInfo", "appList", appList);
 }
@@ -281,11 +281,11 @@ function rebuildMenu(template = false) {
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         if (isMacOS && window) {
             if (appMenu.getMenuItemById("view-menu")) {
-                let userTheme = global.sharedObject.theme;
+                let userTheme = globalThis.sharedObject.theme;
                 if (userTheme === "system") {
                     userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
                 }
-                const localeId = global.sharedObject.deviceInfo.locale;
+                const localeId = globalThis.sharedObject.deviceInfo.locale;
                 checkMenuItem(localeId, true);
                 checkMenuItem(`theme-${userTheme}`, true);
                 checkMenuItem("on-top", window.isAlwaysOnTop());

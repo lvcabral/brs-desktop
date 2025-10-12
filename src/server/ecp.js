@@ -32,7 +32,7 @@ ipcMain.on("currentApp", (_, data) => {
 
 export let isECPEnabled = false;
 export function initECP() {
-    device = global.sharedObject.deviceInfo;
+    device = globalThis.sharedObject.deviceInfo;
 }
 export function enableECP() {
     window = BrowserWindow.fromId(1);

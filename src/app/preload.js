@@ -17,7 +17,7 @@ let titleBar;
 let titleBarConfig;
 let titleColor;
 
-window.addEventListener("DOMContentLoaded", () => {
+globalThis.addEventListener("DOMContentLoaded", () => {
     // Detect Clipboard Copy to create Screenshot
     Mousetrap.bind(["command+c", "ctrl+c"], function () {
         getCurrentWebContents().send("copyScreenshot");

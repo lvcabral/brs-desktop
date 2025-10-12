@@ -34,7 +34,7 @@ export const fileMenuTemplate = {
             accelerator: "CmdOrCtrl+U",
             enabled: true,
             click: (_, window) => {
-                const userTheme = global.sharedObject.theme;
+                const userTheme = globalThis.sharedObject.theme;
                 prompt(
                     {
                         title: "Open from URL",

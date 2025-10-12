@@ -243,7 +243,7 @@ function updateStatus(data) {
             : "<i class='fa fa-cube'></i>";
         statusFile.innerText = shortenPath(
             data.path,
-            Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+            Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
         );
         filePath = data.path;
         if (data.version !== "") {
@@ -272,7 +272,7 @@ function redrawStatus(fullscreen) {
         if (filePath !== "") {
             statusFile.innerText = shortenPath(
                 filePath,
-                Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+                Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
             );
         }
     } else {
