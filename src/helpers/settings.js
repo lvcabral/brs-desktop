@@ -825,7 +825,7 @@ export function saveCaptionStyle() {
             { id: "background/opacity", preference: "backgroundOpacity" }
         ];
         // Update or add each caption style setting
-        captionStyleMappings.forEach(mapping => {
+        for (const mapping of captionStyleMappings) {
             const preferenceValue = settings.preferences.captions[mapping.preference];
             if (preferenceValue) {
                 const index = captionStyle.findIndex((style) => style.id === mapping.id);
@@ -835,7 +835,7 @@ export function saveCaptionStyle() {
                     captionStyle.push({ id: mapping.id, style: preferenceValue });
                 }
             }
-        });
+        }
         window.webContents.send("setCaptionStyle", captionStyle);
     }
 }
@@ -1004,7 +1004,7 @@ ipcMain.on("setCaptionMode", (event, mode) => {
 ipcMain.on("deviceData", (_, deviceData) => {
     if (deviceData) {
         const appDeviceInfo = globalThis.sharedObject.deviceInfo;
-        Object.keys(deviceData).forEach((key) => {
+        for (const key of Object.keys(deviceData)) {
             const ignoreKeys = ["audioCodecs", "fonts", "fontPath", "defaultFont"];
             if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
                 appDeviceInfo[key] = deviceData[key];
@@ -1013,7 +1013,7 @@ ipcMain.on("deviceData", (_, deviceData) => {
                         getRokuModelArray();
                 }
             }
-        });
+        }
     }
 });
 
@@ -1182,9 +1182,9 @@ export function getTitleOverlayTheme(userTheme) {
 function getRokuModelArray() {
     const modelArray = [];
     if (globalThis.sharedObject.deviceInfo?.models?.size) {
-        globalThis.sharedObject.deviceInfo.models.forEach(function (value, key) {
+        for (const [key, value] of globalThis.sharedObject.deviceInfo.models) {
             modelArray.push({ label: `${value[0]} - ${key}`, value: key });
-        });
+        }
     }
     return modelArray;
 }
@@ -1470,8 +1470,8 @@ function getTimezoneArray() {
         { label: "Other/UTC+13" },
         { label: "Other/UTC+14" },
     ];
-    tzArray.forEach(function (item) {
+    for (const item of tzArray) {
         timeZoneLabels.set(item.value || item.label, item.label);
-    });
+    }
     return tzArray;
 }

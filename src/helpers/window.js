@@ -87,11 +87,11 @@ export function createWindow(name, options) {
     });
     win.on("blur", () => {
         if (!isMacOS) {
-            BrowserWindow.getAllWindows().forEach((window) => {
+            for (const window of BrowserWindow.getAllWindows()) {
                 if (window.isMenuBarVisible()) {
                     window.setMenuBarVisibility(false);
                 }
-            });
+            }
         }
         appFocused = false;
     });
@@ -205,11 +205,11 @@ export function reloadDevice() {
     // Close all windows except the main window before reloading
     const allWindows = BrowserWindow.getAllWindows();
     const mainWindow = BrowserWindow.fromId(1);
-    allWindows.forEach((window) => {
+    for (const window of allWindows) {
         if (window.id !== 1 && !window.isDestroyed()) {
             window.close();
         }
-    });
+    }
     if (mainWindow) {
         mainWindow.webContents.reloadIgnoringCache();
     }

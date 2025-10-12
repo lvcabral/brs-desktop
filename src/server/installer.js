@@ -224,9 +224,9 @@ export function unsubscribeInstaller(observerId) {
     observers.delete(observerId);
 }
 function notifyAll(eventName, eventData) {
-    observers.forEach((callback, id) => {
+    for (const [id, callback] of observers) {
         callback(eventName, eventData);
-    });
+    }
 }
 
 // Helper Functions
@@ -245,9 +245,9 @@ function authenticateUser(res) {
 
 function parseAuthenticationInfo(authData) {
     let authenticationObj = {};
-    authData.split(", ").forEach(function (d) {
-        d = d.split("=");
-        authenticationObj[d[0]] = d[1].replace(/"/g, "");
-    });
+    for (const d of authData.split(", ")) {
+        const [key, value] = d.split("=");
+        authenticationObj[key] = value.replace(/"/g, "");
+    }
     return authenticationObj;
 }

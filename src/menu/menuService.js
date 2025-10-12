@@ -87,7 +87,7 @@ export function clearRecentFiles() {
 
 export function updateAppList() {
     const appList = [];
-    recentFiles.ids.forEach((id, index) => {
+    for (const [id, index] of recentFiles.ids.entries()) {
         appList.push({
             id: id,
             title: recentFiles.names[index],
@@ -95,7 +95,7 @@ export function updateAppList() {
             path: recentFiles.zip[index],
             icon: getAppIconPath(id),
         });
-    });
+    }
     globalThis.sharedObject.deviceInfo.appList = appList;
     const window = BrowserWindow.fromId(1);
     window?.webContents?.send("setDeviceInfo", "appList", appList);
@@ -228,9 +228,9 @@ function restoreRecentFiles() {
     recentFiles = recentFiles || recentFilesDefault;
     if (!recentFiles.ids) {
         Object.assign(recentFiles, { ids: new Array(recentFiles.zip.length) });
-        recentFiles.zip.forEach((value, index) => {
+        for (const [index, value] of recentFiles.zip.entries()) {
             recentFiles.ids[index] = value.hashCode();
-        });
+        }
     }
     if (!recentFiles.names) {
         const names = new Array(recentFiles.zip.length).fill("No Title");

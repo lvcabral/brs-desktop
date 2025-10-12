@@ -158,9 +158,9 @@ export function unsubscribeECP(observerId) {
     observers.delete(observerId);
 }
 function notifyAll(eventName, eventData) {
-    observers.forEach((callback, id) => {
+    for (const [id, callback] of observers) {
         callback(eventName, eventData);
-    });
+    }
 }
 
 // ECP-2 WebSocket API
@@ -441,9 +441,11 @@ function genAppsXml(encrypt) {
         // Dummy app as Roku Deep Linking Tester requires at least 2 apps
         xml.ele("app", { id: "home", type: "appl", version: "1.0.0" }, "Home");
     }
-    device.appList?.forEach((app) => {
-        xml.ele("app", { id: app.id, type: "appl", version: app.version }, app.title);
-    });
+    if (device?.appList.length) {
+        for (const app of device.appList) {
+            xml.ele("app", { id: app.id, type: "appl", version: app.version }, app.title);
+        }
+    }
     const strXml = xml.end({ pretty: true });
     return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
@@ -499,7 +501,7 @@ function genAppRegistry(plugin, encrypt) {
         let curSection = "";
         let scXml, itsXml, itXml;
         const registry = new Map([...device.registry].sort());
-        registry.forEach((value, key) => {
+        for (const [key, value] of registry) {
             const sections = key.split(".");
             if (sections.length > 2 && sections[0] === device.developerId) {
                 if (sections[1] !== curSection) {
@@ -516,7 +518,7 @@ function genAppRegistry(plugin, encrypt) {
                 itXml.ele("key", {}, key);
                 itXml.ele("value", {}, value);
             }
-        });
+        }
         xml.ele("status", {}, "OK");
     } else {
         xml.ele("status", {}, "FAILED");
@@ -532,23 +534,23 @@ function getMacAddress() {
     const os = require("node:os");
     const ifaces = os.networkInterfaces();
     let mac = "";
-    Object.keys(ifaces).forEach(function (ifname) {
+    for (const ifname of Object.keys(ifaces)) {
         if (
             mac !== "" ||
             ifname.toLowerCase().startsWith("vmware") ||
             ifname.toLowerCase().startsWith("virtualbox")
         ) {
-            return;
+            continue;
         }
-        ifaces[ifname].forEach(function (iface) {
+        for (const iface of ifaces[ifname]) {
             if ("IPv4" !== iface.family || iface.internal !== false) {
                 // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-                return;
+                continue;
             }
             mac = iface.mac;
-            return;
-        });
-    });
+            break;
+        }
+    }
     if (mac === "") {
         mac = "87:3e:aa:9f:77:70";
     }

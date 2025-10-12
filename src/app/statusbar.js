@@ -174,9 +174,9 @@ export function clearCounters() {
 function shortenPath(bigPath, maxLen) {
     let path = bigPath;
     if (path.length > maxLen) {
-        const splitter = bigPath.indexOf("/") > -1 ? "/" : "\\";
+        const splitter = bigPath.includes("/") ? "/" : "\\";
         const tokens = bigPath.split(splitter);
-        const drive = bigPath.indexOf(":") > -1 ? tokens[0] : "";
+        const drive = bigPath.includes(":") ? tokens[0] : "";
         const fileName = tokens[tokens.length - 1];
         const len = drive.length + fileName.length;
         const remLen = maxLen - len - 3; // remove the current length and also space for ellipsis char and 2 slashes

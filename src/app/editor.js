@@ -62,9 +62,9 @@ const terminal = new WebTerminal({
     autoFocus: false,
 });
 if (consoleBuffer?.length) {
-    consoleBuffer.forEach((value) => {
+    for (const value of consoleBuffer) {
         updateTerminal(value);
-    });
+    }
 }
 terminal.idle();
 
