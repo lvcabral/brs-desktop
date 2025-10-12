@@ -39,9 +39,9 @@ module.exports = env => {
           { context: "src/app/", from: "css/**", to: "../app" },
           { context: "src/app/", from: "web/**", to: "../app" },
           { context: "src/app/", from: "videos/**", to: "../app" },
-          { context: "node_modules/brs-engine/browser/lib", from: fileApi, to: "lib" },
-          { context: "node_modules/brs-engine/browser/lib", from: fileWrk, to: "lib" },
-          { context: "node_modules/brs-engine/browser/", from: "assets/**", to: "../app" },
+          { context: "node_modules/brs-engine/lib", from: fileApi, to: "lib" },
+          { context: "node_modules/brs-engine/lib", from: fileWrk, to: "lib" },
+          { context: "node_modules/brs-engine/", from: "assets/**", to: "../app" },
         ]
       })
     ],
