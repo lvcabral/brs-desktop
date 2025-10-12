@@ -1,5 +1,33 @@
 # Changelog
 
+<a name="v2.0.0"></a>
+
+## [v2.0.0 - SceneGraph Support](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.0) - 11 Oct 2025
+
+This version of the BrightScript Simulator can execute code compatible with language specifications up to Roku OS 15. It also includes experimental **SceneGraph** support which is currently in **alpha stage**.
+
+**Please be aware of the following:**
+
+* SceneGraph components may not render correctly
+* Some SceneGraph features are not yet implemented
+* Apps may crash or behave unexpectedly
+* Check all [current limitations](https://github.com/lvcabral/brs-engine/blob/scenegraph/docs/limitations.md) for more details
+
+## Release Changes
+
+* Add closed caption style settings and startup SceneGraph warning dialog [@lvcabral](https://github.com/lvcabral) in [#194](https://github.com/lvcabral/brs-desktop/pull/194)
+* Bump to v2.0.0 and upgraded Electron to v2.9 [@lvcabral](https://github.com/lvcabral) in [#194](https://github.com/lvcabral/brs-desktop/pull/194) - main changes since last release:
+* Return new ECP device info fields introduced in Roku OS 15 [@lvcabral](https://github.com/lvcabral) in [#193](https://github.com/lvcabral/brs-desktop/pull/193)
+* Added a message dialog to warn users that SceneGraph is in alpha stage [@lvcabral](https://github.com/lvcabral) in [#191](https://github.com/lvcabral/brs-desktop/pull/191)
+* Added BRS bouncing splash video [@lvcabral](https://github.com/lvcabral) in [#186](https://github.com/lvcabral/brs-desktop/pull/186)
+* Bump `brs-engine` to v2.0.0-alpha.11 and upgraded other dependencies [@lvcabral](https://github.com/lvcabral) in [#187](https://github.com/lvcabral/brs-desktop/pull/187)
+* Bump electron from 25.9.8 to 28.3.2 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#185](https://github.com/lvcabral/brs-desktop/pull/185)
+* Bump pbkdf2 from 3.1.2 to 3.1.3 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#184](https://github.com/lvcabral/brs-desktop/pull/184)
+* Bump @babel/runtime-corejs2 from 7.26.0 to 7.26.10 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#183](https://github.com/lvcabral/brs-desktop/pull/183)
+* Bump tmp from 0.2.3 to 0.2.4 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#188](https://github.com/lvcabral/brs-desktop/pull/188)
+
+[Full Changelog][v2.0.0]
+
 <a name="v1.4.0"></a>
 
 ## [v1.4.0 - Editor Improvements](https://github.com/lvcabral/brs-desktop/releases/tag/v1.4.0) - 03 Feb 2025
@@ -336,6 +364,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.0.0]: https://github.com/lvcabral/brs-desktop/compare/v1.4.0...v2.0.0
 [v1.4.0]: https://github.com/lvcabral/brs-desktop/compare/v1.3.2...v1.4.0
 [v1.3.2]: https://github.com/lvcabral/brs-desktop/compare/v1.3.0...v1.3.2
 [v1.3.0]: https://github.com/lvcabral/brs-desktop/compare/v1.2.0...v1.3.0
