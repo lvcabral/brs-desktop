@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
 import { getSimulatorOption, getTitleOverlayTheme } from "./settings";
-import path from "path";
+import path from "node:path";
 import jetpack from "fs-jetpack";
 
 const userDataDir = jetpack.cwd(app.getPath("userData"));
@@ -58,7 +58,7 @@ export function createWindow(name, options) {
             const stateStoreFile = "window-state-editor.json";
             const defaultSize = { width: 1440, height: 800 };
             const state = restoreWindowState(stateStoreFile, defaultSize);
-            const userTheme = global.sharedObject.theme;
+            const userTheme = globalThis.sharedObject.theme;
             return {
                 action: "allow",
                 overrideBrowserWindowOptions: Object.assign(state, {
@@ -87,11 +87,11 @@ export function createWindow(name, options) {
     });
     win.on("blur", () => {
         if (!isMacOS) {
-            BrowserWindow.getAllWindows().forEach((window) => {
+            for (const window of BrowserWindow.getAllWindows()) {
                 if (window.isMenuBarVisible()) {
                     window.setMenuBarVisibility(false);
                 }
-            });
+            }
         }
         appFocused = false;
     });
@@ -109,7 +109,7 @@ export function createWindow(name, options) {
     });
     ipcMain.on("setBackgroundColor", (_, color) => {
         win.setBackgroundColor(color);
-        global.sharedObject.backgroundColor = color;
+        globalThis.sharedObject.backgroundColor = color;
     });
     ipcMain.on("isFullScreen", (event) => {
         event.returnValue = win.isFullScreen();
@@ -119,7 +119,7 @@ export function createWindow(name, options) {
     });
     ipcMain.on("updateRegistry", (_, data) => {
         if (data instanceof Map) {
-            global.sharedObject.deviceInfo.registry = data;
+            globalThis.sharedObject.deviceInfo.registry = data;
         }
     });
     ipcMain.on("showEditor", () => {
@@ -157,7 +157,7 @@ export function openDevTools(window) {
 }
 
 export function setAspectRatio(changed = true) {
-    const displayMode = global.sharedObject.deviceInfo.displayMode || "720p";
+    const displayMode = globalThis.sharedObject.deviceInfo.displayMode || "720p";
     const ASPECT_RATIO_SD = 4 / 3;
     const ASPECT_RATIO_HD = 16 / 9;
     const window = BrowserWindow.fromId(1);
@@ -202,9 +202,16 @@ export function closeChannel() {
 }
 
 export function reloadDevice() {
-    const window = BrowserWindow.fromId(1);
-    if (window) {
-        window.webContents.reloadIgnoringCache();
+    // Close all windows except the main window before reloading
+    const allWindows = BrowserWindow.getAllWindows();
+    const mainWindow = BrowserWindow.fromId(1);
+    for (const window of allWindows) {
+        if (window.id !== 1 && !window.isDestroyed()) {
+            window.close();
+        }
+    }
+    if (mainWindow) {
+        mainWindow.webContents.reloadIgnoringCache();
     }
 }
 
@@ -232,7 +239,7 @@ function getWindowState(win) {
         y: bounds.y,
         width: bounds.width,
         height: bounds.height,
-        backgroundColor: global.sharedObject.backgroundColor,
+        backgroundColor: globalThis.sharedObject.backgroundColor,
     };
 }
 

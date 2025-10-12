@@ -86,7 +86,7 @@ export async function runOnPeerRoku(fileData) {
                         isError = true;
                     } else {
                         message = `App installed on peer Roku at ${device.ip} with success!`;
-                        if (response.body.indexOf("Identical to previous version") > -1) {
+                        if (response.body.includes("Identical to previous version")) {
                             message = `Identical to previous version, starting "dev" app...`;
                             postEcpRequest(device, "/launch/dev");
                         }

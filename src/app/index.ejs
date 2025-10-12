@@ -5,7 +5,7 @@
         <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' data: blob: 'self';"> -->
         <title><%= appName %></title>
         <script>
-            window.__setTheme = () => {
+            globalThis.__setTheme = () => {
                 document.documentElement.setAttribute("data-theme", api.getTheme() || "purple");
             };
             __setTheme();
@@ -72,6 +72,39 @@
                     <span style="float: right"><i class="fa fa-upload"></i></span> </span
             ></a>
         </div>
+
+        <!-- SceneGraph Alpha Warning Dialog -->
+        <div id="scenegraph-warning-dialog" class="modal-overlay" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <h3><i class="fa fa-exclamation-triangle" style="color: #f39c12; margin-right: 8px;"></i>BrightScript and SceneGraph Support</h3>
+                </div>
+                <div class="modal-content">
+                    <p>This version of the Simulator can execute BrightScript language code compatible with Roku OS 15. It also includes experimental SceneGraph support which is currently in <strong>alpha stage</strong>.</p>
+                    <p><strong>Please be aware of the following limitations:</strong></p>
+                    <ul>
+                        <li>SceneGraph components may not render correctly</li>
+                        <li>Some SceneGraph features are not yet implemented</li>
+                        <li>Apps may crash or behave unexpectedly</li>
+                        <li>Check all <a href="https://github.com/lvcabral/brs-engine/blob/scenegraph/docs/limitations.md" target="_blank">current limitations</a> for more details</li>
+                    </ul>
+                    <p>🛠️ This simulator is intended for development purposes only. Always test your apps on actual Roku devices before release.</p>
+                    <p>🤝 If you found issues or have suggestions, remember that this is an open source project, feel free to contribute!</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-checkbox">
+                        <label>
+                            <input type="checkbox" id="dont-show-warning-again">
+                            Don't show this warning again
+                        </label>
+                    </div>
+                    <div class="modal-buttons">
+                        <button id="close-scenegraph-warning" class="modal-button">I Understand</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script src="./lib/<%= brsApi %>"></script>
         <script src="../node_modules/toastify-js/src/toastify.js"></script>
     </body>

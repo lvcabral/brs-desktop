@@ -7,10 +7,10 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow } from "electron";
 import Busboy from "busboy";
-import fs from "fs";
-import path from "path";
-import http from "http";
-import crypt from "crypto";
+import fs from "node:fs";
+import path from "node:path";
+import http from "node:http";
+import crypt from "node:crypto";
 
 const credentials = {
     userName: "rokudev",
@@ -29,8 +29,8 @@ export function setPassword(password) {
 export function setPort(customPort) {
     if (typeof customPort === "number") {
         port = customPort;
-    } else if (typeof customPort === "string" && !isNaN(parseInt(customPort))) {
-        port = parseInt(customPort);
+    } else if (typeof customPort === "string" && !Number.isNaN(Number.parseInt(customPort))) {
+        port = Number.parseInt(customPort);
     }
 }
 export function enableInstaller() {
@@ -224,9 +224,9 @@ export function unsubscribeInstaller(observerId) {
     observers.delete(observerId);
 }
 function notifyAll(eventName, eventData) {
-    observers.forEach((callback, id) => {
+    for (const [id, callback] of observers) {
         callback(eventName, eventData);
-    });
+    }
 }
 
 // Helper Functions
@@ -245,9 +245,9 @@ function authenticateUser(res) {
 
 function parseAuthenticationInfo(authData) {
     let authenticationObj = {};
-    authData.split(", ").forEach(function (d) {
-        d = d.split("=");
-        authenticationObj[d[0]] = d[1].replace(/"/g, "");
-    });
+    for (const d of authData.split(", ")) {
+        const [key, value] = d.split("=");
+        authenticationObj[key] = value.replace(/"/g, "");
+    }
     return authenticationObj;
 }

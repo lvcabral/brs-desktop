@@ -28,12 +28,18 @@ let backColor = colorValues.getPropertyValue("--background-color").trim();
 api.setBackgroundColor(backColor);
 api.createNewTitleBar(titleColor, titleBgColor, itemBgColor);
 const customDeviceInfo = api.getDeviceInfo();
-// On device reset, prevent sending back registry and models
+// On device reset, prevent sending back items not customizable
 if ("registry" in customDeviceInfo) {
     delete customDeviceInfo.registry;
 }
+if ("registryBuffer" in customDeviceInfo) {
+    delete customDeviceInfo.registryBuffer;
+}
 if ("models" in customDeviceInfo) {
     delete customDeviceInfo.models;
+}
+if ("assets" in customDeviceInfo) {
+    delete customDeviceInfo.assets;
 }
 // Initialize device and subscribe to events
 let currentApp = { id: "", running: false };
@@ -58,7 +64,24 @@ brs.initialize(customDeviceInfo, {
     showStats: false,
     customKeys: customKeys,
 });
-api.send("deviceData", brs.deviceData);
+
+// Send deviceData via IPC
+const clonedDeviceData = { ...brs.deviceData };
+delete clonedDeviceData.assets; // Remove assets to avoid issues with structured cloning
+delete clonedDeviceData.registryBuffer; // Remove registryBuffer to avoid issues with structured cloning
+
+try {
+    api.send("deviceData", clonedDeviceData);
+} catch (error) {
+    console.warn(
+        "Sending deviceData object via IPC failed, using JSON serialization workaround:",
+        error.message
+    );
+    // Use JSON serialization as a fallback in case of structured cloning issues
+    const jsonSerializedData = JSON.parse(JSON.stringify(clonedDeviceData));
+    api.send("deviceData", jsonSerializedData);
+}
+
 api.send("serialNumber", brs.getSerialNumber());
 api.send("engineVersion", brs.getVersion());
 
@@ -79,7 +102,7 @@ brs.subscribe("desktop", (event, data) => {
         }
     } else if (event === "browser") {
         if (data?.url) {
-            const newWindow = window.open(
+            const newWindow = globalThis.open(
                 data.url,
                 "_blank",
                 `width=${data.width},height=${data.height},popup`
@@ -102,6 +125,9 @@ brs.subscribe("desktop", (event, data) => {
         redrawEvent(data);
     } else if (event === "control") {
         api.send("keySent", data);
+    } else if (event === "captionMode") {
+        api.send("setCaptionMode", data);
+        showToast(`Caption mode changed to: ${data}`);
     } else if (event === "debug") {
         if (data.level === "stop") {
             api.send("debugStarted");
@@ -120,15 +146,15 @@ brs.subscribe("desktop", (event, data) => {
         api.send("reset");
     }
 });
+
 // Events from Main process
 api.receive("openEditor", function () {
     if (editor === null || editor.closed) {
-        editor = window.open("editor.html", "BrightScript Editor", "width=1440,height=800");
+        editor = globalThis.open("editor.html", "BrightScript Editor", "width=1440,height=800");
     } else {
         api.send("showEditor");
     }
 });
-
 api.receive("setTheme", function (theme) {
     if (theme !== document.documentElement.getAttribute("data-theme")) {
         document.documentElement.setAttribute("data-theme", theme);
@@ -149,7 +175,16 @@ api.receive("setDeviceInfo", function (key, value) {
         }
     }
 });
+api.receive("setCaptionStyle", function (newStyles) {
+    brs.setCaptionStyle(newStyles);
+});
 api.receive("executeFile", function (filePath, data, clear, mute, debug, input) {
+    // Close the SceneGraph warning dialog if it's still open
+    const dialog = document.getElementById("scenegraph-warning-dialog");
+    if (dialog && dialog.style.display === "flex") {
+        dialog.style.display = "none";
+    }
+
     try {
         const fileExt = filePath.split(".").pop()?.toLowerCase();
         let password = "";
@@ -242,7 +277,7 @@ api.receive("setAudioMute", function (mute) {
 });
 
 // Splash video handling
-function initSplashVideo() {
+function startSplashVideo() {
     const player = document.getElementById("player");
     if (!player) {
         return;
@@ -252,10 +287,10 @@ function initSplashVideo() {
     const originalAutoplay = player.autoplay;
     const originalMuted = player.muted;
 
-    // Configure player for splash video
+    // Configure and start splash video
     player.src = "./videos/brs-bouncing.mp4";
     player.controls = false;
-    player.autoplay = true;
+    player.autoplay = false;
     player.muted = true;
 
     // Function to restore player state
@@ -269,36 +304,38 @@ function initSplashVideo() {
 
         // Restore original state
         player.pause();
-        player.removeAttribute("src"); // empty source
-        player.load(); // reset everything, silent without errors!
+        player.removeAttribute("src");
+        player.load();
         player.style.display = "none";
         player.controls = originalControls;
         player.autoplay = originalAutoplay;
         player.muted = originalMuted;
     };
 
-    // Hide video when it ends or and error occurs
+    // Add event listeners
     player.addEventListener("ended", restorePlayer, { once: true });
     player.addEventListener("error", restorePlayer, { once: true });
 
-    // Start playing the video
-    player.play();
+    // Start playing
+    player.play().catch(error => {
+        console.warn("Could not play splash video:", error);
+    });
 }
 
-// Initialize splash video when DOM is loaded
+// Initialize the app when DOM is loaded
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initSplashVideo);
+    document.addEventListener("DOMContentLoaded", initSceneGraphWarningDialog);
 } else {
-    initSplashVideo();
+    initSceneGraphWarningDialog();
 }
 
 // Window Resize Event
-window.onload = window.onresize = function () {
+globalThis.onload = globalThis.onresize = function () {
     brs.redraw(api.isFullScreen());
 };
 
 // Window Focus Events
-window.addEventListener(
+globalThis.addEventListener(
     "focus",
     function () {
         if (currentApp.running && debugMode === "pause") {
@@ -313,7 +350,7 @@ window.addEventListener(
     false
 );
 
-window.addEventListener(
+globalThis.addEventListener(
     "blur",
     function () {
         if (currentApp.running && debugMode === "continue") {
@@ -399,12 +436,56 @@ function redrawEvent(redraw) {
     }
 }
 
+// SceneGraph Warning Dialog
+function initSceneGraphWarningDialog() {
+    const dontShowWarning = localStorage.getItem('sceneGraphWarningDismissed') === 'true';
+    if (dontShowWarning) {
+        setTimeout(() => startSplashVideo(), 500);
+        return;
+    }
+    // Get dialog elements
+    const dialog = document.getElementById("scenegraph-warning-dialog");
+    const closeButton = document.getElementById("close-scenegraph-warning");
+    const dontShowAgainCheckbox = document.getElementById("dont-show-warning-again");
+    if (!dialog || !closeButton || !dontShowAgainCheckbox) {
+        setTimeout(() => startSplashVideo(), 500);
+        return;
+    }
+    // Show the dialog after a short delay to ensure UI is ready
+    setTimeout(() => {
+        dialog.style.display = "flex";
+    }, 500);
+    // Function to handle dialog dismissal
+    const handleDialogClose = () => {
+        if (dontShowAgainCheckbox.checked) {
+            localStorage.setItem('sceneGraphWarningDismissed', 'true');
+        }
+        dialog.style.display = "none";
+        setTimeout(() => startSplashVideo(), 300);
+    };
+    closeButton.addEventListener("click", handleDialogClose);
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && dialog.style.display === "flex") {
+            handleDialogClose();
+        }
+    });
+    // Prevent dialog from closing when clicking inside the modal content
+    const modalDialog = dialog.querySelector(".modal-dialog");
+    if (modalDialog) {
+        modalDialog.addEventListener("click", (event) => {
+            event.stopPropagation();
+        });
+    }
+    // Close dialog when clicking on overlay
+    dialog.addEventListener("click", handleDialogClose);
+}
+
 // Exposed API to Child Windows
-window.getEngineContext = () => {
+globalThis.getEngineContext = () => {
     return [brs, currentApp, api.getConsoleBuffer(), debugMode];
 };
 
-window.clearStatusCounters = () => {
+globalThis.clearStatusCounters = () => {
     clearCounters();
     setStatusColor();
 };

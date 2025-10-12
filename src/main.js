@@ -5,9 +5,9 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import path from "path";
-import url from "url";
-import dns from "dns";
+import path from "node:path";
+import url from "node:url";
+import dns from "node:dns";
 import minimist from "minimist";
 import jetpack from "fs-jetpack";
 import { app, screen, BrowserWindow } from "electron";
@@ -15,6 +15,7 @@ import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
+import { randomUUID } from "node:crypto";
 import {
     createMenu,
     enableMenuItem,
@@ -32,6 +33,7 @@ import {
     setRemoteKeys,
     setThemeSource,
     setTimeZone,
+    saveCaptionStyle,
     updateECPStatus,
     updateInstallerStatus,
     updateTelnetStatus,
@@ -45,7 +47,6 @@ import {
 } from "./helpers/window";
 import { getGateway, getLocalIps } from "./helpers/util";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
-import { randomUUID } from "crypto";
 
 const isMacOS = process.platform === "darwin";
 
@@ -68,6 +69,9 @@ const deviceInfo = {
     locale: "en_US",
     clockFormat: "12h",
     displayMode: "720p", // Options are: 480p (SD), 720p (HD), 1080p (FHD)
+    captionMode: "Off",
+    captionStyle: [],
+    captionLanguage: "en",
     connectionInfo: {
         type: "WiredConnection",
         name: localIps[0].split(",")[0],
@@ -78,7 +82,8 @@ const deviceInfo = {
     localIps: localIps,
     startTime: Date.now(),
     maxSimulStreams: 2,
-    audioVolume: 40,
+    audioVolume: 50,
+    audioLanguage: "en",
     appList: [],
 };
 
@@ -115,7 +120,7 @@ app.on("ready", () => {
     setupTitlebar();
     createMenu();
     // Shared Object with Front End
-    global.sharedObject = {
+    globalThis.sharedObject = {
         theme: "purple",
         backgroundColor: "#251135",
         deviceInfo: deviceInfo,
@@ -125,7 +130,7 @@ app.on("ready", () => {
     let mainWindow = createWindow("main", {
         width: 1280,
         height: 770,
-        backgroundColor: global.sharedObject.backgroundColor,
+        backgroundColor: globalThis.sharedObject.backgroundColor,
     });
     // Configure Window and load content
     const winBounds = mainWindow.getBounds();
@@ -221,6 +226,7 @@ function loadSettings(mainWindow, startup) {
     if (settings.preferences.audio) {
         setDeviceInfo("audio", "maxSimulStreams");
         setDeviceInfo("audio", "audioVolume");
+        setDeviceInfo("audio", "audioLanguage");
     }
     if (settings.preferences.localization) {
         const localeId = settings.value("localization.locale");
@@ -231,6 +237,11 @@ function loadSettings(mainWindow, startup) {
         setDeviceInfo("localization", "clockFormat");
         setDeviceInfo("localization", "countryCode");
         setTimeZone();
+    }
+    if (settings.preferences.captions) {
+        setDeviceInfo("captions", "captionMode");
+        setDeviceInfo("captions", "captionLanguage");
+        saveCaptionStyle();
     }
     if (settings.preferences.peerRoku) {
         checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
@@ -257,7 +268,7 @@ function processArgv(mainWindow, startup) {
     }
     if (argv?.web) {
         setPort(argv.web);
-        settings.value("services.webPort", parseInt(argv.web));
+        settings.value("services.webPort", Number.parseInt(argv.web));
         enableInstaller(mainWindow);
     } else if (startup.installerEnabled) {
         enableInstaller(mainWindow);

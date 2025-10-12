@@ -21,8 +21,8 @@ import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile, loadUrl, editorCodeFile } from "../helpers/files";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
 
@@ -87,7 +87,7 @@ export function clearRecentFiles() {
 
 export function updateAppList() {
     const appList = [];
-    recentFiles.ids.forEach((id, index) => {
+    for (const [id, index] of recentFiles.ids.entries()) {
         appList.push({
             id: id,
             title: recentFiles.names[index],
@@ -95,8 +95,8 @@ export function updateAppList() {
             path: recentFiles.zip[index],
             icon: getAppIconPath(id),
         });
-    });
-    global.sharedObject.deviceInfo.appList = appList;
+    }
+    globalThis.sharedObject.deviceInfo.appList = appList;
     const window = BrowserWindow.fromId(1);
     window?.webContents?.send("setDeviceInfo", "appList", appList);
 }
@@ -228,9 +228,9 @@ function restoreRecentFiles() {
     recentFiles = recentFiles || recentFilesDefault;
     if (!recentFiles.ids) {
         Object.assign(recentFiles, { ids: new Array(recentFiles.zip.length) });
-        recentFiles.zip.forEach((value, index) => {
+        for (const [index, value] of recentFiles.zip.entries()) {
             recentFiles.ids[index] = value.hashCode();
-        });
+        }
     }
     if (!recentFiles.names) {
         const names = new Array(recentFiles.zip.length).fill("No Title");
@@ -281,11 +281,11 @@ function rebuildMenu(template = false) {
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         if (isMacOS && window) {
             if (appMenu.getMenuItemById("view-menu")) {
-                let userTheme = global.sharedObject.theme;
+                let userTheme = globalThis.sharedObject.theme;
                 if (userTheme === "system") {
                     userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
                 }
-                const localeId = global.sharedObject.deviceInfo.locale;
+                const localeId = globalThis.sharedObject.deviceInfo.locale;
                 checkMenuItem(localeId, true);
                 checkMenuItem(`theme-${userTheme}`, true);
                 checkMenuItem("on-top", window.isAlwaysOnTop());

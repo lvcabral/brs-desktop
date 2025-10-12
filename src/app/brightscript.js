@@ -396,10 +396,10 @@ export function defineMode(CodeMirror) {
                         (style.substr(0, 8) === "variable" ||
                             style === "builtin" ||
                             style === "keyword")) ||
-                    knownElements.indexOf(current.substring(1)) > -1
+                    knownElements.includes(current.substring(1))
                 ) {
                     if (style === "builtin" || style === "keyword") style = "variable";
-                    if (knownElements.indexOf(current.substr(1)) > -1) style = "variable-2";
+                    if (knownElements.includes(current.substr(1))) style = "variable-2";
 
                     return style;
                 } else {

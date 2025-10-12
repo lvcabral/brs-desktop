@@ -7,8 +7,8 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, nativeTheme, ipcMain } from "electron";
 import { DateTime } from "luxon";
-import path from "path";
-import ElectronPreferences from "electron-preferences";
+import path from "node:path";
+import ElectronPreferences from "@lvcabral/electron-preferences";
 import { setAspectRatio } from "./window";
 import { enableECP, disableECP, subscribeECP, ECP_PORT } from "../server/ecp";
 import { enableTelnet, disableTelnet, subscribeTelnet, TELNET_PORT } from "../server/telnet";
@@ -57,10 +57,10 @@ export function getSettings(window) {
                 telnet: ["enabled"],
             },
             device: {
-                deviceModel: global.sharedObject.deviceInfo.deviceModel,
-                clientId: global.sharedObject.deviceInfo.clientId,
-                RIDA: global.sharedObject.deviceInfo.RIDA,
-                developerId: global.sharedObject.deviceInfo.developerId,
+                deviceModel: globalThis.sharedObject.deviceInfo.deviceModel,
+                clientId: globalThis.sharedObject.deviceInfo.clientId,
+                RIDA: globalThis.sharedObject.deviceInfo.RIDA,
+                developerId: globalThis.sharedObject.deviceInfo.developerId,
                 developerPwd: "",
             },
             display: {
@@ -76,15 +76,27 @@ export function getSettings(window) {
                 keyPlayPause: "End",
             },
             audio: {
-                maxSimulStreams: global.sharedObject.deviceInfo.maxSimulStreams,
-                audioVolume: global.sharedObject.deviceInfo.audioVolume,
+                maxSimulStreams: globalThis.sharedObject.deviceInfo.maxSimulStreams,
+                audioVolume: globalThis.sharedObject.deviceInfo.audioVolume,
                 muted: [false],
+                audioLanguage: globalThis.sharedObject.deviceInfo.audioLanguage,
             },
             localization: {
-                locale: global.sharedObject.deviceInfo.locale,
-                countryCode: global.sharedObject.deviceInfo.countryCode,
-                clockFormat: global.sharedObject.deviceInfo.clockFormat,
+                locale: globalThis.sharedObject.deviceInfo.locale,
+                countryCode: globalThis.sharedObject.deviceInfo.countryCode,
+                clockFormat: globalThis.sharedObject.deviceInfo.clockFormat,
                 timeZone: "system",
+            },
+            captions: {
+                captionMode: globalThis.sharedObject.deviceInfo.captionMode,
+                textFont: "default",
+                textEffect: "default",
+                textSize: "default",
+                textColor: "default",
+                textOpacity: "default",
+                backgroundColor: "default",
+                backgroundOpacity: "default",
+                captionLanguage: globalThis.sharedObject.deviceInfo.captionLanguage,
             },
             peerRoku: {
                 password: "rokudev",
@@ -349,6 +361,7 @@ export function getSettings(window) {
                 form: {
                     groups: [
                         {
+                            label: "Display Settings",
                             fields: [
                                 {
                                     label: "Display Mode",
@@ -429,7 +442,7 @@ export function getSettings(window) {
                                     key: "maxSimulStreams",
                                     type: "slider",
                                     min: 1,
-                                    max: 3,
+                                    max: 2,
                                     help: "Maximum number of audio streams that can be mixed together and played simultaneously",
                                 },
                                 {
@@ -450,6 +463,13 @@ export function getSettings(window) {
                                         },
                                     ],
                                 },
+                                {
+                                    label: "Audio Preferred Language",
+                                    key: "audioLanguage",
+                                    type: "dropdown",
+                                    options: getTracksLanguageArray(),
+                                    help: "Sets the preferred language for audio tracks in video playback",
+                                },
                             ],
                         },
                     ],
@@ -462,13 +482,14 @@ export function getSettings(window) {
                 form: {
                     groups: [
                         {
+                            label: "Localization Settings",
                             fields: [
                                 {
-                                    label: "Channels UI Locale",
+                                    label: "Language",
                                     key: "locale",
-                                    type: "radio",
+                                    type: "dropdown",
                                     options: getLocaleIdArray(),
-                                    help: "Configure the localization, this setting only affects apps not the simulator UI",
+                                    help: "Configure the current locale, this setting only affects BrightScript apps not the simulator UI",
                                 },
                                 {
                                     label: "Clock Format",
@@ -486,17 +507,102 @@ export function getSettings(window) {
                                     ],
                                 },
                                 {
-                                    label: "Channel Store Country",
+                                    label: "Device Country",
                                     key: "countryCode",
                                     type: "dropdown",
                                     options: getCountryArray(),
-                                    help: "Configure the country store associated with the device returned by ifDeviceInfo.GetCountryCode()",
+                                    help: "Configure the device country (app store), this is returned by ifDeviceInfo.GetCountryCode()",
                                 },
                                 {
                                     label: "Time Zone",
                                     key: "timeZone",
                                     type: "dropdown",
-                                    options: getTimezonArray(),
+                                    options: getTimezoneArray(),
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+            {
+                id: "captions",
+                label: "Captioning",
+                icon: "closed-caption",
+                form: {
+                    groups: [
+                        {
+                            fields: [
+                                {
+                                    label: "Captions Mode",
+                                    key: "captionMode",
+                                    type: "dropdown",
+                                    options: [
+                                        {
+                                            value: "Off",
+                                            label: "Off",
+                                        },
+                                        {
+                                            value: "On",
+                                            label: "On Always",
+                                        },
+                                        {
+                                            value: "Instant replay",
+                                            label: "On Replay",
+                                        },
+                                        {
+                                            value: "When mute",
+                                            label: "On Mute",
+                                        },
+                                    ],
+                                },
+                                {
+                                    label: "Text Style",
+                                    key: "textFont",
+                                    type: "dropdown",
+                                    options: getTextFontArray(),
+                                },
+                                {
+                                    label: "Text Edge Effect",
+                                    key: "textEffect",
+                                    type: "dropdown",
+                                    options: getTextEffectArray(),
+                                },
+                                {
+                                    label: "Text Size",
+                                    key: "textSize",
+                                    type: "dropdown",
+                                    options: getTextSizeArray(),
+                                },
+                                {
+                                    label: "Text Color",
+                                    key: "textColor",
+                                    type: "dropdown",
+                                    options: getCaptionColorArray(),
+                                },
+                                {
+                                    label: "Text Opacity",
+                                    key: "textOpacity",
+                                    type: "dropdown",
+                                    options: getTextOpacityArray(),
+                                },
+                                {
+                                    label: "Background Color",
+                                    key: "backgroundColor",
+                                    type: "dropdown",
+                                    options: getCaptionColorArray(),
+                                },
+                                {
+                                    label: "Background Opacity",
+                                    key: "backgroundOpacity",
+                                    type: "dropdown",
+                                    options: getBackgroundOpacityArray(),
+                                },
+                                {
+                                    label: "Preferred Language",
+                                    key: "captionLanguage",
+                                    type: "dropdown",
+                                    options: getTracksLanguageArray(),
+                                    help: "Sets the preferred language for closed caption tracks in video playback",
                                 },
                             ],
                         },
@@ -565,12 +671,15 @@ export function getSettings(window) {
         if (preferences.audio) {
             setDeviceInfo("audio", "maxSimulStreams", true);
             setDeviceInfo("audio", "audioVolume", true);
+            setDeviceInfo("audio", "audioLanguage", true);
             window.webContents.send("setAudioMute", preferences.audio.muted[0]);
         }
         if (preferences.localization) {
             const localeId = preferences.localization.locale;
-            if (global.sharedObject.deviceInfo.locale !== localeId) {
-                global.sharedObject.deviceInfo.locale = localeId;
+            if (localeId === "") {
+                setPreference("localization.locale", globalThis.sharedObject.deviceInfo.locale);
+            } else if (globalThis.sharedObject.deviceInfo.locale !== localeId) {
+                globalThis.sharedObject.deviceInfo.locale = localeId;
                 checkMenuItem(localeId, true);
                 window.webContents.send("setLocale", localeId);
             }
@@ -578,12 +687,17 @@ export function getSettings(window) {
             setDeviceInfo("localization", "countryCode", true);
             setTimeZone(true);
         }
+        if (preferences.captions) {
+            setDeviceInfo("captions", "captionMode", true);
+            setDeviceInfo("captions", "captionLanguage", true);
+            saveCaptionStyle();
+        }
     });
     nativeTheme.on("updated", () => {
         if (settings.value("simulator.theme") === "system") {
             const userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
             window.webContents.send("setTheme", userTheme);
-            global.sharedObject.theme = userTheme;
+            globalThis.sharedObject.theme = userTheme;
         }
     });
     return settings;
@@ -640,7 +754,7 @@ export function showSettings() {
     if (isMacOS) {
         createShortMenu();
     } else {
-        const userTheme = global.sharedObject.theme;
+        const userTheme = globalThis.sharedObject.theme;
         if (isWindows) {
             settings.browserWindowOverrides.titleBarOverlay = getTitleOverlayTheme(userTheme);
         }
@@ -685,14 +799,44 @@ export function setPreference(key, value) {
 }
 
 export function setDeviceInfo(section, key, notifyApp) {
-    const oldValue = global.sharedObject.deviceInfo[key];
+    const oldValue = globalThis.sharedObject.deviceInfo[key];
     const newValue = settings.value(`${section}.${key}`);
     if (newValue && newValue !== oldValue) {
-        global.sharedObject.deviceInfo[key] = newValue;
+        globalThis.sharedObject.deviceInfo[key] = newValue;
         if (notifyApp) {
             const window = BrowserWindow.fromId(1);
             window?.webContents.send("setDeviceInfo", key, newValue);
         }
+    }
+}
+
+export function saveCaptionStyle() {
+    const window = BrowserWindow.fromId(1);
+    const captionStyle = globalThis.sharedObject.deviceInfo.captionStyle;
+    if (Array.isArray(captionStyle)) {
+        // Map of caption preference keys to their corresponding style IDs
+        const captionStyleMappings = [
+            { id: "text/font", preference: "textFont" },
+            { id: "text/effect", preference: "textEffect" },
+            { id: "text/size", preference: "textSize" },
+            { id: "text/color", preference: "textColor" },
+            { id: "text/opacity", preference: "textOpacity" },
+            { id: "background/color", preference: "backgroundColor" },
+            { id: "background/opacity", preference: "backgroundOpacity" }
+        ];
+        // Update or add each caption style setting
+        for (const mapping of captionStyleMappings) {
+            const preferenceValue = settings.preferences.captions[mapping.preference];
+            if (preferenceValue) {
+                const index = captionStyle.findIndex((style) => style.id === mapping.id);
+                if (index !== -1) {
+                    captionStyle[index].style = preferenceValue;
+                } else {
+                    captionStyle.push({ id: mapping.id, style: preferenceValue });
+                }
+            }
+        }
+        window.webContents.send("setCaptionStyle", captionStyle);
     }
 }
 
@@ -719,8 +863,8 @@ export function setDisplayOption(option, mode, notifyApp) {
     } else {
         mode = current;
     }
-    if (option in global.sharedObject.deviceInfo) {
-        global.sharedObject.deviceInfo[option] = mode;
+    if (option in globalThis.sharedObject.deviceInfo) {
+        globalThis.sharedObject.deviceInfo[option] = mode;
     }
     if (mode !== current && (mode === "480p" || current === "480p")) {
         setAspectRatio();
@@ -745,7 +889,7 @@ export function setThemeSource(userTheme, notifyApp) {
     if (userTheme === "system") {
         userTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
     }
-    global.sharedObject.theme = userTheme;
+    globalThis.sharedObject.theme = userTheme;
     if (notifyApp) {
         const window = BrowserWindow.fromId(1);
         window.webContents.send("setTheme", userTheme);
@@ -813,14 +957,14 @@ export function getPeerRoku() {
 export function setLocaleId(locale) {
     const window = BrowserWindow.fromId(1);
     setPreference("localization.locale", locale);
-    global.sharedObject.deviceInfo.locale = locale;
+    globalThis.sharedObject.deviceInfo.locale = locale;
     window.webContents.send("setLocale", locale);
 }
 
 export function setTimeZone(notifyApp) {
     let timeZone = settings.value("localization.timeZone");
     if (timeZone) {
-        const di = global.sharedObject.deviceInfo;
+        const di = globalThis.sharedObject.deviceInfo;
         const dt = DateTime.now().setZone(timeZone.replace("Other/", ""));
         if (dt.invalidReason) {
             console.warn(`Warning: ${dt.invalidReason} - ${dt.invalidExplanation}`);
@@ -852,10 +996,15 @@ ipcMain.on("setAudioMute", (event, mute) => {
     settings.value("audio.muted", mute ? [mute] : []);
 });
 
+ipcMain.on("setCaptionMode", (event, mode) => {
+    globalThis.sharedObject.deviceInfo.captionMode = mode;
+    setPreference("captions.captionMode", mode);
+});
+
 ipcMain.on("deviceData", (_, deviceData) => {
     if (deviceData) {
-        const appDeviceInfo = global.sharedObject.deviceInfo;
-        Object.keys(deviceData).forEach((key) => {
+        const appDeviceInfo = globalThis.sharedObject.deviceInfo;
+        for (const key of Object.keys(deviceData)) {
             const ignoreKeys = ["audioCodecs", "fonts", "fontPath", "defaultFont"];
             if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
                 appDeviceInfo[key] = deviceData[key];
@@ -864,16 +1013,16 @@ ipcMain.on("deviceData", (_, deviceData) => {
                         getRokuModelArray();
                 }
             }
-        });
+        }
     }
 });
 
 ipcMain.on("serialNumber", (_, serialNumber) => {
-    global.sharedObject.deviceInfo.serialNumber = serialNumber;
+    globalThis.sharedObject.deviceInfo.serialNumber = serialNumber;
 });
 
 export function getModelName(model) {
-    const modelName = global.sharedObject.deviceInfo.models.get(model);
+    const modelName = globalThis.sharedObject.deviceInfo.models.get(model);
     return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }
 
@@ -952,7 +1101,7 @@ function saveServicesSettings(services, window) {
 }
 
 function saveDisplaySettings(window) {
-    const oldValue = global.sharedObject.deviceInfo.displayMode;
+    const oldValue = globalThis.sharedObject.deviceInfo.displayMode;
     const newValue = settings.value("display.displayMode");
     if (newValue && newValue !== oldValue) {
         setDisplayOption("displayMode", undefined, true);
@@ -1032,21 +1181,114 @@ export function getTitleOverlayTheme(userTheme) {
 
 function getRokuModelArray() {
     const modelArray = [];
-    if (global.sharedObject.deviceInfo?.models?.size) {
-        global.sharedObject.deviceInfo.models.forEach(function (value, key) {
+    if (globalThis.sharedObject.deviceInfo?.models?.size) {
+        for (const [key, value] of globalThis.sharedObject.deviceInfo.models) {
             modelArray.push({ label: `${value[0]} - ${key}`, value: key });
-        });
+        }
     }
     return modelArray;
 }
 
 function getLocaleIdArray() {
     return [
-        { value: "en_US", label: "US English (en-US)" },
-        { value: "de_DE", label: "German (de-DE)" },
-        { value: "es_MX", label: "Mexican Spanish (es-MX)" },
-        { value: "fr_CA", label: "Canadian French (fr-CA)" },
-        { value: "pt_BR", label: "Brazilian Portuguese (pt-BR)" },
+        { label: "US English (en-US)", value: "en_US" },
+        { label: "British English (en-GB)", value: "en_GB" },
+        { label: "Australian English (en-AU)", value: "en_AU" },
+        { label: "Canadian English (en-CA)", value: "en_CA" },
+        { label: "Canadian French (fr-CA)", value: "fr_CA" },
+        { label: "International Spanish (es-ES)", value: "es_ES" },
+        { label: "Mexican Spanish (es-MX)", value: "es_MX" },
+        { label: "German (de-DE)", value: "de_DE" },
+        { label: "Italian (it-IT)", value: "it_IT" },
+        { label: "Brazilian Portuguese (pt-BR)", value: "pt_BR" },
+    ];
+}
+function getTextFontArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Serif fixed width", value: "serif fixed width" },
+        { label: "Serif proportional", value: "serif proportional" },
+        { label: "Sans Serif fixed width", value: "sans serif fixed width" },
+        { label: "Sans Serif proportional", value: "sans serif proportional" },
+        { label: "Casual", value: "casual" },
+        { label: "Cursive", value: "cursive" },
+        { label: "Small Caps", value: "small caps" },
+    ];
+}
+function getTextEffectArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "None", value: "none" },
+        { label: "Raised", value: "raised" },
+        { label: "Depressed", value: "depressed" },
+        { label: "Uniform", value: "uniform" },
+        { label: "Drop shadow (left)", value: "drop shadow (left)" },
+        { label: "Drop shadow (right)", value: "drop shadow (right)" },
+    ];
+}
+function getTextSizeArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Extra Large", value: "extra large" },
+        { label: "Large", value: "large" },
+        { label: "Medium", value: "medium" },
+        { label: "Small", value: "small" },
+        { label: "Small", value: "small" },
+        { label: "Extra Small", value: "extra small" },];
+}
+function getCaptionColorArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Bright White", value: "bright white" },
+        { label: "White", value: "white" },
+        { label: "Black", value: "black" },
+        { label: "Red", value: "red" },
+        { label: "Green", value: "green" },
+        { label: "Blue", value: "blue" },
+        { label: "Yellow", value: "yellow" },
+        { label: "Magenta", value: "magenta" },
+        { label: "Cyan", value: "cyan" },
+    ];
+}
+function getTextOpacityArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "25%", value: "25%" },
+        { label: "50%", value: "50%" },
+        { label: "75%", value: "75%" },
+        { label: "100%", value: "100%" },
+    ];
+}
+function getBackgroundOpacityArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Off", value: "off" },
+        { label: "25%", value: "25%" },
+        { label: "50%", value: "50%" },
+        { label: "75%", value: "75%" },
+        { label: "100%", value: "100%" },
+    ];
+}
+
+function getTracksLanguageArray() {
+    return [
+        { label: "English", value: "en" },
+        { label: "Spanish (español)", value: "es" },
+        { label: "French (français)", value: "fr" },
+        { label: "German (deutsch)", value: "de" },
+        { label: "Italian (italiano)", value: "it" },
+        { label: "Portuguese (português)", value: "pt" },
+        { label: "Russian (русский)", value: "ru" },
+        { label: "Turkish (Türkçe)", value: "tr" },
+        { label: "Polish (polski)", value: "pl" },
+        { label: "Ukrainian (українська)", value: "uk" },
+        { label: "Romansh (rumantsch)", value: "rm" },
+        { label: "Dutch (Nederlands)", value: "nl" },
+        { label: "Croatian (hrvatski)", value: "hr" },
+        { label: "Hungarian (magyar)", value: "hu" },
+        { label: "Greek (ελληνικά)", value: "el" },
+        { label: "Czech (čeština)", value: "cs" },
+        { label: "Swedish (svenska)", value: "sv" },
     ];
 }
 
@@ -1074,7 +1316,7 @@ function getCountryArray() {
     ];
 }
 
-function getTimezonArray() {
+function getTimezoneArray() {
     const dt = DateTime.now().setZone("system");
     const tzArray = [
         { label: `System: ${dt.zoneName}`, value: "system" },
@@ -1228,8 +1470,8 @@ function getTimezonArray() {
         { label: "Other/UTC+13" },
         { label: "Other/UTC+14" },
     ];
-    tzArray.forEach(function (item) {
+    for (const item of tzArray) {
         timeZoneLabels.set(item.value || item.label, item.label);
-    });
+    }
     return tzArray;
 }

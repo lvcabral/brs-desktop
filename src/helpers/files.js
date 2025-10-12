@@ -13,8 +13,8 @@ import { appFocused } from "./window";
 import { subscribeECP } from "../server/ecp";
 import { isValidUrl } from "./util";
 import { zipSync, strToU8 } from "fflate";
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 
 export const editorCodeFile = path.join(app.getPath("userData"), "editor_code.brs");
 

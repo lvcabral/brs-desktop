@@ -9,7 +9,7 @@ const { contextBridge, ipcRenderer, shell } = require("electron");
 const { getCurrentWebContents, getGlobal } = require("@electron/remote");
 const customTitlebar = require("custom-electron-titlebar");
 const Mousetrap = require("mousetrap");
-const path = require("path");
+const path = require("node:path");
 const isMacOS = process.platform === "darwin";
 
 let onPreferencesUpdatedHandler = () => {};
@@ -17,7 +17,7 @@ let titleBar;
 let titleBarConfig;
 let titleColor;
 
-window.addEventListener("DOMContentLoaded", () => {
+globalThis.addEventListener("DOMContentLoaded", () => {
     // Detect Clipboard Copy to create Screenshot
     Mousetrap.bind(["command+c", "ctrl+c"], function () {
         getCurrentWebContents().send("copyScreenshot");
@@ -103,6 +103,7 @@ contextBridge.exposeInMainWorld("api", {
             "openConsole",
             "debugStarted",
             "setAudioMute",
+            "setCaptionMode",
             "deviceData",
             "serialNumber",
             "engineVersion",
@@ -137,6 +138,7 @@ contextBridge.exposeInMainWorld("api", {
             "setOverscan",
             "setLocale",
             "setDeviceInfo",
+            "setCaptionStyle",
             "setCustomKeys",
             "setAudioMute",
             "toggleStatusBar",

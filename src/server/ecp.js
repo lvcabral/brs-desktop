@@ -9,11 +9,11 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import { isValidIP } from "../helpers/util";
 import { Server as SSDP } from "node-ssdp";
 import xmlbuilder from "xmlbuilder";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 const WebSocket = require("ws");
-const url = require("url");
+const url = require("node:url");
 
 export const ECP_PORT = 8060;
 export const SSDP_PORT = 1900;
@@ -32,7 +32,7 @@ ipcMain.on("currentApp", (_, data) => {
 
 export let isECPEnabled = false;
 export function initECP() {
-    device = global.sharedObject.deviceInfo;
+    device = globalThis.sharedObject.deviceInfo;
 }
 export function enableECP() {
     window = BrowserWindow.fromId(1);
@@ -158,9 +158,9 @@ export function unsubscribeECP(observerId) {
     observers.delete(observerId);
 }
 function notifyAll(eventName, eventData) {
-    observers.forEach((callback, id) => {
+    for (const [_id, callback] of observers) {
         callback(eventName, eventData);
-    });
+    }
 }
 
 // ECP-2 WebSocket API
@@ -395,6 +395,8 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("support-suspend", {}, false);
     xml.ele("support-find-remote", {}, false);
     xml.ele("support-audio-guide", {}, false);
+    xml.ele("supports-audio-volume-control", {}, true);
+    xml.ele("support-power-control", {}, true);
     xml.ele("support-rva", {}, true);
     xml.ele("developer-enabled", {}, true);
     xml.ele("keyed-developer-id", {}, device.developerId);
@@ -439,9 +441,11 @@ function genAppsXml(encrypt) {
         // Dummy app as Roku Deep Linking Tester requires at least 2 apps
         xml.ele("app", { id: "home", type: "appl", version: "1.0.0" }, "Home");
     }
-    device.appList?.forEach((app) => {
-        xml.ele("app", { id: app.id, type: "appl", version: app.version }, app.title);
-    });
+    if (device?.appList.length) {
+        for (const app of device.appList) {
+            xml.ele("app", { id: app.id, type: "appl", version: app.version }, app.title);
+        }
+    }
     const strXml = xml.end({ pretty: true });
     return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
@@ -497,7 +501,7 @@ function genAppRegistry(plugin, encrypt) {
         let curSection = "";
         let scXml, itsXml, itXml;
         const registry = new Map([...device.registry].sort());
-        registry.forEach((value, key) => {
+        for (const [key, value] of registry) {
             const sections = key.split(".");
             if (sections.length > 2 && sections[0] === device.developerId) {
                 if (sections[1] !== curSection) {
@@ -514,7 +518,7 @@ function genAppRegistry(plugin, encrypt) {
                 itXml.ele("key", {}, key);
                 itXml.ele("value", {}, value);
             }
-        });
+        }
         xml.ele("status", {}, "OK");
     } else {
         xml.ele("status", {}, "FAILED");
@@ -527,26 +531,26 @@ function genAppRegistry(plugin, encrypt) {
 // Helper Functions
 
 function getMacAddress() {
-    const os = require("os");
+    const os = require("node:os");
     const ifaces = os.networkInterfaces();
     let mac = "";
-    Object.keys(ifaces).forEach(function (ifname) {
+    for (const ifname of Object.keys(ifaces)) {
         if (
             mac !== "" ||
             ifname.toLowerCase().startsWith("vmware") ||
             ifname.toLowerCase().startsWith("virtualbox")
         ) {
-            return;
+            continue;
         }
-        ifaces[ifname].forEach(function (iface) {
+        for (const iface of ifaces[ifname]) {
             if ("IPv4" !== iface.family || iface.internal !== false) {
                 // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-                return;
+                continue;
             }
             mac = iface.mac;
-            return;
-        });
-    });
+            break;
+        }
+    }
     if (mac === "") {
         mac = "87:3e:aa:9f:77:70";
     }
@@ -559,7 +563,7 @@ function getRokuOS(firmware, version = true) {
             const versions = "0123456789ACDEFGHJKLMNPRSTUVWXY";
             const major = versions.indexOf(firmware.charAt(2));
             const minor = firmware.slice(4, 5);
-            const revision = firmware.slice(7, 8);
+            const revision = firmware.slice(5, 6);
             return `${major}.${minor}.${revision}`;
         } else {
             return firmware.slice(8, 12);

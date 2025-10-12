@@ -38,7 +38,7 @@ const cancelButton = document.getElementById("cancel-button");
 const moreButton = document.getElementById("more-options");
 const dropdown = document.getElementById("more-options-dropdown");
 
-const simulator = window.opener;
+const simulator = globalThis.opener;
 let [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
 
 const prompt = "Brightscript Debugger";
@@ -62,9 +62,9 @@ const terminal = new WebTerminal({
     autoFocus: false,
 });
 if (consoleBuffer?.length) {
-    consoleBuffer.forEach((value) => {
+    for (const value of consoleBuffer) {
         updateTerminal(value);
-    });
+    }
 }
 terminal.idle();
 
@@ -699,12 +699,12 @@ function onMouseDown(event) {
 }
 
 function onResize() {
-    if (window.innerWidth >= 1150 || editorContainer.classList.contains("hidden")) {
+    if (globalThis.innerWidth >= 1150 || editorContainer.classList.contains("hidden")) {
         const { height } = codeColumn.getBoundingClientRect();
         editorManager.editor.setSize("100%", `${height - 15}px`);
     } else {
         const { top } = consoleColumn.getBoundingClientRect();
-        editorManager.editor.setSize("100%", `${Math.trunc(window.innerHeight - top - 15)}px`);
+        editorManager.editor.setSize("100%", `${Math.trunc(globalThis.innerHeight - top - 15)}px`);
         codeColumn.style.width = "100%";
     }
     scrollToBottom();
@@ -734,9 +734,9 @@ function showToast(message, duration = 3000, error = false) {
 }
 
 // Theme Management
-window.__currentTheme = () =>
-    window.matchMedia("(prefers-color-scheme:dark)")?.matches ? "dark" : "light";
-window.__setTheme = () => {
+globalThis.__currentTheme = () =>
+    globalThis.matchMedia("(prefers-color-scheme:dark)")?.matches ? "dark" : "light";
+globalThis.__setTheme = () => {
     const preferences = api.getPreferences();
     let theme = preferences.simulator.theme || "purple";
     if (theme === "system") {
@@ -750,7 +750,7 @@ window.__setTheme = () => {
         editorManager.editor.setOption("theme", getThemeCss(theme));
     }
 };
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", __setTheme);
+globalThis.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", __setTheme);
 api.onPreferencesUpdated(__setTheme);
 
 document.addEventListener("DOMContentLoaded", (event) => {
@@ -765,8 +765,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
 });
 
 // Events Handling
-window.addEventListener("load", main, false);
-window.addEventListener("resize", onResize, false);
+globalThis.addEventListener("load", main, false);
+globalThis.addEventListener("resize", onResize, false);
 document.addEventListener("keydown", hotKeys, false);
 document.addEventListener("mousemove", onMouseMove, false);
 document.addEventListener("mouseup", onMouseUp, false);

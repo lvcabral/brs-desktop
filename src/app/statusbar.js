@@ -174,9 +174,9 @@ export function clearCounters() {
 function shortenPath(bigPath, maxLen) {
     let path = bigPath;
     if (path.length > maxLen) {
-        const splitter = bigPath.indexOf("/") > -1 ? "/" : "\\";
+        const splitter = bigPath.includes("/") ? "/" : "\\";
         const tokens = bigPath.split(splitter);
-        const drive = bigPath.indexOf(":") > -1 ? tokens[0] : "";
+        const drive = bigPath.includes(":") ? tokens[0] : "";
         const fileName = tokens[tokens.length - 1];
         const len = drive.length + fileName.length;
         const remLen = maxLen - len - 3; // remove the current length and also space for ellipsis char and 2 slashes
@@ -243,7 +243,7 @@ function updateStatus(data) {
             : "<i class='fa fa-cube'></i>";
         statusFile.innerText = shortenPath(
             data.path,
-            Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+            Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
         );
         filePath = data.path;
         if (data.version !== "") {
@@ -272,7 +272,7 @@ function redrawStatus(fullscreen) {
         if (filePath !== "") {
             statusFile.innerText = shortenPath(
                 filePath,
-                Math.max(MIN_PATH_SIZE, window.innerWidth * PATH_SIZE_FACTOR)
+                Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
             );
         }
     } else {

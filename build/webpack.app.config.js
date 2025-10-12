@@ -1,4 +1,4 @@
-const path = require("path");
+const path = require("node:path");
 const merge = require("webpack-merge");
 const base = require("./webpack.base.config");
 const packageInfo = require("../package.json");
@@ -39,9 +39,9 @@ module.exports = env => {
           { context: "src/app/", from: "css/**", to: "../app" },
           { context: "src/app/", from: "web/**", to: "../app" },
           { context: "src/app/", from: "videos/**", to: "../app" },
-          { context: "node_modules/brs-engine/browser/lib", from: fileApi, to: "lib" },
-          { context: "node_modules/brs-engine/browser/lib", from: fileWrk, to: "lib" },
-          { context: "node_modules/brs-engine/browser/", from: "assets/**", to: "../app" },
+          { context: "node_modules/brs-engine/lib", from: fileApi, to: "lib" },
+          { context: "node_modules/brs-engine/lib", from: fileWrk, to: "lib" },
+          { context: "node_modules/brs-engine/", from: "assets/**", to: "../app" },
         ]
       })
     ],
@@ -69,7 +69,7 @@ module.exports = env => {
       new CopyWebpackPlugin({
         patterns: [
           { context: "src/app/", from: "themes/**", to: "../app" },
-          { context: "node_modules/electron-preferences/build/", from: "icons/**", to: "../app" },
+          { context: "node_modules/@lvcabral/electron-preferences/build/", from: "icons/**", to: "../app" },
         ]
       })
     ],

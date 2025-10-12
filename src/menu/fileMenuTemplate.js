@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2024 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -34,7 +34,7 @@ export const fileMenuTemplate = {
             accelerator: "CmdOrCtrl+U",
             enabled: true,
             click: (_, window) => {
-                const userTheme = global.sharedObject.theme;
+                const userTheme = globalThis.sharedObject.theme;
                 prompt(
                     {
                         title: "Open from URL",

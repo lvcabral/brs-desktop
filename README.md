@@ -3,7 +3,7 @@
 <img alt="Simulator Desktop Apps" src="docs/images/brs-desktop.png?raw=true"/>
 </p>
 
-![GitHub](https://img.shields.io/github/license/lvcabral/brs-desktop)
+[![License](https://img.shields.io/github/license/lvcabral/brs-desktop?logo=github&color=blue)](https://github.com/lvcabral/brs-desktop/blob/master/LICENSE)
 [![Build](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml/badge.svg)](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
@@ -57,6 +57,6 @@ Below you will find the links for the documentation of this project, how to use,
 
 ## License
 
-Copyright © 2019-2024 Marcelo Lv Cabral. All rights reserved.
+Copyright © 2019-2025 Marcelo Lv Cabral. All rights reserved.
 
 Licensed under [MIT](LICENSE) License.
