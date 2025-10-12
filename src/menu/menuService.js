@@ -30,9 +30,9 @@ const isMacOS = process.platform === "darwin";
 const maxFiles = 7;
 const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
+const recentMenuIndex = 3;
 
 let fileMenuIndex = 0;
-let recentMenuIndex = 3;
 let recentFiles;
 let menuTemplate;
 // External Functions
@@ -163,6 +163,9 @@ export function isMenuItemEnabled(id) {
 
 // Events
 ipcMain.on("addRecentPackage", (event, currentApp) => {
+    if (currentApp.path?.endsWith("apps/brs-tv.zip")) {
+        return;
+    }
     const devFile = path.join(app.getPath("userData"), "dev.zip");
     if (currentApp.id === "dev" && currentApp.path !== devFile) {
         currentApp.id = currentApp.path.hashCode();

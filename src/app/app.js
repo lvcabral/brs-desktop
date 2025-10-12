@@ -89,7 +89,7 @@ let selectedApp = "";
 
 brs.subscribe("desktop", (event, data) => {
     if (event === "loaded") {
-        selectedApp = "";
+        //TODO: Handle properly TV Mode - selectedApp = "";
         currentApp = data;
         appLoaded(data);
     } else if (event === "started") {
@@ -117,10 +117,11 @@ brs.subscribe("desktop", (event, data) => {
         appTerminated();
         if (selectedApp !== "" && event === "closed") {
             api.send("runUrl", selectedApp);
+            selectedApp = "https://lvcabral.com/brs/apps/brs-tv.zip";
         } else {
             showCloseMessage(event, data);
+            selectedApp = "";
         }
-        selectedApp = "";
     } else if (event === "redraw") {
         redrawEvent(data);
     } else if (event === "control") {

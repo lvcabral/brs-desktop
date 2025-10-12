@@ -199,6 +199,15 @@ export const fileMenuTemplate = {
         },
         { type: "separator" },
         {
+            id: "open-brs-home",
+            label: "Open BrightScript TV...",
+            enabled: true,
+            click: () => {
+                loadUrl("https://lvcabral.com/brs/apps/brs-tv.zip");
+            },
+        },
+        { type: "separator" },
+        {
             id: "save-screen",
             label: "Save Screenshot...",
             accelerator: "CmdOrCtrl+S",
