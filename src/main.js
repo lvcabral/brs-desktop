@@ -5,9 +5,9 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import path from "path";
-import url from "url";
-import dns from "dns";
+import path from "node:path";
+import url from "node:url";
+import dns from "node:dns";
 import minimist from "minimist";
 import jetpack from "fs-jetpack";
 import { app, screen, BrowserWindow } from "electron";
@@ -15,6 +15,7 @@ import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
+import { randomUUID } from "node:crypto";
 import {
     createMenu,
     enableMenuItem,
@@ -46,7 +47,6 @@ import {
 } from "./helpers/window";
 import { getGateway, getLocalIps } from "./helpers/util";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
-import { randomUUID } from "crypto";
 
 const isMacOS = process.platform === "darwin";
 
@@ -268,7 +268,7 @@ function processArgv(mainWindow, startup) {
     }
     if (argv?.web) {
         setPort(argv.web);
-        settings.value("services.webPort", parseInt(argv.web));
+        settings.value("services.webPort", Number.parseInt(argv.web));
         enableInstaller(mainWindow);
     } else if (startup.installerEnabled) {
         enableInstaller(mainWindow);

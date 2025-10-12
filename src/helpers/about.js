@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import path from "path";
+import path from "node:path";
 import { ipcMain, BrowserWindow } from "electron";
 import openAboutWindow from "electron-about-window";
 import packageInfo from "../../package.json";

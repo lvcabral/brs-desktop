@@ -8,7 +8,7 @@
 import { app, BrowserWindow } from "electron";
 import Busboy from "busboy";
 import fs from "fs";
-import path from "path";
+import path from "node:path";
 import http from "http";
 import crypt from "crypto";
 
@@ -29,8 +29,8 @@ export function setPassword(password) {
 export function setPort(customPort) {
     if (typeof customPort === "number") {
         port = customPort;
-    } else if (typeof customPort === "string" && !isNaN(parseInt(customPort))) {
-        port = parseInt(customPort);
+    } else if (typeof customPort === "string" && !Number.isNaN(Number.parseInt(customPort))) {
+        port = Number.parseInt(customPort);
     }
 }
 export function enableInstaller() {

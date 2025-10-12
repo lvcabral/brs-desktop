@@ -9,11 +9,11 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import { isValidIP } from "../helpers/util";
 import { Server as SSDP } from "node-ssdp";
 import xmlbuilder from "xmlbuilder";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 const WebSocket = require("ws");
-const url = require("url");
+const url = require("node:url");
 
 export const ECP_PORT = 8060;
 export const SSDP_PORT = 1900;
@@ -529,7 +529,7 @@ function genAppRegistry(plugin, encrypt) {
 // Helper Functions
 
 function getMacAddress() {
-    const os = require("os");
+    const os = require("node:os");
     const ifaces = os.networkInterfaces();
     let mac = "";
     Object.keys(ifaces).forEach(function (ifname) {

@@ -9,7 +9,7 @@ const { contextBridge, ipcRenderer, shell } = require("electron");
 const { getCurrentWebContents, getGlobal } = require("@electron/remote");
 const customTitlebar = require("custom-electron-titlebar");
 const Mousetrap = require("mousetrap");
-const path = require("path");
+const path = require("node:path");
 const isMacOS = process.platform === "darwin";
 
 let onPreferencesUpdatedHandler = () => {};

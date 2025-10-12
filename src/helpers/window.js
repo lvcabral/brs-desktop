@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
 import { getSimulatorOption, getTitleOverlayTheme } from "./settings";
-import path from "path";
+import path from "node:path";
 import jetpack from "fs-jetpack";
 
 const userDataDir = jetpack.cwd(app.getPath("userData"));

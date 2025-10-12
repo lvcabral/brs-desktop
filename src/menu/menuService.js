@@ -21,8 +21,8 @@ import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile, loadUrl, editorCodeFile } from "../helpers/files";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
 
