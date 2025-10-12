@@ -66,7 +66,7 @@ brs.initialize(customDeviceInfo, {
 });
 
 // Send deviceData via IPC
-const clonedDeviceData = Object.assign({}, brs.deviceData);
+const clonedDeviceData = { ...brs.deviceData };
 delete clonedDeviceData.assets; // Remove assets to avoid issues with structured cloning
 delete clonedDeviceData.registryBuffer; // Remove registryBuffer to avoid issues with structured cloning
 

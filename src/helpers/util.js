@@ -5,9 +5,9 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import os from "os";
+import os from "node:os";
 import network from "network";
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 
 const isWindows = process.platform === "win32";
 

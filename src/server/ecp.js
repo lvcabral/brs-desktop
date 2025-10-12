@@ -158,7 +158,7 @@ export function unsubscribeECP(observerId) {
     observers.delete(observerId);
 }
 function notifyAll(eventName, eventData) {
-    for (const [id, callback] of observers) {
+    for (const [_id, callback] of observers) {
         callback(eventName, eventData);
     }
 }

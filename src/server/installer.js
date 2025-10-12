@@ -7,10 +7,10 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow } from "electron";
 import Busboy from "busboy";
-import fs from "fs";
+import fs from "node:fs";
 import path from "node:path";
-import http from "http";
-import crypt from "crypto";
+import http from "node:http";
+import crypt from "node:crypto";
 
 const credentials = {
     userName: "rokudev",
