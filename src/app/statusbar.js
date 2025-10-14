@@ -67,9 +67,7 @@ let currentLocale = api.getDeviceInfo().locale;
 setLocaleStatus(currentLocale);
 // Subscribe Events
 brs.subscribe("statusbar", (event, data) => {
-    if (event === "loaded") {
-        updateStatus(data);
-    } else if (event === "closed") {
+    if (event === "closed") {
         updateStatus(false);
     } else if (event === "redraw") {
         redrawStatus(data);
@@ -170,6 +168,7 @@ export function clearCounters() {
     errorCount = 0;
     warnCount = 0;
 }
+
 // Function that shortens a path (based on code by https://stackoverflow.com/users/2149492/johnpan)
 function shortenPath(bigPath, maxLen) {
     let path = bigPath;
@@ -232,19 +231,25 @@ api.receive("setLocale", function (locale) {
     }
 });
 
-// Helper Functions
-
-function updateStatus(data) {
+export function updateStatus(data, tvMode = false) {
     if (data) {
         clearCounters();
         setStatusColor();
-        statusIconFile.innerHTML = data.path.toLowerCase().endsWith(".brs")
-            ? "<i class='fa fa-file'></i>"
-            : "<i class='fa fa-cube'></i>";
-        statusFile.innerText = shortenPath(
-            data.path,
-            Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
-        );
+        // Show different icon and text based on TV mode
+        if (tvMode) {
+            console.debug("Updating status for TV mode");
+            statusIconFile.innerHTML = "<i class='fa fa-tv'></i>";
+            statusFile.innerText = data.title || "BrightScript TV";
+        } else {
+            console.debug("Updating status for non-TV mode");
+            statusIconFile.innerHTML = data.path.toLowerCase().endsWith(".brs")
+                ? "<i class='fa fa-file'></i>"
+                : "<i class='fa fa-cube'></i>";
+            statusFile.innerText = shortenPath(
+                data.path,
+                Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
+            );
+        }
         filePath = data.path;
         if (data.version !== "") {
             statusVersion.innerText = data.version;
@@ -265,6 +270,7 @@ function updateStatus(data) {
         statusSepRes.style.display = "none";
     }
 }
+// Helper Functions
 
 function redrawStatus(fullscreen) {
     if (!fullscreen && api.isStatusEnabled()) {

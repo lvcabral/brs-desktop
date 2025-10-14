@@ -52,7 +52,7 @@ export async function loadUrl(url, input) {
         return;
     }
     const fileName = path.parse(url).base;
-    const fileExt = path.parse(url).ext.toLowerCase();
+    const fileExt = path.parse(url).ext.toLowerCase().split("?")[0];
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
             const response = await fetch(url);

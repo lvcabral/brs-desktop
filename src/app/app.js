@@ -8,7 +8,13 @@
 import "./styles/main.css";
 import "./styles/fontawesome.min.css";
 import "../helpers/hash";
-import { setStatusColor, setAudioStatus, showToast, clearCounters } from "./statusbar";
+import {
+    setStatusColor,
+    setAudioStatus,
+    showToast,
+    clearCounters,
+    updateStatus,
+} from "./statusbar";
 
 const isMacOS = api.processPlatform() === "darwin";
 
@@ -45,6 +51,9 @@ if ("assets" in customDeviceInfo) {
 let currentApp = { id: "", running: false };
 let debugMode = "continue";
 let editor = null;
+let brsTVMode = false;
+const brsTVApp = "https://lvcabral.com/brs/apps/brstv.zip";
+const clientId = brs.deviceData.clientId.replaceAll("-", "");
 const customKeys = new Map();
 customKeys.set("Comma", "rev");
 customKeys.set("Period", "fwd");
@@ -89,16 +98,17 @@ let selectedApp = "";
 
 brs.subscribe("desktop", (event, data) => {
     if (event === "loaded") {
-        //TODO: Handle properly TV Mode - selectedApp = "";
+        if (!brsTVMode) {
+            selectedApp = "";
+        }
         currentApp = data;
         appLoaded(data);
     } else if (event === "started") {
         currentApp = data;
         stats.style.visibility = "visible";
     } else if (event === "launch") {
-        console.info(`App launched: ${data}`);
-        if (data?.app) {
-            selectedApp = data.app;
+        if (typeof data?.app === "string") {
+            selectedApp = data.app + (brsTVMode ? "?tvmode=1" : "");
         }
     } else if (event === "browser") {
         if (data?.url) {
@@ -117,10 +127,13 @@ brs.subscribe("desktop", (event, data) => {
         appTerminated();
         if (selectedApp !== "" && event === "closed") {
             api.send("runUrl", selectedApp);
-            selectedApp = "https://lvcabral.com/brs/apps/brs-tv.zip";
+            if (brsTVMode) {
+                selectedApp = brsTVApp;
+            }
         } else {
             showCloseMessage(event, data);
             selectedApp = "";
+            brsTVMode = false;
         }
     } else if (event === "redraw") {
         redrawEvent(data);
@@ -187,7 +200,7 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
     }
 
     try {
-        const fileExt = filePath.split(".").pop()?.toLowerCase();
+        const fileExt = filePath.split(".").pop()?.toLowerCase().split("?")[0];
         let password = "";
         if (fileExt === "bpk") {
             const settings = api.getPreferences();
@@ -196,8 +209,13 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
         if (fileExt !== "brs") {
             data = data.buffer;
         }
+        brsTVMode = filePath === brsTVApp || filePath.endsWith("?tvmode=1");
+        if (brsTVMode) {
+            selectedApp = brsTVApp;
+            password = fileExt === "bpk" ? clientId : "";
+        }
         brs.execute(
-            filePath,
+            filePath.split("?")[0],
             data,
             {
                 clearDisplayOnExit: clear,
@@ -218,6 +236,8 @@ api.receive("closeChannel", function (source, appID) {
         if (appID && appID !== currentApp.id) {
             return;
         }
+        selectedApp = "";
+        brsTVMode = false;
         brs.terminate(source);
     }
 });
@@ -318,7 +338,7 @@ function startSplashVideo() {
     player.addEventListener("error", restorePlayer, { once: true });
 
     // Start playing
-    player.play().catch(error => {
+    player.play().catch((error) => {
         console.warn("Could not play splash video:", error);
     });
 }
@@ -398,15 +418,18 @@ function appLoaded(appData) {
         brs.enableStats(settings.simulator.options.includes("perfStats"));
     }
     api.updateTitle(`${appData.title} - ${defaultTitle}`);
-    if (appData.path.toLowerCase().endsWith(".brs")) {
-        api.send("addRecentSource", appData.path);
-    } else {
-        api.send("addRecentPackage", appData);
+    if (!brsTVMode) {
+        if (appData.path.toLowerCase().endsWith(".brs")) {
+            api.send("addRecentSource", appData.path);
+        } else {
+            api.send("addRecentPackage", appData);
+        }
     }
     api.enableMenuItem("close-channel", true);
     api.enableMenuItem("save-screen", true);
     api.enableMenuItem("copy-screen", true);
     api.send("currentApp", appData);
+    updateStatus(appData, brsTVMode);
 }
 
 function appTerminated() {
@@ -439,7 +462,7 @@ function redrawEvent(redraw) {
 
 // SceneGraph Warning Dialog
 function initSceneGraphWarningDialog() {
-    const dontShowWarning = localStorage.getItem('sceneGraphWarningDismissed') === 'true';
+    const dontShowWarning = localStorage.getItem("sceneGraphWarningDismissed") === "true";
     if (dontShowWarning) {
         setTimeout(() => startSplashVideo(), 500);
         return;
@@ -459,14 +482,14 @@ function initSceneGraphWarningDialog() {
     // Function to handle dialog dismissal
     const handleDialogClose = () => {
         if (dontShowAgainCheckbox.checked) {
-            localStorage.setItem('sceneGraphWarningDismissed', 'true');
+            localStorage.setItem("sceneGraphWarningDismissed", "true");
         }
         dialog.style.display = "none";
         setTimeout(() => startSplashVideo(), 300);
     };
     closeButton.addEventListener("click", handleDialogClose);
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && dialog.style.display === "flex") {
+        if (["Escape", "Enter"].includes(event.key) && dialog.style.display === "flex") {
             handleDialogClose();
         }
     });

@@ -200,10 +200,11 @@ export const fileMenuTemplate = {
         { type: "separator" },
         {
             id: "open-brs-home",
-            label: "Open BrightScript TV...",
+            label: "Open BrightScript TV",
+            accelerator: "CmdOrCtrl+T",
             enabled: true,
             click: () => {
-                loadUrl("https://lvcabral.com/brs/apps/brs-tv.zip");
+                loadUrl("https://lvcabral.com/brs/apps/brstv.zip");
             },
         },
         { type: "separator" },
