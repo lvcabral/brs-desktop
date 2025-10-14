@@ -55,12 +55,7 @@ let editor = null;
 let brsTVMode = false;
 const clientId = brs.deviceData.clientId.replaceAll("-", "");
 const customKeys = new Map();
-customKeys.set("Comma", "rev");
-customKeys.set("Period", "fwd");
-customKeys.set("Space", "play");
 customKeys.set("NumpadMultiply", "info");
-customKeys.set("KeyA", "a");
-customKeys.set("KeyZ", "b");
 // Support for Games with multi_key_events=1 in the manifest
 customKeys.set("ShiftLeft", "playonly");
 customKeys.set("Shift+ArrowRight", "right");
