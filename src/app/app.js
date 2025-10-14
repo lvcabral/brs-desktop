@@ -15,6 +15,7 @@ import {
     clearCounters,
     updateStatus,
 } from "./statusbar";
+import { BRS_TV_APP_URL } from "../constants";
 
 const isMacOS = api.processPlatform() === "darwin";
 
@@ -52,7 +53,6 @@ let currentApp = { id: "", running: false };
 let debugMode = "continue";
 let editor = null;
 let brsTVMode = false;
-const brsTVApp = "https://lvcabral.com/brs/apps/brstv.zip";
 const clientId = brs.deviceData.clientId.replaceAll("-", "");
 const customKeys = new Map();
 customKeys.set("Comma", "rev");
@@ -108,6 +108,10 @@ brs.subscribe("desktop", (event, data) => {
         stats.style.visibility = "visible";
     } else if (event === "launch") {
         if (typeof data?.app === "string") {
+            if (brsTVMode && data.app.includes("TVOff")) {
+                selectedApp = "";
+                return;
+            }
             selectedApp = data.app + (brsTVMode ? "?tvmode=1" : "");
         }
     } else if (event === "browser") {
@@ -128,7 +132,7 @@ brs.subscribe("desktop", (event, data) => {
         if (selectedApp !== "" && event === "closed") {
             api.send("runUrl", selectedApp);
             if (brsTVMode) {
-                selectedApp = brsTVApp;
+                selectedApp = BRS_TV_APP_URL;
             }
         } else {
             showCloseMessage(event, data);
@@ -209,9 +213,9 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
         if (fileExt !== "brs") {
             data = data.buffer;
         }
-        brsTVMode = filePath === brsTVApp || filePath.endsWith("?tvmode=1");
+        brsTVMode = filePath === BRS_TV_APP_URL || filePath.endsWith("?tvmode=1");
         if (brsTVMode) {
-            selectedApp = brsTVApp;
+            selectedApp = BRS_TV_APP_URL;
             password = fileExt === "bpk" ? clientId : "";
         }
         brs.execute(
@@ -237,7 +241,6 @@ api.receive("closeChannel", function (source, appID) {
             return;
         }
         selectedApp = "";
-        brsTVMode = false;
         brs.terminate(source);
     }
 });
@@ -404,8 +407,10 @@ function showCloseMessage(event, data) {
         showToast(`Missing developer password, unable to unpack the app!`, 5000, true);
     } else if (data !== "EXIT_USER_NAV") {
         showToast(`App closed with exit reason: ${data}`, 5000, true);
+    } else if (brsTVMode) {
+        showToast(`BrightScript TV shut down with success!`);
     } else {
-        showToast(`App finished with success!`);
+        showToast(`App closed with success!`);
     }
 }
 

@@ -12,6 +12,7 @@ import { runOnPeerRoku, resetPeerRoku } from "./roku";
 import { appFocused } from "./window";
 import { subscribeECP } from "../server/ecp";
 import { isValidUrl } from "./util";
+import { BRS_TV_APP_URL } from "../constants";
 import { zipSync, strToU8 } from "fflate";
 import path from "node:path";
 import fs from "node:fs";
@@ -57,8 +58,21 @@ export async function loadUrl(url, input) {
         try {
             const response = await fetch(url);
             if (response.status === 200) {
-                let fileData = await response.arrayBuffer();
+                const fileData = await response.arrayBuffer();
                 executeFile(window, Buffer.from(fileData), url, input);
+            } else if (url === BRS_TV_APP_URL) {
+                window.webContents.send(
+                    "console",
+                    `Error fetching BrightScript TV App: ${response.statusText} ${response.status}`,
+                    true
+                );
+            } else if (url.endsWith("?tvmode=1")) {
+                window.webContents.send(
+                    "console",
+                    `Error fetching BrightScript TV App: ${response.statusText} ${response.status}`,
+                    true
+                );
+                loadBrsTvApp();
             } else {
                 window.webContents.send(
                     "console",
@@ -72,6 +86,10 @@ export async function loadUrl(url, input) {
     } else {
         window.webContents.send("console", `File format not supported: ${fileExt}`, true);
     }
+}
+
+export function loadBrsTvApp() {
+    loadUrl(BRS_TV_APP_URL);
 }
 
 export function saveFile(file, data) {

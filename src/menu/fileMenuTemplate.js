@@ -8,7 +8,7 @@
 import prompt from "electron-prompt";
 import * as dialog from "../helpers/dialog";
 import { closeChannel } from "../helpers/window";
-import { loadUrl } from "../helpers/files";
+import { loadUrl, loadBrsTvApp } from "../helpers/files";
 import { loadPackage, loadSource, clearRecentFiles } from "./menuService";
 
 export const fileMenuTemplate = {
@@ -204,7 +204,7 @@ export const fileMenuTemplate = {
             accelerator: "CmdOrCtrl+T",
             enabled: true,
             click: () => {
-                loadUrl("https://lvcabral.com/brs/apps/brstv.zip");
+                loadBrsTvApp();
             },
         },
         { type: "separator" },

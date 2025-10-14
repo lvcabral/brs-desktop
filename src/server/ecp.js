@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { isValidIP } from "../helpers/util";
+import { ECP_PORT, SSDP_PORT } from "../constants";
 import { Server as SSDP } from "node-ssdp";
 import xmlbuilder from "xmlbuilder";
 import fs from "node:fs";
@@ -14,9 +15,6 @@ import path from "node:path";
 
 const WebSocket = require("ws");
 const url = require("node:url");
-
-export const ECP_PORT = 8060;
-export const SSDP_PORT = 1900;
 const DEBUG = false;
 const MAC = getMacAddress();
 const UDN = "138aedd0-d6ad-11eb-b8bc-" + MAC.replace(/:\s*/g, "");

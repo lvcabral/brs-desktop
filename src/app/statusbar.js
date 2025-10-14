@@ -5,6 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
+import { ECP_PORT, WEB_INSTALLER_PORT } from "../constants";
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
@@ -37,11 +38,11 @@ statusError.innerText = "0";
 statusWarn.innerText = "0";
 let errorCount = 0;
 let warnCount = 0;
-let ECPPort = 8060;
+let ECPPort = ECP_PORT;
 statusECP.onclick = function () {
     api.openExternal(`http://localhost:${ECPPort}/query/device-info`);
 };
-let installerPort = 80;
+let installerPort = WEB_INSTALLER_PORT;
 statusWeb.onclick = function () {
     api.openExternal(`http://localhost:${installerPort}/`);
 };
@@ -237,11 +238,9 @@ export function updateStatus(data, tvMode = false) {
         setStatusColor();
         // Show different icon and text based on TV mode
         if (tvMode) {
-            console.debug("Updating status for TV mode");
             statusIconFile.innerHTML = "<i class='fa fa-tv'></i>";
             statusFile.innerText = data.title || "BrightScript TV";
         } else {
-            console.debug("Updating status for non-TV mode");
             statusIconFile.innerHTML = data.path.toLowerCase().endsWith(".brs")
                 ? "<i class='fa fa-file'></i>"
                 : "<i class='fa fa-cube'></i>";

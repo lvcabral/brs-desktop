@@ -10,8 +10,8 @@ import { DateTime } from "luxon";
 import path from "node:path";
 import ElectronPreferences from "@lvcabral/electron-preferences";
 import { setAspectRatio } from "./window";
-import { enableECP, disableECP, subscribeECP, ECP_PORT } from "../server/ecp";
-import { enableTelnet, disableTelnet, subscribeTelnet, TELNET_PORT } from "../server/telnet";
+import { enableECP, disableECP, subscribeECP } from "../server/ecp";
+import { enableTelnet, disableTelnet, subscribeTelnet } from "../server/telnet";
 import {
     enableInstaller,
     disableInstaller,
@@ -21,6 +21,7 @@ import {
     subscribeInstaller,
 } from "../server/installer";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
+import { WEB_INSTALLER_PORT, DEFAULT_USRPWD, ECP_PORT, TELNET_PORT } from "../constants";
 
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
@@ -51,8 +52,8 @@ export function getSettings(window) {
             },
             services: {
                 installer: ["enabled"],
-                webPort: 80,
-                password: "rokudev",
+                webPort: WEB_INSTALLER_PORT,
+                password: DEFAULT_USRPWD,
                 ecp: ["enabled"],
                 telnet: ["enabled"],
             },
@@ -99,7 +100,7 @@ export function getSettings(window) {
                 captionLanguage: globalThis.sharedObject.deviceInfo.captionLanguage,
             },
             peerRoku: {
-                password: "rokudev",
+                password: DEFAULT_USRPWD,
             },
         },
         browserWindowOverrides: {
@@ -948,7 +949,7 @@ export function getPeerRoku() {
     return {
         deploy: settings.value("peerRoku.deploy")?.includes("enabled") || false,
         ip: settings.value("peerRoku.ip"),
-        username: "rokudev",
+        username: DEFAULT_USRPWD,
         password: settings.value("peerRoku.password"),
         syncControl: settings.value("peerRoku.syncControl")?.includes("enabled") || false,
     };

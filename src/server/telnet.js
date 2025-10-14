@@ -7,9 +7,8 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { consoleBuffer } from "../helpers/console";
+import { TELNET_PORT } from "../constants";
 import * as telnet from "net";
-
-export const TELNET_PORT = 8085;
 let server;
 let clientId = 0;
 let clients = new Map();
