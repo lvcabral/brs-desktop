@@ -63,7 +63,7 @@ export async function loadUrl(url, input) {
             } else if (url === BRS_TV_APP_URL) {
                 window.webContents.send(
                     "console",
-                    `Error fetching BrightScript TV App: ${response.statusText} ${response.status}`,
+                    `Error opening BrightScript TV: ${response.statusText}`,
                     true
                 );
             } else if (url.endsWith("?tvmode=1")) {
