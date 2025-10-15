@@ -130,7 +130,7 @@ splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
 }
 
 function executeFile(window, fileData, filePath, input) {
-    let fileExt = path.parse(filePath).ext.toLowerCase();
+    let fileExt = path.parse(filePath).ext.toLowerCase().split("?")[0];
     if (input == undefined) {
         input = new Map();
     }
