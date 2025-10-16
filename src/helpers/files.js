@@ -146,7 +146,10 @@ function executeFile(window, fileData, filePath, input) {
         getSimulatorOption("debugOnCrash"),
         input
     );
-    if (fileExt === ".brs") {
+    if (filePath.endsWith("?tvmode=1")) {
+        // Do send to peer Roku when in TV Mode
+        return
+    } else if (fileExt === ".brs") {
         runOnPeerRoku(packageBrs(fileData));
     } else if (fileExt !== ".bpk") {
         runOnPeerRoku(fileData);
