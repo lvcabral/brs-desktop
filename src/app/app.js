@@ -133,6 +133,7 @@ brs.subscribe("desktop", (event, data) => {
             showCloseMessage(event, data);
             selectedApp = "";
             brsTVMode = false;
+            brs.setDebugState(true);
         }
     } else if (event === "redraw") {
         redrawEvent(data);
@@ -209,6 +210,7 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
             data = data.buffer;
         }
         brsTVMode = filePath === BRS_TV_APP_URL || filePath.endsWith("?tvmode=1");
+        brs.setDebugState(!brsTVMode);
         if (brsTVMode) {
             selectedApp = BRS_TV_APP_URL;
             password = fileExt === "bpk" ? clientId : "";
