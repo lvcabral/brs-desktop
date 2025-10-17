@@ -2,7 +2,7 @@
 
 <a name="v2.0.0"></a>
 
-## [v2.0.0 - SceneGraph Support](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.0) - 12 Oct 2025
+## [v2.0.0 - SceneGraph Support](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.0) - 17 Oct 2025
 
 This version of the BrightScript Simulator can execute code compatible with language specifications up to Roku OS 15. It also includes experimental **SceneGraph** support which is currently in **alpha stage**.
 
@@ -16,20 +16,22 @@ This version of the BrightScript Simulator can execute code compatible with lang
 ## Release Changes
 
 * Bump to v2.0.0 and upgraded Electron to v2.9 [@lvcabral](https://github.com/lvcabral) in [#190](https://github.com/lvcabral/brs-desktop/pull/190)
-* Bump `brs-engine` to v2.0.0-alpha.12 [@lvcabral](https://github.com/lvcabral) - main changes since last release:
+* Added new menu option to open BrightScript TV by [@lvcabral](https://github.com/lvcabral) in [#195](https://github.com/lvcabral/brs-desktop/pull/195)
+* Added a message dialog to warn users that SceneGraph is in alpha stage by [@lvcabral](https://github.com/lvcabral) in [#191](https://github.com/lvcabral/brs-desktop/pull/191)
+* Add closed caption style settings and startup SceneGraph warning dialog by [@lvcabral](https://github.com/lvcabral) in [#194](https://github.com/lvcabral/brs-desktop/pull/194)
+* Return new ECP device info fields introduced in Roku OS 15 by [@lvcabral](https://github.com/lvcabral) in [#193](https://github.com/lvcabral/brs-desktop/pull/193)
+* Added BRS bouncing splash video by [@lvcabral](https://github.com/lvcabral) in [#186](https://github.com/lvcabral/brs-desktop/pull/186)
+* Bump `brs-engine` to v2.0.0-alpha.14 [@lvcabral](https://github.com/lvcabral) - main changes since last release:
   * v1.8.6 - Changed the internal device assets (fonts, sounds, images and libraries) to be stored in the `common.zip` file that holds the `common:/` volume in the file system, and mainly this release brings a fix for the `m` context when using indexed get to retrieve functions. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.6))
   * v1.8.7 - Brings the undocumented signature for `InStr()` function with only 2 parameters, the  `roTimespan.totalMicroseconds()` method and the `Type()` function returning "legacy" types (unless you pass version 3 parameter). Other important fixes to highlight are the support for boxed values as array indexes and having `roBoolean` to be properly comparable. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.7))
   * v1.8.8 - Added the support for the `flags` parameter on the `ParseJSON()` to make the AA returned to be case insensitive, and `FormatJSON` flag now allows you to disable the escape of non-ASCII characters. There are also, fixes for `Left()` and `Mid()` that were not handling negative values properly and `Substitute()` that now supports the `^0` notation. The `chr()` and `asc()` functions were also updated to support extended Unicode. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.8))
   * v1.8.9 - Introduces a few missing methods in `roDeviceInfo` and a new method to `ifStringOps`, also several enhancements on Video and Audio handling. The default font was replaced by `DejaVuSansCondensed` that is used in Roku devices for `Draw2D` text rendering. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.9))
   * v1.9.1 - Reorganized the repository as a monorepo splitting the released artifacts into two separate NPM packages: `brs-engine` (for Web applications) and `brs-node` (for Node.js and CLI). Also, with this release, the BrightScript language and components are now synchronized with Roku OS 15.0. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.1))
   * v1.9.2 - Implemented new method `createPayloadFromFileMap` in `brs-node` library and updated documentation. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.2))
-  * v2.0.0-alpha.11 - Contains the current state for the experimental SceneGraph framework support, for more details about what is implemented and what is still missing check the [current limitations document](https://github.com/lvcabral/brs-engine/tree/scenegraph/docs/limitations.md)
-  * v2.0.0-alpha.12 - Optimized loading of Libraries and fixed Roku Browser app launch. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v2.0.0-alpha.12))
-* Added new menu option to open BrightScript TV by [@lvcabral](https://github.com/lvcabral) in [#195](https://github.com/lvcabral/brs-desktop/pull/195)
-* Added a message dialog to warn users that SceneGraph is in alpha stage by [@lvcabral](https://github.com/lvcabral) in [#191](https://github.com/lvcabral/brs-desktop/pull/191)
-* Add closed caption style settings and startup SceneGraph warning dialog by [@lvcabral](https://github.com/lvcabral) in [#194](https://github.com/lvcabral/brs-desktop/pull/194)
-* Return new ECP device info fields introduced in Roku OS 15 by [@lvcabral](https://github.com/lvcabral) in [#193](https://github.com/lvcabral/brs-desktop/pull/193)
-* Added BRS bouncing splash video by [@lvcabral](https://github.com/lvcabral) in [#186](https://github.com/lvcabral/brs-desktop/pull/186)
+  * v1.9.3 - Fixed issues related to `roNDK.start()` allowing URL as `ChannelId` on `SDKLaunch` and `RokuBrowser.brs` library now parses arrays in options object. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.3))
+  * v1.9.4 - Remapping of the game pad buttons to the Roku remote control, allowing for a better experience using the game pad with Roku apps. It also documents the custom `manifest` option `multi_key_events` that allows apps to receive multiple key events at the same time. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.4))
+  * v1.9.5 - Added new methods in the engine API, improvements to `roAppManager`, and the `manifest` parsing now matches the behavior of Roku devices. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.5))
+  * v2.0.0-alpha.14 - Contains the current state for the experimental SceneGraph framework support, for more details about what is implemented and what is still missing check the [current limitations document](https://github.com/lvcabral/brs-engine/tree/scenegraph/docs/limitations.md)
 * Bump `brs-engine` to v1.8.9 and upgraded other dependencies by [@lvcabral](https://github.com/lvcabral) in [#187](https://github.com/lvcabral/brs-desktop/pull/187)
 * Bump electron from 25.9.8 to 28.3.2 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#185](https://github.com/lvcabral/brs-desktop/pull/185)
 * Bump pbkdf2 from 3.1.2 to 3.1.3 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#184](https://github.com/lvcabral/brs-desktop/pull/184)
