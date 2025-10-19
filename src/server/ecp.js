@@ -570,8 +570,9 @@ function getRokuOS(firmware, version = true) {
 }
 
 function getAppIconPath(appID) {
-    let iconPath = path.join(__dirname, "images", "channel-icon.png");
-    return device.appList.find((app) => app.id === appID)?.icon ?? iconPath;
+    const fallbackIcon = path.join(__dirname, "images", "channel-icon.png");
+    const iconPath = device.appList.find((app) => app.id === appID)?.icon.replaceAll("file://", "");
+    return iconPath && fs.existsSync(iconPath) ? iconPath : fallbackIcon;
 }
 
 function getModelName(model) {

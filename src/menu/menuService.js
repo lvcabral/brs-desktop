@@ -87,13 +87,13 @@ export function clearRecentFiles() {
 
 export function updateAppList() {
     const appList = [];
-    for (const [id, index] of recentFiles.ids.entries()) {
+    for (const [index, id] of recentFiles.ids.entries()) {
         appList.push({
             id: id,
             title: recentFiles.names[index],
             version: recentFiles.versions[index],
             path: recentFiles.zip[index],
-            icon: getAppIconPath(id),
+            icon: getAppIconUrl(id),
         });
     }
     globalThis.sharedObject.deviceInfo.appList = appList;
@@ -101,8 +101,8 @@ export function updateAppList() {
     window?.webContents?.send("setDeviceInfo", "appList", appList);
 }
 
-export function getAppIconPath(appID) {
-    let iconPath = path.join(__dirname, "images", "channel-icon.png");
+function getAppIconUrl(appID) {
+    let iconUrl = `file://${path.join(__dirname, "images", "channel-icon.png")}`;
     const index = getChannelIds().indexOf(appID);
     if (index >= 0) {
         const appIconPath = path.join(
@@ -110,10 +110,10 @@ export function getAppIconPath(appID) {
             getRecentPackage(index).hashCode() + ".png"
         );
         if (fs.existsSync(appIconPath)) {
-            iconPath = appIconPath;
+            iconUrl = `file://${appIconPath}`;
         }
     }
-    return iconPath;
+    return iconUrl;
 }
 
 export function loadPackage(id) {
