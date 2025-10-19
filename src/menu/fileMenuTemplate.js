@@ -8,7 +8,7 @@
 import prompt from "electron-prompt";
 import * as dialog from "../helpers/dialog";
 import { closeChannel } from "../helpers/window";
-import { loadUrl, loadBrsTvApp } from "../helpers/files";
+import { loadUrl } from "../helpers/files";
 import { loadPackage, loadSource, clearRecentFiles } from "./menuService";
 
 export const fileMenuTemplate = {
@@ -196,16 +196,6 @@ export const fileMenuTemplate = {
                     },
                 },
             ],
-        },
-        { type: "separator" },
-        {
-            id: "open-brs-home",
-            label: "Open BrightScript TV",
-            accelerator: "CmdOrCtrl+T",
-            enabled: true,
-            click: () => {
-                loadBrsTvApp();
-            },
         },
         { type: "separator" },
         {
