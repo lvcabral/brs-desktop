@@ -415,8 +415,30 @@ globalThis.addEventListener(
 );
 
 // Toggle Full Screen when Double Click
+let clickTimeout = null;
 display.ondblclick = function () {
+    // Clear the click timeout to prevent the toast from showing
+    if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        clickTimeout = null;
+    }
     api.toggleFullScreen();
+};
+// Warn user to use keyboard
+display.onclick = function () {
+    const settings = api.getPreferences();
+    const displayToast = !settings?.simulator?.options?.includes("disableClickToast");
+    console.log("Display clicked", settings?.simulator?.options);
+    if (currentApp.running && displayToast) {
+        // Delay the toast to allow double-click to cancel it
+        if (clickTimeout) {
+            clearTimeout(clickTimeout);
+        }
+        clickTimeout = setTimeout(() => {
+            showToast("Use the keyboard or a gamepad to interact with the app. Double click toggles full screen.", 5000);
+            clickTimeout = null;
+        }, 250); // 250ms delay to detect double-click
+    }
 };
 
 // Helper functions

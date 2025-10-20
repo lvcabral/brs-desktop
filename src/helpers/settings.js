@@ -179,6 +179,10 @@ export function getSettings(window) {
                                             label: "Disable Home Screen mode",
                                             value: "disableHomeScreen",
                                         },
+                                        {
+                                            label: "Disable warning to use keyboard or gamepad on display click",
+                                            value: "disableClickToast",
+                                        },
                                     ],
                                     help: "Configure your preferences for the Simulator window and debugging tools",
                                 },
