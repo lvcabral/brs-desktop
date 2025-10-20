@@ -119,7 +119,7 @@ contextBridge.exposeInMainWorld("api", {
             "currentApp",
             "reset",
             "openAppPackage",
-            "closeApp",
+            "closeSimulator",
         ];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);

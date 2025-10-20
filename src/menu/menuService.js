@@ -20,7 +20,8 @@ import { isInstallerEnabled } from "../server/installer";
 import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
-import { loadFile, loadUrl, editorCodeFile } from "../helpers/files";
+import { loadFile, loadUrl } from "../helpers/files";
+import { EDITOR_CODE_BRS } from "../constants";
 import path from "node:path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
@@ -180,8 +181,8 @@ ipcMain.on("addRecentPackage", (event, currentApp) => {
     rebuildMenu();
 });
 
-ipcMain.on("addRecentSource", (event, filePath) => {
-    if (filePath === editorCodeFile) {
+ipcMain.on("addRecentSource", (_, filePath) => {
+    if (filePath.endsWith(EDITOR_CODE_BRS)) {
         return;
     }
     let idx = recentFiles.brs.indexOf(filePath);

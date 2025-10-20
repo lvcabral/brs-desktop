@@ -12,17 +12,18 @@ import { runOnPeerRoku, resetPeerRoku } from "./roku";
 import { appFocused } from "./window";
 import { subscribeECP } from "../server/ecp";
 import { isValidUrl } from "./util";
+import { BRS_HOME_APP_PATH, EDITOR_CODE_BRS } from "../constants";
 import { zipSync, strToU8 } from "fflate";
 import path from "node:path";
 import fs from "node:fs";
 
-export const editorCodeFile = path.join(app.getPath("userData"), "editor_code.brs");
-
 export function loadFile(file, input) {
     resetPeerRoku();
-    if (file == undefined) return;
+    if (!file?.length) return;
     const window = BrowserWindow.fromId(1);
-    focusWindow(window);
+    if (file[0] !== BRS_HOME_APP_PATH) {
+        focusWindow(window);
+    }
     let filePath = file?.[0]?.split("?")[0] ?? "";
     if (filePath.startsWith("./")) {
         filePath = path.join(__dirname, filePath);
@@ -88,6 +89,7 @@ ipcMain.on("saveIcon", (_, data) => {
     saveFile(iconPath, data.iconData);
 });
 ipcMain.on("runCode", (_, code) => {
+    const editorCodeFile = path.join(app.getPath("userData"), EDITOR_CODE_BRS);
     fs.writeFileSync(editorCodeFile, code);
     loadFile([editorCodeFile]);
 });

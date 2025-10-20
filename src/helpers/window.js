@@ -141,7 +141,7 @@ export function createWindow(name, options) {
         win.reload();
     });
 
-    ipcMain.on("closeApp", () => {
+    ipcMain.on("closeSimulator", () => {
         win.close();
         app.quit();
     });

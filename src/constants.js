@@ -19,3 +19,6 @@ export const DEFAULT_USRPWD = "rokudev";
 
 // BrightScript Home Application
 export const BRS_HOME_APP_PATH = "./assets/brs-home.bpk";
+
+// Editor temporary file name
+export const EDITOR_CODE_BRS = "editor_code.brs";

@@ -107,10 +107,8 @@ brs.subscribe("desktop", (event, data) => {
         brs.deviceData.appList = structuredClone(appList);
     } else if (event === "launch") {
         if (typeof data?.app === "string") {
-            console.info("Launching app:", data.app);
             if (data.app === "tv-off") {
-                // Close the application
-                api.send("closeApp");
+                api.send("closeSimulator");
                 return;
             } else if (data.app === "add-apps") {
                 api.send("openAppPackage");
@@ -138,7 +136,6 @@ brs.subscribe("desktop", (event, data) => {
             api.send("runFile", BRS_HOME_APP_PATH);
         } else if (launchAppId !== "" && event === "closed") {
             const app = appList.find((a) => a.id === launchAppId);
-            console.info("Launching app after previous closed:", app?.id, app?.path);
             if (app?.path?.startsWith("http") || app?.path?.startsWith("file:")) {
                 api.send("runUrl", app.path);
             } else if (app?.path) {
