@@ -10,18 +10,17 @@ import { DateTime } from "luxon";
 import path from "node:path";
 import ElectronPreferences from "@lvcabral/electron-preferences";
 import { setAspectRatio } from "./window";
-import { enableECP, disableECP, subscribeECP } from "../server/ecp";
-import { enableTelnet, disableTelnet, subscribeTelnet } from "../server/telnet";
+import { enableECP, disableECP } from "../server/ecp";
+import { enableTelnet, disableTelnet } from "../server/telnet";
 import {
     enableInstaller,
     disableInstaller,
     setPort,
     isInstallerEnabled,
     setPassword,
-    subscribeInstaller,
 } from "../server/installer";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
-import { WEB_INSTALLER_PORT, DEFAULT_USRPWD, ECP_PORT, TELNET_PORT } from "../constants";
+import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
 
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
@@ -1067,33 +1066,7 @@ export function getModelName(model) {
     return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }
 
-// Server Events
-
-subscribeECP("settings", updateECPStatus);
-
-export function updateECPStatus(event, enabled) {
-    if (event === "enabled") {
-        updateServerStatus("ECP", "ecp-api", enabled, ECP_PORT);
-    }
-}
-
-subscribeInstaller("settings", updateInstallerStatus);
-
-export function updateInstallerStatus(event, data) {
-    if (event === "enabled") {
-        updateServerStatus("Installer", "web-installer", data.enabled, data.port);
-    }
-}
-
-subscribeTelnet("settings", updateTelnetStatus);
-
-export function updateTelnetStatus(event, enabled) {
-    if (event === "enabled") {
-        updateServerStatus("Telnet", "telnet", enabled, TELNET_PORT);
-    }
-}
-
-function updateServerStatus(service, menuItem, enabled, port) {
+export function updateServerStatus(service, menuItem, enabled, port) {
     setPreference(`services.${service.toLowerCase()}`, enabled ? ["enabled"] : []);
     checkMenuItem(menuItem, enabled);
     const window = BrowserWindow.fromId(1);
