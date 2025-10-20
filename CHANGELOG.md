@@ -17,10 +17,11 @@ This version of the BrightScript Simulator can execute code compatible with lang
 
 * Bump to v2.0.0 and upgraded Electron to v2.9 [@lvcabral](https://github.com/lvcabral) in [#190](https://github.com/lvcabral/brs-desktop/pull/190)
 * Added a message dialog to warn users that SceneGraph is in alpha stage by [@lvcabral](https://github.com/lvcabral) in [#191](https://github.com/lvcabral/brs-desktop/pull/191)
-* Add closed caption style settings and startup SceneGraph warning dialog by [@lvcabral](https://github.com/lvcabral) in [#194](https://github.com/lvcabral/brs-desktop/pull/194)
+* Added closed caption style settings and startup SceneGraph warning dialog by [@lvcabral](https://github.com/lvcabral) in [#194](https://github.com/lvcabral/brs-desktop/pull/194)
 * Return new ECP device info fields introduced in Roku OS 15 by [@lvcabral](https://github.com/lvcabral) in [#193](https://github.com/lvcabral/brs-desktop/pull/193)
 * Added BRS bouncing splash video by [@lvcabral](https://github.com/lvcabral) in [#186](https://github.com/lvcabral/brs-desktop/pull/186)
-* Moved `keepDisplayOnExit` and `perfStats` options from `simulator` to `display` tab on Settings screen by [@lvcabral](https://github.com/lvcabral)
+* Implemented simulator home screen and improved app list handling by [@lvcabral](https://github.com/lvcabral) in [#196](https://github.com/lvcabral/brs-desktop/pull/196)
+* Moved `keepDisplayOnExit` and `perfStats` options from `simulator` to `display` tab on Settings screen by [@lvcabral](https://github.com/lvcabral) in [#196](https://github.com/lvcabral/brs-desktop/pull/196)
 * Bump `brs-engine` to v2.0.0-alpha.16 [@lvcabral](https://github.com/lvcabral) - main changes since last release:
   * v1.8.6 - Changed the internal device assets (fonts, sounds, images and libraries) to be stored in the `common.zip` file that holds the `common:/` volume in the file system, and mainly this release brings a fix for the `m` context when using indexed get to retrieve functions. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.6))
   * v1.8.7 - Brings the undocumented signature for `InStr()` function with only 2 parameters, the  `roTimespan.totalMicroseconds()` method and the `Type()` function returning "legacy" types (unless you pass version 3 parameter). Other important fixes to highlight are the support for boxed values as array indexes and having `roBoolean` to be properly comparable. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.7))
