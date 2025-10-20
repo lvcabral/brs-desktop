@@ -18,7 +18,7 @@ export const SSDP_PORT = 1900;
 export const DEFAULT_USRPWD = "rokudev";
 
 // BrightScript Home Application
-export const BRS_HOME_APP_PATH = "./assets/brs-home.bpk";
+export const BRS_HOME_APP_PATH = "./assets/brs-home.zip";
 
 // Editor temporary file name
 export const EDITOR_CODE_BRS = "editor_code.brs";

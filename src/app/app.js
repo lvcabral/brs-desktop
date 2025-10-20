@@ -56,7 +56,7 @@ let editor = null;
 // Read settings for home screen mode
 const initialSettings = api.getPreferences();
 let brsHomeMode = !initialSettings?.simulator?.options?.includes("disableHomeScreen");
-const clientId = brs.deviceData.clientId.replaceAll("-", "");
+// Custom key mappings
 const customKeys = new Map();
 customKeys.set("NumpadMultiply", "info");
 // Support for Games with multi_key_events=1 in the manifest
@@ -218,7 +218,7 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
     try {
         const fileExt = filePath.split(".").pop()?.toLowerCase().split("?")[0];
         let password = "";
-        let debugState = true;
+        let debugState = !filePath.includes(BRS_HOME_APP_PATH);
         if (fileExt === "bpk") {
             const settings = api.getPreferences();
             password = settings?.device?.developerPwd ?? "";
@@ -230,7 +230,6 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
         brs.setDebugState(debugState);
         if (brsHomeMode) {
             launchAppId = BRS_HOME_APP_PATH;
-            password = filePath.includes(BRS_HOME_APP_PATH) ? clientId : password;
         }
         brs.execute(
             filePath.split("?")[0],
