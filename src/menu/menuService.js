@@ -21,13 +21,13 @@ import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile, loadUrl, editorCodeFile } from "../helpers/files";
-import fs from "node:fs";
 import path from "node:path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
 
 const isMacOS = process.platform === "darwin";
-const maxFiles = 7;
+const maxFiles = 21;
+const maxMenuFiles = 7;
 const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
 const recentMenuIndex = 3;
@@ -35,6 +35,7 @@ const recentMenuIndex = 3;
 let fileMenuIndex = 0;
 let recentFiles;
 let menuTemplate;
+restoreRecentFiles();
 // External Functions
 export function createMenu() {
     menuTemplate = [
@@ -67,10 +68,6 @@ export function createShortMenu() {
     rebuildMenu(true);
 }
 
-export function getChannelIds() {
-    return recentFiles.ids;
-}
-
 export function getRecentPackage(index) {
     return recentFiles.zip[index];
 }
@@ -85,35 +82,27 @@ export function clearRecentFiles() {
     rebuildMenu();
 }
 
-export function updateAppList() {
+export function getAppList() {
     const appList = [];
     for (const [index, id] of recentFiles.ids.entries()) {
+        const zipPath = recentFiles.zip[index];
+        const iconUrl = path.join(app.getPath("userData"), zipPath.hashCode() + ".png");
         appList.push({
             id: id,
             title: recentFiles.names[index],
             version: recentFiles.versions[index],
-            path: recentFiles.zip[index],
-            icon: getAppIconUrl(id),
+            path: zipPath,
+            icon: `file://${iconUrl}`,
         });
     }
+    return appList;
+}
+
+export function updateAppList() {
+    const appList = getAppList();
     globalThis.sharedObject.deviceInfo.appList = appList;
     const window = BrowserWindow.fromId(1);
     window?.webContents?.send("setDeviceInfo", "appList", appList);
-}
-
-function getAppIconUrl(appID) {
-    let iconUrl = `file://${path.join(__dirname, "images", "channel-icon.png")}`;
-    const index = getChannelIds().indexOf(appID);
-    if (index >= 0) {
-        const appIconPath = path.join(
-            app.getPath("userData"),
-            getRecentPackage(index).hashCode() + ".png"
-        );
-        if (fs.existsSync(appIconPath)) {
-            iconUrl = `file://${appIconPath}`;
-        }
-    }
-    return iconUrl;
 }
 
 export function loadPackage(id) {
@@ -255,7 +244,7 @@ function rebuildMenu(template = false) {
     const appMenu = app.applicationMenu;
     if (isMacOS || template) {
         const recentMenu = menuTemplate[fileMenuIndex].submenu[recentMenuIndex].submenu;
-        for (let index = 0; index < maxFiles; index++) {
+        for (let index = 0; index < maxMenuFiles; index++) {
             let fileMenu = recentMenu[index];
             if (index < recentFiles.zip.length) {
                 fileMenu.label = recentFiles.zip[index];
@@ -264,8 +253,8 @@ function rebuildMenu(template = false) {
                 fileMenu.visible = false;
             }
         }
-        for (let index = 0; index < maxFiles; index++) {
-            let fileMenu = recentMenu[index + maxFiles + 2];
+        for (let index = 0; index < maxMenuFiles; index++) {
+            let fileMenu = recentMenu[index + maxMenuFiles + 2];
             if (index < recentFiles.brs.length) {
                 fileMenu.label = recentFiles.brs[index];
                 fileMenu.visible = true;
@@ -273,8 +262,8 @@ function rebuildMenu(template = false) {
                 fileMenu.visible = false;
             }
         }
-        const brsEnd = maxFiles * 2 + 2;
-        recentMenu[maxFiles].visible = recentFiles.zip.length === 0;
+        const brsEnd = maxMenuFiles * 2 + 2;
+        recentMenu[maxMenuFiles].visible = recentFiles.zip.length === 0;
         recentMenu[brsEnd].visible = recentFiles.brs.length === 0;
         recentMenu[recentMenu.length - 1].enabled =
             recentFiles.zip.length + recentFiles.brs.length > 0;
@@ -303,7 +292,7 @@ function rebuildMenu(template = false) {
         }
     } else {
         const recentMenu = appMenu.getMenuItemById("file-open-recent").submenu;
-        for (let index = 0; index < maxFiles; index++) {
+        for (let index = 0; index < maxMenuFiles; index++) {
             let fileMenu = recentMenu.getMenuItemById(`zip-${index}`);
             if (index < recentFiles.zip.length) {
                 fileMenu.label = recentFiles.zip[index];
@@ -312,7 +301,7 @@ function rebuildMenu(template = false) {
                 fileMenu.visible = false;
             }
         }
-        for (let index = 0; index < maxFiles; index++) {
+        for (let index = 0; index < maxMenuFiles; index++) {
             let fileMenu = recentMenu.getMenuItemById(`brs-${index}`);
             if (index < recentFiles.brs.length) {
                 fileMenu.label = recentFiles.brs[index];

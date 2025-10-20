@@ -114,9 +114,12 @@ contextBridge.exposeInMainWorld("api", {
             "contextMenu",
             "keySent",
             "runCode",
+            "runFile",
             "runUrl",
             "currentApp",
             "reset",
+            "openAppPackage",
+            "closeApp",
         ];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
@@ -141,6 +144,7 @@ contextBridge.exposeInMainWorld("api", {
             "setCaptionStyle",
             "setCustomKeys",
             "setAudioMute",
+            "setPerfStats",
             "toggleStatusBar",
             "serverStatus",
             "copyScreenshot",

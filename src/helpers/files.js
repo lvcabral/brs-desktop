@@ -6,13 +6,12 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getAudioMuted, getSimulatorOption } from "./settings";
+import { getAudioMuted, getSimulatorOption, getDisplayOption } from "./settings";
 import { subscribeInstaller } from "../server/installer";
 import { runOnPeerRoku, resetPeerRoku } from "./roku";
 import { appFocused } from "./window";
 import { subscribeECP } from "../server/ecp";
 import { isValidUrl } from "./util";
-import { BRS_TV_APP_URL } from "../constants";
 import { zipSync, strToU8 } from "fflate";
 import path from "node:path";
 import fs from "node:fs";
@@ -24,18 +23,19 @@ export function loadFile(file, input) {
     if (file == undefined) return;
     const window = BrowserWindow.fromId(1);
     focusWindow(window);
-    let filePath;
-    if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
-        filePath = file[0];
-    } else {
-        window.webContents.send("console", `Invalid file: ${file[0]}`, true);
+    let filePath = file?.[0]?.split("?")[0] ?? "";
+    if (filePath.startsWith("./")) {
+        filePath = path.join(__dirname, filePath);
+    }
+    if (!fs.existsSync(filePath)) {
+        window.webContents.send("console", `Invalid file: ${filePath}`, true);
         return;
     }
     const fileName = path.parse(filePath).base;
     const fileExt = path.parse(filePath).ext.toLowerCase();
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
-            executeFile(window, fs.readFileSync(filePath), filePath, input);
+            executeFile(window, fs.readFileSync(filePath), file[0], input);
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);
         }
@@ -60,19 +60,6 @@ export async function loadUrl(url, input) {
             if (response.status === 200) {
                 const fileData = await response.arrayBuffer();
                 executeFile(window, Buffer.from(fileData), url, input);
-            } else if (url === BRS_TV_APP_URL) {
-                window.webContents.send(
-                    "console",
-                    `Error opening BrightScript TV: ${response.statusText}`,
-                    true
-                );
-            } else if (url.endsWith("?tvmode=1")) {
-                window.webContents.send(
-                    "console",
-                    `Error fetching BrightScript TV App: ${response.statusText} ${response.status}`,
-                    true
-                );
-                loadBrsTvApp();
             } else {
                 window.webContents.send(
                     "console",
@@ -88,10 +75,6 @@ export async function loadUrl(url, input) {
     }
 }
 
-export function loadBrsTvApp() {
-    loadUrl(BRS_TV_APP_URL);
-}
-
 export function saveFile(file, data) {
     fs.writeFileSync(file, new Buffer.from(data, "base64"));
 }
@@ -101,12 +84,15 @@ ipcMain.on("saveFile", (_, data) => {
     saveFile(data[0], data[1]);
 });
 ipcMain.on("saveIcon", (_, data) => {
-    const iconPath = path.join(app.getPath("userData"), data[0] + ".png");
-    saveFile(iconPath, data[1]);
+    const iconPath = path.join(app.getPath("userData"), data.iconId + ".png");
+    saveFile(iconPath, data.iconData);
 });
 ipcMain.on("runCode", (_, code) => {
     fs.writeFileSync(editorCodeFile, code);
     loadFile([editorCodeFile]);
+});
+ipcMain.on("runFile", (_, filePath) => {
+    loadFile([filePath]);
 });
 ipcMain.on("runUrl", (_, url) => {
     loadUrl(url);
@@ -141,15 +127,12 @@ function executeFile(window, fileData, filePath, input) {
         "executeFile",
         filePath,
         fileData,
-        !getSimulatorOption("keepDisplayOnExit"),
+        !getDisplayOption("keepDisplayOnExit"),
         getAudioMuted(),
         getSimulatorOption("debugOnCrash"),
         input
     );
-    if (filePath.endsWith("?tvmode=1")) {
-        // Do send to peer Roku when in TV Mode
-        return
-    } else if (fileExt === ".brs") {
+    if (fileExt === ".brs") {
         runOnPeerRoku(packageBrs(fileData));
     } else if (fileExt !== ".bpk") {
         runOnPeerRoku(fileData);

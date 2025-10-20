@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
 import { getSimulatorOption, getTitleOverlayTheme } from "./settings";
+import * as dialog from "../helpers/dialog";
 import path from "node:path";
 import jetpack from "fs-jetpack";
 
@@ -138,6 +139,15 @@ export function createWindow(name, options) {
     });
     ipcMain.on("reset", () => {
         win.reload();
+    });
+
+    ipcMain.on("closeApp", () => {
+        win.close();
+        app.quit();
+    });
+
+    ipcMain.on("openAppPackage", () => {
+        dialog.openChannelPackage();
     });
 
     if (isMacOS) {

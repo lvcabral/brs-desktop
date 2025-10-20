@@ -15,7 +15,7 @@ import {
     clearCounters,
     updateStatus,
 } from "./statusbar";
-import { BRS_TV_APP_URL } from "../constants";
+import { BRS_HOME_APP_PATH } from "../constants";
 
 const isMacOS = api.processPlatform() === "darwin";
 
@@ -49,10 +49,11 @@ if ("assets" in customDeviceInfo) {
     delete customDeviceInfo.assets;
 }
 // Initialize device and subscribe to events
+let appList = structuredClone(customDeviceInfo.appList ?? []);
 let currentApp = { id: "", running: false };
 let debugMode = "continue";
 let editor = null;
-let brsTVMode = false;
+let brsHomeMode = true;
 const clientId = brs.deviceData.clientId.replaceAll("-", "");
 const customKeys = new Map();
 customKeys.set("NumpadMultiply", "info");
@@ -89,25 +90,31 @@ try {
 api.send("serialNumber", brs.getSerialNumber());
 api.send("engineVersion", brs.getVersion());
 
-let selectedApp = "";
+let launchAppId = "";
 
 brs.subscribe("desktop", (event, data) => {
     if (event === "loaded") {
-        if (!brsTVMode) {
-            selectedApp = "";
+        if (!brsHomeMode) {
+            launchAppId = "";
         }
         currentApp = data;
         appLoaded(data);
     } else if (event === "started") {
         currentApp = data;
         stats.style.visibility = "visible";
+        brs.deviceData.appList = structuredClone(appList);
     } else if (event === "launch") {
         if (typeof data?.app === "string") {
-            if (brsTVMode && data.app.includes("TVOff")) {
-                selectedApp = "";
+            console.info("Launching app:", data.app);
+            if (data.app === "tv-off") {
+                // Close the application
+                api.send("closeApp");
+                return;
+            } else if (data.app === "add-apps") {
+                api.send("openAppPackage");
                 return;
             }
-            selectedApp = data.app + (brsTVMode ? "?tvmode=1" : "");
+            launchAppId = data.app;
         }
     } else if (event === "browser") {
         if (data?.url) {
@@ -124,17 +131,22 @@ brs.subscribe("desktop", (event, data) => {
         }
     } else if (event === "closed" || event === "error") {
         appTerminated();
-        if (selectedApp !== "" && event === "closed") {
-            api.send("runUrl", selectedApp);
-            if (brsTVMode) {
-                selectedApp = BRS_TV_APP_URL;
+        if (brsHomeMode && launchAppId === BRS_HOME_APP_PATH) {
+            showCloseMessage(event, data, false);
+            api.send("runFile", BRS_HOME_APP_PATH);
+        } else if (launchAppId !== "" && event === "closed") {
+            const app = appList.find((a) => a.id === launchAppId);
+            console.info("Launching app after previous closed:", app?.id, app?.path);
+            if (app?.path?.startsWith("http") || app?.path?.startsWith("file:")) {
+                api.send("runUrl", app.path);
+            } else if (app?.path) {
+                api.send("runFile", app.path);
             }
         } else {
             showCloseMessage(event, data);
-            selectedApp = "";
-            brsTVMode = false;
             brs.setDebugState(true);
         }
+        launchAppId = brsHomeMode ? BRS_HOME_APP_PATH : "";
     } else if (event === "redraw") {
         redrawEvent(data);
     } else if (event === "control") {
@@ -153,7 +165,7 @@ brs.subscribe("desktop", (event, data) => {
             debugMode = data.level;
         }
     } else if (event === "icon") {
-        api.send("saveIcon", [currentApp.path.hashCode(), data]);
+        api.send("saveIcon", { iconId: currentApp.path.hashCode(), iconData: data });
     } else if (event === "registry") {
         api.send("updateRegistry", data);
     } else if (event === "reset") {
@@ -186,6 +198,8 @@ api.receive("setDeviceInfo", function (key, value) {
         brs.deviceData[key] = value;
         if (key === "deviceModel") {
             api.send("serialNumber", brs.getSerialNumber());
+        } else if (key === "appList") {
+            appList = structuredClone(value);
         }
     }
 });
@@ -202,18 +216,19 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
     try {
         const fileExt = filePath.split(".").pop()?.toLowerCase().split("?")[0];
         let password = "";
+        let debugState = true;
         if (fileExt === "bpk") {
             const settings = api.getPreferences();
             password = settings?.device?.developerPwd ?? "";
+            debugState = false;
         }
         if (fileExt !== "brs") {
             data = data.buffer;
         }
-        brsTVMode = filePath === BRS_TV_APP_URL || filePath.endsWith("?tvmode=1");
-        brs.setDebugState(!brsTVMode);
-        if (brsTVMode) {
-            selectedApp = BRS_TV_APP_URL;
-            password = fileExt === "bpk" ? clientId : "";
+        brs.setDebugState(debugState);
+        if (brsHomeMode) {
+            launchAppId = BRS_HOME_APP_PATH;
+            password = filePath.includes(BRS_HOME_APP_PATH) ? clientId : password;
         }
         brs.execute(
             filePath.split("?")[0],
@@ -237,7 +252,7 @@ api.receive("closeChannel", function (source, appID) {
         if (appID && appID !== currentApp.id) {
             return;
         }
-        selectedApp = "";
+        launchAppId = "";
         brs.terminate(source);
     }
 });
@@ -296,6 +311,9 @@ api.receive("setAudioMute", function (mute) {
     brs.setAudioMute(mute);
     setAudioStatus(mute);
 });
+api.receive("setPerfStats", function (enabled) {
+    brs.enableStats(enabled);
+});
 
 // Splash video handling
 function startSplashVideo() {
@@ -307,9 +325,10 @@ function startSplashVideo() {
     const originalControls = player.controls;
     const originalAutoplay = player.autoplay;
     const originalMuted = player.muted;
-
+    // Define assets
+    const splashVideo = "assets/brs-bouncing.mp4";
     // Configure and start splash video
-    player.src = "./videos/brs-bouncing.mp4";
+    player.src = splashVideo;
     player.controls = false;
     player.autoplay = false;
     player.muted = true;
@@ -321,6 +340,9 @@ function startSplashVideo() {
         if (canvas) {
             const ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        if (player.src.endsWith(splashVideo)) {
+            api.send("runFile", BRS_HOME_APP_PATH);
         }
 
         // Restore original state
@@ -395,7 +417,7 @@ display.ondblclick = function () {
 };
 
 // Helper functions
-function showCloseMessage(event, data) {
+function showCloseMessage(event, data, success = true) {
     if (event === "error") {
         showToast(`Error: ${data}`, 5000, true);
     } else if (data.endsWith("CRASH")) {
@@ -404,9 +426,7 @@ function showCloseMessage(event, data) {
         showToast(`Missing developer password, unable to unpack the app!`, 5000, true);
     } else if (data !== "EXIT_USER_NAV") {
         showToast(`App closed with exit reason: ${data}`, 5000, true);
-    } else if (brsTVMode) {
-        showToast(`BrightScript TV shut down with success!`);
-    } else {
+    } else if (success) {
         showToast(`App closed with success!`);
     }
 }
@@ -416,11 +436,16 @@ function appLoaded(appData) {
     if (settings?.display?.overscanMode) {
         brs.setOverscanMode(settings.display.overscanMode);
     }
-    if (settings?.simulator?.options) {
-        brs.enableStats(settings.simulator.options.includes("perfStats"));
+    if (settings?.display?.options) {
+        brs.enableStats(settings.display.options.includes("perfStats"));
     }
-    api.updateTitle(`${appData.title} - ${defaultTitle}`);
-    if (!brsTVMode) {
+    if (appData.title === defaultTitle) {
+        api.updateTitle(defaultTitle);
+    } else {
+        api.updateTitle(`${appData.title} - ${defaultTitle}`);
+    }
+    const isHomeApp = appData.path.includes(BRS_HOME_APP_PATH);
+    if (!isHomeApp) {
         if (appData.path.toLowerCase().endsWith(".brs")) {
             api.send("addRecentSource", appData.path);
         } else {
@@ -431,7 +456,7 @@ function appLoaded(appData) {
     api.enableMenuItem("save-screen", true);
     api.enableMenuItem("copy-screen", true);
     api.send("currentApp", appData);
-    updateStatus(appData, brsTVMode);
+    updateStatus(appData, isHomeApp);
 }
 
 function appTerminated() {
