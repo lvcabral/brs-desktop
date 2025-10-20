@@ -53,7 +53,9 @@ let appList = structuredClone(customDeviceInfo.appList ?? []);
 let currentApp = { id: "", running: false };
 let debugMode = "continue";
 let editor = null;
-let brsHomeMode = true;
+// Read settings for home screen mode
+const initialSettings = api.getPreferences();
+let brsHomeMode = !initialSettings?.simulator?.options?.includes("disableHomeScreen") ?? true;
 const clientId = brs.deviceData.clientId.replaceAll("-", "");
 const customKeys = new Map();
 customKeys.set("NumpadMultiply", "info");
@@ -314,6 +316,9 @@ api.receive("setAudioMute", function (mute) {
 api.receive("setPerfStats", function (enabled) {
     brs.enableStats(enabled);
 });
+api.receive("setHomeScreenMode", function (enabled) {
+    brsHomeMode = enabled;
+});
 
 // Splash video handling
 function startSplashVideo() {
@@ -341,7 +346,8 @@ function startSplashVideo() {
             const ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-        if (player.src.endsWith(splashVideo)) {
+        // Only run home app if home screen mode is enabled
+        if (player.src.endsWith(splashVideo) && brsHomeMode) {
             api.send("runFile", BRS_HOME_APP_PATH);
         }
 
@@ -490,8 +496,17 @@ function redrawEvent(redraw) {
 // SceneGraph Warning Dialog
 function initSceneGraphWarningDialog() {
     const dontShowWarning = localStorage.getItem("sceneGraphWarningDismissed") === "true";
+    const settings = api.getPreferences();
+    const splashVideoEnabled =
+        !settings?.simulator?.options?.includes("disableSplashVideo") ?? true;
+
     if (dontShowWarning) {
-        setTimeout(() => startSplashVideo(), 500);
+        if (splashVideoEnabled) {
+            setTimeout(() => startSplashVideo(), 500);
+        } else if (brsHomeMode) {
+            // If splash is disabled but home screen is enabled, run home app directly
+            setTimeout(() => api.send("runFile", BRS_HOME_APP_PATH), 500);
+        }
         return;
     }
     // Get dialog elements
@@ -499,7 +514,11 @@ function initSceneGraphWarningDialog() {
     const closeButton = document.getElementById("close-scenegraph-warning");
     const dontShowAgainCheckbox = document.getElementById("dont-show-warning-again");
     if (!dialog || !closeButton || !dontShowAgainCheckbox) {
-        setTimeout(() => startSplashVideo(), 500);
+        if (splashVideoEnabled) {
+            setTimeout(() => startSplashVideo(), 500);
+        } else if (brsHomeMode) {
+            setTimeout(() => api.send("runFile", BRS_HOME_APP_PATH), 500);
+        }
         return;
     }
     // Show the dialog after a short delay to ensure UI is ready
@@ -512,7 +531,11 @@ function initSceneGraphWarningDialog() {
             localStorage.setItem("sceneGraphWarningDismissed", "true");
         }
         dialog.style.display = "none";
-        setTimeout(() => startSplashVideo(), 300);
+        if (splashVideoEnabled) {
+            setTimeout(() => startSplashVideo(), 300);
+        } else if (brsHomeMode) {
+            setTimeout(() => api.send("runFile", BRS_HOME_APP_PATH), 300);
+        }
     };
     closeButton.addEventListener("click", handleDialogClose);
     document.addEventListener("keydown", (event) => {

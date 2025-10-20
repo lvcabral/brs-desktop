@@ -190,7 +190,7 @@ app.on("ready", () => {
 // Load Settings
 function loadSettings(mainWindow, startup) {
     // Load Simulator Settings
-    let settings = getSettings(mainWindow);
+    const settings = getSettings(mainWindow);
     if (settings.preferences.simulator) {
         if (settings.value("simulator.options")) {
             const options = settings.value("simulator.options");

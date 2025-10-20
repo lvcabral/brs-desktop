@@ -145,6 +145,7 @@ contextBridge.exposeInMainWorld("api", {
             "setCustomKeys",
             "setAudioMute",
             "setPerfStats",
+            "setHomeScreenMode",
             "toggleStatusBar",
             "serverStatus",
             "copyScreenshot",

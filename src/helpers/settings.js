@@ -171,6 +171,14 @@ export function getSettings(window) {
                                             label: "Show the Status Bar",
                                             value: "statusBar",
                                         },
+                                        {
+                                            label: "Disable Splash Video on Startup",
+                                            value: "disableSplashVideo",
+                                        },
+                                        {
+                                            label: "Disable Home Screen mode",
+                                            value: "disableHomeScreen",
+                                        },
                                     ],
                                     help: "Configure your preferences for the Simulator window and debugging tools",
                                 },
@@ -430,7 +438,7 @@ export function getSettings(window) {
                                             label: "Show Performance Statistics Overlay",
                                             value: "perfStats",
                                         },
-                                    ]
+                                    ],
                                 },
                             ],
                         },
@@ -831,7 +839,7 @@ export function saveCaptionStyle() {
             { id: "text/color", preference: "textColor" },
             { id: "text/opacity", preference: "textOpacity" },
             { id: "background/color", preference: "backgroundColor" },
-            { id: "background/opacity", preference: "backgroundOpacity" }
+            { id: "background/opacity", preference: "backgroundOpacity" },
         ];
         // Update or add each caption style setting
         for (const mapping of captionStyleMappings) {
@@ -1095,12 +1103,14 @@ function saveSimulatorSettings(options, window) {
     if (options) {
         const onTop = options.includes("alwaysOnTop");
         const statusBar = options.includes("statusBar");
+        const homeScreenMode = !options.includes("disableHomeScreen");
         checkMenuItem("on-top", onTop);
         window.setAlwaysOnTop(onTop);
         if (statusBarVisible != statusBar) {
             checkMenuItem("status-bar", statusBar);
             setStatusBar(statusBar);
         }
+        window.webContents.send("setHomeScreenMode", homeScreenMode);
         setThemeSource(undefined, true);
     }
 }
@@ -1270,7 +1280,8 @@ function getTextSizeArray() {
         { label: "Medium", value: "medium" },
         { label: "Small", value: "small" },
         { label: "Small", value: "small" },
-        { label: "Extra Small", value: "extra small" },];
+        { label: "Extra Small", value: "extra small" },
+    ];
 }
 function getCaptionColorArray() {
     return [
