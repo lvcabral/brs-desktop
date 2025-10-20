@@ -55,7 +55,7 @@ let debugMode = "continue";
 let editor = null;
 // Read settings for home screen mode
 const initialSettings = api.getPreferences();
-let brsHomeMode = !initialSettings?.simulator?.options?.includes("disableHomeScreen") ?? true;
+let brsHomeMode = !initialSettings?.simulator?.options?.includes("disableHomeScreen");
 const clientId = brs.deviceData.clientId.replaceAll("-", "");
 const customKeys = new Map();
 customKeys.set("NumpadMultiply", "info");
@@ -435,7 +435,10 @@ display.onclick = function () {
             clearTimeout(clickTimeout);
         }
         clickTimeout = setTimeout(() => {
-            showToast("Use the keyboard or a gamepad to interact with the app. Double click toggles full screen.", 5000);
+            showToast(
+                "Use the keyboard or a gamepad to interact with the app. Double click toggles full screen.",
+                5000
+            );
             clickTimeout = null;
         }, 250); // 250ms delay to detect double-click
     }
@@ -516,8 +519,7 @@ function redrawEvent(redraw) {
 function initSceneGraphWarningDialog() {
     const dontShowWarning = localStorage.getItem("sceneGraphWarningDismissed") === "true";
     const settings = api.getPreferences();
-    const splashVideoEnabled =
-        !settings?.simulator?.options?.includes("disableSplashVideo") ?? true;
+    const splashVideoEnabled = !settings?.simulator?.options?.includes("disableSplashVideo");
 
     if (dontShowWarning) {
         if (splashVideoEnabled) {
