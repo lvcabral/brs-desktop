@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { app } from "electron";
+import { app, BrowserWindow } from "electron";
 import { subscribeInstaller } from "../server/installer";
 import { subscribeECP } from "../server/ecp";
 import { subscribeTelnet } from "../server/telnet";
@@ -48,6 +48,7 @@ function ecpEvents(event, data) {
             }
             loadFile([zipPath], input);
         } else {
+            const window = BrowserWindow.fromId(1);
             window?.webContents.send(
                 "console",
                 `ECP Launch: File not found! App Id=${appID}`,

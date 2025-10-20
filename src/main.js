@@ -170,6 +170,7 @@ app.on("ready", () => {
         });
     mainWindow.webContents.on("dom-ready", () => {
         let settings = getSettings(mainWindow);
+        const status = "enabled";
         if (!firstLoad) {
             updateServerStatus(
                 "ECP",
