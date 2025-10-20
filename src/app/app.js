@@ -99,12 +99,12 @@ brs.subscribe("desktop", (event, data) => {
         if (!brsHomeMode) {
             launchAppId = "";
         }
+        brs.deviceData.appList = structuredClone(appList);
         currentApp = data;
         appLoaded(data);
     } else if (event === "started") {
         currentApp = data;
         stats.style.visibility = "visible";
-        brs.deviceData.appList = structuredClone(appList);
     } else if (event === "launch") {
         if (typeof data?.app === "string") {
             if (data.app === "tv-off") {
