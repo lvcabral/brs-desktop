@@ -199,6 +199,9 @@ api.receive("setDeviceInfo", function (key, value) {
             api.send("serialNumber", brs.getSerialNumber());
         } else if (key === "appList") {
             appList = structuredClone(value);
+            if (currentApp.running && currentApp.path === BRS_HOME_APP_PATH) {
+                api.send("runFile", BRS_HOME_APP_PATH);
+            }
         }
     }
 });

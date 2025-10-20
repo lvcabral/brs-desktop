@@ -80,6 +80,7 @@ export function getRecentSource(index) {
 export function clearRecentFiles() {
     recentFiles = { ids: [], zip: [], names: [], versions: [], brs: [] };
     saveRecentFiles();
+    updateAppList();
     rebuildMenu();
 }
 
