@@ -17,5 +17,8 @@ export const SSDP_PORT = 1900;
 // Default Roku authentication credentials
 export const DEFAULT_USRPWD = "rokudev";
 
-// BrightScript TV application
-export const BRS_TV_APP_URL = "https://lvcabral.com/brs/apps/brstv.bpk";
+// BrightScript Home Application
+export const BRS_HOME_APP_PATH = "./assets/brs-home.bpk";
+
+// Editor temporary file name
+export const EDITOR_CODE_BRS = "editor_code.brs";

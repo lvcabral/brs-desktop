@@ -22,6 +22,7 @@ import {
     checkMenuItem,
     isMenuItemEnabled,
     loadPackage,
+    getAppList,
     updateAppList,
 } from "./menu/menuService";
 import { loadFile } from "./helpers/files";
@@ -84,7 +85,7 @@ const deviceInfo = {
     maxSimulStreams: 2,
     audioVolume: 50,
     audioLanguage: "en",
-    appList: [],
+    appList: getAppList(),
 };
 
 // Get Network Gateway
@@ -189,7 +190,7 @@ app.on("ready", () => {
 // Load Settings
 function loadSettings(mainWindow, startup) {
     // Load Simulator Settings
-    let settings = getSettings(mainWindow);
+    const settings = getSettings(mainWindow);
     if (settings.preferences.simulator) {
         if (settings.value("simulator.options")) {
             const options = settings.value("simulator.options");

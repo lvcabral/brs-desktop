@@ -238,8 +238,9 @@ export function updateStatus(data, tvMode = false) {
         setStatusColor();
         // Show different icon and text based on TV mode
         if (tvMode) {
-            statusIconFile.innerHTML = "<i class='fa fa-tv'></i>";
-            statusFile.innerText = data.title || "BrightScript TV";
+            statusIconFile.innerHTML = "<i class='fa fa-home'></i>";
+            statusFile.innerText = "Home";
+            filePath = "";
         } else {
             statusIconFile.innerHTML = data.path.toLowerCase().endsWith(".brs")
                 ? "<i class='fa fa-file'></i>"
@@ -248,8 +249,8 @@ export function updateStatus(data, tvMode = false) {
                 data.path,
                 Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
             );
+            filePath = data.path;
         }
-        filePath = data.path;
         if (data.version !== "") {
             statusVersion.innerText = data.version;
             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";

@@ -9,6 +9,7 @@ import Codec from "json-url";
 import WebTerminal from "@lvcabral/terminal";
 import { nanoid } from "nanoid";
 import { CodeMirrorManager, getThemeCss } from "./codemirror";
+import { EDITOR_CODE_BRS, BRS_HOME_APP_PATH } from "../constants";
 import Toastify from "toastify-js";
 import packageInfo from "../../package.json";
 
@@ -39,7 +40,12 @@ const moreButton = document.getElementById("more-options");
 const dropdown = document.getElementById("more-options-dropdown");
 
 const simulator = globalThis.opener;
-let [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
+const [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
+
+let simulatorApp = { ...currentApp };
+if (simulatorApp.path === BRS_HOME_APP_PATH) {
+    simulatorApp.running = false;
+}
 
 const prompt = "Brightscript Debugger";
 const appId = packageInfo.name;
@@ -133,7 +139,10 @@ function main() {
     editorManager.editor.on("contextmenu", (event) => {
         api.send("contextMenu");
     });
-    hideEditor(!(currentApp.title === undefined || currentApp.title.endsWith("editor_code.brs")));
+    const appPath = simulatorApp?.path;
+    if (appPath && !(appPath.endsWith(EDITOR_CODE_BRS) || appPath === BRS_HOME_APP_PATH)) {
+        hideEditor(true);
+    }
     populateCodeSelector();
     // Subscribe to Engine events and initialize Console
     brs.subscribe(appId, handleEngineEvents);
@@ -150,7 +159,7 @@ function main() {
         breakButton.style.display = "none";
         terminal.output("<br />");
         terminal.setPrompt();
-    } else if (currentApp.running) {
+    } else if (simulatorApp.running) {
         runButton.style.display = "none";
         endButton.style.display = "inline";
         breakButton.style.display = "inline";
@@ -168,10 +177,17 @@ function updateButtons() {
 
 function handleEngineEvents(event, data) {
     if (event === "loaded") {
-        currentApp = data;
-        hideEditor(!currentApp.title.endsWith("editor_code.brs"));
+        if (data.path === BRS_HOME_APP_PATH) {
+            return;
+        }
+        simulatorApp = data;
+        const appPath = simulatorApp?.path ?? "";
+        hideEditor(!appPath.endsWith(EDITOR_CODE_BRS));
     } else if (event === "started") {
-        currentApp = data;
+        if (data.path === BRS_HOME_APP_PATH) {
+            return;
+        }
+        simulatorApp = data;
         console.info(`Execution started ${appId}`);
         runButton.style.display = "none";
         endButton.style.display = "inline";
@@ -192,7 +208,7 @@ function handleEngineEvents(event, data) {
         }
         scrollToBottom();
     } else if (event === "closed" || event === "error") {
-        currentApp = data;
+        simulatorApp = data;
         console.info(`Execution terminated! ${event}: ${data}`);
         terminal.idle();
         runButton.style.display = "inline";
@@ -474,7 +490,7 @@ function importCode() {
 
 function resetApp(id = "", code = "") {
     populateCodeSelector(id);
-    if (currentApp.running) {
+    if (simulatorApp.running) {
         brs.terminate("EXIT_USER_NAV");
         clearTerminal();
     }
@@ -605,7 +621,7 @@ export function runCode() {
 }
 
 function startDebug() {
-    if (currentApp.running) {
+    if (simulatorApp.running) {
         brs.debug("break");
     } else {
         showToast("There is nothing running to debug!", 3000, true);
@@ -613,13 +629,13 @@ function startDebug() {
 }
 
 function resumeExecution() {
-    if (currentApp.running) {
+    if (simulatorApp.running) {
         brs.debug("cont");
     }
 }
 
 function endExecution() {
-    if (currentApp.running) {
+    if (simulatorApp.running) {
         brs.terminate("EXIT_USER_NAV");
     } else {
         showToast("There is nothing running to terminate!", 3000, true);
@@ -641,7 +657,7 @@ function hotKeys(event) {
     } else if (isHotKey(event, "KeyL")) {
         event.preventDefault();
         clearTerminal();
-    } else if (currentApp.running) {
+    } else if (simulatorApp.running) {
         if (
             (isMacOS && event.code === "KeyC" && event.ctrlKey) ||
             (!isMacOS && event.code === "KeyB" && event.ctrlKey)
