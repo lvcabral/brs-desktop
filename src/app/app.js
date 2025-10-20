@@ -449,7 +449,7 @@ function showCloseMessage(event, data, success = true) {
     if (event === "error") {
         showToast(`Error: ${data}`, 5000, true);
     } else if (data.endsWith("CRASH")) {
-        showToast(`App crashed, open DevTools console for details!`, 5000, true);
+        showToast(`App crashed, open console for details!`, 5000, true);
     } else if (data === "EXIT_MISSING_PASSWORD") {
         showToast(`Missing developer password, unable to unpack the app!`, 5000, true);
     } else if (data !== "EXIT_USER_NAV") {
