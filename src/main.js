@@ -22,7 +22,6 @@ import {
     enableMenuItem,
     checkMenuItem,
     isMenuItemEnabled,
-    loadPackage,
     getAppList,
     updateAppList,
 } from "./menu/menuService";
