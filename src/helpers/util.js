@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import os from "node:os";
 import network from "network";
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 const isWindows = process.platform === "win32";
 
@@ -70,7 +70,7 @@ export async function getGateway() {
         gateWayData.name = gw.name ?? "";
         gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";
         if (gateWayData.type === "WiFiConnection") {
-            gateWayData.ssid = getSSID() ?? "WiFi";
+            gateWayData.ssid = getSSID();
         }
         console.log(
             `Gateway: ${gateWayData.ip} - Interface: ${gateWayData.name} - Type: ${gateWayData.type} - SSID: ${gateWayData.ssid}`
@@ -111,27 +111,32 @@ async function getActiveInterface() {
 
 function getSSID() {
     const platform = os.platform();
-    let command;
+    let ssid = "WiFi";
+    let command = "";
 
     if (platform === "win32") {
         command = "netsh wlan show interfaces";
     } else if (platform === "darwin") {
-        command =
-            "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I";
+        // Requires `sudo ipconfig setverbose 1` to get SSID info
+        command = "ipconfig getsummary en0";
     } else if (platform === "linux") {
         command = "iwgetid -r";
     }
-
-    let ssid;
-    const result = execSync(command).toString();
-    if (platform === "win32") {
-        const match = result.match(/SSID\s*:\s*(.+)/);
-        ssid = match ? match[1] : null;
-    } else if (platform === "darwin") {
-        const match = result.match(/ SSID: (.+)/);
-        ssid = match ? match[1] : null;
-    } else if (platform === "linux") {
-        ssid = result.trim();
+    // Run the command and parse the SSID
+    try {
+        const result = spawnSync(command, { shell: true, encoding: "utf8" }).stdout;
+        if (platform === "win32") {
+            const match = result.match(/SSID\s*:\s*(.+)/);
+            ssid = match ? match[1].trim() : ssid;
+        } else if (platform === "darwin") {
+            const match = result.match(/ SSID : (.+)/);
+            ssid = match ? match[1].trim() : ssid;
+        } else if (platform === "linux") {
+            ssid = result.trim() ?? ssid;
+        }
+    } catch (err) {
+        // Log error but don't crash - just return null
+        console.warn(`Unable to get SSID: ${err.message}`);
     }
     return ssid;
 }
