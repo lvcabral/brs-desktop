@@ -117,8 +117,8 @@ function getSSID() {
     if (platform === "win32") {
         command = "netsh wlan show interfaces";
     } else if (platform === "darwin") {
-        command =
-            "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I";
+        // Requires `sudo ipconfig setverbose 1` to get SSID info
+        command = "ipconfig getsummary en0";
     } else if (platform === "linux") {
         command = "iwgetid -r";
     }
@@ -129,7 +129,7 @@ function getSSID() {
             const match = result.match(/SSID\s*:\s*(.+)/);
             ssid = match ? match[1].trim() : ssid;
         } else if (platform === "darwin") {
-            const match = result.match(/ SSID: (.+)/);
+            const match = result.match(/ SSID : (.+)/);
             ssid = match ? match[1].trim() : ssid;
         } else if (platform === "linux") {
             ssid = result.trim() ?? ssid;
