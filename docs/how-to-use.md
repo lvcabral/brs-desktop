@@ -11,7 +11,6 @@ This section will describe the options available on the application menu, please
 ### File Menu
 
 - Open App Package - Allows the user to select a zip/bpk file to load an app
-- Open Source File - Allows the user to select a brs file to run on the simulator
 - Open from URL - Downloads a file to run on the simulator (zip/bpk or brs)
 - Open Recent - Display a submenu with the recent opened files
 - Save Screenshot - Saves the current app screen image to a png file
@@ -20,7 +19,7 @@ This section will describe the options available on the application menu, please
 ### Edit Menu
 
 - Copy Screenshot - Copies the current screen image to the OS clipboard
-- Settings - Opens the Settings configuration screen (see details below)
+- Settings - Opens the Settings configuration screen (see details below) - In macOS this option is under the Application menu
 
 ### Device Menu
 
@@ -66,7 +65,7 @@ This screen allows the user to configure multiple features, including some not a
 
 ## Editor and Console
 
-This screen can be used to write BrightScript code and run it directly in the Simulator, or just to debug any app currently running, using the Micro Debugger in the console.
+This screen can be used to write (or import) BrightScript code and run it directly in the Simulator, or just to debug any app currently running, using the Micro Debugger in the console.
 
 ![Editor and Console](images/editor-console.png)
 
