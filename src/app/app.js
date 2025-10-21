@@ -8,7 +8,14 @@
 import "./styles/main.css";
 import "./styles/fontawesome.min.css";
 import "../helpers/hash";
-import { setStatusColor, setAudioStatus, showToast, clearCounters } from "./statusbar";
+import {
+    setStatusColor,
+    setAudioStatus,
+    showToast,
+    clearCounters,
+    updateStatus,
+} from "./statusbar";
+import { BRS_HOME_APP_PATH } from "../constants";
 
 const isMacOS = api.processPlatform() === "darwin";
 
@@ -42,16 +49,16 @@ if ("assets" in customDeviceInfo) {
     delete customDeviceInfo.assets;
 }
 // Initialize device and subscribe to events
+let appList = structuredClone(customDeviceInfo.appList ?? []);
 let currentApp = { id: "", running: false };
 let debugMode = "continue";
 let editor = null;
+// Read settings for home screen mode
+const initialSettings = api.getPreferences();
+let brsHomeMode = !initialSettings?.simulator?.options?.includes("disableHomeScreen");
+// Custom key mappings
 const customKeys = new Map();
-customKeys.set("Comma", "rev");
-customKeys.set("Period", "fwd");
-customKeys.set("Space", "play");
 customKeys.set("NumpadMultiply", "info");
-customKeys.set("KeyA", "a");
-customKeys.set("KeyZ", "b");
 // Support for Games with multi_key_events=1 in the manifest
 customKeys.set("ShiftLeft", "playonly");
 customKeys.set("Shift+ArrowRight", "right");
@@ -85,20 +92,29 @@ try {
 api.send("serialNumber", brs.getSerialNumber());
 api.send("engineVersion", brs.getVersion());
 
-let selectedApp = "";
+let launchAppId = "";
 
 brs.subscribe("desktop", (event, data) => {
     if (event === "loaded") {
-        selectedApp = "";
+        if (!brsHomeMode) {
+            launchAppId = "";
+        }
+        brs.deviceData.appList = structuredClone(appList);
         currentApp = data;
         appLoaded(data);
     } else if (event === "started") {
         currentApp = data;
         stats.style.visibility = "visible";
     } else if (event === "launch") {
-        console.info(`App launched: ${data}`);
-        if (data?.app) {
-            selectedApp = data.app;
+        if (typeof data?.app === "string") {
+            if (data.app === "turn-off") {
+                api.send("closeSimulator");
+                return;
+            } else if (data.app === "add-apps") {
+                api.send("openAppPackage");
+                return;
+            }
+            launchAppId = data.app;
         }
     } else if (event === "browser") {
         if (data?.url) {
@@ -115,12 +131,21 @@ brs.subscribe("desktop", (event, data) => {
         }
     } else if (event === "closed" || event === "error") {
         appTerminated();
-        if (selectedApp !== "" && event === "closed") {
-            api.send("runUrl", selectedApp);
+        if (brsHomeMode && launchAppId === BRS_HOME_APP_PATH) {
+            showCloseMessage(event, data, false);
+            api.send("runFile", BRS_HOME_APP_PATH);
+        } else if (launchAppId !== "" && event === "closed") {
+            const app = appList.find((a) => a.id === launchAppId);
+            if (app?.path?.startsWith("http") || app?.path?.startsWith("file:")) {
+                api.send("runUrl", app.path);
+            } else if (app?.path) {
+                api.send("runFile", app.path);
+            }
         } else {
             showCloseMessage(event, data);
+            brs.setDebugState(true);
         }
-        selectedApp = "";
+        launchAppId = brsHomeMode ? BRS_HOME_APP_PATH : "";
     } else if (event === "redraw") {
         redrawEvent(data);
     } else if (event === "control") {
@@ -139,7 +164,7 @@ brs.subscribe("desktop", (event, data) => {
             debugMode = data.level;
         }
     } else if (event === "icon") {
-        api.send("saveIcon", [currentApp.path.hashCode(), data]);
+        api.send("saveIcon", { iconId: currentApp.path.hashCode(), iconData: data });
     } else if (event === "registry") {
         api.send("updateRegistry", data);
     } else if (event === "reset") {
@@ -172,6 +197,11 @@ api.receive("setDeviceInfo", function (key, value) {
         brs.deviceData[key] = value;
         if (key === "deviceModel") {
             api.send("serialNumber", brs.getSerialNumber());
+        } else if (key === "appList") {
+            appList = structuredClone(value);
+            if (currentApp.running && currentApp.path === BRS_HOME_APP_PATH) {
+                api.send("runFile", BRS_HOME_APP_PATH);
+            }
         }
     }
 });
@@ -186,17 +216,23 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
     }
 
     try {
-        const fileExt = filePath.split(".").pop()?.toLowerCase();
+        const fileExt = filePath.split(".").pop()?.toLowerCase().split("?")[0];
         let password = "";
+        let debugState = !filePath.includes(BRS_HOME_APP_PATH);
         if (fileExt === "bpk") {
             const settings = api.getPreferences();
             password = settings?.device?.developerPwd ?? "";
+            debugState = false;
         }
         if (fileExt !== "brs") {
             data = data.buffer;
         }
+        brs.setDebugState(debugState);
+        if (brsHomeMode) {
+            launchAppId = BRS_HOME_APP_PATH;
+        }
         brs.execute(
-            filePath,
+            filePath.split("?")[0],
             data,
             {
                 clearDisplayOnExit: clear,
@@ -216,6 +252,9 @@ api.receive("closeChannel", function (source, appID) {
     if (currentApp.running) {
         if (appID && appID !== currentApp.id) {
             return;
+        }
+        if (!brsHomeMode) {
+            launchAppId = "";
         }
         brs.terminate(source);
     }
@@ -275,6 +314,23 @@ api.receive("setAudioMute", function (mute) {
     brs.setAudioMute(mute);
     setAudioStatus(mute);
 });
+api.receive("setPerfStats", function (enabled) {
+    brs.enableStats(enabled);
+});
+api.receive("setHomeScreenMode", function (enabled) {
+    brsHomeMode = enabled;
+    if (brsHomeMode) {
+        launchAppId = BRS_HOME_APP_PATH;
+        if (!currentApp.running) {
+            api.send("runFile", BRS_HOME_APP_PATH);
+        }
+    } else {
+        launchAppId = "";
+        if (currentApp.running && currentApp.path.includes(BRS_HOME_APP_PATH)) {
+            brs.terminate("EXIT_USER_NAV");
+        }
+    }
+});
 
 // Splash video handling
 function startSplashVideo() {
@@ -286,9 +342,10 @@ function startSplashVideo() {
     const originalControls = player.controls;
     const originalAutoplay = player.autoplay;
     const originalMuted = player.muted;
-
+    // Define assets
+    const splashVideo = "assets/brs-bouncing.mp4";
     // Configure and start splash video
-    player.src = "./videos/brs-bouncing.mp4";
+    player.src = splashVideo;
     player.controls = false;
     player.autoplay = false;
     player.muted = true;
@@ -300,6 +357,10 @@ function startSplashVideo() {
         if (canvas) {
             const ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        // Only run home app if home screen mode is enabled
+        if (player.src.endsWith(splashVideo) && brsHomeMode) {
+            api.send("runFile", BRS_HOME_APP_PATH);
         }
 
         // Restore original state
@@ -317,7 +378,7 @@ function startSplashVideo() {
     player.addEventListener("error", restorePlayer, { once: true });
 
     // Start playing
-    player.play().catch(error => {
+    player.play().catch((error) => {
         console.warn("Could not play splash video:", error);
     });
 }
@@ -342,7 +403,8 @@ globalThis.addEventListener(
             brs.debug("cont");
         }
         if (isMacOS) {
-            api.enableMenuItem("close-channel", currentApp.running);
+            const isHomeApp = currentApp.path.includes(BRS_HOME_APP_PATH);
+            api.enableMenuItem("close-channel", currentApp.running && !isHomeApp);
             api.enableMenuItem("save-screen", currentApp.running);
             api.enableMenuItem("copy-screen", currentApp.running);
         }
@@ -369,22 +431,46 @@ globalThis.addEventListener(
 );
 
 // Toggle Full Screen when Double Click
+let clickTimeout = null;
 display.ondblclick = function () {
+    // Clear the click timeout to prevent the toast from showing
+    if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        clickTimeout = null;
+    }
     api.toggleFullScreen();
+};
+// Warn user to use keyboard
+display.onclick = function () {
+    const settings = api.getPreferences();
+    const displayToast = !settings?.simulator?.options?.includes("disableClickToast");
+    if (currentApp.running && displayToast) {
+        // Delay the toast to allow double-click to cancel it
+        if (clickTimeout) {
+            clearTimeout(clickTimeout);
+        }
+        clickTimeout = setTimeout(() => {
+            showToast(
+                "Use the keyboard or a gamepad to interact with the app. Double click toggles full screen.",
+                5000
+            );
+            clickTimeout = null;
+        }, 250); // 250ms delay to detect double-click
+    }
 };
 
 // Helper functions
-function showCloseMessage(event, data) {
+function showCloseMessage(event, data, success = true) {
     if (event === "error") {
         showToast(`Error: ${data}`, 5000, true);
     } else if (data.endsWith("CRASH")) {
-        showToast(`App crashed, open DevTools console for details!`, 5000, true);
+        showToast(`App crashed, open console for details!`, 5000, true);
     } else if (data === "EXIT_MISSING_PASSWORD") {
         showToast(`Missing developer password, unable to unpack the app!`, 5000, true);
     } else if (data !== "EXIT_USER_NAV") {
         showToast(`App closed with exit reason: ${data}`, 5000, true);
-    } else {
-        showToast(`App finished with success!`);
+    } else if (success) {
+        showToast(`App closed with success!`);
     }
 }
 
@@ -393,19 +479,25 @@ function appLoaded(appData) {
     if (settings?.display?.overscanMode) {
         brs.setOverscanMode(settings.display.overscanMode);
     }
-    if (settings?.simulator?.options) {
-        brs.enableStats(settings.simulator.options.includes("perfStats"));
+    if (settings?.display?.options) {
+        brs.enableStats(settings.display.options.includes("perfStats"));
     }
-    api.updateTitle(`${appData.title} - ${defaultTitle}`);
-    if (appData.path.toLowerCase().endsWith(".brs")) {
-        api.send("addRecentSource", appData.path);
+    if (appData.title === defaultTitle) {
+        api.updateTitle(defaultTitle);
     } else {
-        api.send("addRecentPackage", appData);
+        api.updateTitle(`${appData.title} - ${defaultTitle}`);
     }
-    api.enableMenuItem("close-channel", true);
+    const isHomeApp = appData.path.includes(BRS_HOME_APP_PATH);
+    if (!isHomeApp) {
+        if (!appData.path.toLowerCase().endsWith(".brs")) {
+            api.send("addRecentPackage", appData);
+        }
+    }
+    api.enableMenuItem("close-channel", !isHomeApp);
     api.enableMenuItem("save-screen", true);
     api.enableMenuItem("copy-screen", true);
     api.send("currentApp", appData);
+    updateStatus(appData, isHomeApp);
 }
 
 function appTerminated() {
@@ -438,9 +530,17 @@ function redrawEvent(redraw) {
 
 // SceneGraph Warning Dialog
 function initSceneGraphWarningDialog() {
-    const dontShowWarning = localStorage.getItem('sceneGraphWarningDismissed') === 'true';
+    const dontShowWarning = localStorage.getItem("sceneGraphWarningDismissed") === "true";
+    const settings = api.getPreferences();
+    const splashVideoEnabled = !settings?.simulator?.options?.includes("disableSplashVideo");
+
     if (dontShowWarning) {
-        setTimeout(() => startSplashVideo(), 500);
+        if (splashVideoEnabled) {
+            setTimeout(() => startSplashVideo(), 500);
+        } else if (brsHomeMode) {
+            // If splash is disabled but home screen is enabled, run home app directly
+            setTimeout(() => api.send("runFile", BRS_HOME_APP_PATH), 500);
+        }
         return;
     }
     // Get dialog elements
@@ -448,7 +548,11 @@ function initSceneGraphWarningDialog() {
     const closeButton = document.getElementById("close-scenegraph-warning");
     const dontShowAgainCheckbox = document.getElementById("dont-show-warning-again");
     if (!dialog || !closeButton || !dontShowAgainCheckbox) {
-        setTimeout(() => startSplashVideo(), 500);
+        if (splashVideoEnabled) {
+            setTimeout(() => startSplashVideo(), 500);
+        } else if (brsHomeMode) {
+            setTimeout(() => api.send("runFile", BRS_HOME_APP_PATH), 500);
+        }
         return;
     }
     // Show the dialog after a short delay to ensure UI is ready
@@ -458,14 +562,18 @@ function initSceneGraphWarningDialog() {
     // Function to handle dialog dismissal
     const handleDialogClose = () => {
         if (dontShowAgainCheckbox.checked) {
-            localStorage.setItem('sceneGraphWarningDismissed', 'true');
+            localStorage.setItem("sceneGraphWarningDismissed", "true");
         }
         dialog.style.display = "none";
-        setTimeout(() => startSplashVideo(), 300);
+        if (splashVideoEnabled) {
+            setTimeout(() => startSplashVideo(), 300);
+        } else if (brsHomeMode) {
+            setTimeout(() => api.send("runFile", BRS_HOME_APP_PATH), 300);
+        }
     };
     closeButton.addEventListener("click", handleDialogClose);
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && dialog.style.display === "flex") {
+        if (["Escape", "Enter"].includes(event.key) && dialog.style.display === "flex") {
             handleDialogClose();
         }
     });

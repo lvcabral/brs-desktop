@@ -20,21 +20,22 @@ import { isInstallerEnabled } from "../server/installer";
 import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
-import { loadFile, loadUrl, editorCodeFile } from "../helpers/files";
-import fs from "node:fs";
+import { loadFile, loadUrl } from "../helpers/files";
 import path from "node:path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
 
 const isMacOS = process.platform === "darwin";
-const maxFiles = 7;
+const maxFiles = 21;
+const maxMenuFiles = 7;
 const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
+const recentMenuIndex = 2;
 
 let fileMenuIndex = 0;
-let recentMenuIndex = 3;
 let recentFiles;
 let menuTemplate;
+restoreRecentFiles();
 // External Functions
 export function createMenu() {
     menuTemplate = [
@@ -67,53 +68,38 @@ export function createShortMenu() {
     rebuildMenu(true);
 }
 
-export function getChannelIds() {
-    return recentFiles.ids;
-}
-
 export function getRecentPackage(index) {
     return recentFiles.zip[index];
 }
 
-export function getRecentSource(index) {
-    return recentFiles.brs[index];
-}
-
 export function clearRecentFiles() {
-    recentFiles = { ids: [], zip: [], names: [], versions: [], brs: [] };
+    recentFiles = { ids: [], zip: [], names: [], versions: [] };
     saveRecentFiles();
+    updateAppList();
     rebuildMenu();
 }
 
-export function updateAppList() {
+export function getAppList() {
     const appList = [];
-    for (const [id, index] of recentFiles.ids.entries()) {
+    for (const [index, id] of recentFiles.ids.entries()) {
+        const zipPath = recentFiles.zip[index];
+        const iconUrl = path.join(app.getPath("userData"), zipPath.hashCode() + ".png");
         appList.push({
             id: id,
             title: recentFiles.names[index],
             version: recentFiles.versions[index],
-            path: recentFiles.zip[index],
-            icon: getAppIconPath(id),
+            path: zipPath,
+            icon: `file://${iconUrl}`,
         });
     }
+    return appList;
+}
+
+export function updateAppList() {
+    const appList = getAppList();
     globalThis.sharedObject.deviceInfo.appList = appList;
     const window = BrowserWindow.fromId(1);
     window?.webContents?.send("setDeviceInfo", "appList", appList);
-}
-
-export function getAppIconPath(appID) {
-    let iconPath = path.join(__dirname, "images", "channel-icon.png");
-    const index = getChannelIds().indexOf(appID);
-    if (index >= 0) {
-        const appIconPath = path.join(
-            app.getPath("userData"),
-            getRecentPackage(index).hashCode() + ".png"
-        );
-        if (fs.existsSync(appIconPath)) {
-            iconPath = appIconPath;
-        }
-    }
-    return iconPath;
 }
 
 export function loadPackage(id) {
@@ -126,19 +112,6 @@ export function loadPackage(id) {
         }
     } else {
         console.log("No recent package to load!");
-    }
-}
-
-export function loadSource(id) {
-    let brs = getRecentSource(id);
-    if (typeof brs === "string") {
-        if (brs.startsWith("http")) {
-            loadUrl(brs);
-        } else {
-            loadFile([brs]);
-        }
-    } else {
-        console.log("No recent file to load!");
     }
 }
 
@@ -191,22 +164,6 @@ ipcMain.on("addRecentPackage", (event, currentApp) => {
     rebuildMenu();
 });
 
-ipcMain.on("addRecentSource", (event, filePath) => {
-    if (filePath === editorCodeFile) {
-        return;
-    }
-    let idx = recentFiles.brs.indexOf(filePath);
-    if (idx >= 0) {
-        recentFiles.brs.splice(idx, 1);
-    }
-    recentFiles.brs.unshift(filePath);
-    if (recentFiles.brs.length > maxFiles) {
-        recentFiles.brs.length = maxFiles;
-    }
-    saveRecentFiles();
-    rebuildMenu();
-});
-
 ipcMain.on("enableMenuItem", (event, id, enable) => {
     enableMenuItem(id, enable);
 });
@@ -219,7 +176,7 @@ ipcMain.on("contextMenu", (event) => {
 
 // Internal functions
 function restoreRecentFiles() {
-    let recentFilesDefault = { ids: [], zip: [], names: [], versions: [], brs: [] };
+    let recentFilesDefault = { ids: [], zip: [], names: [], versions: [] };
     try {
         recentFiles = userDataDir.read(recentFilesJson, "json");
     } catch (err) {
@@ -255,7 +212,7 @@ function rebuildMenu(template = false) {
     const appMenu = app.applicationMenu;
     if (isMacOS || template) {
         const recentMenu = menuTemplate[fileMenuIndex].submenu[recentMenuIndex].submenu;
-        for (let index = 0; index < maxFiles; index++) {
+        for (let index = 0; index < maxMenuFiles; index++) {
             let fileMenu = recentMenu[index];
             if (index < recentFiles.zip.length) {
                 fileMenu.label = recentFiles.zip[index];
@@ -264,20 +221,8 @@ function rebuildMenu(template = false) {
                 fileMenu.visible = false;
             }
         }
-        for (let index = 0; index < maxFiles; index++) {
-            let fileMenu = recentMenu[index + maxFiles + 2];
-            if (index < recentFiles.brs.length) {
-                fileMenu.label = recentFiles.brs[index];
-                fileMenu.visible = true;
-            } else {
-                fileMenu.visible = false;
-            }
-        }
-        const brsEnd = maxFiles * 2 + 2;
-        recentMenu[maxFiles].visible = recentFiles.zip.length === 0;
-        recentMenu[brsEnd].visible = recentFiles.brs.length === 0;
-        recentMenu[recentMenu.length - 1].enabled =
-            recentFiles.zip.length + recentFiles.brs.length > 0;
+        recentMenu[maxMenuFiles].visible = recentFiles.zip.length === 0;
+        recentMenu.at(-1).enabled = recentFiles.zip.length > 0;
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         if (isMacOS && window) {
             if (appMenu.getMenuItemById("view-menu")) {
@@ -303,7 +248,7 @@ function rebuildMenu(template = false) {
         }
     } else {
         const recentMenu = appMenu.getMenuItemById("file-open-recent").submenu;
-        for (let index = 0; index < maxFiles; index++) {
+        for (let index = 0; index < maxMenuFiles; index++) {
             let fileMenu = recentMenu.getMenuItemById(`zip-${index}`);
             if (index < recentFiles.zip.length) {
                 fileMenu.label = recentFiles.zip[index];
@@ -312,19 +257,8 @@ function rebuildMenu(template = false) {
                 fileMenu.visible = false;
             }
         }
-        for (let index = 0; index < maxFiles; index++) {
-            let fileMenu = recentMenu.getMenuItemById(`brs-${index}`);
-            if (index < recentFiles.brs.length) {
-                fileMenu.label = recentFiles.brs[index];
-                fileMenu.visible = true;
-            } else {
-                fileMenu.visible = false;
-            }
-        }
         recentMenu.getMenuItemById("zip-empty").visible = recentFiles.zip.length === 0;
-        recentMenu.getMenuItemById("brs-empty").visible = recentFiles.brs.length === 0;
-        recentMenu.getMenuItemById("file-clear").enabled =
-            recentFiles.zip.length + recentFiles.brs.length > 0;
+        recentMenu.getMenuItemById("file-clear").enabled = recentFiles.zip.length > 0;
     }
     if (window) {
         window.webContents.send("refreshMenu");

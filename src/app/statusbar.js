@@ -5,6 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
+import { ECP_PORT, WEB_INSTALLER_PORT } from "../constants";
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
@@ -37,11 +38,11 @@ statusError.innerText = "0";
 statusWarn.innerText = "0";
 let errorCount = 0;
 let warnCount = 0;
-let ECPPort = 8060;
+let ECPPort = ECP_PORT;
 statusECP.onclick = function () {
     api.openExternal(`http://localhost:${ECPPort}/query/device-info`);
 };
-let installerPort = 80;
+let installerPort = WEB_INSTALLER_PORT;
 statusWeb.onclick = function () {
     api.openExternal(`http://localhost:${installerPort}/`);
 };
@@ -67,9 +68,7 @@ let currentLocale = api.getDeviceInfo().locale;
 setLocaleStatus(currentLocale);
 // Subscribe Events
 brs.subscribe("statusbar", (event, data) => {
-    if (event === "loaded") {
-        updateStatus(data);
-    } else if (event === "closed") {
+    if (event === "closed") {
         updateStatus(false);
     } else if (event === "redraw") {
         redrawStatus(data);
@@ -170,6 +169,7 @@ export function clearCounters() {
     errorCount = 0;
     warnCount = 0;
 }
+
 // Function that shortens a path (based on code by https://stackoverflow.com/users/2149492/johnpan)
 function shortenPath(bigPath, maxLen) {
     let path = bigPath;
@@ -232,20 +232,25 @@ api.receive("setLocale", function (locale) {
     }
 });
 
-// Helper Functions
-
-function updateStatus(data) {
+export function updateStatus(data, homeMode = false) {
     if (data) {
         clearCounters();
         setStatusColor();
-        statusIconFile.innerHTML = data.path.toLowerCase().endsWith(".brs")
-            ? "<i class='fa fa-file'></i>"
-            : "<i class='fa fa-cube'></i>";
-        statusFile.innerText = shortenPath(
-            data.path,
-            Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
-        );
-        filePath = data.path;
+        // Show different icon and text based on TV mode
+        if (homeMode) {
+            statusIconFile.innerHTML = "<i class='fa fa-home'></i>";
+            statusFile.innerText = "Home";
+            filePath = "";
+        } else {
+            statusIconFile.innerHTML = data.path.toLowerCase().endsWith(".brs")
+                ? "<i class='fa fa-file'></i>"
+                : "<i class='fa fa-cube'></i>";
+            statusFile.innerText = shortenPath(
+                data.path,
+                Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
+            );
+            filePath = data.path;
+        }
         if (data.version !== "") {
             statusVersion.innerText = data.version;
             statusIconVersion.innerHTML = "<i class='fa fa-tag'></i>";
@@ -265,6 +270,7 @@ function updateStatus(data) {
         statusSepRes.style.display = "none";
     }
 }
+// Helper Functions
 
 function redrawStatus(fullscreen) {
     if (!fullscreen && api.isStatusEnabled()) {

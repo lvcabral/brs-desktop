@@ -9,6 +9,7 @@ import Codec from "json-url";
 import WebTerminal from "@lvcabral/terminal";
 import { nanoid } from "nanoid";
 import { CodeMirrorManager, getThemeCss } from "./codemirror";
+import { EDITOR_CODE_BRS, BRS_HOME_APP_PATH } from "../constants";
 import Toastify from "toastify-js";
 import packageInfo from "../../package.json";
 
@@ -39,7 +40,12 @@ const moreButton = document.getElementById("more-options");
 const dropdown = document.getElementById("more-options-dropdown");
 
 const simulator = globalThis.opener;
-let [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
+const [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
+
+let simulatorApp = { ...currentApp };
+if (simulatorApp.path === BRS_HOME_APP_PATH) {
+    simulatorApp.running = false;
+}
 
 const prompt = "Brightscript Debugger";
 const appId = packageInfo.name;
@@ -93,7 +99,8 @@ document.addEventListener("click", function (event) {
 document.getElementById("rename-option").addEventListener("click", renameCode);
 document.getElementById("saveas-option").addEventListener("click", saveAsCode);
 document.getElementById("delete-option").addEventListener("click", deleteCode);
-document.getElementById("export-option").addEventListener("click", exportCode);
+document.getElementById("export-brs-option").addEventListener("click", exportBrsCode);
+document.getElementById("export-json-option").addEventListener("click", exportJsonCode);
 document.getElementById("export-all-option")?.addEventListener("click", exportAllCode);
 document.getElementById("import-option").addEventListener("click", importCode);
 
@@ -133,7 +140,10 @@ function main() {
     editorManager.editor.on("contextmenu", (event) => {
         api.send("contextMenu");
     });
-    hideEditor(!(currentApp.title === undefined || currentApp.title.endsWith("editor_code.brs")));
+    const appPath = simulatorApp?.path;
+    if (appPath && !(appPath.endsWith(EDITOR_CODE_BRS) || appPath === BRS_HOME_APP_PATH)) {
+        hideEditor(true);
+    }
     populateCodeSelector();
     // Subscribe to Engine events and initialize Console
     brs.subscribe(appId, handleEngineEvents);
@@ -150,12 +160,19 @@ function main() {
         breakButton.style.display = "none";
         terminal.output("<br />");
         terminal.setPrompt();
-    } else if (currentApp.running) {
+    } else if (simulatorApp.running) {
         runButton.style.display = "none";
         endButton.style.display = "inline";
         breakButton.style.display = "inline";
     }
     editorManager.editor.focus();
+
+    editorContainer?.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!target.closest(".code-header")) {
+            editorManager.editor.focus();
+        }
+    });
 }
 
 function updateButtons() {
@@ -168,11 +185,17 @@ function updateButtons() {
 
 function handleEngineEvents(event, data) {
     if (event === "loaded") {
-        currentApp = data;
-        hideEditor(!currentApp.title.endsWith("editor_code.brs"));
+        if (data.path === BRS_HOME_APP_PATH) {
+            return;
+        }
+        simulatorApp = data;
+        const appPath = simulatorApp?.path ?? "";
+        hideEditor(!appPath.endsWith(EDITOR_CODE_BRS));
     } else if (event === "started") {
-        currentApp = data;
-        console.info(`Execution started ${appId}`);
+        if (data.path === BRS_HOME_APP_PATH) {
+            return;
+        }
+        simulatorApp = data;
         runButton.style.display = "none";
         endButton.style.display = "inline";
         breakButton.style.display = "inline";
@@ -192,8 +215,7 @@ function handleEngineEvents(event, data) {
         }
         scrollToBottom();
     } else if (event === "closed" || event === "error") {
-        currentApp = data;
-        console.info(`Execution terminated! ${event}: ${data}`);
+        simulatorApp = data;
         terminal.idle();
         runButton.style.display = "inline";
         endButton.style.display = "none";
@@ -393,33 +415,65 @@ async function deleteCode() {
         showToast("There is no code snippet selected to delete!", 3000, true);
     }
 }
-function exportCode() {
-    const codes = {};
-    let codeContent = editorManager.editor.getValue();
-    if (codeContent && codeContent.trim() !== "") {
-        if (codeSelect.value !== "0") {
-            let codeName = codeSelect.options[codeSelect.selectedIndex].text;
-            codes[currentId] = { name: codeName, content: codeContent };
-            const safeFileName = codeName
-                .toLowerCase()
-                .replace(/\s+/g, "-")
-                .replace(/^⏺︎ /, "")
-                .replace(/[^a-z0-9-]/g, "");
-            const json = JSON.stringify(codes, null, 2);
-            const blob = new Blob([json], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${safeFileName}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        } else {
-            showToast("Please save your Code Snipped before exporting!", 3000, true);
-            return;
-        }
-    } else {
-        showToast("There is no Code Snippet to Export", 3000, true);
+
+function exportBrsCode() {
+    exportCodeAs("brs");
+}
+
+function exportJsonCode() {
+    exportCodeAs("json");
+}
+
+function exportCodeAs(format) {
+    const codeContent = editorManager.editor.getValue();
+
+    if (typeof codeContent !== "string" || codeContent.trim() === "") {
+        showToast("There is no Source Code to export!", 3000, true);
+        return;
     }
+
+    // For JSON format, require saved snippet
+    if (format === "json" && codeSelect.value === "0") {
+        showToast("Please save your Code Snippet before exporting as JSON!", 3000, true);
+        return;
+    }
+
+    // Get filename
+    let fileName = "code";
+    if (codeSelect.value !== "0") {
+        const codeName = codeSelect.options[codeSelect.selectedIndex].text;
+        fileName = codeName
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/^⏺︎ /, "")
+            .replace(/[^a-z0-9-]/g, "");
+    }
+
+    // Create file content and blob
+    let fileContent, mimeType, extension;
+    if (format === "brs") {
+        fileContent = codeContent;
+        mimeType = "text/plain";
+        extension = "brs";
+    } else {
+        const codes = {
+            [currentId]: {
+                name: codeSelect.options[codeSelect.selectedIndex].text,
+                content: codeContent,
+            },
+        };
+        fileContent = JSON.stringify(codes, null, 2);
+        mimeType = "application/json";
+        extension = "json";
+    }
+    // Download file
+    const blob = new Blob([fileContent], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${fileName}.${extension}`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 function exportAllCode() {
@@ -446,25 +500,64 @@ function exportAllCode() {
 function importCode() {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "application/json";
+    input.accept = ".json,.brs,application/json,text/brs";
     input.onchange = (e) => {
         const file = input.files[0];
         const reader = new FileReader();
         reader.onload = (e) => {
-            const json = e.target.result;
-            const codes = JSON.parse(json);
-            for (const id in codes) {
-                const code = codes[id];
-                const value = `@=${code.name}=@${code.content}`;
-                localStorage.setItem(id, value);
+            let importedCodes = 0;
+            let loadId = currentId;
+            if (file?.name?.toLowerCase().endsWith(".brs")) {
+                const codeId = nanoid(10);
+                const codeName = file.name;
+                const codeContent = e.target?.result;
+                if (typeof codeContent === "string" && codeContent.trim() !== "") {
+                    const value = `@=${codeName}=@${codeContent}`;
+                    localStorage.setItem(codeId, value);
+                    importedCodes++;
+                    loadId = codeId;
+                }
+            } else {
+                const json = e.target.result;
+                let codes;
+                try {
+                    codes = JSON.parse(json);
+                } catch (error) {
+                    showToast("Invalid JSON file format!", 3000, true);
+                    return;
+                }
+                // Validate the codes object structure
+                if (!codes || typeof codes !== "object" || Array.isArray(codes)) {
+                    showToast("Invalid code snippets format: expected an object!", 3000, true);
+                    return;
+                }
+                for (const id in codes) {
+                    const code = codes[id];
+                    // Validate each code entry
+                    if (
+                        !code ||
+                        typeof code !== "object" ||
+                        typeof code.name !== "string" ||
+                        !code.name.trim() ||
+                        typeof code.content !== "string" ||
+                        !code.content.trim()
+                    ) {
+                        continue;
+                    }
+                    const value = `@=${code.name}=@${code.content}`;
+                    localStorage.setItem(id, value);
+                    importedCodes++;
+                }
+                loadId = Object.keys(codes)[0] ?? currentId;
             }
             populateCodeSelector(currentId);
-            if (Object.keys(codes).length === 1) {
+            if (importedCodes === 1) {
                 showToast("Code snippet imported to the simulator local storage!", 3000);
-                const loadId = Object.keys(codes)[0];
                 loadCode(loadId);
-            } else {
+            } else if (importedCodes > 1) {
                 showToast("Code snippets imported to the simulator local storage!", 3000);
+            } else {
+                showToast("No valid code snippets found to import!", 3000, true);
             }
         };
         reader.readAsText(file);
@@ -474,7 +567,7 @@ function importCode() {
 
 function resetApp(id = "", code = "") {
     populateCodeSelector(id);
-    if (currentApp.running) {
+    if (simulatorApp.running) {
         brs.terminate("EXIT_USER_NAV");
         clearTerminal();
     }
@@ -605,7 +698,7 @@ export function runCode() {
 }
 
 function startDebug() {
-    if (currentApp.running) {
+    if (simulatorApp.running) {
         brs.debug("break");
     } else {
         showToast("There is nothing running to debug!", 3000, true);
@@ -613,13 +706,13 @@ function startDebug() {
 }
 
 function resumeExecution() {
-    if (currentApp.running) {
+    if (simulatorApp.running) {
         brs.debug("cont");
     }
 }
 
 function endExecution() {
-    if (currentApp.running) {
+    if (simulatorApp.running) {
         brs.terminate("EXIT_USER_NAV");
     } else {
         showToast("There is nothing running to terminate!", 3000, true);
@@ -641,7 +734,7 @@ function hotKeys(event) {
     } else if (isHotKey(event, "KeyL")) {
         event.preventDefault();
         clearTerminal();
-    } else if (currentApp.running) {
+    } else if (simulatorApp.running) {
         if (
             (isMacOS && event.code === "KeyC" && event.ctrlKey) ||
             (!isMacOS && event.code === "KeyB" && event.ctrlKey)

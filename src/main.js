@@ -16,12 +16,14 @@ import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
 import { randomUUID } from "node:crypto";
+import { ECP_PORT, TELNET_PORT } from "./constants";
 import {
     createMenu,
     enableMenuItem,
     checkMenuItem,
     isMenuItemEnabled,
     loadPackage,
+    getAppList,
     updateAppList,
 } from "./menu/menuService";
 import { loadFile } from "./helpers/files";
@@ -34,9 +36,7 @@ import {
     setThemeSource,
     setTimeZone,
     saveCaptionStyle,
-    updateECPStatus,
-    updateInstallerStatus,
-    updateTelnetStatus,
+    updateServerStatus,
 } from "./helpers/settings";
 import {
     createWindow,
@@ -45,6 +45,7 @@ import {
     setAspectRatio,
     saveWindowState,
 } from "./helpers/window";
+import { subscribeServerEvents } from "./helpers/events";
 import { getGateway, getLocalIps } from "./helpers/util";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 
@@ -84,7 +85,7 @@ const deviceInfo = {
     maxSimulStreams: 2,
     audioVolume: 50,
     audioLanguage: "en",
-    appList: [],
+    appList: getAppList(),
 };
 
 // Get Network Gateway
@@ -170,26 +171,39 @@ app.on("ready", () => {
         });
     mainWindow.webContents.on("dom-ready", () => {
         let settings = getSettings(mainWindow);
+        const status = "enabled";
         if (!firstLoad) {
-            const status = "enabled";
-            updateECPStatus(status, settings.value("services.ecp").includes(status));
-            updateTelnetStatus(status, settings.value("services.telnet").includes(status));
-            updateInstallerStatus(status, {
-                enabled: settings.value("services.installer").includes(status),
-                port: settings.value("services.webPort"),
-            });
+            updateServerStatus(
+                "ECP",
+                "ecp-api",
+                settings.value("services.ecp").includes(status),
+                ECP_PORT
+            );
+            updateServerStatus(
+                "Telnet",
+                "telnet",
+                settings.value("services.telnet").includes(status),
+                TELNET_PORT
+            );
+            updateServerStatus(
+                "Installer",
+                "web-installer",
+                settings.value("services.installer").includes(status),
+                settings.value("services.webPort")
+            );
         }
         if (settings.preferences.remote) {
             setRemoteKeys(settings.defaults.remote, settings.preferences.remote);
         }
     });
     setupEvents(mainWindow);
+    subscribeServerEvents();
 });
 
 // Load Settings
 function loadSettings(mainWindow, startup) {
     // Load Simulator Settings
-    let settings = getSettings(mainWindow);
+    const settings = getSettings(mainWindow);
     if (settings.preferences.simulator) {
         if (settings.value("simulator.options")) {
             const options = settings.value("simulator.options");

@@ -3,7 +3,8 @@
 <img alt="Simulator Desktop Apps" src="docs/images/brs-desktop.png?raw=true"/>
 </p>
 
-[![License](https://img.shields.io/github/license/lvcabral/brs-desktop?logo=github&color=blue)](https://github.com/lvcabral/brs-desktop/blob/master/LICENSE)
+[![Version 2.0.0](https://img.shields.io/badge/Version-2.0.0-blue.svg?logo=github)](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.0)
+[![License](https://img.shields.io/github/license/lvcabral/brs-desktop?logo=github)](https://github.com/lvcabral/brs-desktop/blob/master/LICENSE)
 [![Build](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml/badge.svg)](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
@@ -18,8 +19,20 @@ The objective of this application is to extend the `brs-engine`, making it a ful
 - ECP-2 Service (WebSockets), supporting the Roku mobile application to control the simulator.
 - Telnet Server (port 8085), enabling remote Debugging.
 - Customization of display, device model and information, controls and localization.
+- Code Editor and Console for BrightScript code development and debugging.
 
-This way, the desktop simulator can be detected and handled by the [VS Code BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=RokuCommunity.brightscript), and other development tools, as a real Roku device, for deploy and debugging. You can find the installers for this desktop application (for all platforms) at this repository [Releases](https://github.com/lvcabral/brs-desktop/releases) page.
+With remote services enabled, the desktop simulator can be detected and handled by the [VS Code BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=RokuCommunity.brightscript), and other development tools, as a real Roku device, for deploy, control, deep linking and debugging. You can find the installers for this desktop application (for all platforms) at this repository [Releases](https://github.com/lvcabral/brs-desktop/releases) page.
+
+> [!IMPORTANT]
+>
+> Since version 2.0.0, the simulator can execute code compatible with Roku OS 15 and includes experimental **SceneGraph** support which is currently in **alpha stage**.
+>
+>**Please be aware of the following:**
+>
+>- SceneGraph components may not render correctly
+>- Some SceneGraph features are not yet implemented
+>- Apps may crash or behave unexpectedly
+>- Check all [current limitations](https://github.com/lvcabral/brs-engine/blob/scenegraph/docs/limitations.md) for more details
 
 ## Documentation
 

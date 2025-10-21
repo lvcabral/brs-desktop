@@ -6,35 +6,35 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getAudioMuted, getSimulatorOption } from "./settings";
-import { subscribeInstaller } from "../server/installer";
+import { getAudioMuted, getSimulatorOption, getDisplayOption } from "./settings";
 import { runOnPeerRoku, resetPeerRoku } from "./roku";
 import { appFocused } from "./window";
-import { subscribeECP } from "../server/ecp";
 import { isValidUrl } from "./util";
+import { BRS_HOME_APP_PATH, EDITOR_CODE_BRS } from "../constants";
 import { zipSync, strToU8 } from "fflate";
 import path from "node:path";
 import fs from "node:fs";
 
-export const editorCodeFile = path.join(app.getPath("userData"), "editor_code.brs");
-
 export function loadFile(file, input) {
     resetPeerRoku();
-    if (file == undefined) return;
+    if (!file?.length) return;
     const window = BrowserWindow.fromId(1);
-    focusWindow(window);
-    let filePath;
-    if (file.length >= 1 && file[0].length > 1 && fs.existsSync(file[0])) {
-        filePath = file[0];
-    } else {
-        window.webContents.send("console", `Invalid file: ${file[0]}`, true);
+    if (file[0] !== BRS_HOME_APP_PATH) {
+        focusWindow(window);
+    }
+    let filePath = file?.[0]?.split("?")[0] ?? "";
+    if (filePath.startsWith("./")) {
+        filePath = path.join(__dirname, filePath);
+    }
+    if (!fs.existsSync(filePath)) {
+        window.webContents.send("console", `Invalid file: ${filePath}`, true);
         return;
     }
     const fileName = path.parse(filePath).base;
     const fileExt = path.parse(filePath).ext.toLowerCase();
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
-            executeFile(window, fs.readFileSync(filePath), filePath, input);
+            executeFile(window, fs.readFileSync(filePath), file[0], input);
         } catch (error) {
             window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);
         }
@@ -52,12 +52,12 @@ export async function loadUrl(url, input) {
         return;
     }
     const fileName = path.parse(url).base;
-    const fileExt = path.parse(url).ext.toLowerCase();
+    const fileExt = path.parse(url).ext.toLowerCase().split("?")[0];
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
         try {
             const response = await fetch(url);
             if (response.status === 200) {
-                let fileData = await response.arrayBuffer();
+                const fileData = await response.arrayBuffer();
                 executeFile(window, Buffer.from(fileData), url, input);
             } else {
                 window.webContents.send(
@@ -83,12 +83,16 @@ ipcMain.on("saveFile", (_, data) => {
     saveFile(data[0], data[1]);
 });
 ipcMain.on("saveIcon", (_, data) => {
-    const iconPath = path.join(app.getPath("userData"), data[0] + ".png");
-    saveFile(iconPath, data[1]);
+    const iconPath = path.join(app.getPath("userData"), data.iconId + ".png");
+    saveFile(iconPath, data.iconData);
 });
 ipcMain.on("runCode", (_, code) => {
+    const editorCodeFile = path.join(app.getPath("userData"), EDITOR_CODE_BRS);
     fs.writeFileSync(editorCodeFile, code);
     loadFile([editorCodeFile]);
+});
+ipcMain.on("runFile", (_, filePath) => {
+    loadFile([filePath]);
 });
 ipcMain.on("runUrl", (_, url) => {
     loadUrl(url);
@@ -112,7 +116,7 @@ splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
 }
 
 function executeFile(window, fileData, filePath, input) {
-    let fileExt = path.parse(filePath).ext.toLowerCase();
+    let fileExt = path.parse(filePath).ext.toLowerCase().split("?")[0];
     if (input == undefined) {
         input = new Map();
     }
@@ -123,7 +127,7 @@ function executeFile(window, fileData, filePath, input) {
         "executeFile",
         filePath,
         fileData,
-        !getSimulatorOption("keepDisplayOnExit"),
+        !getDisplayOption("keepDisplayOnExit"),
         getAudioMuted(),
         getSimulatorOption("debugOnCrash"),
         input
@@ -144,49 +148,5 @@ function focusWindow(window) {
         window.setAlwaysOnTop(true);
         window.focus({ steal: true });
         window.setAlwaysOnTop(false);
-    }
-}
-
-// Server Events
-
-subscribeECP("files", launchApp);
-
-function launchApp(event, data) {
-    if (event === "launch") {
-        const appID = data.appID;
-        const query = data.query;
-        let zipPath;
-        if (appID.toLowerCase() === "dev") {
-            zipPath = path.join(app.getPath("userData"), "dev.zip");
-        } else {
-            const index = getChannelIds().indexOf(appID);
-            zipPath = getRecentPackage(index);
-        }
-        if (zipPath && fs.existsSync(zipPath)) {
-            const input = new Map();
-            input.set("source", "external-control");
-            if (query) {
-                for (let key in query) {
-                    input.set(key, query[key]);
-                }
-            }
-            loadFile([zipPath], input);
-        } else {
-            window?.webContents.send(
-                "console",
-                `ECP Launch: File not found! App Id=${appID}`,
-                true
-            );
-        }
-    }
-}
-
-subscribeInstaller("files", installApp);
-
-function installApp(event, data) {
-    if (event === "install") {
-        const input = new Map();
-        input.set("source", data.source);
-        loadFile([data.file], input);
     }
 }

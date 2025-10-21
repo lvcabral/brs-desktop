@@ -6,6 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow } from "electron";
+import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
 import Busboy from "busboy";
 import fs from "node:fs";
 import path from "node:path";
@@ -13,11 +14,11 @@ import http from "node:http";
 import crypt from "node:crypto";
 
 const credentials = {
-    userName: "rokudev",
-    password: "rokudev",
+    userName: DEFAULT_USRPWD,
+    password: DEFAULT_USRPWD,
     realm: app.getName(),
 };
-let port = 80;
+let port = WEB_INSTALLER_PORT;
 let server;
 let hash;
 export let isInstallerEnabled = false;

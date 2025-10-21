@@ -8,6 +8,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getPeerRoku } from "./settings";
 import { isValidIP } from "./util";
+import { ECP_PORT } from "../constants";
 import request from "postman-request";
 
 let sendECPKeys = false;
@@ -138,7 +139,7 @@ function postEcpRequest(device, path, callback) {
     request(
         {
             method: "POST",
-            url: `http://${device.ip}:8060${path}`,
+            url: `http://${device.ip}:${ECP_PORT}${path}`,
             timeout: 30000,
         },
         (err, httpResponse, body) => {
