@@ -150,7 +150,7 @@ async function main() {
         } else if (event === "reset") {
             api.send("reset");
         } else if (event === "version") {
-            console.log(`Engine Version: ${data}`);
+            // brs-engine requests the version from the worker as the last step on initialize
             startupProcess();
         }
     });
@@ -181,7 +181,6 @@ async function main() {
     api.send("serialNumber", brs.getSerialNumber());
     api.send("engineVersion", brs.getVersion());
     brs.redraw(api.isFullScreen());
-    console.log("Simulator initialized");
 }
 
 // Events from Main process
