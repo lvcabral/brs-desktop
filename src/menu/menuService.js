@@ -21,7 +21,6 @@ import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
 import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile, loadUrl } from "../helpers/files";
-import { EDITOR_CODE_BRS } from "../constants";
 import path from "node:path";
 import jetpack from "fs-jetpack";
 import "../helpers/hash";
