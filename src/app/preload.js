@@ -98,7 +98,6 @@ contextBridge.exposeInMainWorld("api", {
         // whitelist channels
         let validChannels = [
             "telnet",
-            "addRecentSource",
             "addRecentPackage",
             "openConsole",
             "debugStarted",

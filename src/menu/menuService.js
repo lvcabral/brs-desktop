@@ -31,7 +31,7 @@ const maxFiles = 21;
 const maxMenuFiles = 7;
 const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
-const recentMenuIndex = 3;
+const recentMenuIndex = 2;
 
 let fileMenuIndex = 0;
 let recentFiles;
@@ -73,12 +73,8 @@ export function getRecentPackage(index) {
     return recentFiles.zip[index];
 }
 
-export function getRecentSource(index) {
-    return recentFiles.brs[index];
-}
-
 export function clearRecentFiles() {
-    recentFiles = { ids: [], zip: [], names: [], versions: [], brs: [] };
+    recentFiles = { ids: [], zip: [], names: [], versions: [] };
     saveRecentFiles();
     updateAppList();
     rebuildMenu();
@@ -117,19 +113,6 @@ export function loadPackage(id) {
         }
     } else {
         console.log("No recent package to load!");
-    }
-}
-
-export function loadSource(id) {
-    let brs = getRecentSource(id);
-    if (typeof brs === "string") {
-        if (brs.startsWith("http")) {
-            loadUrl(brs);
-        } else {
-            loadFile([brs]);
-        }
-    } else {
-        console.log("No recent file to load!");
     }
 }
 
@@ -182,22 +165,6 @@ ipcMain.on("addRecentPackage", (event, currentApp) => {
     rebuildMenu();
 });
 
-ipcMain.on("addRecentSource", (_, filePath) => {
-    if (filePath.endsWith(EDITOR_CODE_BRS)) {
-        return;
-    }
-    let idx = recentFiles.brs.indexOf(filePath);
-    if (idx >= 0) {
-        recentFiles.brs.splice(idx, 1);
-    }
-    recentFiles.brs.unshift(filePath);
-    if (recentFiles.brs.length > maxFiles) {
-        recentFiles.brs.length = maxFiles;
-    }
-    saveRecentFiles();
-    rebuildMenu();
-});
-
 ipcMain.on("enableMenuItem", (event, id, enable) => {
     enableMenuItem(id, enable);
 });
@@ -210,7 +177,7 @@ ipcMain.on("contextMenu", (event) => {
 
 // Internal functions
 function restoreRecentFiles() {
-    let recentFilesDefault = { ids: [], zip: [], names: [], versions: [], brs: [] };
+    let recentFilesDefault = { ids: [], zip: [], names: [], versions: [] };
     try {
         recentFiles = userDataDir.read(recentFilesJson, "json");
     } catch (err) {
@@ -255,20 +222,8 @@ function rebuildMenu(template = false) {
                 fileMenu.visible = false;
             }
         }
-        for (let index = 0; index < maxMenuFiles; index++) {
-            let fileMenu = recentMenu[index + maxMenuFiles + 2];
-            if (index < recentFiles.brs.length) {
-                fileMenu.label = recentFiles.brs[index];
-                fileMenu.visible = true;
-            } else {
-                fileMenu.visible = false;
-            }
-        }
-        const brsEnd = maxMenuFiles * 2 + 2;
         recentMenu[maxMenuFiles].visible = recentFiles.zip.length === 0;
-        recentMenu[brsEnd].visible = recentFiles.brs.length === 0;
-        recentMenu[recentMenu.length - 1].enabled =
-            recentFiles.zip.length + recentFiles.brs.length > 0;
+        recentMenu.at(-1).enabled = recentFiles.zip.length > 0;
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         if (isMacOS && window) {
             if (appMenu.getMenuItemById("view-menu")) {
@@ -303,19 +258,8 @@ function rebuildMenu(template = false) {
                 fileMenu.visible = false;
             }
         }
-        for (let index = 0; index < maxMenuFiles; index++) {
-            let fileMenu = recentMenu.getMenuItemById(`brs-${index}`);
-            if (index < recentFiles.brs.length) {
-                fileMenu.label = recentFiles.brs[index];
-                fileMenu.visible = true;
-            } else {
-                fileMenu.visible = false;
-            }
-        }
         recentMenu.getMenuItemById("zip-empty").visible = recentFiles.zip.length === 0;
-        recentMenu.getMenuItemById("brs-empty").visible = recentFiles.brs.length === 0;
-        recentMenu.getMenuItemById("file-clear").enabled =
-            recentFiles.zip.length + recentFiles.brs.length > 0;
+        recentMenu.getMenuItemById("file-clear").enabled = recentFiles.zip.length > 0;
     }
     if (window) {
         window.webContents.send("refreshMenu");
