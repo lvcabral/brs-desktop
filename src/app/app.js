@@ -48,129 +48,141 @@ if ("models" in customDeviceInfo) {
 if ("assets" in customDeviceInfo) {
     delete customDeviceInfo.assets;
 }
-// Initialize device and subscribe to events
-let appList = structuredClone(customDeviceInfo.appList ?? []);
-let currentApp = { id: "", running: false };
-let debugMode = "continue";
-let editor = null;
 // Read settings for home screen mode
 const initialSettings = api.getPreferences();
 let brsHomeMode = !initialSettings?.simulator?.options?.includes("disableHomeScreen");
-// Custom key mappings
-const customKeys = new Map();
-customKeys.set("NumpadMultiply", "info");
-// Support for Games with multi_key_events=1 in the manifest
-customKeys.set("ShiftLeft", "playonly");
-customKeys.set("Shift+ArrowRight", "right");
-customKeys.set("Shift+ArrowLeft", "left");
-customKeys.set("Shift+ArrowUp", "up");
-customKeys.set("Shift+ArrowDown", "down");
 
-brs.initialize(customDeviceInfo, {
-    debugToConsole: false,
-    showStats: false,
-    customKeys: customKeys,
-});
-
-// Send deviceData via IPC
-const clonedDeviceData = { ...brs.deviceData };
-delete clonedDeviceData.assets; // Remove assets to avoid issues with structured cloning
-delete clonedDeviceData.registryBuffer; // Remove registryBuffer to avoid issues with structured cloning
-
-try {
-    api.send("deviceData", clonedDeviceData);
-} catch (error) {
-    console.warn(
-        "Sending deviceData object via IPC failed, using JSON serialization workaround:",
-        error.message
-    );
-    // Use JSON serialization as a fallback in case of structured cloning issues
-    const jsonSerializedData = JSON.parse(JSON.stringify(clonedDeviceData));
-    api.send("deviceData", jsonSerializedData);
-}
-
-api.send("serialNumber", brs.getSerialNumber());
-api.send("engineVersion", brs.getVersion());
-
+// Initialize variables
+let appList = structuredClone(customDeviceInfo.appList ?? []);
+let currentApp = { id: "", path: "", icon: "", running: false };
 let launchAppId = "";
+let debugMode = "continue";
+let editor = null;
 
-brs.subscribe("desktop", (event, data) => {
-    if (event === "loaded") {
-        if (!brsHomeMode) {
-            launchAppId = "";
-        }
-        brs.deviceData.appList = structuredClone(appList);
-        currentApp = data;
-        appLoaded(data);
-    } else if (event === "started") {
-        currentApp = data;
-        stats.style.visibility = "visible";
-    } else if (event === "launch") {
-        if (typeof data?.app === "string") {
-            if (data.app === "turn-off") {
-                api.send("closeSimulator");
-                return;
-            } else if (data.app === "add-apps") {
-                api.send("openAppPackage");
-                return;
+// Initialize BrightScript Engine when window loads
+globalThis.addEventListener("load", main, false);
+
+// Main function to initialize the BrightScript engine
+async function main() {
+    // Custom key mappings
+    const customKeys = new Map();
+    customKeys.set("NumpadMultiply", "info");
+    // Support for Games with multi_key_events=1 in the manifest
+    customKeys.set("ShiftLeft", "playonly");
+    customKeys.set("Shift+ArrowRight", "right");
+    customKeys.set("Shift+ArrowLeft", "left");
+    customKeys.set("Shift+ArrowUp", "up");
+    customKeys.set("Shift+ArrowDown", "down");
+
+    brs.subscribe("desktop", (event, data) => {
+        if (event === "loaded") {
+            if (!brsHomeMode) {
+                launchAppId = "";
             }
-            launchAppId = data.app;
-        }
-    } else if (event === "browser") {
-        if (data?.url) {
-            const newWindow = globalThis.open(
-                data.url,
-                "_blank",
-                `width=${data.width},height=${data.height},popup`
-            );
-            if (newWindow) {
-                newWindow.focus();
+            brs.deviceData.appList = structuredClone(appList);
+            currentApp = data;
+            appLoaded(data);
+        } else if (event === "started") {
+            currentApp = data;
+            stats.style.visibility = "visible";
+        } else if (event === "launch") {
+            if (typeof data?.app === "string") {
+                if (data.app === "turn-off") {
+                    api.send("closeSimulator");
+                    return;
+                } else if (data.app === "add-apps") {
+                    api.send("openAppPackage");
+                    return;
+                }
+                launchAppId = data.app;
+            }
+        } else if (event === "browser") {
+            if (data?.url) {
+                const newWindow = globalThis.open(
+                    data.url,
+                    "_blank",
+                    `width=${data.width},height=${data.height},popup`
+                );
+                if (newWindow) {
+                    newWindow.focus();
+                } else {
+                    showToast("Warning: It was not possible to open a new window!", true);
+                }
+            }
+        } else if (event === "closed" || event === "error") {
+            appTerminated();
+            if (brsHomeMode && launchAppId === BRS_HOME_APP_PATH) {
+                showCloseMessage(event, data, false);
+                api.send("runFile", BRS_HOME_APP_PATH);
+            } else if (launchAppId !== "" && event === "closed") {
+                const app = appList.find((a) => a.id === launchAppId);
+                if (app?.path?.startsWith("http") || app?.path?.startsWith("file:")) {
+                    api.send("runUrl", app.path);
+                } else if (app?.path) {
+                    api.send("runFile", app.path);
+                }
             } else {
-                showToast("Warning: It was not possible to open a new window!", true);
+                showCloseMessage(event, data);
+                brs.setDebugState(true);
             }
-        }
-    } else if (event === "closed" || event === "error") {
-        appTerminated();
-        if (brsHomeMode && launchAppId === BRS_HOME_APP_PATH) {
-            showCloseMessage(event, data, false);
-            api.send("runFile", BRS_HOME_APP_PATH);
-        } else if (launchAppId !== "" && event === "closed") {
-            const app = appList.find((a) => a.id === launchAppId);
-            if (app?.path?.startsWith("http") || app?.path?.startsWith("file:")) {
-                api.send("runUrl", app.path);
-            } else if (app?.path) {
-                api.send("runFile", app.path);
+            launchAppId = brsHomeMode ? BRS_HOME_APP_PATH : "";
+        } else if (event === "redraw") {
+            redrawEvent(data);
+        } else if (event === "control") {
+            api.send("keySent", data);
+        } else if (event === "captionMode") {
+            api.send("setCaptionMode", data);
+            showToast(`Caption mode changed to: ${data}`);
+        } else if (event === "debug") {
+            if (data.level === "stop") {
+                api.send("debugStarted");
+                showToast(`App stopped and Micro Debugger is active!`);
+            } else if (typeof data.content === "string") {
+                api.send("telnet", data.content);
             }
-        } else {
-            showCloseMessage(event, data);
-            brs.setDebugState(true);
+            if (["stop", "pause", "continue"].includes(data.level)) {
+                debugMode = data.level;
+            }
+        } else if (event === "icon") {
+            api.send("saveIcon", { iconId: currentApp.path.hashCode(), iconData: data });
+        } else if (event === "registry") {
+            api.send("updateRegistry", data);
+        } else if (event === "reset") {
+            api.send("reset");
+        } else if (event === "version") {
+            console.log(`Engine Version: ${data}`);
+            startupProcess();
         }
-        launchAppId = brsHomeMode ? BRS_HOME_APP_PATH : "";
-    } else if (event === "redraw") {
-        redrawEvent(data);
-    } else if (event === "control") {
-        api.send("keySent", data);
-    } else if (event === "captionMode") {
-        api.send("setCaptionMode", data);
-        showToast(`Caption mode changed to: ${data}`);
-    } else if (event === "debug") {
-        if (data.level === "stop") {
-            api.send("debugStarted");
-            showToast(`App stopped and Micro Debugger is active!`);
-        } else if (typeof data.content === "string") {
-            api.send("telnet", data.content);
-        }
-        if (["stop", "pause", "continue"].includes(data.level)) {
-            debugMode = data.level;
-        }
-    } else if (event === "icon") {
-        api.send("saveIcon", { iconId: currentApp.path.hashCode(), iconData: data });
-    } else if (event === "registry") {
-        api.send("updateRegistry", data);
-    } else if (event === "reset") {
-        api.send("reset");
+    });
+
+    brs.initialize(customDeviceInfo, {
+        debugToConsole: false,
+        showStats: false,
+        customKeys: customKeys,
+    });
+
+    // Send deviceData via IPC
+    const clonedDeviceData = { ...brs.deviceData };
+    delete clonedDeviceData.assets; // Remove assets to avoid issues with structured cloning
+    delete clonedDeviceData.registryBuffer; // Remove registryBuffer to avoid issues with structured cloning
+
+    try {
+        api.send("deviceData", clonedDeviceData);
+    } catch (error) {
+        console.warn(
+            "Sending deviceData object via IPC failed, using JSON serialization workaround:",
+            error.message
+        );
+        // Use JSON serialization as a fallback in case of structured cloning issues
+        const jsonSerializedData = JSON.parse(JSON.stringify(clonedDeviceData));
+        api.send("deviceData", jsonSerializedData);
     }
-});
+
+    api.send("serialNumber", brs.getSerialNumber());
+    api.send("engineVersion", brs.getVersion());
+    brs.redraw(api.isFullScreen());
+    console.log("Simulator initialized");
+}
 
 // Events from Main process
 api.receive("openEditor", function () {
@@ -332,66 +344,8 @@ api.receive("setHomeScreenMode", function (enabled) {
     }
 });
 
-// Splash video handling
-function startSplashVideo() {
-    const player = document.getElementById("player");
-    if (!player) {
-        return;
-    }
-    // Store original player state
-    const originalControls = player.controls;
-    const originalAutoplay = player.autoplay;
-    const originalMuted = player.muted;
-    // Define assets
-    const splashVideo = "assets/brs-bouncing.mp4";
-    // Configure and start splash video
-    player.src = splashVideo;
-    player.controls = false;
-    player.autoplay = false;
-    player.muted = true;
-
-    // Function to restore player state
-    const restorePlayer = () => {
-        // Clear the canvas to remove the video content
-        const canvas = document.getElementById("display");
-        if (canvas) {
-            const ctx = canvas.getContext("2d");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-        // Only run home app if home screen mode is enabled
-        if (player.src.endsWith(splashVideo) && brsHomeMode) {
-            api.send("runFile", BRS_HOME_APP_PATH);
-        }
-
-        // Restore original state
-        player.pause();
-        player.removeAttribute("src");
-        player.load();
-        player.style.display = "none";
-        player.controls = originalControls;
-        player.autoplay = originalAutoplay;
-        player.muted = originalMuted;
-    };
-
-    // Add event listeners
-    player.addEventListener("ended", restorePlayer, { once: true });
-    player.addEventListener("error", restorePlayer, { once: true });
-
-    // Start playing
-    player.play().catch((error) => {
-        console.warn("Could not play splash video:", error);
-    });
-}
-
-// Initialize the app when DOM is loaded
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initSceneGraphWarningDialog);
-} else {
-    initSceneGraphWarningDialog();
-}
-
 // Window Resize Event
-globalThis.onload = globalThis.onresize = function () {
+globalThis.onresize = function () {
     brs.redraw(api.isFullScreen());
 };
 
@@ -528,30 +482,25 @@ function redrawEvent(redraw) {
     }
 }
 
-// SceneGraph Warning Dialog
-function initSceneGraphWarningDialog() {
-    const dontShowWarning = localStorage.getItem("sceneGraphWarningDismissed") === "true";
+// Simulator Startup Process
+function startupProcess() {
     const settings = api.getPreferences();
     const splashVideoEnabled = !settings?.simulator?.options?.includes("disableSplashVideo");
+    const runLastApp = settings?.simulator?.options?.includes("runLastChannel") ?? false;
 
-    if (dontShowWarning) {
-        if (splashVideoEnabled) {
-            setTimeout(() => startSplashVideo(), 500);
-        } else if (brsHomeMode) {
-            // If splash is disabled but home screen is enabled, run home app directly
-            setTimeout(() => api.send("runFile", BRS_HOME_APP_PATH), 500);
-        }
-        return;
-    }
     // Get dialog elements
+    const dontShowWarning = localStorage.getItem("sceneGraphWarningDismissed") === "true";
     const dialog = document.getElementById("scenegraph-warning-dialog");
     const closeButton = document.getElementById("close-scenegraph-warning");
     const dontShowAgainCheckbox = document.getElementById("dont-show-warning-again");
-    if (!dialog || !closeButton || !dontShowAgainCheckbox) {
-        if (splashVideoEnabled) {
-            setTimeout(() => startSplashVideo(), 500);
+
+    if (dontShowWarning || !dialog || !closeButton || !dontShowAgainCheckbox) {
+        if (runLastApp) {
+            setTimeout(() => startLastApp(), 300);
+        } else if (splashVideoEnabled) {
+            setTimeout(() => startSplashVideo(), 300);
         } else if (brsHomeMode) {
-            setTimeout(() => api.send("runFile", BRS_HOME_APP_PATH), 500);
+            setTimeout(() => startHomeApp(), 300);
         }
         return;
     }
@@ -565,10 +514,12 @@ function initSceneGraphWarningDialog() {
             localStorage.setItem("sceneGraphWarningDismissed", "true");
         }
         dialog.style.display = "none";
-        if (splashVideoEnabled) {
+        if (runLastApp) {
+            setTimeout(() => startLastApp(), 300);
+        } else if (splashVideoEnabled) {
             setTimeout(() => startSplashVideo(), 300);
         } else if (brsHomeMode) {
-            setTimeout(() => api.send("runFile", BRS_HOME_APP_PATH), 300);
+            setTimeout(() => startHomeApp(), 300);
         }
     };
     closeButton.addEventListener("click", handleDialogClose);
@@ -586,6 +537,72 @@ function initSceneGraphWarningDialog() {
     }
     // Close dialog when clicking on overlay
     dialog.addEventListener("click", handleDialogClose);
+}
+
+function startSplashVideo() {
+    const player = document.getElementById("player");
+    if (!player) {
+        return;
+    }
+    // Store original player state
+    const originalControls = player.controls;
+    const originalAutoplay = player.autoplay;
+    const originalMuted = player.muted;
+    // Define assets
+    const splashVideo = "assets/brs-bouncing.mp4";
+    // Configure and start splash video
+    player.src = splashVideo;
+    player.controls = false;
+    player.autoplay = false;
+    player.muted = true;
+
+    // Function to restore player state
+    const restorePlayer = () => {
+        // Clear the canvas to remove the video content
+        const canvas = document.getElementById("display");
+        if (canvas) {
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        // Only run home app if home screen mode is enabled
+        if (player.src.endsWith(splashVideo) && brsHomeMode) {
+            startHomeApp();
+        }
+        // Restore original state
+        player.pause();
+        player.removeAttribute("src");
+        player.load();
+        player.style.display = "none";
+        player.controls = originalControls;
+        player.autoplay = originalAutoplay;
+        player.muted = originalMuted;
+    };
+
+    // Add event listeners
+    player.addEventListener("ended", restorePlayer, { once: true });
+    player.addEventListener("error", restorePlayer, { once: true });
+
+    // Start playing
+    player.play().catch((error) => {
+        console.warn("Could not play splash video:", error);
+    });
+}
+
+function startHomeApp() {
+    if (brsHomeMode && !currentApp.running) {
+        api.send("runFile", BRS_HOME_APP_PATH);
+    }
+}
+
+function startLastApp() {
+    if (appList.length > 0) {
+        const lastApp = appList[0];
+        if (lastApp.path.startsWith("http") || lastApp.path.startsWith("file:")) {
+            api.send("runUrl", lastApp.path);
+        } else if (lastApp.path) {
+            api.send("runFile", lastApp.path);
+        }
+    }
 }
 
 // Exposed API to Child Windows
