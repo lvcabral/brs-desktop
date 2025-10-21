@@ -196,7 +196,6 @@ function handleEngineEvents(event, data) {
             return;
         }
         simulatorApp = data;
-        console.info(`Execution started ${appId}`);
         runButton.style.display = "none";
         endButton.style.display = "inline";
         breakButton.style.display = "inline";
@@ -217,7 +216,6 @@ function handleEngineEvents(event, data) {
         scrollToBottom();
     } else if (event === "closed" || event === "error") {
         simulatorApp = data;
-        console.info(`Execution terminated! ${event}: ${data}`);
         terminal.idle();
         runButton.style.display = "inline";
         endButton.style.display = "none";

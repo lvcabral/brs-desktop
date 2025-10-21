@@ -444,7 +444,6 @@ display.ondblclick = function () {
 display.onclick = function () {
     const settings = api.getPreferences();
     const displayToast = !settings?.simulator?.options?.includes("disableClickToast");
-    console.log("Display clicked", settings?.simulator?.options);
     if (currentApp.running && displayToast) {
         // Delay the toast to allow double-click to cancel it
         if (clickTimeout) {
