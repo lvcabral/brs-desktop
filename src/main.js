@@ -16,6 +16,7 @@ import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
 import { randomUUID } from "node:crypto";
+import { ECP_PORT, TELNET_PORT } from "./constants";
 import {
     createMenu,
     enableMenuItem,
