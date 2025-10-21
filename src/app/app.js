@@ -107,7 +107,7 @@ brs.subscribe("desktop", (event, data) => {
         stats.style.visibility = "visible";
     } else if (event === "launch") {
         if (typeof data?.app === "string") {
-            if (data.app === "tv-off") {
+            if (data.app === "turn-off") {
                 api.send("closeSimulator");
                 return;
             } else if (data.app === "add-apps") {
@@ -476,9 +476,7 @@ function appLoaded(appData) {
     }
     const isHomeApp = appData.path.includes(BRS_HOME_APP_PATH);
     if (!isHomeApp) {
-        if (appData.path.toLowerCase().endsWith(".brs")) {
-            api.send("addRecentSource", appData.path);
-        } else {
+        if (!appData.path.toLowerCase().endsWith(".brs")) {
             api.send("addRecentPackage", appData);
         }
     }
