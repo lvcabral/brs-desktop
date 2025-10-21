@@ -232,12 +232,12 @@ api.receive("setLocale", function (locale) {
     }
 });
 
-export function updateStatus(data, tvMode = false) {
+export function updateStatus(data, homeMode = false) {
     if (data) {
         clearCounters();
         setStatusColor();
         // Show different icon and text based on TV mode
-        if (tvMode) {
+        if (homeMode) {
             statusIconFile.innerHTML = "<i class='fa fa-home'></i>";
             statusFile.innerText = "Home";
             filePath = "";
