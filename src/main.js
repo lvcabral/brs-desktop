@@ -22,7 +22,6 @@ import {
     enableMenuItem,
     checkMenuItem,
     isMenuItemEnabled,
-    loadPackage,
     getAppList,
     updateAppList,
 } from "./menu/menuService";
@@ -142,7 +141,7 @@ app.on("ready", () => {
     );
     let firstLoad = true;
     // Load application settings
-    let startup = {
+    const startup = {
         devTools: false,
         console: false,
         runLastChannel: false,
@@ -329,8 +328,6 @@ function processArgv(mainWindow, startup) {
         } else {
             console.log("File format not supported: ", fileExt);
         }
-    } else if (startup.runLastChannel) {
-        loadPackage(0);
     }
 }
 
