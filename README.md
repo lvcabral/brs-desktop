@@ -19,8 +19,9 @@ The objective of this application is to extend the `brs-engine`, making it a ful
 - ECP-2 Service (WebSockets), supporting the Roku mobile application to control the simulator.
 - Telnet Server (port 8085), enabling remote Debugging.
 - Customization of display, device model and information, controls and localization.
+- Code Editor and Console for BrightScript code development and debugging.
 
-This way, the desktop simulator can be detected and handled by the [VS Code BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=RokuCommunity.brightscript), and other development tools, as a real Roku device, for deploy and debugging. You can find the installers for this desktop application (for all platforms) at this repository [Releases](https://github.com/lvcabral/brs-desktop/releases) page.
+With remote services enabled, the desktop simulator can be detected and handled by the [VS Code BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=RokuCommunity.brightscript), and other development tools, as a real Roku device, for deploy, control, deep linking and debugging. You can find the installers for this desktop application (for all platforms) at this repository [Releases](https://github.com/lvcabral/brs-desktop/releases) page.
 
 > [!IMPORTANT]
 >
