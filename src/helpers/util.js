@@ -70,7 +70,7 @@ export async function getGateway() {
         gateWayData.name = gw.name ?? "";
         gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";
         if (gateWayData.type === "WiFiConnection") {
-            gateWayData.ssid = getSSID() ?? "WiFi";
+            gateWayData.ssid = getSSID();
         }
         console.log(
             `Gateway: ${gateWayData.ip} - Interface: ${gateWayData.name} - Type: ${gateWayData.type} - SSID: ${gateWayData.ssid}`
@@ -111,7 +111,8 @@ async function getActiveInterface() {
 
 function getSSID() {
     const platform = os.platform();
-    let command;
+    let ssid = "WiFi";
+    let command = "";
 
     if (platform === "win32") {
         command = "netsh wlan show interfaces";
@@ -121,25 +122,21 @@ function getSSID() {
     } else if (platform === "linux") {
         command = "iwgetid -r";
     }
-
+    // Run the command and parse the SSID
     try {
-        let ssid;
         const result = spawnSync(command, { shell: true, encoding: "utf8" }).stdout;
-        console.log(`SSID Command Result: ${result}`);
-
         if (platform === "win32") {
             const match = result.match(/SSID\s*:\s*(.+)/);
-            ssid = match ? match[1].trim() : null;
+            ssid = match ? match[1].trim() : ssid;
         } else if (platform === "darwin") {
             const match = result.match(/ SSID: (.+)/);
-            ssid = match ? match[1].trim() : null;
+            ssid = match ? match[1].trim() : ssid;
         } else if (platform === "linux") {
-            ssid = result.trim() || null;
+            ssid = result.trim() ?? ssid;
         }
-        return ssid;
     } catch (err) {
         // Log error but don't crash - just return null
         console.warn(`Unable to get SSID: ${err.message}`);
-        return null;
     }
+    return ssid;
 }
