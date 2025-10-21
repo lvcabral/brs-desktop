@@ -72,6 +72,7 @@
         "dist-linux32": "webpack --config build/webpack.app.config.js --env production && electron-builder -l --ia32",
         "dist-linux64": "webpack --config build/webpack.app.config.js --env production && electron-builder -l --x64",
         "dist-deb64": "webpack --config build/webpack.app.config.js --env production && electron-builder --linux deb --x64",
+        "dist-linuxarm64": "webpack --config build/webpack.app.config.js --env production && electron-builder --linux deb --arm64",
         "dist-linuxarm": "webpack --config build/webpack.app.config.js --env production && electron-builder --linux appimage --armv7l",
         "release": "webpack --config build/webpack.app.config.js --env production"
     },
