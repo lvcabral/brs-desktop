@@ -223,7 +223,7 @@ function rebuildMenu(template = false) {
             }
         }
         recentMenu[maxMenuFiles].visible = recentFiles.zip.length === 0;
-        recentMenu[recentMenu.length - 1].enabled = recentFiles.zip.length > 0;
+        recentMenu.at(-1).enabled = recentFiles.zip.length > 0;
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         if (isMacOS && window) {
             if (appMenu.getMenuItemById("view-menu")) {

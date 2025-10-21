@@ -429,7 +429,7 @@ function exportJsonCode() {
 function exportCodeAs(format) {
     const codeContent = editorManager.editor.getValue();
 
-    if (!codeContent || codeContent.trim() === "") {
+    if (typeof codeContent !== "string" || codeContent.trim() === "") {
         showToast("There is no Source Code to export!", 3000, true);
         return;
     }
@@ -513,7 +513,7 @@ function importCode() {
                 const codeId = nanoid(10);
                 const codeName = file.name;
                 const codeContent = e.target?.result;
-                if (codeContent) {
+                if (typeof codeContent === "string" && codeContent.trim() !== "") {
                     const value = `@=${codeName}=@${codeContent}`;
                     localStorage.setItem(codeId, value);
                     importedCodes++;
