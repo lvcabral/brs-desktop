@@ -253,7 +253,9 @@ api.receive("closeChannel", function (source, appID) {
         if (appID && appID !== currentApp.id) {
             return;
         }
-        launchAppId = "";
+        if (!brsHomeMode) {
+            launchAppId = "";
+        }
         brs.terminate(source);
     }
 });
@@ -317,6 +319,17 @@ api.receive("setPerfStats", function (enabled) {
 });
 api.receive("setHomeScreenMode", function (enabled) {
     brsHomeMode = enabled;
+    if (brsHomeMode) {
+        launchAppId = BRS_HOME_APP_PATH;
+        if (!currentApp.running) {
+            api.send("runFile", BRS_HOME_APP_PATH);
+        }
+    } else {
+        launchAppId = "";
+        if (currentApp.running && currentApp.path.includes(BRS_HOME_APP_PATH)) {
+            brs.terminate("EXIT_USER_NAV");
+        }
+    }
 });
 
 // Splash video handling
@@ -390,7 +403,8 @@ globalThis.addEventListener(
             brs.debug("cont");
         }
         if (isMacOS) {
-            api.enableMenuItem("close-channel", currentApp.running);
+            const isHomeApp = currentApp.path.includes(BRS_HOME_APP_PATH);
+            api.enableMenuItem("close-channel", currentApp.running && !isHomeApp);
             api.enableMenuItem("save-screen", currentApp.running);
             api.enableMenuItem("copy-screen", currentApp.running);
         }
@@ -480,7 +494,7 @@ function appLoaded(appData) {
             api.send("addRecentPackage", appData);
         }
     }
-    api.enableMenuItem("close-channel", true);
+    api.enableMenuItem("close-channel", !isHomeApp);
     api.enableMenuItem("save-screen", true);
     api.enableMenuItem("copy-screen", true);
     api.send("currentApp", appData);
