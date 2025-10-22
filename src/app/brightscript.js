@@ -18,12 +18,12 @@ export function defineMode(CodeMirror) {
             return new RegExp(`^((${words.join(")|(")}))\\b`, "i");
         }
 
-        let singleOperators = /^[+\-/*&\\^<>=]/;
-        let doubleOperators = /^((<>)|(<=)|(>=)|(<<)|(>>))/;
-        let singleDelimiters = /^[.,;:$%!#&@?]/;
-        let brackets = /^[(){}[\]]/;
-        let functions = /^[_A-Za-z]\w*(?=\()/;
-        let identifiers = /^[_A-Za-z]\w*/;
+        const singleOperators = /^[+\-/*&\\^<>=]/;
+        const doubleOperators = /^((<>)|(<=)|(>=)|(<<)|(>>))/;
+        const singleDelimiters = /^[.,;:$%!#&@?]/;
+        const brackets = /^[(){}[\]]/;
+        const functions = /^[_A-Za-z]\w*(?=\()/;
+        const identifiers = /^[_A-Za-z]\w*/;
 
         const openingKeywords = ["sub", "function"];
         const endKeywords = ["endsub", "endfunction"];
@@ -74,7 +74,7 @@ export function defineMode(CodeMirror) {
         ];
 
         const atomWords = ["true", "false", "invalid"];
-        let builtinFuncsWords = [
+        const builtinFuncsWords = [
             "box",
             "createobject",
             "getglobalaa",
@@ -131,9 +131,9 @@ export function defineMode(CodeMirror) {
             "sqr",
             "tan",
         ];
-        let builtinConsts = ["LINE_NUM"];
+        const builtinConsts = ["LINE_NUM"];
         let builtinObjsWords = ["global", "m"];
-        let knownElements = [
+        const knownElements = [
             "getdefaultfont",
             "clear",
             "push",
@@ -146,27 +146,29 @@ export function defineMode(CodeMirror) {
             "state",
             "update",
             "addnew",
+            "tostr",
+            "toint",
         ];
 
         builtinObjsWords = builtinObjsWords.concat(builtinConsts);
 
-        let keywords = wordRegexp(commonkeywords);
-        let types = wordRegexp(commontypes);
-        let atoms = wordRegexp(atomWords);
-        let builtinFuncs = wordRegexp(builtinFuncsWords);
-        let builtinObjs = wordRegexp(builtinObjsWords);
-        let known = wordRegexp(knownElements);
-        let stringPrefixes = '"';
+        const keywords = wordRegexp(commonkeywords);
+        const types = wordRegexp(commontypes);
+        const atoms = wordRegexp(atomWords);
+        const builtinFuncs = wordRegexp(builtinFuncsWords);
+        const builtinObjs = wordRegexp(builtinObjsWords);
+        const known = wordRegexp(knownElements);
+        const stringPrefixes = '"';
 
-        let opening = wordRegexp(openingKeywords);
-        let closing = wordRegexp(endKeywords);
-        let openingCtrl = wordRegexp(openingControl);
-        let middleCtrl = wordRegexp(middleControl);
-        let closingCtrl = wordRegexp(endControl);
-        let doubleClosing = wordRegexp(["end"]);
-        let doOpening = wordRegexp(["do"]);
-        let noIndentWords = wordRegexp(["library"]);
-        let comment = wordRegexp(["rem"]);
+        const opening = wordRegexp(openingKeywords);
+        const closing = wordRegexp(endKeywords);
+        const openingCtrl = wordRegexp(openingControl);
+        const middleCtrl = wordRegexp(middleControl);
+        const closingCtrl = wordRegexp(endControl);
+        const doubleClosing = wordRegexp(["end"]);
+        const doOpening = wordRegexp(["do"]);
+        const noIndentWords = wordRegexp(["library"]);
+        const comment = wordRegexp(["rem"]);
 
         function indent(_stream, state) {
             state.currentIndent++;
@@ -181,7 +183,7 @@ export function defineMode(CodeMirror) {
                 return "space";
             }
 
-            let ch = stream.peek();
+            const ch = stream.peek();
             // Handle Comments
             if (ch === "'") {
                 stream.skipToEnd();
@@ -358,8 +360,8 @@ export function defineMode(CodeMirror) {
         }
 
         function tokenStringFactory(delimiter) {
+            const singleline = delimiter.length == 1;
             const OUTCLASS = "string";
-            let singleline = delimiter.length == 1;
 
             return function (stream, state) {
                 while (!stream.eol()) {
@@ -410,7 +412,7 @@ export function defineMode(CodeMirror) {
             return style;
         }
 
-        let external = {
+        const external = {
             electricChars: "dDpPtTfFeE ",
             startState: function () {
                 return {
@@ -439,7 +441,7 @@ export function defineMode(CodeMirror) {
             },
 
             indent: function (state, textAfter) {
-                let trueText = textAfter.replace(/(^\s+)|(\s+$)/g, "");
+                const trueText = textAfter.replace(/(^\s+)|(\s+$)/g, "");
                 if (
                     trueText.match(closing) ||
                     trueText.match(doubleClosing) ||
