@@ -16,7 +16,7 @@ import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
 import { randomUUID } from "node:crypto";
-import { ECP_PORT, TELNET_PORT } from "./constants";
+import { ECP_PORT, TELNET_PORT, UPDATE_CHECK_STARTUP, UPDATE_CHECK_INTERVAL } from "./constants";
 import {
     createMenu,
     enableMenuItem,
@@ -29,6 +29,7 @@ import { loadFile } from "./helpers/files";
 import {
     getPeerRoku,
     getSettings,
+    getSimulatorOption,
     setDeviceInfo,
     setDisplayOption,
     setRemoteKeys,
@@ -47,6 +48,7 @@ import {
 } from "./helpers/window";
 import { subscribeServerEvents } from "./helpers/events";
 import { getGateway, getLocalIps } from "./helpers/util";
+import { checkForUpdates } from "./helpers/updates";
 import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 
 const isMacOS = process.platform === "darwin";
@@ -198,6 +200,26 @@ app.on("ready", () => {
     });
     setupEvents(mainWindow);
     subscribeServerEvents();
+    // Initialize version checking (only in production and if not disabled)
+    if (app.isPackaged && !getSimulatorOption("disableCheckForUpdates")) {
+        // Check for updates 30 seconds after app start
+        setTimeout(async () => {
+            try {
+                await checkForUpdates();
+            } catch (error) {
+                console.error("Error checking for updates:", error);
+            }
+        }, UPDATE_CHECK_STARTUP);
+
+        // Check for updates every 4 hours
+        setInterval(async () => {
+            try {
+                await checkForUpdates();
+            } catch (error) {
+                console.error("Error checking for updates:", error);
+            }
+        }, UPDATE_CHECK_INTERVAL);
+    }
 });
 
 // Load Settings

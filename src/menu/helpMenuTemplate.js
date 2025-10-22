@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { shell } from "electron";
 import { showAbout } from "../helpers/about";
+import { checkForUpdates } from "../helpers/updates";
 import packageInfo from "../../package.json";
 
 const isMacOS = process.platform === "darwin";
@@ -43,8 +44,15 @@ export const helpMenuTemplate = {
                 shell.openExternal(`${packageInfo.repository.url}/blob/master/LICENSE`);
             },
         },
-        // { type: "separator" },
-        // { label: "Check for Updates...", enabled: false },
+        { type: "separator" },
+        {
+            label: "Check for Updates...",
+            click: () => {
+                checkForUpdates(true).catch((error) => {
+                    console.error("Manual update check failed:", error);
+                });
+            },
+        },
         { type: "separator", visible: !isMacOS },
         {
             label: "About",
