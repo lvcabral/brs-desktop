@@ -36,6 +36,7 @@ import {
     setTimeZone,
     saveCaptionStyle,
     updateServerStatus,
+    closeSettings,
 } from "./helpers/settings";
 import {
     createWindow,
@@ -357,6 +358,7 @@ function setupEvents(mainWindow) {
             enableMenuItem("on-top", false);
         });
         mainWindow.on("hide", function () {
+            closeSettings(); // Close settings window to prevent inaccessible state
             enableMenuItem("copy-screen", false);
         });
         mainWindow.on("restore", function () {

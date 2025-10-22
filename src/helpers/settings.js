@@ -814,6 +814,12 @@ export function showSettings() {
     });
 }
 
+export function closeSettings() {
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+        settingsWindow.close();
+    }
+}
+
 export function setPreference(key, value) {
     settings.value(key, value);
 }
