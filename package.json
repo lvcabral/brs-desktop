@@ -79,7 +79,7 @@
     "dependencies": {
         "@electron/remote": "^2.0.9",
         "@lvcabral/electron-preferences": "^2.8.70",
-        "@lvcabral/terminal": "^0.1.0",
+        "@lvcabral/terminal": "^1.1.0",
         "busboy": "^0.3.1",
         "codemirror": "^5.65.12",
         "custom-electron-titlebar": "^4.2.8",

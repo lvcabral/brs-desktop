@@ -116,6 +116,7 @@ function main() {
     // Initialize the Code Mirror manager
     const preferences = api.getPreferences();
     const theme = preferences?.simulator?.theme || "purple";
+    terminal.setColorTheme(theme === "light" ? "light" : "dark");
     editorManager = new CodeMirrorManager(brsCodeField, theme);
     if (isMacOS) {
         // Remove binding for Ctrl+V on MacOS to allow remapping
@@ -226,19 +227,23 @@ function handleEngineEvents(event, data) {
 }
 
 function updateTerminal(text, level = "print") {
-    let output = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    if (level === "print") {
-        const promptLen = `${prompt}&gt; `.length;
-        if (output.slice(-promptLen) === `${prompt}&gt; `) {
-            output = output.slice(0, output.length - promptLen);
+       let output = text.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        if (level === "print") {
+            const promptLen = `${prompt}&gt; `.length;
+            if (output.endsWith(`${prompt}&gt; `)) {
+                output = output.slice(0, output.length - promptLen);
+            }
+            output = output.replaceAll(" ", "&nbsp;");
+        } else if (level === "warning") {
+            output = terminal.colorize(output.replaceAll(" ", "&nbsp;"), "#d7ba7d");
+        } else if (level === "error") {
+            output = terminal.colors.brightRed(output.replaceAll(" ", "&nbsp;"));
         }
-    } else if (level === "warning") {
-        output = "<span style='color: #d7ba7d;'>" + output + "</span>";
-    } else if (level === "error") {
-        output = "<span style='color: #e95449;'>" + output + "</span>";
+        const lines = output.split(/\r\n?|\n/);
+        for (const line of lines) {
+            terminal.output(line);
+        }
     }
-    terminal.output(`<pre>${output}</pre>`);
-}
 
 function hideEditor(toggle) {
     editorContainer.classList.toggle("hidden", toggle);
@@ -842,6 +847,7 @@ globalThis.__setTheme = () => {
     if (editorManager) {
         editorManager.editor.setOption("theme", getThemeCss(theme));
     }
+    terminal.setColorTheme(theme === "light" ? "light" : "dark");
 };
 globalThis.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", __setTheme);
 api.onPreferencesUpdated(__setTheme);
