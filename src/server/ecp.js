@@ -8,7 +8,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import { isValidIP } from "../helpers/util";
 import { ECP_PORT, SSDP_PORT } from "../constants";
-import { Server as SSDP } from "node-ssdp";
+import { Server as SSDP } from "@lvcabral/node-ssdp";
 import xmlbuilder from "xmlbuilder";
 import fs from "node:fs";
 import path from "node:path";
