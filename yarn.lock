@@ -1019,10 +1019,10 @@
   resolved "https://registry.yarnpkg.com/@lvcabral/sprintf/-/sprintf-1.2.2.tgz#6002d24709407ef22bc7313bbb8251768ca7ce47"
   integrity sha512-I42wl+u7zhDNANFxlhh1iGKhnPnWxKsW4zFLEN7+HXYKu+H5JBhJGj62zhS4wgFN6RDpUTU37CXVzXVCAGcY8A==
 
-"@lvcabral/terminal@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@lvcabral/terminal/-/terminal-0.1.0.tgz#def43b598061aaaf85af326e79fe3218844b95d3"
-  integrity sha512-+TxQQ95qca+5Xti2ovFKKpCYT5Thio8i5rKAE5mHPi3c4hudYwAoi/YdrR9ONnXoxiPyYHaYd7x/oDKX/wnlTw==
+"@lvcabral/terminal@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@lvcabral/terminal/-/terminal-1.1.0.tgz#2112355ff73ed8ed9bbca6021261b26abbcff4d2"
+  integrity sha512-/gemdfXye7DSSedmuS35sbMfYaAIt+hISFQe1RwBQ9ZKgwscfKd+RzpZJyXCejNzqa0T77Yb/8GwZPhsUxWEdg==
 
 "@lvcabral/upng@^2.3.0":
   version "2.3.0"
