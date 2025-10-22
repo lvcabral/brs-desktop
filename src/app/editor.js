@@ -227,23 +227,23 @@ function handleEngineEvents(event, data) {
 }
 
 function updateTerminal(text, level = "print") {
-       let output = text.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-        if (level === "print") {
-            const promptLen = `${prompt}&gt; `.length;
-            if (output.endsWith(`${prompt}&gt; `)) {
-                output = output.slice(0, output.length - promptLen);
-            }
-            output = output.replaceAll(" ", "&nbsp;");
-        } else if (level === "warning") {
-            output = terminal.colorize(output.replaceAll(" ", "&nbsp;"), "#d7ba7d");
-        } else if (level === "error") {
-            output = terminal.colors.brightRed(output.replaceAll(" ", "&nbsp;"));
+    let output = text.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    if (level === "print") {
+        const promptLen = `${prompt}&gt; `.length;
+        if (output.endsWith(`${prompt}&gt; `)) {
+            output = output.slice(0, output.length - promptLen);
         }
-        const lines = output.split(/\r\n?|\n/);
-        for (const line of lines) {
-            terminal.output(line);
-        }
+        output = output.replaceAll(" ", "&nbsp;");
+    } else if (level === "warning") {
+        output = terminal.colorize(output.replaceAll(" ", "&nbsp;"), "#d7ba7d");
+    } else if (level === "error") {
+        output = terminal.colors.brightRed(output.replaceAll(" ", "&nbsp;"));
     }
+    const lines = output.split(/\r\n?|\n/);
+    for (const line of lines) {
+        terminal.output(line);
+    }
+}
 
 function hideEditor(toggle) {
     editorContainer.classList.toggle("hidden", toggle);
@@ -396,14 +396,20 @@ function renameCode() {
 }
 
 function saveAsCode() {
+    const code = editorManager.editor.getValue();
+    if (!code || code.trim() === "") {
+        showToast("There is no Source Code to save!", 3000, true);
+        return;
+    }
     if (currentId && localStorage.getItem(currentId)) {
         actionType.value = "saveas";
         const codeName = codeSelect.options[codeSelect.selectedIndex].text + " (Copy)";
         codeForm.codeName.value = codeName.replace(/^⏺︎ /, "");
-        codeDialog.showModal();
     } else {
-        showToast("There is no code snippet selected to save as!", 3000, true);
+        actionType.value = "save";
+        codeForm.codeName.value = "";
     }
+    codeDialog.showModal();
 }
 
 async function deleteCode() {
