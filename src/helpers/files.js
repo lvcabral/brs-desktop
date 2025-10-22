@@ -10,7 +10,7 @@ import { getAudioMuted, getSimulatorOption, getDisplayOption } from "./settings"
 import { runOnPeerRoku, resetPeerRoku } from "./roku";
 import { appFocused } from "./window";
 import { isValidUrl } from "./util";
-import { BRS_HOME_APP_PATH, EDITOR_CODE_BRS } from "../constants";
+import { BRS_HOME_APP_PATH, EDITOR_CODE_BRS, MAX_PACKAGE_SIZE_MB } from "../constants";
 import { zipSync, strToU8 } from "fflate";
 import path from "node:path";
 import fs from "node:fs";
@@ -116,6 +116,16 @@ splash_screen_hd=pkg:/images/splash-screen_hd.jpg`;
 }
 
 function executeFile(window, fileData, filePath, input) {
+    // Check file size limit
+    const fileSize = fileData.length || fileData.byteLength || 0;
+    const fileSizeMB = fileSize / (1024 * 1024);
+    if (fileSizeMB > MAX_PACKAGE_SIZE_MB) {
+        const fSize = fileSizeMB.toFixed(2);
+        const errorMsg = `Package size (${fSize}MB) exceeds the maximum limit of ${MAX_PACKAGE_SIZE_MB}MB`;
+        window.webContents.send("console", errorMsg, true);
+        return;
+    }
+    // Send the app to the simulator to be executed
     let fileExt = path.parse(filePath).ext.toLowerCase().split("?")[0];
     if (input == undefined) {
         input = new Map();
@@ -132,6 +142,7 @@ function executeFile(window, fileData, filePath, input) {
         getSimulatorOption("debugOnCrash"),
         input
     );
+    // Send to the Roku peer
     if (fileExt === ".brs") {
         runOnPeerRoku(packageBrs(fileData));
     } else if (fileExt !== ".bpk" && filePath !== BRS_HOME_APP_PATH) {
