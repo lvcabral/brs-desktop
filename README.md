@@ -3,7 +3,7 @@
 <img alt="Simulator Desktop Apps" src="docs/images/brs-desktop.png?raw=true"/>
 </p>
 
-[![Version 2.0.0](https://img.shields.io/badge/Version-2.0.0-blue.svg?logo=github)](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.0)
+[![Version 2.0.0](https://img.shields.io/badge/Version-2.0.1-blue.svg?logo=github)](https://github.com/lvcabral/brs-desktop/releases/)
 [![License](https://img.shields.io/github/license/lvcabral/brs-desktop?logo=github)](https://github.com/lvcabral/brs-desktop/blob/master/LICENSE)
 [![Build](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml/badge.svg)](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
