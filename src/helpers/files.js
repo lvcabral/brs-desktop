@@ -134,7 +134,7 @@ function executeFile(window, fileData, filePath, input) {
     );
     if (fileExt === ".brs") {
         runOnPeerRoku(packageBrs(fileData));
-    } else if (fileExt !== ".bpk") {
+    } else if (fileExt !== ".bpk" && filePath !== BRS_HOME_APP_PATH) {
         runOnPeerRoku(fileData);
     }
 }
