@@ -26,7 +26,7 @@ const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
 const timeZoneLabels = new Map();
 const w = 800;
-const h = 630;
+const h = 650;
 let settings;
 let settingsWindow;
 let statusBarVisible = true;
@@ -179,8 +179,12 @@ export function getSettings(window) {
                                             value: "disableHomeScreen",
                                         },
                                         {
-                                            label: "Disable warning to use keyboard or gamepad on display click",
+                                            label: "Disable Warning to use Keyboard or Gamepad on Display Click",
                                             value: "disableClickToast",
+                                        },
+                                        {
+                                            label: "Disable Check for Updates on Startup",
+                                            value: "disableCheckForUpdates",
                                         },
                                     ],
                                     help: "Configure your preferences for the Simulator window and debugging tools",
