@@ -1,8 +1,22 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+<a name="v2.0.1"></a>
+
+## [v2.0.1 - Fixes on startup and app deployment](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.1) - 21 Oct 2025
+
+### Release Changes
+
+* Fixed `getSSID` to prevent startup error message on Raspberry Pi OS by [@lvcabral](https://github.com/lvcabral) in [#199](https://github.com/lvcabral/brs-desktop/pull/199)
+* Fixed option to run last loaded app on startup by [@lvcabral](https://github.com/lvcabral) in [#200](https://github.com/lvcabral/brs-desktop/pull/200)
+* Fixed race condition with VSCode deployment by [@lvcabral](https://github.com/lvcabral) in [#201](https://github.com/lvcabral/brs-desktop/pull/201)
+
+[Full Changelog][v2.0.1]
+
 <a name="v2.0.0"></a>
 
-## [v2.0.0 - SceneGraph Support](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.0) - 17 Oct 2025
+## [v2.0.0 - SceneGraph Support](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.0) - 20 Oct 2025
 
 This version of the BrightScript Simulator can execute code compatible with language specifications up to Roku OS 15. It also includes experimental **SceneGraph** support which is currently in **alpha stage**.
 
@@ -13,7 +27,7 @@ This version of the BrightScript Simulator can execute code compatible with lang
 * Apps may crash or behave unexpectedly
 * Check all [current limitations](https://github.com/lvcabral/brs-engine/blob/scenegraph/docs/limitations.md) for more details
 
-## Release Changes
+### Release Changes
 
 * Bump to v2.0.0 and upgraded Electron to v2.9 [@lvcabral](https://github.com/lvcabral) in [#190](https://github.com/lvcabral/brs-desktop/pull/190)
 * Added a message dialog to warn users that SceneGraph is in alpha stage by [@lvcabral](https://github.com/lvcabral) in [#191](https://github.com/lvcabral/brs-desktop/pull/191)
@@ -381,6 +395,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.0.1]: https://github.com/lvcabral/brs-desktop/compare/v2.0.0...v2.0.1
 [v2.0.0]: https://github.com/lvcabral/brs-desktop/compare/v1.4.0...v2.0.0
 [v1.4.0]: https://github.com/lvcabral/brs-desktop/compare/v1.3.2...v1.4.0
 [v1.3.2]: https://github.com/lvcabral/brs-desktop/compare/v1.3.0...v1.3.2
