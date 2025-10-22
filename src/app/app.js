@@ -53,8 +53,9 @@ const initialSettings = api.getPreferences();
 let brsHomeMode = !initialSettings?.simulator?.options?.includes("disableHomeScreen");
 
 // Initialize variables
+const defaultAppInfo = { id: "", path: "", icon: "", running: false };
 let appList = structuredClone(customDeviceInfo.appList ?? []);
-let currentApp = { id: "", path: "", icon: "", running: false };
+let currentApp = structuredClone(defaultAppInfo);
 let launchAppId = "";
 let debugMode = "continue";
 let editor = null;
@@ -454,7 +455,7 @@ function appLoaded(appData) {
 }
 
 function appTerminated() {
-    currentApp = { id: "", running: false };
+    currentApp = structuredClone(defaultAppInfo);
     stats.style.visibility = "hidden";
     api.updateTitle(defaultTitle);
     api.enableMenuItem("close-channel", false);
