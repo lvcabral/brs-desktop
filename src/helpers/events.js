@@ -66,7 +66,9 @@ function installerEvents(event, data) {
     } else if (event === "install") {
         const input = new Map();
         input.set("source", data.source);
-        loadFile([data.file], input);
+        setTimeout(() => {
+            loadFile([data.file], input);
+        }, 500);
     }
 }
 
