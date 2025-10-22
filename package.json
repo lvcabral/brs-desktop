@@ -94,7 +94,6 @@
         "nanoid": "^5.0.9",
         "network": "^0.7.0",
         "node-ssdp": "^4.0.1",
-        "postman-request": "^2.88.1-postman.33",
         "restana": "^4.9.9",
         "toastify-js": "^1.12.0",
         "ws": "^7.5.0",
