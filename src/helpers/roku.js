@@ -9,7 +9,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import { getPeerRoku } from "./settings";
 import { isValidIP } from "./util";
 import { ECP_PORT } from "../constants";
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 let sendECPKeys = false;
 
@@ -86,19 +86,19 @@ export async function runOnPeerRoku(fileData) {
                     if (err) {
                         message = `Error installing app: ${err} ${body}`;
                         isError = true;
-                    } else if (response?.status !== 200) {
-                        message = `Response Installing app: ${response.status} ${err ?? ""}`;
-                        if (isCompileError(body)) {
-                            message = `Error compiling app: ${response.status} check telnet console for details`;
-                        }
-                        isError = true;
-                    } else {
+                    } else if (response?.status === 200) {
                         message = `App installed on peer Roku at ${device.ip} with success!`;
                         if (body.includes("Identical to previous version")) {
                             message = `Identical to previous version, starting "dev" app...`;
                             await postEcpRequest(device, "/launch/dev");
                         }
                         sendECPKeys = device.syncControl;
+                    } else {
+                        message = `Response Installing app: ${response.status} ${err ?? ""}`;
+                        if (isCompileError(body)) {
+                            message = `Error compiling app: ${response.status} check telnet console for details`;
+                        }
+                        isError = true;
                     }
                     window.webContents.send("console", message, isError);
                 }
@@ -176,7 +176,7 @@ async function postInstallerRequest(device, path, formData, callback) {
         // If we get 401, parse the challenge and retry with auth
         if (response.status === 401) {
             const authHeader = response.headers.get("www-authenticate");
-            if (authHeader && authHeader.toLowerCase().startsWith("digest")) {
+            if (authHeader?.toLowerCase().startsWith("digest")) {
                 const challenge = parseDigestChallenge(authHeader);
                 const digestParams = generateDigestResponse(
                     device.username,
