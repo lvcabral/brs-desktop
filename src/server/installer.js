@@ -42,39 +42,52 @@ export function enableInstaller() {
     hash = cryptoUsingMD5(credentials.realm);
     server = http
         .createServer(function (req, res) {
-            let authInfo,
-                digestAuthObject = {};
+            // Skip authentication for image endpoints - they're accessed from already authenticated pages
+            const urlPath = req.url.split("?")[0];
+            if (urlPath === "/pkgs/dev.png" || urlPath === "/pkgs/dev.jpg") {
+                // Serve the image directly without authentication
+                const filePath = path.join(app.getPath("userData"), "dev.png");
+                fs.readFile(filePath, function (error, pgResp) {
+                    if (error) {
+                        res.writeHead(404);
+                        res.end("Error 404: Not Found\nFile not found");
+                    } else {
+                        res.writeHead(200, { "Content-Type": "image/png" });
+                        res.end(pgResp);
+                    }
+                });
+                return;
+            }
+
+            // Digest Authentication
             if (!req.headers.authorization) {
                 authenticateUser(res);
                 return;
             }
-            authInfo = req.headers.authorization.replace(/^Digest /, "");
-            authInfo = parseAuthenticationInfo(authInfo);
-            if (authInfo.username !== credentials.userName) {
+            const authInfo = req.headers.authorization.replace(/^Digest /, "");
+            const parsedAuth = parseAuthenticationInfo(authInfo);
+            if (parsedAuth.username !== credentials.userName) {
                 authenticateUser(res);
                 return;
             }
-            digestAuthObject.ha1 = cryptoUsingMD5(
-                `${authInfo.username}:${credentials.realm}:${credentials.password}`
+
+            const ha1 = cryptoUsingMD5(
+                `${parsedAuth.username}:${credentials.realm}:${credentials.password}`
             );
-            digestAuthObject.ha2 = cryptoUsingMD5(`${req.method}:${authInfo.uri}`);
-            let resp = cryptoUsingMD5(
-                [
-                    digestAuthObject.ha1,
-                    authInfo.nonce,
-                    authInfo.nc,
-                    authInfo.cnonce,
-                    authInfo.qop,
-                    digestAuthObject.ha2,
-                ].join(":")
+            const ha2 = cryptoUsingMD5(`${req.method}:${parsedAuth.uri}`);
+            const expectedResponse = cryptoUsingMD5(
+                [ha1, parsedAuth.nonce, parsedAuth.nc, parsedAuth.cnonce, parsedAuth.qop, ha2].join(
+                    ":"
+                )
             );
-            digestAuthObject.response = resp;
-            if (authInfo.response !== digestAuthObject.response) {
+            if (parsedAuth.response !== expectedResponse) {
                 authenticateUser(res);
                 return;
             }
             if (req.method === "POST") {
                 let done = "";
+                let fileSize = 0;
+                let fileError = null;
                 const busboy = new Busboy({ headers: req.headers });
                 busboy.on("file", function (fieldname, file, filename, encoding, mimetype) {
                     if (filename?.length) {
@@ -85,6 +98,9 @@ export function enableInstaller() {
                             }
                             const saveTo = path.join(app.getPath("userData"), devFile);
                             const writeStream = fs.createWriteStream(saveTo);
+                            file.on("data", (chunk) => {
+                                fileSize += chunk.length;
+                            });
                             file.pipe(writeStream);
                             file.on("end", () => {
                                 done = "file";
@@ -92,12 +108,11 @@ export function enableInstaller() {
                             writeStream.on("finish", () => {
                                 notifyAll("install", { file: saveTo, source: "auto-run-dev" });
                             });
+                            writeStream.on("error", (error) => {
+                                fileError = error.message;
+                            });
                         } catch (error) {
-                            res.writeHead(500);
-                            res.end(
-                                "Error 500: Internal Server Error\nCould not write channel file!"
-                            );
-                            return;
+                            fileError = error.message;
                         }
                     } else {
                         res.writeHead(302, { Location: "/" });
@@ -128,67 +143,141 @@ export function enableInstaller() {
                 busboy.on("finish", function () {
                     if (done === "screenshot") {
                         setTimeout(() => {
-                            const saveTo = path.join(app.getPath("userData"), "dev.png");
-                            const s = fs.createReadStream(saveTo);
-                            s.on("open", () => {
-                                res.setHeader("Content-Type", "image/png");
-                                s.pipe(res);
-                            });
-                            s.on("error", () => {
-                                res.writeHead(404);
-                                res.end("Error 404: Not Found\nFile not found");
+                            const utilitiesPath = path.join(__dirname, "web", "utilities.html");
+                            fs.readFile(utilitiesPath, "utf8", (error, html) => {
+                                if (error) {
+                                    res.writeHead(500);
+                                    res.end(
+                                        "Error 500: Internal Server Error\nCould not read utilities page!"
+                                    );
+                                    return;
+                                }
+                                // Check if screenshot file exists
+                                const screenshotPath = path.join(
+                                    app.getPath("userData"),
+                                    "dev.png"
+                                );
+                                const screenshotExists = fs.existsSync(screenshotPath);
+
+                                let contentDiv;
+                                if (screenshotExists) {
+                                    // Success: Insert success message and image div
+                                    const timestamp = Date.now();
+                                    contentDiv = `
+                                <div style="margin-top: 20px;">
+                                    <div style="background-color: #d4edda; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 500;">
+                                        Screenshot ok
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <img src="pkgs/dev.png?time=${timestamp}" alt="Screenshot" style="max-width: 100%; height: auto; border: 1px solid #ccc;"/>
+                                    </div>
+                                </div>`;
+                                } else {
+                                    // Error: Show error message
+                                    contentDiv = `
+                                <div style="margin-top: 20px;">
+                                    <div style="background-color: #f8d7da; color: #721c24; padding: 12px 20px; border-radius: 8px; font-weight: 500;">
+                                        Screenshot failed: Could not capture screenshot
+                                    </div>
+                                </div>`;
+                                }
+
+                                contentDiv += `
+                            </div>`;
+                                const modifiedHtml = html.replace(
+                                    "</div>\n                    </div>\n                </main>",
+                                    `${contentDiv}\n                    </div>\n                </main>`
+                                );
+                                res.writeHead(200, { "Content-Type": "text/html" });
+                                res.end(modifiedHtml);
                             });
                         }, 1000);
                         return;
                     } else if (done === "file") {
-                        res.writeHead(200, { "Content-Type": "text/plain" });
-                        res.write("Channel Installed!");
+                        const installerPath = path.join(__dirname, "web", "installer.html");
+                        fs.readFile(installerPath, "utf8", (error, html) => {
+                            if (error) {
+                                res.writeHead(500);
+                                res.end(
+                                    "Error 500: Internal Server Error\nCould not read installer page!"
+                                );
+                                return;
+                            }
+
+                            let contentDiv;
+                            if (fileError) {
+                                // Error: Show error message
+                                contentDiv = `
+                                <div style="margin-top: 20px;">
+                                    <div style="background-color: #f8d7da; color: #721c24; padding: 12px 20px; border-radius: 8px; font-weight: 500;">
+                                        Installation failed: ${fileError}
+                                    </div>
+                                </div>
+                            </div>`;
+                            } else {
+                                // Success: Show success messages
+                                contentDiv = `
+                                <div style="margin-top: 20px;">
+                                    <div style="background-color: #d4edda; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 12px; font-weight: 500;">
+                                        Application Received: ${fileSize} bytes stored.
+                                    </div>
+                                    <div style="background-color: #d4edda; color: #155724; padding: 12px 20px; border-radius: 8px; font-weight: 500;">
+                                        Install Success
+                                    </div>
+                                </div>
+                            </div>`;
+                            }
+
+                            const modifiedHtml = html.replace(
+                                "</div>\n                        </div>\n                    </div>\n                </main>",
+                                `${contentDiv}\n                        </div>\n                    </div>\n                </main>`
+                            );
+                            res.writeHead(200, { "Content-Type": "text/html" });
+                            res.end(modifiedHtml);
+                        });
+                        return;
                     } else if (done === "delete") {
                         res.writeHead(200, { "Content-Type": "text/plain" });
-                        res.write("File Deleted!");
+                        res.end("File Deleted!");
                     } else {
                         console.warn(`[Web Installer] Invalid method: ${done}`);
                         res.writeHead(501);
-                        res.write("Error 501: Not Implemented\nMethod not Implemented");
+                        res.end("Error 501: Not Implemented\nMethod not Implemented");
                     }
-                    res.end();
                 });
                 req.pipe(busboy);
             } else if (req.method === "GET") {
                 let filePath = "";
                 let contentType = "";
-                if (req.url === "/css/styles.min.css") {
+
+                if (urlPath === "/css/styles.min.css") {
                     filePath = path.join(__dirname, "css", "styles.min.css");
                     contentType = "text/css";
                 } else if (
-                    req.url === "/" ||
-                    req.url === "/index.html" ||
-                    req.url === "/plugin_install"
+                    urlPath === "/" ||
+                    urlPath === "/index.html" ||
+                    urlPath === "/plugin_install"
                 ) {
                     filePath = path.join(__dirname, "web", "installer.html");
                     contentType = "text/html";
-                } else if (req.url === "/plugin_inspect") {
+                } else if (urlPath === "/plugin_inspect") {
                     filePath = path.join(__dirname, "web", "utilities.html");
                     contentType = "text/html";
-                } else if (req.url === "/pkgs/dev.png" || req.url === "/pkgs/dev.jpg") {
-                    filePath = path.join(app.getPath("userData"), "dev.png");
-                    contentType = "image/png";
                 }
+                // Note: /pkgs/dev.png is handled at the top without authentication
                 if (filePath !== "") {
                     fs.readFile(filePath, function (error, pgResp) {
                         if (error) {
                             res.writeHead(404);
-                            res.write("Error 404: Not Found\nFile not found");
+                            res.end("Error 404: Not Found\nFile not found");
                         } else {
                             res.writeHead(200, { "Content-Type": contentType });
-                            res.write(pgResp);
+                            res.end(pgResp);
                         }
-                        res.end();
                     });
                 } else {
                     res.writeHead(404);
-                    res.write("Error 404: Not Found\nFile not found");
-                    res.end();
+                    res.end("Error 404: Not Found\nFile not found");
                 }
             }
         })
@@ -225,7 +314,7 @@ export function unsubscribeInstaller(observerId) {
     observers.delete(observerId);
 }
 function notifyAll(eventName, eventData) {
-    for (const [id, callback] of observers) {
+    for (const callback of observers.values()) {
         callback(eventName, eventData);
     }
 }

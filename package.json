@@ -79,6 +79,7 @@
     "dependencies": {
         "@electron/remote": "^2.0.9",
         "@lvcabral/electron-preferences": "^2.8.70",
+        "@lvcabral/node-ssdp": "^4.0.4",
         "@lvcabral/terminal": "^1.1.0",
         "busboy": "^0.3.1",
         "codemirror": "^5.65.12",
@@ -93,7 +94,6 @@
         "mousetrap": "^1.6.5",
         "nanoid": "^5.0.9",
         "network": "^0.7.0",
-        "node-ssdp": "^4.0.1",
         "restana": "^4.9.9",
         "toastify-js": "^1.12.0",
         "ws": "^7.5.0",

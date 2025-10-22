@@ -24,4 +24,4 @@ export const BRS_HOME_APP_PATH = "./assets/brs-home.zip";
 export const EDITOR_CODE_BRS = "editor_code.brs";
 
 // Maximum package size in MB
-export const MAX_PACKAGE_SIZE_MB = 5;
+export const MAX_PACKAGE_SIZE_MB = 7;
