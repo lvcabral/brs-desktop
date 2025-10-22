@@ -14,12 +14,16 @@ import request from "postman-request";
 let sendECPKeys = false;
 
 ipcMain.on("keySent", (_, data) => {
-    if (sendECPKeys) {
+    if (sendECPKeys && typeof data?.key === "string") {
         const device = getPeerRoku();
+        let ecpKey = data.key;
+        if (ecpKey.toLowerCase().startsWith("lit_")) {
+            ecpKey = `lit_${encodeURIComponent(ecpKey.charAt(4))}`;
+        }
         if (data.mod === 0) {
-            postEcpRequest(device, `/keydown/${data.key}`);
+            postEcpRequest(device, `/keydown/${ecpKey}`);
         } else {
-            postEcpRequest(device, `/keyup/${data.key}`);
+            postEcpRequest(device, `/keyup/${ecpKey}`);
         }
         if (data.key === "poweroff") {
             const window = BrowserWindow.fromId(1);
