@@ -52,8 +52,11 @@ export function enableECP() {
     ecp.get("//query/device-info", sendDeviceInfo);
     ecp.get("/query/apps", sendApps);
     ecp.get("/query/active-app", sendActiveApp);
+    ecp.get("/query/media-player", sendMediaPlayer);
     ecp.get("/query/icon/:appID", sendAppIcon);
     ecp.get("/query/registry/:appID", sendRegistry);
+    ecp.get("/query/graphics-frame-rate", sendGraphicsFrameRate);
+    ecp.get("/query/app-state/:appID", sendAppState);
     ecp.post("/input", sendInput);
     ecp.post("/input/:appID", sendInput);
     ecp.post("/launch/:appID", sendLaunchApp);
@@ -249,6 +252,11 @@ function sendActiveApp(req, res) {
     res.send(genActiveApp(false));
 }
 
+function sendMediaPlayer(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genMediaPlayer(false));
+}
+
 function sendDeviceImage(req, res) {
     let image = fs.readFileSync(path.join(__dirname, "images", "device-image.png"));
     res.setHeader("content-type", "image/png");
@@ -269,6 +277,16 @@ function sendAppIcon(req, res) {
 function sendRegistry(req, res) {
     res.setHeader("content-type", "application/xml");
     res.send(genAppRegistry(req.params.appID, false));
+}
+
+function sendGraphicsFrameRate(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genGraphicsFrameRate(false));
+}
+
+function sendAppState(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genAppState(req.params.appID, false));
 }
 
 function sendInput(req, res) {
@@ -360,6 +378,7 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("serial-number", {}, device.serialNumber);
     xml.ele("device-id", {}, device.serialNumber);
     xml.ele("advertising-id", {}, device.RIDA);
+    xml.ele("user-profile-type", {}, "none");
     xml.ele("vendor-name", {}, "Roku");
     xml.ele("model-name", {}, modelName);
     xml.ele("model-number", {}, device.deviceModel);
@@ -370,7 +389,7 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("wifi-mac", {}, MAC);
     xml.ele("ethernet-mac", {}, MAC);
     xml.ele("network-type", {}, "wifi");
-    xml.ele("network-name", {}, "Local");
+    xml.ele("network-name", {}, device.connectionInfo?.ssid ?? "Local");
     xml.ele("friendly-device-name", {}, device.friendlyName);
     xml.ele("friendly-model-name", {}, modelName);
     xml.ele("default-device-name", {}, `${device.friendlyName} - ${device.serialNumber}`);
@@ -379,9 +398,11 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("software-version", {}, getRokuOS(device.firmwareVersion));
     xml.ele("software-build", {}, getRokuOS(device.firmwareVersion, false));
     xml.ele("secure-device", {}, true);
+    xml.ele("ecp-setting-mode", {}, "enabled");
     xml.ele("language", {}, device.locale.split("_")[0]);
     xml.ele("country", {}, device.countryCode);
     xml.ele("locale", {}, device.locale);
+    xml.ele("closed-caption-mode", {}, device.captionMode);
     xml.ele("time-zone-auto", {}, device.timeZoneAuto);
     xml.ele("time-zone", {}, device.timeZone);
     xml.ele("time-zone-name", {}, device.timeZone);
@@ -455,25 +476,44 @@ function genAppIcon(appID, encrypt) {
 
 function genActiveApp(encrypt) {
     try {
-        const xml = xmlbuilder.create("apps");
+        const xml = xmlbuilder.create("active-app");
         const firstApp = device.appList[0];
-        if (firstApp && currentApp?.id !== "") {
-            xml.ele(
-                "app",
-                {
-                    id: firstApp.id ?? "home",
-                    type: "appl",
-                    version: firstApp.version ?? "1.0.0",
-                },
-                firstApp.title ?? "Home"
-            );
+        if (firstApp && currentApp?.id === firstApp?.id) {
+            const id = firstApp.id ?? "home";
+            const title = firstApp.title ?? "Home";
+            const version = firstApp.version ?? "1.0.0";
+            xml.ele("app", { id: id, type: "appl", version: version, "ui-location": id }, title);
         } else {
-            xml.ele("app", { id: "home", type: "appl", version: "1.0.0" }, "Home");
+            const id = currentApp?.id ?? "home";
+            xml.ele("app", { id: id, type: "home", version: "1.0.0", "ui-location": id }, "Home");
         }
         const strXml = xml.end({ pretty: true });
         return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
     } catch (error) {
         console.log("Error generating active app XML:", error);
+        return "";
+    }
+}
+
+function genMediaPlayer(encrypt) {
+    try {
+        const xml = xmlbuilder.create("player");
+        xml.att("state", "close");
+        xml.att("error", "false");
+        const firstApp = device.appList[0];
+        let id, title;
+        if (firstApp && currentApp?.id === firstApp?.id) {
+            id = firstApp.id ?? "home";
+            title = firstApp.title ?? "Home";
+        } else {
+            id = currentApp?.id ?? "home";
+            title = currentApp?.title ?? "Home";
+        }
+        xml.ele("plugin", { id: id, name: title, bandwidth: "5000000 bps" });
+        const strXml = xml.end({ pretty: true });
+        return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
+    } catch (error) {
+        console.log("Error generating media player XML:", error);
         return "";
     }
 }
@@ -524,6 +564,43 @@ function genAppRegistry(plugin, encrypt) {
     }
     const strXml = xml.end({ pretty: true });
     return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
+}
+
+function genGraphicsFrameRate(encrypt) {
+    try {
+        const xml = xmlbuilder.create("graphics-frame-rate");
+        xml.ele("fps", {}, "0.000000");
+        xml.ele("timestamp", {}, `${Date.now()}`);
+        xml.ele("status", {}, "OK");
+        const strXml = xml.end({ pretty: true });
+        return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
+    } catch (error) {
+        console.log("Error generating graphics frame rate XML:", error);
+        return "";
+    }
+}
+
+function genAppState(appID, encrypt) {
+    try {
+        const app = device.appList.find((app) => app.id === appID);
+        const xml = xmlbuilder.create("app-state");
+        xml.ele("app-id", {}, appID);
+        if (app) {
+            xml.ele("app-title", {}, app.title);
+            xml.ele("app-version", {}, app.version);
+            xml.ele("app-dev-id", {}, device.developerId);
+            xml.ele("state", {}, app.id === currentApp?.id ? "active" : "inactive");
+            xml.ele("status", {}, "OK");
+        } else {
+            xml.ele("status", {}, "FAILED");
+            xml.ele("error", {}, `Channel not found: ${appID}`);
+        }
+        const strXml = xml.end({ pretty: true });
+        return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
+    } catch (error) {
+        console.log("Error generating app state XML:", error);
+        return "";
+    }
 }
 
 // Helper Functions
