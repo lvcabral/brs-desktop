@@ -55,6 +55,8 @@ export function enableECP() {
     ecp.get("/query/media-player", sendMediaPlayer);
     ecp.get("/query/icon/:appID", sendAppIcon);
     ecp.get("/query/registry/:appID", sendRegistry);
+    ecp.get("/query/graphics-frame-rate", sendGraphicsFrameRate);
+    ecp.get("/query/app-state/:appID", sendAppState);
     ecp.post("/input", sendInput);
     ecp.post("/input/:appID", sendInput);
     ecp.post("/launch/:appID", sendLaunchApp);
@@ -275,6 +277,16 @@ function sendAppIcon(req, res) {
 function sendRegistry(req, res) {
     res.setHeader("content-type", "application/xml");
     res.send(genAppRegistry(req.params.appID, false));
+}
+
+function sendGraphicsFrameRate(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genGraphicsFrameRate(false));
+}
+
+function sendAppState(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genAppState(req.params.appID, false));
 }
 
 function sendInput(req, res) {
@@ -501,7 +513,7 @@ function genMediaPlayer(encrypt) {
         const strXml = xml.end({ pretty: true });
         return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
     } catch (error) {
-        console.log("Error generating active app XML:", error);
+        console.log("Error generating media player XML:", error);
         return "";
     }
 }
@@ -552,6 +564,43 @@ function genAppRegistry(plugin, encrypt) {
     }
     const strXml = xml.end({ pretty: true });
     return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
+}
+
+function genGraphicsFrameRate(encrypt) {
+    try {
+        const xml = xmlbuilder.create("graphics-frame-rate");
+        xml.ele("fps", {}, "0.000000");
+        xml.ele("timestamp", {}, `${Date.now()}`);
+        xml.ele("status", {}, "OK");
+        const strXml = xml.end({ pretty: true });
+        return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
+    } catch (error) {
+        console.log("Error generating graphics frame rate XML:", error);
+        return "";
+    }
+}
+
+function genAppState(appID, encrypt) {
+    try {
+        const app = device.appList.find((app) => app.id === appID);
+        const xml = xmlbuilder.create("app-state");
+        xml.ele("app-id", {}, appID);
+        if (app) {
+            xml.ele("app-title", {}, app.title);
+            xml.ele("app-version", {}, app.version);
+            xml.ele("app-dev-id", {}, device.developerId);
+            xml.ele("state", {}, app.id === currentApp?.id ? "active" : "inactive");
+            xml.ele("status", {}, "OK");
+        } else {
+            xml.ele("status", {}, "FAILED");
+            xml.ele("error", {}, `Channel not found: ${appID}`);
+        }
+        const strXml = xml.end({ pretty: true });
+        return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
+    } catch (error) {
+        console.log("Error generating app state XML:", error);
+        return "";
+    }
 }
 
 // Helper Functions
