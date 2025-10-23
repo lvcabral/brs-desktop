@@ -52,6 +52,7 @@ export function enableECP() {
     ecp.get("//query/device-info", sendDeviceInfo);
     ecp.get("/query/apps", sendApps);
     ecp.get("/query/active-app", sendActiveApp);
+    ecp.get("/query/media-player", sendMediaPlayer);
     ecp.get("/query/icon/:appID", sendAppIcon);
     ecp.get("/query/registry/:appID", sendRegistry);
     ecp.post("/input", sendInput);
@@ -247,6 +248,11 @@ function sendApps(req, res) {
 function sendActiveApp(req, res) {
     res.setHeader("content-type", "application/xml");
     res.send(genActiveApp(false));
+}
+
+function sendMediaPlayer(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genMediaPlayer(false));
 }
 
 function sendDeviceImage(req, res) {
@@ -455,21 +461,40 @@ function genAppIcon(appID, encrypt) {
 
 function genActiveApp(encrypt) {
     try {
-        const xml = xmlbuilder.create("apps");
+        const xml = xmlbuilder.create("active-app");
         const firstApp = device.appList[0];
-        if (firstApp && currentApp?.id !== "") {
-            xml.ele(
-                "app",
-                {
-                    id: firstApp.id ?? "home",
-                    type: "appl",
-                    version: firstApp.version ?? "1.0.0",
-                },
-                firstApp.title ?? "Home"
-            );
+        if (firstApp && currentApp?.id === firstApp?.id) {
+            const id = firstApp.id ?? "home";
+            const title = firstApp.title ?? "Home";
+            const version = firstApp.version ?? "1.0.0";
+            xml.ele("app", { id: id, type: "appl", version: version, "ui-location": id }, title);
         } else {
-            xml.ele("app", { id: "home", type: "appl", version: "1.0.0" }, "Home");
+            const id = currentApp?.id ?? "home";
+            xml.ele("app", { id: id, type: "home", version: "1.0.0", "ui-location": id }, "Home");
         }
+        const strXml = xml.end({ pretty: true });
+        return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
+    } catch (error) {
+        console.log("Error generating active app XML:", error);
+        return "";
+    }
+}
+
+function genMediaPlayer(encrypt) {
+    try {
+        const xml = xmlbuilder.create("player");
+        xml.att("state", "close");
+        xml.att("error", "false");
+        const firstApp = device.appList[0];
+        let id, title;
+        if (firstApp && currentApp?.id === firstApp?.id) {
+            id = firstApp.id ?? "home";
+            title = firstApp.title ?? "Home";
+        } else {
+            id = currentApp?.id ?? "home";
+            title = currentApp?.title ?? "Home";
+        }
+        xml.ele("plugin", { id: id, name: title, bandwidth: "5000000 bps" });
         const strXml = xml.end({ pretty: true });
         return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
     } catch (error) {
