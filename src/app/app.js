@@ -491,10 +491,10 @@ function loadRegistry() {
     for (let index = 0; index < storage.length; index++) {
         const key = storage.key(index);
         if (key?.split(".")[0] === brs.deviceData.developerId) {
-            if (key.split(".")[1] !== "Transient") {
-                registry.set(key, storage.getItem(key) ?? "");
-            } else {
+            if (key.split(".")[1] === "Transient") {
                 transientKeys.push(key);
+            } else {
+                registry.set(key, storage.getItem(key) ?? "");
             }
         }
     }
