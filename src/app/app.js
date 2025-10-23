@@ -178,7 +178,7 @@ async function main() {
         const jsonSerializedData = JSON.parse(JSON.stringify(clonedDeviceData));
         api.send("deviceData", jsonSerializedData);
     }
-
+    api.send("updateRegistry", loadRegistry());
     api.send("serialNumber", brs.getSerialNumber());
     api.send("engineVersion", brs.getVersion());
     brs.redraw(api.isFullScreen());
@@ -480,6 +480,28 @@ function redrawEvent(redraw) {
             }
         }
     }
+}
+
+// Load device Registry from Local Storage
+// Note: remove this function when brs-engine generates event on init
+function loadRegistry() {
+    const storage = globalThis.localStorage;
+    const transientKeys = [];
+    const registry = new Map();
+    for (let index = 0; index < storage.length; index++) {
+        const key = storage.key(index);
+        if (key?.split(".")[0] === brs.deviceData.developerId) {
+            if (key.split(".")[1] !== "Transient") {
+                registry.set(key, storage.getItem(key) ?? "");
+            } else {
+                transientKeys.push(key);
+            }
+        }
+    }
+    for (const key of transientKeys) {
+        storage.removeItem(key);
+    }
+    return registry;
 }
 
 // Simulator Startup Process
