@@ -366,6 +366,7 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("serial-number", {}, device.serialNumber);
     xml.ele("device-id", {}, device.serialNumber);
     xml.ele("advertising-id", {}, device.RIDA);
+    xml.ele("user-profile-type", {}, "none");
     xml.ele("vendor-name", {}, "Roku");
     xml.ele("model-name", {}, modelName);
     xml.ele("model-number", {}, device.deviceModel);
@@ -376,7 +377,7 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("wifi-mac", {}, MAC);
     xml.ele("ethernet-mac", {}, MAC);
     xml.ele("network-type", {}, "wifi");
-    xml.ele("network-name", {}, "Local");
+    xml.ele("network-name", {}, device.connectionInfo?.ssid ?? "Local");
     xml.ele("friendly-device-name", {}, device.friendlyName);
     xml.ele("friendly-model-name", {}, modelName);
     xml.ele("default-device-name", {}, `${device.friendlyName} - ${device.serialNumber}`);
@@ -385,9 +386,11 @@ function genDeviceInfoXml(encrypt) {
     xml.ele("software-version", {}, getRokuOS(device.firmwareVersion));
     xml.ele("software-build", {}, getRokuOS(device.firmwareVersion, false));
     xml.ele("secure-device", {}, true);
+    xml.ele("ecp-setting-mode", {}, "enabled");
     xml.ele("language", {}, device.locale.split("_")[0]);
     xml.ele("country", {}, device.countryCode);
     xml.ele("locale", {}, device.locale);
+    xml.ele("closed-caption-mode", {}, device.captionMode);
     xml.ele("time-zone-auto", {}, device.timeZoneAuto);
     xml.ele("time-zone", {}, device.timeZone);
     xml.ele("time-zone-name", {}, device.timeZone);
