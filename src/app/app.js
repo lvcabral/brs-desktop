@@ -113,7 +113,9 @@ async function main() {
         } else if (event === "closed" || event === "error") {
             appTerminated();
             if (brsHomeMode && launchAppId === BRS_HOME_APP_PATH) {
-                showCloseMessage(event, data, false);
+                if (event === "error" || data.endsWith("CRASH")) {
+                    showCloseMessage(event, data, false);
+                }
                 api.send("runFile", BRS_HOME_APP_PATH);
             } else if (launchAppId !== "" && event === "closed") {
                 const app = appList.find((a) => a.id === launchAppId);
@@ -223,7 +225,7 @@ api.receive("setCaptionStyle", function (newStyles) {
 api.receive("executeFile", function (filePath, data, clear, mute, debug, input) {
     // Close the SceneGraph warning dialog if it's still open
     const dialog = document.getElementById("scenegraph-warning-dialog");
-    if (dialog && dialog.style.display === "flex") {
+    if (dialog?.style?.display === "flex") {
         dialog.style.display = "none";
     }
 
