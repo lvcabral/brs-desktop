@@ -225,7 +225,7 @@ api.receive("setCaptionStyle", function (newStyles) {
 api.receive("executeFile", function (filePath, data, clear, mute, debug, input) {
     // Close the SceneGraph warning dialog if it's still open
     const dialog = document.getElementById("scenegraph-warning-dialog");
-    if (dialog && dialog.style.display === "flex") {
+    if (dialog?.style?.display === "flex") {
         dialog.style.display = "none";
     }
 
