@@ -113,7 +113,9 @@ async function main() {
         } else if (event === "closed" || event === "error") {
             appTerminated();
             if (brsHomeMode && launchAppId === BRS_HOME_APP_PATH) {
-                showCloseMessage(event, data, false);
+                if (event === "error" || data.endsWith("CRASH")) {
+                    showCloseMessage(event, data, false);
+                }
                 api.send("runFile", BRS_HOME_APP_PATH);
             } else if (launchAppId !== "" && event === "closed") {
                 const app = appList.find((a) => a.id === launchAppId);
