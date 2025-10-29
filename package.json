@@ -105,7 +105,7 @@
         "@types/luxon": "^1.27.1",
         "@types/request": "^2.47.0",
         "babel-loader": "^8.0.6",
-        "brs-engine": "^2.0.0-alpha.16",
+        "brs-engine": "^2.0.0-alpha.17",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.7.3",
         "dotenv": "^16.4.7",
