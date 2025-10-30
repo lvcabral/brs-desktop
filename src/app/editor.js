@@ -304,7 +304,7 @@ function populateCodeSelector(currentId = "") {
             arrCode[idx][1] = codeId;
         }
     }
-    arrCode.sort();
+    arrCode.sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: 'base' }));
     codeSelect.length = 1;
     for (let i = 0; i < arrCode.length; i++) {
         const codeId = arrCode[i][1];
