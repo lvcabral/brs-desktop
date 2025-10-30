@@ -111,24 +111,7 @@ async function main() {
                 }
             }
         } else if (event === "closed" || event === "error") {
-            appTerminated();
-            if (brsHomeMode && launchAppId === BRS_HOME_APP_PATH) {
-                if (event === "error" || data.endsWith("CRASH")) {
-                    showCloseMessage(event, data, false);
-                }
-                api.send("runFile", BRS_HOME_APP_PATH);
-            } else if (launchAppId !== "" && event === "closed") {
-                const app = appList.find((a) => a.id === launchAppId);
-                if (app?.path?.startsWith("http") || app?.path?.startsWith("file:")) {
-                    api.send("runUrl", app.path);
-                } else if (app?.path) {
-                    api.send("runFile", app.path);
-                }
-            } else {
-                showCloseMessage(event, data);
-                brs.setDebugState(true);
-            }
-            launchAppId = brsHomeMode ? BRS_HOME_APP_PATH : "";
+            handleAppClosing(event, data);
         } else if (event === "redraw") {
             redrawEvent(data);
         } else if (event === "control") {
@@ -410,6 +393,38 @@ display.onclick = function () {
 
 // Helper functions
 
+function handleAppClosing(event, reason) {
+    appTerminated();
+    if (launchAppId !== "" && event === "closed") {
+        let path = "";
+        if (launchAppId === BRS_HOME_APP_PATH) {
+            path = BRS_HOME_APP_PATH;
+        } else {
+            const app = appList.find((a) => a.id === launchAppId);
+            if (app) {
+                path = app.path;
+            }
+        }
+        if (reason.endsWith("CRASH")) {
+            showCloseMessage(event, reason, false);
+        }
+        if (path.startsWith("http") || path.startsWith("file:")) {
+            api.send("runUrl", path);
+        } else if (path) {
+            api.send("runFile", path);
+        } else {
+            showToast(`Error: Could not find app with id ${launchAppId} to launch!`, 5000, true);
+        }
+    } else if (brsHomeMode) {
+        showCloseMessage(event, reason, false);
+        api.send("runFile", BRS_HOME_APP_PATH);
+    } else {
+        showCloseMessage(event, reason);
+        brs.setDebugState(true);
+    }
+    launchAppId = brsHomeMode ? BRS_HOME_APP_PATH : "";
+}
+
 function takeScreenshot(file = "") {
     const screenshot = brs.getScreenshot();
     if (screenshot === null) {
@@ -439,15 +454,15 @@ function takeScreenshot(file = "") {
     });
 }
 
-function showCloseMessage(event, data, success = true) {
+function showCloseMessage(event, reason, success = true) {
     if (event === "error") {
-        showToast(`Error: ${data}`, 5000, true);
-    } else if (data.endsWith("CRASH")) {
+        showToast(`Error: ${reason}`, 5000, true);
+    } else if (reason.endsWith("CRASH")) {
         showToast(`App crashed, check the console for details!`, 5000, true);
-    } else if (data === "EXIT_MISSING_PASSWORD") {
+    } else if (reason === "EXIT_MISSING_PASSWORD") {
         showToast(`Missing developer password, unable to unpack the app!`, 5000, true);
-    } else if (data !== "EXIT_USER_NAV") {
-        showToast(`App closed with exit reason: ${data}`, 5000, true);
+    } else if (reason !== "EXIT_USER_NAV") {
+        showToast(`App closed with exit reason: ${reason}`, 5000, true);
     } else if (success) {
         showToast(`App closed with success!`);
     }
