@@ -123,7 +123,10 @@ function handlePostRequest(req, res, window) {
     });
 
     busboy.on("field", (fieldname, value) => {
-        done = handleFormField(fieldname, value, window);
+        const result = handleFormField(fieldname, value, window);
+        if (result === "screenshot" || result === "delete") {
+            done = result;
+        }
     });
 
     busboy.on("finish", () => {
@@ -237,7 +240,7 @@ function buildScreenshotHtml(screenshotExists) {
                                         Screenshot ok
                                     </div>
                                     <div style="text-align: center;">
-                                        <img src="/pkgs/dev.png?time=${timestamp}" alt="Screenshot" style="max-width: 100%; height: auto; border: 1px solid #ccc;"/>
+                                        <img src="pkgs/dev.png?time=${timestamp}" alt="Screenshot" style="max-width: 100%; height: auto; border: 1px solid #ccc;"/>
                                     </div>
                                 </div>
                             </div>`;
