@@ -57,15 +57,15 @@ statusAudio.onclick = function () {
     showToast(`Audio is ${muted ? "off" : "on"}`);
 };
 
-let displayMode = api.getDeviceInfo().displayMode;
+const deviceInfo = api.getDeviceInfo();
+let displayMode = deviceInfo.displayMode;
 let ui = getUIType(displayMode);
 statusDisplay.innerText = `${ui} (${displayMode})`;
 const MIN_PATH_SIZE = 30;
 const PATH_SIZE_FACTOR = 0.045;
 let filePath = "";
 // Locale on StatusBar
-let currentLocale = api.getDeviceInfo().locale;
-setLocaleStatus(currentLocale);
+setLocaleStatus(deviceInfo.locale);
 // Subscribe Events
 brs.subscribe("statusbar", (event, data) => {
     if (event === "closed") {
@@ -224,12 +224,6 @@ api.receive("serverStatus", function (server, enable, port) {
         console.info(`${server} server was disabled.`);
     }
     setServerStatus(server, enable, port);
-});
-api.receive("setLocale", function (locale) {
-    if (locale !== currentLocale) {
-        currentLocale = locale;
-        setLocaleStatus(locale);
-    }
 });
 
 export function updateStatus(data, homeMode = false) {

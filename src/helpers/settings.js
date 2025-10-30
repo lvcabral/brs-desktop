@@ -704,9 +704,8 @@ export function getSettings(window) {
             if (localeId === "") {
                 setPreference("localization.locale", globalThis.sharedObject.deviceInfo.locale);
             } else if (globalThis.sharedObject.deviceInfo.locale !== localeId) {
-                globalThis.sharedObject.deviceInfo.locale = localeId;
+                setDeviceInfo("localization", "locale", true);
                 checkMenuItem(localeId, true);
-                window.webContents.send("setLocale", localeId);
             }
             setDeviceInfo("localization", "clockFormat", true);
             setDeviceInfo("localization", "countryCode", true);
@@ -1006,10 +1005,8 @@ export function getPeerRoku() {
 }
 
 export function setLocaleId(locale) {
-    const window = BrowserWindow.fromId(1);
     setPreference("localization.locale", locale);
-    globalThis.sharedObject.deviceInfo.locale = locale;
-    window.webContents.send("setLocale", locale);
+    setDeviceInfo("localization", "locale", true);
 }
 
 export function setTimeZone(notifyApp) {
