@@ -1005,7 +1005,6 @@ export function getPeerRoku() {
 }
 
 export function setLocaleId(locale) {
-    const window = BrowserWindow.fromId(1);
     setPreference("localization.locale", locale);
     setDeviceInfo("localization", "locale", true);
 }
