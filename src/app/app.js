@@ -300,17 +300,10 @@ api.receive("postKeyPress", function (key, delay, remote) {
     brs.sendKeyPress(key, delay, remote);
 });
 api.receive("copyScreenshot", function () {
-    display.toBlob(function (blob) {
-        const item = new ClipboardItem({ "image/png": blob });
-        navigator.clipboard.write([item]).catch((err) => {
-            console.log(`error copying screenshot to clipboard: ${err.message}`);
-        });
-    });
+    takeScreenshot();
 });
 api.receive("saveScreenshot", function (file) {
-    const img = display.toDataURL("image/png");
-    const data = img.replace(/^data:image\/\w+;base64,/, "");
-    api.send("saveFile", [file, data]);
+    takeScreenshot(file);
 });
 api.receive("setDisplay", function (mode) {
     if (mode !== brs.getDisplayMode()) {
@@ -416,6 +409,34 @@ display.onclick = function () {
 };
 
 // Helper functions
+
+function takeScreenshot(file = "") {
+    const screenshot = brs.getScreenshot();
+    if (screenshot === null) {
+        showToast("Error: Could not get screenshot!", 3000, true);
+        return;
+    }
+    const canvas = new OffscreenCanvas(screenshot.width, screenshot.height);
+    const ctx = canvas.getContext("2d");
+    ctx.putImageData(screenshot, 0, 0);
+    canvas.convertToBlob().then(function (blob) {
+        if (file !== "") {
+            blob.arrayBuffer()
+                .then((buffer) => {
+                    api.send("saveFile", [file, buffer]);
+                })
+                .catch((err) => {
+                    showToast(`Error saving screenshot: ${err.message}`, 5000, true);
+                });
+        } else {
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]).catch((err) => {
+                showToast(`Error copying screenshot to clipboard: ${err.message}`, 5000, true);
+            });
+        }
+    });
+}
+
 function showCloseMessage(event, data, success = true) {
     if (event === "error") {
         showToast(`Error: ${data}`, 5000, true);

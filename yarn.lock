@@ -1935,10 +1935,10 @@ browserslist@^4.24.0, browserslist@^4.25.3:
     node-releases "^2.0.21"
     update-browserslist-db "^1.1.3"
 
-brs-engine@^2.0.0-alpha.17:
-  version "2.0.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/brs-engine/-/brs-engine-2.0.0-alpha.17.tgz#73b2ad1515bab4614c53883350f88f1a23c7dffe"
-  integrity sha512-JC0V69VYPBchdkB3UH/qT+hcCP3tU93WpJvL1gQlTcHr0/GHrceIQZ2sti5K1kA7xcFUqZ2bw8QfZmvFq+HyXQ==
+brs-engine@^2.0.0-alpha.18:
+  version "2.0.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/brs-engine/-/brs-engine-2.0.0-alpha.18.tgz#7edfbb24e97f3a5a25e2bc18ed96abf13da37c1f"
+  integrity sha512-pxE5KZWs4rkkOnuaYEgmMINgADKNg7jZ9sInq0SVrWH0xHyHf4X2X6AyZvfarCrauSesIJxJoNVI0clZBDua0Q==
   dependencies:
     "@lvcabral/libwebp" "^0.1.0"
     "@lvcabral/memory-fs" "^0.5.1"
