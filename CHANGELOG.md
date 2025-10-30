@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.0.2"></a>
+
+## [v2.0.2 - Hotfix for SceneGraph apps](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.2) - 29 Oct 2025
+
+This release brings several fixes and improvements to the BrightScript Simulator with SceneGraph support. Improves the Screenshot feature and fix several issues, in particular, it addresses issues related to deploying apps to peer Roku devices, ECP command handling, and enhances the overall stability of the simulator when running SceneGraph applications. I also implements a Check for Updates feature to keep users informed about the latest releases.
+
+### Release Changes
+
+* Fixed peer Roku app deploy to not install home app by [@lvcabral](https://github.com/lvcabral) in [#202](https://github.com/lvcabral/brs-desktop/pull/202)
+* Fixed ECP to properly encode literal keys sent to peer Roku by [@lvcabral](https://github.com/lvcabral) in [#203](https://github.com/lvcabral/brs-desktop/pull/203)
+* Replaced dependency `postman-request` using node native `fetch` and `crypto` by [@lvcabral](https://github.com/lvcabral) in [#204](https://github.com/lvcabral/brs-desktop/pull/204)
+* Upgraded `terminal` to v1.1.0 and added theme support to the console by [@lvcabral](https://github.com/lvcabral) in [#205](https://github.com/lvcabral/brs-desktop/pull/205)
+* Prevent loading a package larger than 5MB by [@lvcabral](https://github.com/lvcabral) in [#206](https://github.com/lvcabral/brs-desktop/pull/206)
+* Fixed: In MacOS, hiding Display with Settings open would not allow reopen Settings by [@lvcabral](https://github.com/lvcabral) in [#207](https://github.com/lvcabral/brs-desktop/pull/207)
+* Changed Save as.. option, in Code Editor, to act like Save button if no snippet is selected by [@lvcabral](https://github.com/lvcabral) in [#208](https://github.com/lvcabral/brs-desktop/pull/208)
+* Improved web installer to act like Roku and allow VSCode to take screenshots by [@lvcabral](https://github.com/lvcabral) in [#209](https://github.com/lvcabral/brs-desktop/pull/209)
+* Updated installer and utilities page titles to match Roku by [@lvcabral](https://github.com/lvcabral) in [#210](https://github.com/lvcabral/brs-desktop/pull/210)
+* Added Check for Updates feature by [@lvcabral](https://github.com/lvcabral) in [#211](https://github.com/lvcabral/brs-desktop/pull/211)
+* Add missing ECP queries and fixed others by [@lvcabral](https://github.com/lvcabral) in [#212](https://github.com/lvcabral/brs-desktop/pull/212)
+* In home app mode, only display closing app toast with `error` or `crash` by [@lvcabral](https://github.com/lvcabral) in [#213](https://github.com/lvcabral/brs-desktop/pull/213)
+* Prevent app installer to be enabled by default in Linux by [@lvcabral](https://github.com/lvcabral) in [#214](https://github.com/lvcabral/brs-desktop/pull/214)
+* Changed Editor code list to be case insensitive by [@lvcabral](https://github.com/lvcabral) in [#215](https://github.com/lvcabral/brs-desktop/pull/215)
+* Improved take `Screenshot` feature to get full resolution image by [@lvcabral](https://github.com/lvcabral) in [#216](https://github.com/lvcabral/brs-desktop/pull/216)
+* Bump `brs-engine` to v2.0.0-alpha.18 by @lvcabral - main changes since last release:
+  * Implemented support for `roSGNode.update()` recursive child tree creation
+  * Added support for `Invalid` children in `roSGNode`
+  * Implemented support for `RowList` field `rowItemSelected`
+  * Fixed deserialization of `Nodes` from `Tasks` and `roSGNode.update()`
+  * Fixed when `Video` node field `contentIsPlaylist` is set after `content`
+  * Refactored `RootObjects` into a separate module `SGRoot` to fix `Audio` and `Video` reset
+  * Fixed `Audio` and `Video` to resend and reset the `content` when `contentIsPlaylist` changes
+  * Several fixes on `RowList` rendering and behavior
+  * Implement `LayoutGroup` node
+  * Implemented `ZoomRowList` node
+  * Fixed `Video` and `Audio` handling of changes in `content` field
+  * Added mapping of `MaskGroup` and `TargetGroup` to `Group` before implementation
+  * Improved `Task` handling of `Node` field changes
+  * Fixed more `LayoutGroup` rendering issues
+  * Improved focus feedback rendering in `RowList` and `ZoomRowList`
+  * Fixed `Overhang` logo rendering to match Roku behavior
+  * Fixes in `RowList` and refactoring of `ZoomRowList`
+  * Implement missing `roSGNode` methods
+  * Fixed `LabelList` and `MarkupList` vertical navigation in `floatingFocus` mode
+  * Added new API method `getScreenshot()`
+  * Updated API documentation to add new `getScreenshot()` method
+  * Prevent crash on Micro Debugger with `bpk` files
+  * Fixed `Dialog` spacing to the divider in HD resolution
+
+[Full Changelog][v2.0.2]
+
 <a name="v2.0.1"></a>
 
 ## [v2.0.1 - Fixes on startup and app deployment](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.1) - 21 Oct 2025
@@ -395,6 +445,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.0.2]: https://github.com/lvcabral/brs-desktop/compare/v2.0.1...v2.0.2
 [v2.0.1]: https://github.com/lvcabral/brs-desktop/compare/v2.0.0...v2.0.1
 [v2.0.0]: https://github.com/lvcabral/brs-desktop/compare/v1.4.0...v2.0.0
 [v1.4.0]: https://github.com/lvcabral/brs-desktop/compare/v1.3.2...v1.4.0
