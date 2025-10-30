@@ -138,7 +138,6 @@ contextBridge.exposeInMainWorld("api", {
             "setTheme",
             "setDisplay",
             "setOverscan",
-            "setLocale",
             "setDeviceInfo",
             "setCaptionStyle",
             "setCustomKeys",

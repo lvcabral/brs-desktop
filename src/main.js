@@ -267,7 +267,7 @@ function loadSettings(mainWindow, startup) {
     if (settings.preferences.localization) {
         const localeId = settings.value("localization.locale");
         if (localeId) {
-            deviceInfo.locale = localeId;
+            setDeviceInfo("localization", "locale");
             checkMenuItem(localeId, true);
         }
         setDeviceInfo("localization", "clockFormat");

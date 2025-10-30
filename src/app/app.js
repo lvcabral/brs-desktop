@@ -14,6 +14,7 @@ import {
     showToast,
     clearCounters,
     updateStatus,
+    setLocaleStatus,
 } from "./statusbar";
 import { BRS_HOME_APP_PATH } from "../constants";
 
@@ -199,6 +200,8 @@ api.receive("setDeviceInfo", function (key, value) {
             if (currentApp.running && currentApp.path === BRS_HOME_APP_PATH) {
                 api.send("runFile", BRS_HOME_APP_PATH);
             }
+        } else if (key === "locale") {
+            setLocaleStatus(value);
         }
     }
 });
