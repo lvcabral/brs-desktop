@@ -413,27 +413,29 @@ display.onclick = function () {
 function takeScreenshot(file = "") {
     const screenshot = brs.getScreenshot();
     if (screenshot === null) {
-        showToast("Error: Could not get screenshot!", 3000, true);
+        showToast("Error: Could not get a screenshot!", 3000, true);
         return;
     }
     const canvas = new OffscreenCanvas(screenshot.width, screenshot.height);
     const ctx = canvas.getContext("2d");
     ctx.putImageData(screenshot, 0, 0);
     canvas.convertToBlob().then(function (blob) {
-        if (file !== "") {
-            blob.arrayBuffer()
-                .then((buffer) => {
-                    api.send("saveFile", [file, buffer]);
-                })
-                .catch((err) => {
-                    showToast(`Error saving screenshot: ${err.message}`, 5000, true);
-                });
-        } else {
+        // Copy to clipboard
+        if (file === "") {
             const item = new ClipboardItem({ "image/png": blob });
             navigator.clipboard.write([item]).catch((err) => {
                 showToast(`Error copying screenshot to clipboard: ${err.message}`, 5000, true);
             });
+            return;
         }
+        // Save to file
+        blob.arrayBuffer()
+            .then((buffer) => {
+                api.send("saveFile", [file, buffer]);
+            })
+            .catch((err) => {
+                showToast(`Error saving screenshot: ${err.message}`, 5000, true);
+            });
     });
 }
 
