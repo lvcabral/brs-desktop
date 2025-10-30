@@ -23,23 +23,31 @@ export function loadFile(file, input) {
         focusWindow(window);
     }
     let filePath = file?.[0]?.split("?")[0] ?? "";
+    let errMessage = "";
     if (filePath.startsWith("./")) {
         filePath = path.join(__dirname, filePath);
     }
-    if (!fs.existsSync(filePath)) {
-        window.webContents.send("console", `Invalid file: ${filePath}`, true);
-        return;
-    }
-    const fileName = path.parse(filePath).base;
-    const fileExt = path.parse(filePath).ext.toLowerCase();
-    if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
-        try {
-            executeFile(window, fs.readFileSync(filePath), file[0], input);
-        } catch (error) {
-            window.webContents.send("console", `Error opening ${fileName}:${error.message}`, true);
+    if (fs.existsSync(filePath)) {
+        const fileName = path.parse(filePath).base;
+        const fileExt = path.parse(filePath).ext.toLowerCase();
+        if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
+            try {
+                executeFile(window, fs.readFileSync(filePath), file[0], input);
+                return;
+            } catch (error) {
+                errMessage = `Error opening ${fileName}:${error.message}`;
+            }
+        } else {
+            errMessage = `Unsupported file format: ${fileExt}`;
         }
     } else {
-        window.webContents.send("console", `File format not supported: ${fileExt}`, true);
+        errMessage = `Invalid file: ${filePath}`;
+    }
+    if (errMessage !== "") {
+        window.webContents.send("console", errMessage, true);
+    }
+    if (!getSimulatorOption("disableHomeScreen")) {
+        loadFile([BRS_HOME_APP_PATH]);
     }
 }
 
@@ -51,6 +59,7 @@ export async function loadUrl(url, input) {
         window.webContents.send("console", `Invalid Url: ${url}`, true);
         return;
     }
+    let errMessage = "";
     const fileName = path.parse(url).base;
     const fileExt = path.parse(url).ext.toLowerCase().split("?")[0];
     if ([".zip", ".bpk", ".brs"].includes(fileExt)) {
@@ -59,18 +68,19 @@ export async function loadUrl(url, input) {
             if (response.status === 200) {
                 const fileData = await response.arrayBuffer();
                 executeFile(window, Buffer.from(fileData), url, input);
+                return;
             } else {
-                window.webContents.send(
-                    "console",
-                    `Error fetching ${fileName}: ${response.statusText} ${response.status}`,
-                    true
-                );
+                errMessage = `Error fetching ${fileName}: ${response.statusText} ${response.status}`;
             }
         } catch (error) {
-            window.webContents.send("console", `Error fetching ${url}: ${error.message}`, true);
+            errMessage = `Error fetching ${url}: ${error.message}`;
         }
-    } else {
-        window.webContents.send("console", `File format not supported: ${fileExt}`, true);
+    }
+    if (errMessage !== "") {
+        window.webContents.send("console", errMessage, true);
+    }
+    if (!getSimulatorOption("disableHomeScreen")) {
+        loadFile([BRS_HOME_APP_PATH]);
     }
 }
 

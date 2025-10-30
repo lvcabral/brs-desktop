@@ -148,7 +148,7 @@ export function getSettings(window) {
                                             value: "devToolsStartup",
                                         },
                                         {
-                                            label: "Open Console on Startup",
+                                            label: "Open Editor and Console on Startup",
                                             value: "consoleStartup",
                                         },
                                         {
