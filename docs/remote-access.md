@@ -1,18 +1,21 @@
 # Remote Access Services
 
-The **BrightScript Simulator** desktop app, the same way all Roku devices, implements some remote access services in order to enable automation and monitoring of the apps being executed. It allows among other possibilities, to integrate the simulator to the [VSCode BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=celsoaf.brightscript). Below you will find a quick reference documentation about the services available.
+The **BrightScript Simulator** desktop app, the same way all Roku devices, implements some remote access services in order to enable automation and monitoring of the apps being executed. It allows among other possibilities, to integrate the simulator to the [VSCode BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=celsoaf.brightscript) (see [how to integrate to VSCode](vscode-integration.md)). Below you will find a quick reference documentation about the services available.
 
-## Web Application Installer
+## Application Installer
 
-This service allows to remotely _side load_ an app in the simulator, it has a web interface that can be accessed using a web browser, or any _HTTP_ client application. It also has a `Utilities` option where the user can request a screenshot of the currently running app.
+This service allows you to remotely _side load_ an app in the simulator, it has a web interface that can be accessed using a browser, or any _HTTP_ client application. It also has a `Utilities` option where the user can request a screenshot of the currently running app.
 
-<p align="center">
-<img alt="Simulator Web Installer" src="images/web-installer.png?raw=true"/>
-</p>
+[![Application Installer](./images/installer-screenshot.gif)](./images/installer-screenshot.gif)
 
-The **Web Installer** is disabled by default and when enabled it listens to the _TCP_ port 80 and requires authentication to be used. Because this port is the default _HTTP_ port, it may cause conflict with existing services or be blocked by IT security policies. To overcome that, is possible to run the simulator with the command line `--web=<newport>` to load the Web Installer listening to the defined port, this option is saved in the app local storage. An icon is shown in the status bar with the listening port number indicating the service is active, if the icon is clicked it will open the Web Installer page on the default driver (image above).
+The **Development Application Installer**  by default listens to the _TCP_ port 80 and requires authentication to be used. Because this port is the default _HTTP_ port, it may cause conflict with existing services or be blocked by IT security policies. To overcome that, is possible to configure a different port, either using the [Settings Screen](docs/how-to-use.md#settings-screen) or running the simulator with the command line `--web=<newport>`, this option is saved in the app local storage. An icon is shown in the status bar with the listening port number indicating the service is active, if the icon is clicked it will open the Installer page on the default browser (image above).
 
-The **Web Installer** default user and password are both `rokudev`, the password can be changed (and saved) by using the command line `--pwd=<newpwd>`.
+The **Installer** default user and password are both `rokudev`, besides the [Settings Screen](docs/how-to-use.md#settings-screen), the password can also be changed (and saved) by using the command line `--pwd=<newpwd>`.
+
+> [!IMPORTANT]
+>
+> On Linux systems, due to OS restrictions, the Installer service can not be started on port 80, so the service is disabled by default.
+> To enable it, you must specify a different port.
 
 ## ECP (External Control Protocol)
 
@@ -44,8 +47,8 @@ The **BrightScript Simulator** desktop app only implements a subset of **ECP** c
 
 The **Remote Console** can be accessed using telnet through a shell application such as [PuTTY](http://www.putty.org/) for Windows or terminal on Mac and Linux:
 
-```
-$ telnet <simulator-ip-address> 8085
+```console
+telnet <simulator-ip-address> 8085
 ```
 
 The simulator now supports the interactive debugging using the **Remote Console**, the list below has the Roku MicroDebugger commands currently implemented:

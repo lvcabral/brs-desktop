@@ -24,6 +24,7 @@ import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
 
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
+const isLinux = process.platform === "linux";
 const timeZoneLabels = new Map();
 const w = 800;
 const h = 650;
@@ -50,7 +51,7 @@ export function getSettings(window) {
                 theme: "purple",
             },
             services: {
-                installer: ["enabled"],
+                installer: isLinux ? [] : ["enabled"],
                 webPort: WEB_INSTALLER_PORT,
                 password: DEFAULT_USRPWD,
                 ecp: ["enabled"],
