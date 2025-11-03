@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.0.3"></a>
+
+## [v2.0.3 - Fixes and improvements](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.3) - 02 Nov 2025
+
+This release improves several features of the SceneGraph support, including the availability of accessing `Scene` in `Task` threads and the prevention of crashes when using valid nodes not yet implemented. It also includes fixes for the App Installer Screenshot integration with VSCode, enhances app crash handling in Home App mode, allows updating the device locale without needing a reset, and improves the Console to properly handle empty lines and wrap long strings.
+
+### Release Changes
+
+* Fixed App Installer Screenshot response to VS Code Extension by [@lvcabral](https://github.com/lvcabral) in [#217](https://github.com/lvcabral/brs-desktop/pull/217)
+* Improved app crash handling in Home App mode by [@lvcabral](https://github.com/lvcabral) in [#218](https://github.com/lvcabral/brs-desktop/pull/218)
+* Allow update device locale without need of reset by [@lvcabral](https://github.com/lvcabral) in [#219](https://github.com/lvcabral/brs-desktop/pull/219)
+* Fixed Console to not ignore empty lines and properly wrap long strings by [@lvcabral](https://github.com/lvcabral) in [#220](https://github.com/lvcabral/brs-desktop/pull/220)
+* Bump `brs-engine` to v2.0.0-alpha.18 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
+  * Added support for `roSGNode.getScene()` in `Task` threads
+  * Added 50 missing supported Nodes to `SGNodeType` enumerator
+  * Fixed return type for `roRegex.split()` to `roList` instead of `roArray`
+  * Fixed: `stop` not working as the last statement
+
+[Full Changelog][v2.0.3]
+
 <a name="v2.0.2"></a>
 
 ## [v2.0.2 - Hotfix for SceneGraph apps](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.2) - 29 Oct 2025
@@ -445,6 +465,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.0.3]: https://github.com/lvcabral/brs-desktop/compare/v2.0.2...v2.0.3
 [v2.0.2]: https://github.com/lvcabral/brs-desktop/compare/v2.0.1...v2.0.2
 [v2.0.1]: https://github.com/lvcabral/brs-desktop/compare/v2.0.0...v2.0.1
 [v2.0.0]: https://github.com/lvcabral/brs-desktop/compare/v1.4.0...v2.0.0
