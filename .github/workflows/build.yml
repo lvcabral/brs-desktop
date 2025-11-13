@@ -40,7 +40,7 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Build/release Electron app for macOS
         env:
