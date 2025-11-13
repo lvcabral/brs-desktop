@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.0.4"></a>
+
+## [v2.0.4 - Improvements on File System](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.4) - 12 Nov 2025
+
+This release brings several improvements to the BrightScript Simulator's file system handling. It upgrades the `zenFS` dependency, enhancing file operations and ensuring better compatibility with Roku applications. Key changes include saving paths in writable volumes with their original case, sharing temporary and cache file systems among threads, and improving the serialization of `RoSGNode` objects for inter-thread communication. Additionally, this update addresses issues related to audio playback, content loading, and node management within the SceneGraph framework.
+
+### Release Changes
+
+* Bump `brs-engine` to v2.0.0-alpha.22 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
+  * Upgraded `zenFS` dependency and removed `memory-fs`
+  * Added `common:/certs/ca-bundle.crt` file and upgraded `zenFS`
+  * Fixed issue that prevented playback of the first loaded audio
+  * Save paths in writeable volumes with original case
+  * Changed `tmp:` and `cachefs:` to be shared among threads
+  * Refactored `RoSGNode` to use type `SGNode` and fixed `clone()` and `roUtils.deepCopy()`
+  * Forced ignore cache for `common.zip` when new version is available
+  * Improved serialization of `RoSGNode` to transfer among threads
+  * Prevent Node child serialization in AA and Array
+  * Refactored `RoSGNode` to be an abstract class and created the new SceneGraph `Node` class
+  * Fixed `ContentNode` field setting
+  * Fixed setting fields with default values in the XML
+  * Fixed `MicroDebugger` to properly handle a line with multiple statements separated by colon `:`
+  * Generate a `registry` event when loading the registry during startup of the engine
+  * Improvements on node thread ownership
+
+[Full Changelog][v2.0.4]
+
 <a name="v2.0.3"></a>
 
 ## [v2.0.3 - Fixes and improvements](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.3) - 02 Nov 2025
@@ -14,7 +41,7 @@ This release improves several features of the SceneGraph support, including the 
 * Improved app crash handling in Home App mode by [@lvcabral](https://github.com/lvcabral) in [#218](https://github.com/lvcabral/brs-desktop/pull/218)
 * Allow update device locale without need of reset by [@lvcabral](https://github.com/lvcabral) in [#219](https://github.com/lvcabral/brs-desktop/pull/219)
 * Fixed Console to not ignore empty lines and properly wrap long strings by [@lvcabral](https://github.com/lvcabral) in [#220](https://github.com/lvcabral/brs-desktop/pull/220)
-* Bump `brs-engine` to v2.0.0-alpha.18 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
+* Bump `brs-engine` to v2.0.0-alpha.19 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
   * Added support for `roSGNode.getScene()` in `Task` threads
   * Added 50 missing supported Nodes to `SGNodeType` enumerator
   * Fixed return type for `roRegex.split()` to `roList` instead of `roArray`
@@ -465,6 +492,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.0.4]: https://github.com/lvcabral/brs-desktop/compare/v2.0.3...v2.0.4
 [v2.0.3]: https://github.com/lvcabral/brs-desktop/compare/v2.0.2...v2.0.3
 [v2.0.2]: https://github.com/lvcabral/brs-desktop/compare/v2.0.1...v2.0.2
 [v2.0.1]: https://github.com/lvcabral/brs-desktop/compare/v2.0.0...v2.0.1

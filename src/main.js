@@ -87,6 +87,8 @@ const deviceInfo = {
     maxSimulStreams: 2,
     audioVolume: 50,
     audioLanguage: "en",
+    tmpVolSize: 100 * 1024 * 1024, // 100 MB
+    cacheFSVolSize: 100 * 1024 * 1024, // 100 MB
     appList: getAppList(),
 };
 
