@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.0.5"></a>
+
+## [v2.0.5 - Peer Roku SSDP discovery](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.5) - 15 Nov 2025
+
+### Release Changes
+
+* Implemented Peer Roku list discovery via SSDP by [@lvcabral](https://github.com/lvcabral) in [#222](https://github.com/lvcabral/brs-desktop/pull/222)
+* Bump `brs-engine` to v2.0.0-alpha.25 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
+  * Clear the display before showing icon as splash
+  * Added support for the `not` operator in the preprocessor's `#if` clause evaluation
+  * Fixed exception handling for Parser and Preprocessor
+  * Added UTF-16 support for `StringI` and prevented crash with negative `string.repeat()`
+  * Added validation to `#if` to not allow extra text after the condition token
+  * Fixed loading of SG localized terms and added missing `es_ES` and `it_IT` files
+  * Fixed ZIP based volumes `pkg:`, `common:` and `ext1:` to show the original case on path names
+  * Prevented debug error messages in `Network.ts`
+  * Replaced dependency `xml2js` by `xmldoc`
+  * Added test case for `common:` volume
+  * Refactored API to create a `task` module
+
+[Full Changelog][v2.0.5]
+
 <a name="v2.0.4"></a>
 
 ## [v2.0.4 - Improvements on File System](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.4) - 12 Nov 2025
@@ -492,6 +514,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.0.5]: https://github.com/lvcabral/brs-desktop/compare/v2.0.4...v2.0.5
 [v2.0.4]: https://github.com/lvcabral/brs-desktop/compare/v2.0.3...v2.0.4
 [v2.0.3]: https://github.com/lvcabral/brs-desktop/compare/v2.0.2...v2.0.3
 [v2.0.2]: https://github.com/lvcabral/brs-desktop/compare/v2.0.1...v2.0.2
