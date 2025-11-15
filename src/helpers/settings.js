@@ -8,7 +8,9 @@
 import { app, BrowserWindow, nativeTheme, ipcMain } from "electron";
 import { DateTime } from "luxon";
 import path from "node:path";
+import http from "node:http";
 import ElectronPreferences from "@lvcabral/electron-preferences";
+import { Client as SSDPClient } from "@lvcabral/node-ssdp";
 import { setAspectRatio } from "./window";
 import { enableECP, disableECP } from "../server/ecp";
 import { enableTelnet, disableTelnet } from "../server/telnet";
@@ -21,16 +23,22 @@ import {
 } from "../server/installer";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
 import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
+import { getLocalIps } from "./util";
 
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
 const isLinux = process.platform === "linux";
 const timeZoneLabels = new Map();
+const discoveredDevices = new Map();
+const pendingMetadataRequests = new Set();
 const w = 800;
 const h = 650;
 let settings;
 let settingsWindow;
 let statusBarVisible = true;
+let ssdpClient;
+let localIps = [];
+let peerRokuOptionsTimer = null;
 
 export function getSettings(window) {
     if (settings !== undefined) {
@@ -101,6 +109,8 @@ export function getSettings(window) {
                 captionLanguage: globalThis.sharedObject.deviceInfo.captionLanguage,
             },
             peerRoku: {
+                ip: "",
+                manualIp: "",
                 password: DEFAULT_USRPWD,
             },
         },
@@ -655,10 +665,17 @@ export function getSettings(window) {
                                     help: "If enabled, the simulator will side load the app on the peer Roku device in parallel",
                                 },
                                 {
-                                    label: "Device IP Address",
+                                    label: "Roku Device",
                                     key: "ip",
+                                    type: "dropdown",
+                                    options: getRokuDeviceOptions(),
+                                    help: "Select a discovered Roku device or choose manual entry",
+                                },
+                                {
+                                    label: "Manual IP Address",
+                                    key: "manualIp",
                                     type: "text",
-                                    help: "IP Address assigned to the peer Roku device",
+                                    help: "Enter the IP address when Manual Entry is selected",
                                 },
                                 {
                                     label: "Installer Password (default: rokudev)",
@@ -684,6 +701,7 @@ export function getSettings(window) {
             },
         ],
     });
+    updatePeerRokuFieldOptions();
     settings.on("save", (preferences) => {
         saveSimulatorSettings(preferences.simulator.options, window);
         saveServicesSettings(preferences.services, window);
@@ -762,7 +780,7 @@ export function setRemoteKeys(defaults, remote) {
     }
 }
 
-export function showSettings() {
+export async function showSettings() {
     const window = BrowserWindow.fromId(1);
     if (window.isFullScreen()) {
         window.setFullScreen(false);
@@ -784,6 +802,7 @@ export function showSettings() {
         }
     }
 
+    updatePeerRokuFieldOptions();
     settingsWindow = settings.show();
     if (window.isAlwaysOnTop()) {
         settingsWindow.setAlwaysOnTop(true);
@@ -812,8 +831,9 @@ export function showSettings() {
             }
             const userTheme = settings.value("simulator.theme");
             checkMenuItem(`theme-${userTheme}`, true);
-            checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
-            checkMenuItem("peer-roku-control", getPeerRoku().syncControl);
+            const peerRoku = getPeerRoku();
+            checkMenuItem("peer-roku-deploy", peerRoku.deploy);
+            checkMenuItem("peer-roku-control", peerRoku.syncControl);
         }
     });
 }
@@ -995,13 +1015,22 @@ export function setPeerRoku(key, enable, menuId) {
 }
 
 export function getPeerRoku() {
+    const selectedIp = settings.value("peerRoku.ip");
+    const manualIp = settings.value("peerRoku.manualIp");
+    const resolvedIp = !selectedIp || selectedIp === "manual" ? manualIp : selectedIp;
     return {
         deploy: settings.value("peerRoku.deploy")?.includes("enabled") || false,
-        ip: settings.value("peerRoku.ip"),
+        ip: resolvedIp || "",
+        friendlyName: getRokuDeviceNameByIp(resolvedIp),
         username: DEFAULT_USRPWD,
         password: settings.value("peerRoku.password"),
         syncControl: settings.value("peerRoku.syncControl")?.includes("enabled") || false,
     };
+}
+
+export function getRokuDeviceNameByIp(ip) {
+    const device = discoveredDevices.get(ip);
+    return device ? device.friendlyName || device.deviceModel : "";
 }
 
 export function setLocaleId(locale) {
@@ -1506,4 +1535,374 @@ function getTimezoneArray() {
         timeZoneLabels.set(item.value || item.label, item.label);
     }
     return tzArray;
+}
+
+// Peer Roku Device Discovery
+function updatePeerRokuFieldOptions() {
+    if (peerRokuOptionsTimer) {
+        return;
+    }
+    peerRokuOptionsTimer = setTimeout(() => {
+        peerRokuOptionsTimer = null;
+        applyPeerRokuFieldOptions();
+    }, 50);
+}
+
+function applyPeerRokuFieldOptions() {
+    if (!settings || !settings.options?.sections) {
+        return;
+    }
+    const peerSection = settings.options.sections.find((section) => section.id === "peerRoku");
+    if (!peerSection?.form?.groups) {
+        return;
+    }
+    const targetField = peerSection.form.groups
+        .flatMap((group) => group.fields || [])
+        .find((field) => field.key === "ip");
+    if (targetField) {
+        const newOptions = getRokuDeviceOptions();
+        const previousOptions = targetField.options || [];
+        const optionsChanged = JSON.stringify(previousOptions) !== JSON.stringify(newOptions);
+        targetField.options = newOptions;
+        if (optionsChanged && typeof settings?.broadcastSections === "function") {
+            settings.broadcastSections();
+        }
+    }
+}
+
+// SSDP discovery helpers
+function getRokuDeviceOptions() {
+    const options = [{ label: "Manual Entry", value: "manual" }];
+
+    for (const [ip, device] of discoveredDevices) {
+        const friendlyName = device.friendlyName?.trim();
+        const primaryName = (friendlyName || device.modelName || "Roku Device").trim();
+        const detailParts = [];
+        if (device.modelNumber) {
+            const modelNumber = device.modelNumber.trim();
+            if (modelNumber) {
+                detailParts.push(modelNumber);
+            }
+        }
+        if (device.firmware) {
+            const firmwareTrimmed = device.firmware.trim();
+            if (firmwareTrimmed) {
+                detailParts.push(`OS ${firmwareTrimmed}`);
+            }
+        }
+        if (device.serialNumber) {
+            const serialTrimmed = device.serialNumber.trim();
+            if (serialTrimmed) {
+                detailParts.push(serialTrimmed);
+            }
+        }
+
+        const detailSuffix = detailParts.length ? ` · ${detailParts.join(" · ")}` : "";
+        const label = `${primaryName}${detailSuffix} (${ip})`;
+        console.log(`Discovered Roku device: ${label}`);
+        options.push({ label, value: ip });
+    }
+
+    return options;
+}
+
+function extractFirmwareFromServer(serverHeader) {
+    if (!serverHeader) {
+        return "";
+    }
+    const match = serverHeader.match(/Roku\/[\d.]+\s+UPnP\/[\d.]+\s+Roku\/([^(]+)/);
+    return match ? match[1].trim() : "";
+}
+
+function extractSerialNumberFromUSN(usnHeader) {
+    if (!usnHeader) {
+        return "";
+    }
+    const match = usnHeader.match(/uuid:roku:ecp:([^:]+)/i);
+    return match ? match[1] : "";
+}
+
+function normalizeIpAddress(ipAddress) {
+    if (!ipAddress) {
+        return "";
+    }
+    return ipAddress.startsWith("::ffff:") ? ipAddress.slice(7) : ipAddress;
+}
+
+function stopSsdpClient(client) {
+    if (!client) {
+        return;
+    }
+    try {
+        client.stop();
+    } catch (error) {
+        console.warn(`Unable to stop SSDP client: ${error.message}`);
+    }
+}
+
+function isRokuDiscoveryResponse(headers) {
+    if (!headers) {
+        return false;
+    }
+    const serviceType = headers.ST?.toLowerCase() ?? "";
+    const uniqueServiceName = headers.USN?.toLowerCase() ?? "";
+    return serviceType.includes("roku:ecp") || uniqueServiceName.includes("roku:ecp");
+}
+
+async function discoverRokuDevices() {
+    return new Promise((resolve) => {
+        const metadataFetches = [];
+        try {
+            localIps = getLocalIps()
+                .map((entry) => entry.split(",")[1])
+                .filter(Boolean);
+        } catch (error) {
+            console.error(`Unable to read local IP addresses: ${error.message}`);
+            localIps = [];
+        }
+
+        discoveredDevices.clear();
+        pendingMetadataRequests.clear();
+        console.log("Searching for Roku devices on the local network...");
+
+        if (ssdpClient) {
+            stopSsdpClient(ssdpClient);
+            ssdpClient = undefined;
+        }
+
+        const client = new SSDPClient();
+        ssdpClient = client;
+
+        client.on("response", (headers, _statusCode, rinfo) => {
+            if (!headers?.LOCATION || !isRokuDiscoveryResponse(headers)) {
+                return;
+            }
+            const deviceIP = normalizeIpAddress(rinfo.address);
+            if (!deviceIP) {
+                return;
+            }
+            if (localIps.includes(deviceIP)) {
+                return;
+            }
+
+            const previousDevice = discoveredDevices.get(deviceIP);
+            const hadMetadata = Boolean(previousDevice?.metadataFetched);
+            const serialNumber = extractSerialNumberFromUSN(headers.USN);
+            const firmwareFromServer = extractFirmwareFromServer(headers.SERVER);
+
+            const mergedDevice = {
+                ...previousDevice,
+                ip: deviceIP,
+                location: headers.LOCATION ?? previousDevice?.location,
+                server: headers.SERVER ?? previousDevice?.server,
+                usn: headers.USN ?? previousDevice?.usn,
+                serialNumber: serialNumber || previousDevice?.serialNumber,
+                firmware: firmwareFromServer,
+                metadataFetched: hadMetadata,
+            };
+
+            discoveredDevices.set(deviceIP, mergedDevice);
+
+            if (
+                !previousDevice &&
+                !mergedDevice.metadataFetched &&
+                !pendingMetadataRequests.has(deviceIP)
+            ) {
+                pendingMetadataRequests.add(deviceIP);
+                const metadataPromise = getDeviceMetadata(deviceIP, serialNumber)
+                    .then((details) => {
+                        updateDeviceMetadata(deviceIP, mergedDevice, details);
+                    })
+                    .finally(() => {
+                        pendingMetadataRequests.delete(deviceIP);
+                    });
+                metadataFetches.push(metadataPromise);
+            }
+        });
+
+        client.on("error", (error) => {
+            const message = `SSDP discovery error: ${error.message}`;
+            console.error(message);
+            sendRokuDiscoveryLog(message, true);
+        });
+
+        client.search("roku:ecp");
+        setTimeout(() => {
+            try {
+                client.search("urn:roku-com:device:player:1");
+            } catch (error) {
+                console.error(`SSDP discovery retry failed: ${error.message}`);
+            }
+        }, 1000);
+
+        setTimeout(() => {
+            stopSsdpClient(client);
+            if (ssdpClient === client) {
+                ssdpClient = undefined;
+            }
+            const finalize = () => {
+                if (peerRokuOptionsTimer) {
+                    clearTimeout(peerRokuOptionsTimer);
+                    peerRokuOptionsTimer = null;
+                }
+                applyPeerRokuFieldOptions();
+                if (discoveredDevices.size === 0) {
+                    console.warn("No Roku devices found on the local network.");
+                }
+                resolve(discoveredDevices.size);
+            };
+            if (metadataFetches.length > 0) {
+                Promise.allSettled(metadataFetches).then(finalize).catch(finalize);
+            } else {
+                finalize();
+            }
+        }, 5000);
+    });
+}
+
+export async function initRokuDeviceDiscovery() {
+    try {
+        return await discoverRokuDevices();
+    } catch (error) {
+        console.error(`Failed to discover Roku devices: ${error.message}`);
+        return 0;
+    }
+}
+
+// Update the stored device metadata with new details
+function updateDeviceMetadata(deviceIP, mergedDevice, details) {
+    const normalizedDetailsIp = normalizeIpAddress(details?.ipAddr);
+    const deviceKey =
+        normalizedDetailsIp && discoveredDevices.has(normalizedDetailsIp)
+            ? normalizedDetailsIp
+            : deviceIP;
+    const baseDevice = discoveredDevices.get(deviceKey) || mergedDevice;
+    const nextFriendly = details?.friendlyName?.trim();
+    const nextModel = details?.modelName?.trim();
+    const nextModelNumber = details?.modelNumber?.trim();
+    const storedDevice = {
+        ...baseDevice,
+        ip: normalizedDetailsIp || deviceKey,
+        modelName: nextModel || baseDevice.modelName,
+        modelNumber: nextModelNumber || baseDevice.modelNumber,
+        friendlyName: nextFriendly || baseDevice.friendlyName || baseDevice.modelName,
+        metadataFetched: Boolean(nextModel || nextModelNumber || nextFriendly),
+    };
+    discoveredDevices.set(deviceKey, storedDevice);
+}
+
+// Send an ECP request to the device to get its details and return a promise with the metadata
+function getDeviceMetadata(ipAddr, serialNumber) {
+    let host = ipAddr;
+    let port = 8060;
+    const deviceEntry = discoveredDevices.get(ipAddr);
+    if (deviceEntry?.location) {
+        try {
+            const locationUrl = new URL(deviceEntry.location);
+            host = locationUrl.hostname || host;
+            port = Number(locationUrl.port) || port;
+        } catch (error) {
+            console.warn(
+                `Unable to parse Roku device location ${deviceEntry.location}: ${error.message}`
+            );
+        }
+    }
+    const options = {
+        host,
+        port,
+        path: "/query/device-info",
+        method: "GET",
+        timeout: 2000,
+    };
+    const bufferList = [];
+    return new Promise((resolve) => {
+        const request = http.request(options, (res) => {
+            res.on("data", (chunk) => {
+                bufferList.push(chunk);
+            });
+            res.on("end", () => {
+                const response = Buffer.concat(bufferList).toString("utf8");
+                const resolvedIp = normalizeIpAddress(res.socket?.remoteAddress) || ipAddr;
+                const details = parseDeviceMetadata(resolvedIp, serialNumber, response);
+                resolve(details);
+            });
+        });
+
+        request.on("timeout", () => {
+            request.destroy(new Error("Request timeout"));
+        });
+
+        request.on("error", (error) => {
+            const message = `Failed to retrieve Roku device details from ${ipAddr}: ${error.message}`;
+            console.error(message);
+            sendRokuDiscoveryLog(message, true);
+            resolve({
+                ipAddr,
+                serialNumber: serialNumber || "",
+                friendlyName: "",
+                modelNumber: "",
+                modelName: "",
+            });
+        });
+
+        request.end();
+    });
+}
+
+function parseDeviceMetadata(ipAddr, sn, data) {
+    if (!data) {
+        return {
+            ipAddr,
+            serialNumber: sn || "",
+            friendlyName: "",
+            modelNumber: "",
+            modelName: "",
+        };
+    }
+    const serialNumber =
+        sn ||
+        extractAny(
+            [/<serial-number>(.*?)<\/serial-number>/i, /<serialNumber>(.*?)<\/serialNumber>/i],
+            data
+        );
+    const friendlyName = extractAny(
+        [
+            /<friendly-device-name>(.*?)<\/friendly-device-name>/i,
+            /<user-device-name>(.*?)<\/user-device-name>/i,
+        ],
+        data
+    );
+    const modelNumber = extractAny(
+        [/<model-number>(.*?)<\/model-number>/i, /<modelNumber>(.*?)<\/modelNumber>/i],
+        data
+    );
+    const modelName = extractAny(
+        [/<model-name>(.*?)<\/model-name>/i, /<friendly-model-name>(.*?)<\/friendly-model-name>/i],
+        data
+    );
+
+    return {
+        ipAddr,
+        serialNumber,
+        friendlyName,
+        modelNumber,
+        modelName,
+    };
+}
+
+// Use a regular expression to extract a field from some data,
+// returning an empty string if the field is not found
+function extract(re, data) {
+    const match = re.exec(data);
+    return Array.isArray(match) && match.length === 2 ? match[1].trim() : "";
+}
+
+function extractAny(patterns, data) {
+    for (const pattern of patterns) {
+        const value = extract(pattern, data);
+        if (value) {
+            return value;
+        }
+    }
+    return "";
 }
