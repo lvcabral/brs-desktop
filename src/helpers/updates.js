@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { dialog, BrowserWindow, shell } from "electron";
+import { app, dialog, BrowserWindow, shell } from "electron";
 import https from "node:https";
 import packageInfo from "../../package.json";
 
@@ -81,17 +81,19 @@ function showNoUpdatesDialog(version) {
 function handleVersionCheck(currentVersion, forceCheck, resolve) {
     if (compareVersions(currentVersion, latestVersion) === 1) {
         updateAvailable = true;
-        console.log(`Update available: ${latestVersion}`);
+        if (!app.isPackaged) {
+            console.log(`Update available: ${latestVersion}`);
+        }
         showUpdateAvailableDialog(latestVersion);
         resolve({ updateAvailable: true, version: latestVersion });
     } else {
         updateAvailable = false;
-        console.log("No updates available");
-
+        if (!app.isPackaged) {
+            console.log("No updates available");
+        }
         if (forceCheck) {
             showNoUpdatesDialog(currentVersion);
         }
-
         resolve({ updateAvailable: false, version: currentVersion });
     }
 }
@@ -108,7 +110,9 @@ function processReleaseData(data, statusCode, currentVersion, forceCheck, resolv
         }
 
         latestVersion = release.tag_name;
-        console.log(`Current version: ${currentVersion}, Latest version: ${latestVersion}`);
+        if (!app.isPackaged) {
+            console.log(`Current version: ${currentVersion}, Latest version: ${latestVersion}`);
+        }
         handleVersionCheck(currentVersion, forceCheck, resolve);
     } catch (error) {
         console.error("Error parsing release data:", error);
@@ -155,7 +159,9 @@ function fetchLatestRelease(repoUrl, currentVersion, forceCheck, resolve, reject
 
 // Function to check for updates via GitHub API
 export function checkForUpdates(forceCheck = false) {
-    console.log("Checking for updates...");
+    if (!app.isPackaged) {
+        console.log("Checking for updates...");
+    }
 
     return new Promise((resolve, reject) => {
         const repoUrl = packageInfo.repository.url

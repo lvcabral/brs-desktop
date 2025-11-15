@@ -357,7 +357,7 @@ function processArgv(mainWindow, startup) {
         if (fileExt === ".zip" || fileExt === ".bpk" || fileExt === ".brs") {
             loadFile([openFile]);
         } else {
-            console.log("File format not supported: ", fileExt);
+            console.warn("File format not supported: ", fileExt);
         }
     }
 }

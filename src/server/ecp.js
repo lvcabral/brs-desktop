@@ -490,7 +490,7 @@ function genActiveApp(encrypt) {
         const strXml = xml.end({ pretty: true });
         return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
     } catch (error) {
-        console.log("Error generating active app XML:", error);
+        console.error("Error generating active app XML:", error);
         return "";
     }
 }
@@ -513,7 +513,7 @@ function genMediaPlayer(encrypt) {
         const strXml = xml.end({ pretty: true });
         return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
     } catch (error) {
-        console.log("Error generating media player XML:", error);
+        console.error("Error generating media player XML:", error);
         return "";
     }
 }
@@ -575,7 +575,7 @@ function genGraphicsFrameRate(encrypt) {
         const strXml = xml.end({ pretty: true });
         return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
     } catch (error) {
-        console.log("Error generating graphics frame rate XML:", error);
+        console.error("Error generating graphics frame rate XML:", error);
         return "";
     }
 }
@@ -598,7 +598,7 @@ function genAppState(appID, encrypt) {
         const strXml = xml.end({ pretty: true });
         return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
     } catch (error) {
-        console.log("Error generating app state XML:", error);
+        console.error("Error generating app state XML:", error);
         return "";
     }
 }

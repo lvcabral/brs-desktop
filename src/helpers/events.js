@@ -56,7 +56,7 @@ function ecpEvents(event, data) {
             );
         }
     } else {
-        console.log("ECP Unknown Event:", event, data);
+        console.warn("ECP Unknown Event:", event, data);
     }
 }
 

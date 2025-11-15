@@ -1599,7 +1599,9 @@ function getRokuDeviceOptions() {
 
         const detailSuffix = detailParts.length ? ` · ${detailParts.join(" · ")}` : "";
         const label = `${primaryName}${detailSuffix} (${ip})`;
-        console.log(`Discovered Roku device: ${label}`);
+        if (!app.isPackaged) {
+            console.log(`Discovered Roku device: ${label}`);
+        }
         options.push({ label, value: ip });
     }
 
@@ -1663,7 +1665,9 @@ async function discoverRokuDevices() {
 
         discoveredDevices.clear();
         pendingMetadataRequests.clear();
-        console.log("Searching for Roku devices on the local network...");
+        if (!app.isPackaged) {
+            console.log("Searching for Roku devices on the local network...");
+        }
 
         if (ssdpClient) {
             stopSsdpClient(ssdpClient);

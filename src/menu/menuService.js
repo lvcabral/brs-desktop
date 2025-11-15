@@ -110,7 +110,7 @@ export function loadPackage(id) {
         } else {
             loadFile([pkg]);
         }
-    } else {
+    } else if (!app.isPackaged) {
         console.log("No recent package to load!");
     }
 }
