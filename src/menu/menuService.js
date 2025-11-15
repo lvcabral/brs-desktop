@@ -110,7 +110,7 @@ export function loadPackage(id) {
         } else {
             loadFile([pkg]);
         }
-    } else {
+    } else if (!app.isPackaged) {
         console.log("No recent package to load!");
     }
 }
@@ -242,8 +242,9 @@ function rebuildMenu(template = false) {
                 checkMenuItem("web-installer", isInstallerEnabled);
                 checkMenuItem("ecp-api", isECPEnabled);
                 checkMenuItem("telnet", isTelnetEnabled);
-                checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
-                checkMenuItem("peer-roku-control", getPeerRoku().syncControl);
+                const peerRoku = getPeerRoku();
+                checkMenuItem("peer-roku-deploy", peerRoku.deploy);
+                checkMenuItem("peer-roku-control", peerRoku.syncControl);
             }
         }
     } else {

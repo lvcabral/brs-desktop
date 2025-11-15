@@ -38,6 +38,7 @@ import {
     saveCaptionStyle,
     updateServerStatus,
     closeSettings,
+    initRokuDeviceDiscovery,
 } from "./helpers/settings";
 import {
     createWindow,
@@ -157,6 +158,10 @@ app.on("ready", () => {
     loadSettings(mainWindow, startup);
     // Initialize ECP and SSDP servers
     initECP();
+    // Initialize Roku device discovery
+    setTimeout(() => {
+        initRokuDeviceDiscovery();
+    }, 2000); // Delay to allow network services to start
     // Load Renderer
     mainWindow
         .loadURL(
@@ -282,8 +287,9 @@ function loadSettings(mainWindow, startup) {
         saveCaptionStyle();
     }
     if (settings.preferences.peerRoku) {
-        checkMenuItem("peer-roku-deploy", getPeerRoku().deploy);
-        checkMenuItem("peer-roku-control", getPeerRoku().syncControl);
+        const peerRoku = getPeerRoku();
+        checkMenuItem("peer-roku-deploy", peerRoku.deploy);
+        checkMenuItem("peer-roku-control", peerRoku.syncControl);
     }
 }
 
@@ -351,7 +357,7 @@ function processArgv(mainWindow, startup) {
         if (fileExt === ".zip" || fileExt === ".bpk" || fileExt === ".brs") {
             loadFile([openFile]);
         } else {
-            console.log("File format not supported: ", fileExt);
+            console.warn("File format not supported: ", fileExt);
         }
     }
 }

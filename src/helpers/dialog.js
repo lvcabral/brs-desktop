@@ -26,7 +26,7 @@ export function openChannelPackage() {
             loadFile(result.filePaths);
         })
         .catch((err) => {
-            console.log(err);
+            console.error(err);
         });
 }
 
@@ -45,7 +45,7 @@ export function saveScreenshot() {
             window.webContents.send("saveScreenshot", result.filePath);
         })
         .catch((err) => {
-            console.log(err);
+            console.error(err);
         });
 }
 

@@ -5,6 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
+import { app } from "electron";
 import os from "node:os";
 import network from "network";
 import { spawnSync } from "node:child_process";
@@ -46,11 +47,15 @@ export function getLocalIps() {
             }
             if (alias >= 1) {
                 // this single interface has multiple ipv4 addresses
-                console.log(`${ifname}:${alias}`, iface.address);
+                if (!app.isPackaged) {
+                    console.log(`${ifname}:${alias}`, iface.address);
+                }
                 ips.push(`${ifname}:${alias},${iface.address}`);
             } else {
                 // this interface has only one ipv4 address
-                console.log(ifname, iface.address);
+                if (!app.isPackaged) {
+                    console.log(ifname, iface.address);
+                }
                 ips.push(`${ifname},${iface.address}`);
             }
             ++alias;
@@ -72,9 +77,11 @@ export async function getGateway() {
         if (gateWayData.type === "WiFiConnection") {
             gateWayData.ssid = getSSID();
         }
-        console.log(
-            `Gateway: ${gateWayData.ip} - Interface: ${gateWayData.name} - Type: ${gateWayData.type} - SSID: ${gateWayData.ssid}`
-        );
+        if (!app.isPackaged) {
+            console.log(
+                `Gateway: ${gateWayData.ip} - Interface: ${gateWayData.name} - Type: ${gateWayData.type} - SSID: ${gateWayData.ssid}`
+            );
+        }
     } catch (err) {
         console.error(`Unable to get the Network Gateway: ${err.message}`);
     }
