@@ -84,8 +84,8 @@ This is an Electron-based desktop application that simulates Roku devices for Br
   - Main entry: Creates `app/main.js` from `src/main.js`
   - App entry: Creates `app/app.js` from `src/app/app.js` 
   - Editor entry: Creates `app/editor.js` from `src/app/editor.js`
-- **Development**: `yarn start` runs `build/start.js` with webpack watch + electron spawn
-- **Release**: `yarn dist` builds production bundles + electron-builder packages
+- **Development**: `npm run start` runs `build/start.js` with webpack watch + electron spawn
+- **Release**: `npm run dist` builds production bundles + electron-builder packages
 
 ## Key Patterns
 
@@ -204,18 +204,18 @@ settings.value("simulator.options")  // ["statusBar", "debugOnCrash"] array
 
 ### Local Development
 ```bash
-yarn install          # Install dependencies
-yarn start            # Development mode with hot reload
-yarn build            # Build without packaging  
-yarn clean            # Clear build artifacts
+npm install          # Install dependencies
+npm run start            # Development mode with hot reload
+npm run build            # Build without packaging  
+npm run clean            # Clear build artifacts
 ```
 
 ### Cross-Platform Distribution
 ```bash
-yarn dist             # Current platform
-yarn dist-win         # Windows x64/x86
-yarn dist-linux64     # Linux x64 AppImage
-yarn dist-deb64       # Linux x64 Debian
+npm run dist             # Current platform
+npm run dist-win         # Windows x64/x86
+npm run dist-linux64     # Linux x64 AppImage
+npm run dist-deb64       # Linux x64 Debian
 ```
 
 ### File Loading Patterns

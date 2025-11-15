@@ -4,11 +4,6 @@ The BrightScript Simulator Desktop App project is being developed using the [Ele
 ## Prerequisites
 To build the project you will need `NodeJS`, so you'll need to [install that first](https://nodejs.org).
 
-Once that's ready, install [yarn](https://yarnpkg.com).  Installing it with `npm` is probably the simplest:
-
-```console
-$ npm install -g yarn
-```
 ## Setup
 1. Clone this repo:
    ```console
@@ -17,7 +12,7 @@ $ npm install -g yarn
 
 2. Install dependencies:
     ```console
-    $ yarn install     # or just `yarn`
+    $ npm install     # or just `npm i`
     ```
 
 ## Debugging and Building for Release
@@ -26,7 +21,7 @@ $ npm install -g yarn
 If you want to run the application without packaging it, for debugging, just execute:
 
 ```console
-$ yarn start
+$ npm run start
 ```
 
 ### Packaging for Release
@@ -39,29 +34,29 @@ Below the list of available build commands for each platform:
 
 Run from macOS `terminal`:
 ```console
-$ yarn dist
+$ npm run dist
 ```
 #### Windows 32 & 64 bits (single installer)
 
 Run from Windows `command` or `PowerShell` prompt:
 ```console
-C:\git\brs-desktop> yarn dist-win
+C:\git\brs-desktop> npm run dist-win
 ```
 #### Linux 32 bits (AppImage)
 
 Run from Linux `terminal`:
 ```console
-$ yarn dist-linux32
+$ npm run dist-linux32
 ```
 #### Linux 64 bits (AppImage)
 
 Run from Linux `terminal`:
 ```console
-$ yarn dist-linux64
+$ npm run dist-linux64
 ```
 #### Linux 64 bits (Debian)
 
 Run from Linux `terminal`:
 ```console
-$ yarn dist-deb64
+$ npm run dist-deb64
 ```

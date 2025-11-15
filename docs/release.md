@@ -16,7 +16,7 @@
 - APPLE_ID=<your_apple_id>
 - APPLE_TEAM_ID=<your_apple_team_id>
 - APPLE_PASSWORD=<your_apple_password>
-- Run `yarn release` to build the code
-- Run `yarn dist` to create the installers and notarize the macOS app
+- Run `npm run release` to build the code
+- Run `npm run dist` to create the installers and notarize the macOS app
 - The installers will be created in the `dist` folder
 - After the build, comment back the line in `build/notarize.mac.js` to avoid exposing your Apple ID in the repository.
