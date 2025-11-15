@@ -1750,7 +1750,7 @@ async function discoverRokuDevices() {
                     peerRokuOptionsTimer = null;
                 }
                 applyPeerRokuFieldOptions();
-                if (discoveredDevices.size === 0) {
+                if (discoveredDevices.size === 0 && !app.isPackaged) {
                     console.warn("No Roku devices found on the local network.");
                 }
                 resolve(discoveredDevices.size);
