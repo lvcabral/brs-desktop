@@ -1549,7 +1549,7 @@ function updatePeerRokuFieldOptions() {
 }
 
 function applyPeerRokuFieldOptions() {
-    if (!settings || !settings.options?.sections) {
+    if (!settings?.options?.sections) {
         return;
     }
     const peerSection = settings.options.sections.find((section) => section.id === "peerRoku");
