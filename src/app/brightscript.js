@@ -1,461 +1,361 @@
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: https://codemirror.net/5/LICENSE
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Language Support for Monaco Editor
+ *
+ *  Based on the VS Code BrightScript Language Extension:
+ *  https://github.com/rokucommunity/vscode-brightscript-language
+ *
+ *  Copyright (c) 2023-2025 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 
 /*
 BrightScript Language Mode
 
-https://developer.roku.com/docs/references/brightscript/language/brightscript-language-reference.md
-
-Adapted from the Visual Basic mode for CodeMirror by Marcelo Lv Cabral
+Grammar converted from TextMate grammar in vscode-brightscript-language extension
+https://github.com/rokucommunity/vscode-brightscript-language
 
 */
 
-export function defineMode(CodeMirror) {
-    CodeMirror.defineMode("brightscript", function (conf, parserConf) {
-        const ERRORCLASS = "error";
+export function defineBrightScriptLanguage(monaco) {
+    // Register the language
+    monaco.languages.register({ id: "brightscript" });
 
-        function wordRegexp(words) {
-            return new RegExp(`^((${words.join(")|(")}))\\b`, "i");
-        }
+    // Set Monarch tokenizer (syntax highlighting)
+    monaco.languages.setMonarchTokensProvider("brightscript", {
+        defaultToken: "",
+        ignoreCase: true,
 
-        const singleOperators = /^[+\-/*&\\^<>=]/;
-        const doubleOperators = /^((<>)|(<=)|(>=)|(<<)|(>>))/;
-        const singleDelimiters = /^[.,;:$%!#&@?]/;
-        const brackets = /^[(){}[\]]/;
-        const functions = /^[_A-Za-z]\w*(?=\()/;
-        const identifiers = /^[_A-Za-z]\w*/;
+        keywords: [
+            "and", "as", "catch", "continue", "dim", "do", "each", "else", "elseif", "end",
+            "endfor", "endfunction", "endif", "endsub", "endtry", "endwhile", "eval", "exit",
+            "false", "for", "function", "goto", "if", "in", "invalid", "let", "library",
+            "loop", "mod", "next", "not", "or", "print", "rem", "return", "run", "step",
+            "stop", "sub", "then", "throw", "to", "true", "try", "while"
+        ],
 
-        const openingKeywords = ["sub", "function"];
-        const endKeywords = ["endsub", "endfunction"];
+        typeKeywords: [
+            "boolean", "integer", "longinteger", "float", "double", "string", "object",
+            "interface", "dynamic", "brsub", "void", "as"
+        ],
 
-        const openingControl = ["while", "if", "for", "try"];
-        const middleControl = [
-            "catch",
-            "continue for",
-            "continue while",
-            "else if",
-            "elseif",
-            "else",
-            "exit for",
-            "exit while",
-            "to",
-            "step",
-            "in",
-            "then",
-            "each",
-            "as",
-            "return",
-            "stop",
-            "throw",
-        ];
-        const endControl = [
-            "next",
-            "endif",
-            "end if",
-            "endfor",
-            "end for",
-            "endwhile",
-            "end while",
-            "endtry",
-            "end try",
-        ];
-        const wordOperators = wordRegexp(["and", "or", "not", "mod"]);
-        const commonkeywords = ["dim", "print", "goto", "library"];
-        const commontypes = [
-            "object",
-            "dynamic",
-            "boolean",
-            "string",
-            "integer",
-            "longinteger",
-            "double",
-            "float",
-            "void",
-        ];
+        operators: ["=", ">=", "<=", "<", ">", "<>", "+", "-", "*", "/", "^", "\\", "&"],
 
-        const atomWords = ["true", "false", "invalid"];
-        const builtinFuncsWords = [
-            "box",
-            "createobject",
-            "getglobalaa",
-            "getlastruncompileerror",
-            "getlastrunruntimeerror",
-            "type",
-            "copyfile",
-            "createdirectory",
-            "deletefile",
-            "findmemberfunction",
-            "formatdrive",
-            "formatjson",
-            "getinterface",
-            "listdir",
-            "matchfiles",
-            "movefile",
-            "parsejson",
-            "readasciifile",
-            "rebootsystem",
-            "rungarbagecollector",
-            "sleep",
-            "strtoi",
-            "uptime",
-            "wait",
-            "writeasciifile",
-            "asc",
-            "chr",
-            "instr",
-            "lcase",
-            "left",
-            "len",
-            "mid",
-            "right",
-            "str",
-            "stri",
-            "string",
-            "stringi",
-            "substitute",
-            "tr",
-            "ucase",
-            "val",
-            "abs",
-            "atn",
-            "cdbl",
-            "cint",
-            "cos",
-            "csng",
-            "exp",
-            "fix",
-            "int",
-            "log",
-            "sgn",
-            "sin",
-            "sqr",
-            "tan",
-        ];
-        const builtinConsts = ["LINE_NUM"];
-        let builtinObjsWords = ["global", "m"];
-        const knownElements = [
-            "getdefaultfont",
-            "clear",
-            "push",
-            "next",
-            "replace",
-            "write",
-            "writeline",
-            "close",
-            "open",
-            "state",
-            "update",
-            "addnew",
-            "tostr",
-            "toint",
-        ];
+        symbols: /[=><!~?:&|+\-*\/\^%]+/,
 
-        builtinObjsWords = builtinObjsWords.concat(builtinConsts);
+        escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
 
-        const keywords = wordRegexp(commonkeywords);
-        const types = wordRegexp(commontypes);
-        const atoms = wordRegexp(atomWords);
-        const builtinFuncs = wordRegexp(builtinFuncsWords);
-        const builtinObjs = wordRegexp(builtinObjsWords);
-        const known = wordRegexp(knownElements);
-        const stringPrefixes = '"';
+        tokenizer: {
+            root: [
+                // Comments
+                [/^\s*rem\b.*$/i, "comment"],
+                [/'.*$/, "comment"],
 
-        const opening = wordRegexp(openingKeywords);
-        const closing = wordRegexp(endKeywords);
-        const openingCtrl = wordRegexp(openingControl);
-        const middleCtrl = wordRegexp(middleControl);
-        const closingCtrl = wordRegexp(endControl);
-        const doubleClosing = wordRegexp(["end"]);
-        const doOpening = wordRegexp(["do"]);
-        const noIndentWords = wordRegexp(["library"]);
-        const comment = wordRegexp(["rem"]);
+                // Region markers
+                [/^\s*'\s*#region/i, "comment.region"],
+                [/^\s*'\s*#endregion/i, "comment.region"],
 
-        function indent(_stream, state) {
-            state.currentIndent++;
-        }
+                // Preprocessor directives
+                [/#\s*(const|if|elseif|else|endif|error)/i, "keyword.preprocessor"],
 
-        function dedent(_stream, state) {
-            state.currentIndent--;
-        }
-        // tokenizers
-        function tokenBase(stream, state) {
-            if (stream.eatSpace()) {
-                return "space";
-            }
+                // Template strings
+                [/`/, { token: "string.backtick", bracket: "@open", next: "@templateString" }],
 
-            const ch = stream.peek();
-            // Handle Comments
-            if (ch === "'") {
-                stream.skipToEnd();
-                return "comment";
-            }
-            if (stream.match(comment)) {
-                stream.skipToEnd();
-                return "comment";
-            }
+                // Double quoted strings
+                [/"([^"\\]|\\.)*$/, "string.invalid"],
+                [/"/, { token: "string.quote", bracket: "@open", next: "@string" }],
 
-            // Handle Number Literals
-            if (
-                stream.match(/^((&H)|(&O))?[0-9.]/i, false) &&
-                !stream.match(/^((&H)|(&O))?[0-9.]+[a-z_]/i, false)
-            ) {
-                let floatLiteral = false;
+                // Hex numbers
+                [/&H[0-9a-f]+/i, "number.hex"],
+
+                // Octal numbers
+                [/&O[0-7]+/i, "number.octal"],
+
                 // Floats
-                if (stream.match(/^\d*\.\d+/i)) {
-                    floatLiteral = true;
-                } else if (stream.match(/^\d+\.\d*/)) {
-                    floatLiteral = true;
-                } else if (stream.match(/^\.\d+/)) {
-                    floatLiteral = true;
-                }
+                [/\d*\.\d+([eE][+-]?\d+)?[fFdD]?/, "number.float"],
 
-                if (floatLiteral) {
-                    // Float literals may be "imaginary"
-                    stream.eat(/J/i);
-                    return "number";
-                }
                 // Integers
-                let intLiteral = false;
-                // Hex
-                if (stream.match(/^&H[0-9a-f]+/i)) {
-                    intLiteral = true;
-                }
-                // Octal
-                else if (stream.match(/^&O[0-7]+/i)) {
-                    intLiteral = true;
-                }
-                // Decimal
-                else if (stream.match(/^[1-9]\d*F?/)) {
-                    // Decimal literals may be "imaginary"
-                    stream.eat(/J/i);
-                    // TODO - Can you have imaginary longs?
-                    intLiteral = true;
-                }
-                // Zero by itself with no other piece of number.
-                else if (stream.match(/^0(?![\dx])/i)) {
-                    intLiteral = true;
-                }
-                if (intLiteral) {
-                    // Integer literals may be "long"
-                    stream.eat(/L/i);
-                    return "number";
-                }
-            }
+                [/\d+[fFdDlL]?/, "number"],
 
-            // Handle Strings
-            if (stream.match(stringPrefixes)) {
-                state.tokenize = tokenStringFactory(stream.current());
-                return state.tokenize(stream, state);
-            }
+                // Function/Sub declarations - MUST come before general keyword matching
+                [/\bfunction\b/i, { token: "keyword", next: "@functionName" }],
+                [/\bsub\b/i, { token: "keyword", next: "@subName" }],
 
-            // Handle operators and Delimiters
-            if (
-                stream.match(doubleOperators) ||
-                stream.match(singleOperators) ||
-                stream.match(wordOperators)
-            ) {
-                return "operator";
-            }
-            if (stream.match(singleDelimiters)) {
-                return null;
-            }
+                // End function/sub statements
+                [/\b(end\s+function|endfunction)\b/i, "keyword"],
+                [/\b(end\s+sub|endsub)\b/i, "keyword"],
 
-            if (stream.match(brackets)) {
-                return "bracket";
-            }
+                // Other end statements
+                [/\b(end\s+if|endif)\b/i, "keyword"],
+                [/\b(end\s+for|endfor)\b/i, "keyword"],
+                [/\b(end\s+while|endwhile)\b/i, "keyword"],
+                [/\b(end\s+try|endtry)\b/i, "keyword"],
 
-            if (stream.match(noIndentWords)) {
-                state.doInCurrentLine = true;
+                // Multi-word keywords
+                [/\belse\s+if\b/i, "keyword"],
+                [/\bend\s+if\b/i, "keyword"],
+                [/\bend\s+for\b/i, "keyword"],
+                [/\bend\s+while\b/i, "keyword"],
+                [/\bend\s+sub\b/i, "keyword"],
+                [/\bend\s+function\b/i, "keyword"],
+                [/\bfor\s+each\b/i, "keyword"],
+                [/\bexit\s+for\b/i, "keyword"],
+                [/\bexit\s+while\b/i, "keyword"],
+                [/\bcontinue\s+for\b/i, "keyword"],
+                [/\bcontinue\s+while\b/i, "keyword"],
 
-                return "control";
-            }
+                // Keywords (function and sub are handled separately in declarations)
+                [/\b(?:if|then|else|elseif|for|to|step|while|end|exit|return|as|next|stop|goto|dim|print|rem|new|try|catch|throw|run|library|continue|do|loop|each|in)\b/i, "keyword"],
 
-            if (stream.match(doOpening)) {
-                indent(stream, state);
-                state.doInCurrentLine = true;
+                // Boolean and null constants
+                [/\b(?:true|false)\b/i, "constant.language"],
+                [/\b(?:invalid)\b/i, "constant.language"],
 
-                return "keyword";
-            }
-            if (stream.match(opening)) {
-                if (!state.doInCurrentLine) indent(stream, state);
-                else state.doInCurrentLine = false;
+                // Special keywords
+                [/\b(?:m|super|global)\b/i, "variable.language"],
+                [/\bLINE_NUM\b/, "variable.language"],
 
-                return "keyword";
-            }
+                // Logical operators
+                [/\b(?:and|or|not|mod)\b/i, "keyword.operator"],
 
-            if (stream.match(openingCtrl)) {
-                if (!state.doInCurrentLine) indent(stream, state);
-                else state.doInCurrentLine = false;
+                // Type keywords (function/sub as types only after 'as' keyword)
+                [/(?<=\bas\s+)(function|sub)\b/i, "type"],
 
-                return "control";
-            }
+                // Other type keywords
+                [/\b(?:boolean|integer|longinteger|float|double|string|object|interface|dynamic|brsub|void)\b/i, "type"],
 
-            if (stream.match(middleCtrl)) {
-                return "control";
-            }
+                // Class, namespace, interface declarations
+                [/\b(class|namespace|interface|enum)\s+([a-z_]\w*)/i, ["keyword", "type.identifier"]],
 
-            if (stream.match(doubleClosing)) {
-                if (stream.peek() === " ") {
-                    stream.eatSpace();
-                }
-                let style = "keyword";
-                let result = stream.match(openingCtrl, false);
-                if (result) {
-                    style = "control";
-                }
-                dedent(stream, state);
-                dedent(stream, state);
-                return style;
-            }
+                // Roku built-in types (roXXX)
+                [/\b(ro[A-Z]\w*)\b/, "type.roku"],
 
-            if (stream.match(closing)) {
-                if (!state.doInCurrentLine) dedent(stream, state);
-                else state.doInCurrentLine = false;
+                // Function calls
+                [/\b([a-z_]\w*)(?=\s*\()/i, "entity.name.function"],
 
-                return "keyword";
-            }
+                // Identifiers
+                [/[a-z_]\w*/i, "identifier"],
 
-            if (stream.match(closingCtrl)) {
-                if (!state.doInCurrentLine) dedent(stream, state);
-                else state.doInCurrentLine = false;
-
-                return "control";
-            }
-
-            if (stream.match(types)) {
-                return "type";
-            }
-
-            if (stream.match(keywords)) {
-                return "keyword";
-            }
-
-            if (stream.match(atoms)) {
-                return "atom";
-            }
-
-            if (stream.match(known)) {
-                return "variable-2";
-            }
-
-            if (stream.match(builtinFuncs)) {
-                return "builtin";
-            }
-
-            if (stream.match(builtinObjs)) {
-                return "keyword";
-            }
-
-            if (stream.match(functions)) {
-                return "variable-2";
-            }
-
-            if (stream.match(identifiers)) {
-                return "variable";
-            }
-
-            // Handle non-detected items
-            stream.next();
-            return ERRORCLASS;
-        }
-
-        function tokenStringFactory(delimiter) {
-            const singleline = delimiter.length == 1;
-            const OUTCLASS = "string";
-
-            return function (stream, state) {
-                while (!stream.eol()) {
-                    stream.eatWhile(/[^'"]/);
-                    if (stream.match(delimiter)) {
-                        state.tokenize = tokenBase;
-                        return OUTCLASS;
-                    } else {
-                        stream.eat(/['"]/);
+                // Operators
+                [/@symbols/, {
+                    cases: {
+                        "@operators": "operator",
+                        "@default": ""
                     }
-                }
-                if (singleline) {
-                    if (parserConf.singleLineStringErrors) {
-                        return ERRORCLASS;
-                    } else {
-                        state.tokenize = tokenBase;
-                    }
-                }
-                return OUTCLASS;
-            };
-        }
+                }],
 
-        function tokenLexer(stream, state) {
-            let style = state.tokenize(stream, state);
-            let current = stream.current();
+                // Delimiters and brackets
+                [/[{}()\[\]]/, "@brackets"],
+                [/[<>](?!@symbols)/, "@brackets"],
+                [/[,;:.]/, "delimiter"],
 
-            // Handle '.' connected identifiers
-            if (current === ".") {
-                style = state.tokenize(stream, state);
+                // Whitespace
+                { include: "@whitespace" },
+            ],
 
-                current = stream.current();
-                if (
-                    (style &&
-                        (style.substr(0, 8) === "variable" ||
-                            style === "builtin" ||
-                            style === "keyword")) ||
-                    knownElements.includes(current.substring(1))
-                ) {
-                    if (style === "builtin" || style === "keyword") style = "variable";
-                    if (knownElements.includes(current.substr(1))) style = "variable-2";
+            whitespace: [
+                [/\s+/, "white"],
+            ],
 
-                    return style;
-                } else {
-                    return ERRORCLASS;
-                }
-            }
+            string: [
+                [/[^\\"]+/, "string"],
+                [/@escapes/, "string.escape"],
+                [/\\./, "string.escape.invalid"],
+                [/"/, { token: "string.quote", bracket: "@close", next: "@pop" }]
+            ],
 
-            return style;
-        }
+            templateString: [
+                [/\$\{/, { token: "delimiter.bracket", next: "@templateExpression" }],
+                [/[^`$]+/, "string.backtick"],
+                [/\$[^{]/, "string.backtick"],
+                [/`/, { token: "string.backtick", bracket: "@close", next: "@pop" }]
+            ],
 
-        const external = {
-            electricChars: "dDpPtTfFeE ",
-            startState: function () {
-                return {
-                    tokenize: tokenBase,
-                    lastToken: null,
-                    currentIndent: 0,
-                    nextLineIndent: 0,
-                    doInCurrentLine: false,
-                    ignoreKeyword: false,
-                };
-            },
+            templateExpression: [
+                [/\}/, { token: "delimiter.bracket", next: "@pop" }],
+                { include: "root" }
+            ],
 
-            token: function (stream, state) {
-                if (stream.sol()) {
-                    state.currentIndent += state.nextLineIndent;
-                    state.nextLineIndent = 0;
-                    state.doInCurrentLine = 0;
-                }
-                let style = tokenLexer(stream, state);
+            functionName: [
+                [/\s+/, "white"],
+                [/[a-z_]\w*/i, { token: "entity.name.function", next: "@pop" }],
+                [/./, { token: "@rematch", next: "@pop" }]
+            ],
 
-                state.lastToken = { style: style, content: stream.current() };
-
-                if (style === "space") style = null;
-
-                return style;
-            },
-
-            indent: function (state, textAfter) {
-                const trueText = textAfter.replace(/(^\s+)|(\s+$)/g, "");
-                if (
-                    trueText.match(closing) ||
-                    trueText.match(doubleClosing) ||
-                    trueText.match(middleCtrl)
-                )
-                    return conf.indentUnit * (state.currentIndent - 1);
-                if (state.currentIndent < 0) return 0;
-                return state.currentIndent * conf.indentUnit;
-            },
-
-            lineComment: "'",
-        };
-        return external;
+            subName: [
+                [/\s+/, "white"],
+                [/[a-z_]\w*/i, { token: "entity.name.function", next: "@pop" }],
+                [/./, { token: "@rematch", next: "@pop" }]
+            ],
+        },
     });
 
-    CodeMirror.defineMIME("text/brs", "brightscript");
+    // Set language configuration
+    monaco.languages.setLanguageConfiguration("brightscript", {
+        comments: {
+            lineComment: "'",
+        },
+        brackets: [
+            ["{", "}"],
+            ["[", "]"],
+            ["(", ")"],
+        ],
+        autoClosingPairs: [
+            { open: "{", close: "}" },
+            { open: "[", close: "]" },
+            { open: "(", close: ")" },
+            { open: '"', close: '"', notIn: ["string"] },
+            { open: "`", close: "`", notIn: ["string", "comment"] },
+        ],
+        surroundingPairs: [
+            { open: "{", close: "}" },
+            { open: "[", close: "]" },
+            { open: "(", close: ")" },
+            { open: '"', close: '"' },
+            { open: "`", close: "`" },
+        ],
+        folding: {
+            markers: {
+                start: /^\s*('|rem)\s*#region\b/i,
+                end: /^\s*('|rem)\s*#endregion\b/i,
+            },
+        },
+        onEnterRules: [
+            {
+                // Increase indent after function/sub declaration
+                beforeText: /^\s*(?:function|sub)\s+\w+/i,
+                action: { indentAction: monaco.languages.IndentAction.Indent },
+            },
+            {
+                // Increase indent after if/for/while (without inline then)
+                beforeText: /^\s*(?:if\b(?!.*\bthen\b.*$)|for\b|while\b|try\b)/i,
+                action: { indentAction: monaco.languages.IndentAction.Indent },
+            },
+        ],
+        indentationRules: {
+            increaseIndentPattern: /^\s*(?:(?:function|sub)\s+\w+|(?:if\b(?!.*\bthen\b.*$))|(?:for\b)|(?:while\b)|(?:try\b)|(?:else\s*$))/i,
+            decreaseIndentPattern: /^\s*(?:(?:end\s+(?:function|sub|if|for|while|try))|(?:endfunction|endsub|endif|endfor|endwhile|endtry)|(?:else\b)|(?:elseif\b)|(?:catch\b))/i,
+        },
+        wordPattern: /[a-zA-Z_]\w*/,
+    });
+}
+
+/**
+ * Defines BrightScript theme colors matching VS Code's default theme
+ * These colors match the token colors used in the VS Code BrightScript extension
+ */
+export function defineBrightScriptTheme(monaco, theme) {
+    const isDark = theme === "dark";
+
+    // VS Code Dark+ theme colors (default dark theme)
+    const darkColors = [
+        // Keywords - blue (#569CD6 in VS Code Dark+)
+        { token: "keyword", foreground: "569CD6" },
+        { token: "keyword.operator", foreground: "569CD6" },
+        { token: "keyword.preprocessor", foreground: "569CD6" },
+
+        // Types - light blue/teal (#4EC9B0 in VS Code Dark+)
+        { token: "type", foreground: "4EC9B0" },
+        { token: "type.identifier", foreground: "4EC9B0" },
+        { token: "type.roku", foreground: "4EC9B0" },
+
+        // Strings - orange/brown (#CE9178 in VS Code Dark+)
+        { token: "string", foreground: "CE9178" },
+        { token: "string.quote", foreground: "CE9178" },
+        { token: "string.backtick", foreground: "CE9178" },
+        { token: "string.escape", foreground: "D7BA7D" },
+        { token: "string.escape.invalid", foreground: "D7BA7D" },
+        { token: "string.invalid", foreground: "F44747" },
+
+        // Comments - green (#6A9955 in VS Code Dark+)
+        { token: "comment", foreground: "6A9955" },
+        { token: "comment.region", foreground: "6A9955" },
+
+        // Numbers - light green (#B5CEA8 in VS Code Dark+)
+        { token: "number", foreground: "B5CEA8" },
+        { token: "number.hex", foreground: "B5CEA8" },
+        { token: "number.octal", foreground: "B5CEA8" },
+        { token: "number.float", foreground: "B5CEA8" },
+
+        // Functions - yellow (#DCDCAA in VS Code Dark+)
+        { token: "entity.name.function", foreground: "DCDCAA" },
+
+        // Constants - blue (#569CD6 in VS Code Dark+)
+        { token: "constant.language", foreground: "569CD6" },
+
+        // Variables - light blue (#9CDCFE in VS Code Dark+)
+        { token: "variable.language", foreground: "569CD6" },
+        { token: "identifier", foreground: "9CDCFE" },
+
+        // Operators - white/gray (#D4D4D4 in VS Code Dark+)
+        { token: "operator", foreground: "D4D4D4" },
+
+        // Delimiters - white/gray (#D4D4D4 in VS Code Dark+)
+        { token: "delimiter", foreground: "D4D4D4" },
+        { token: "delimiter.bracket", foreground: "FFD700" },
+    ];
+
+    // VS Code Light+ theme colors (default light theme)
+    const lightColors = [
+        // Keywords - blue (#0000FF in VS Code Light+)
+        { token: "keyword", foreground: "0000FF" },
+        { token: "keyword.operator", foreground: "0000FF" },
+        { token: "keyword.preprocessor", foreground: "0000FF" },
+
+        // Types - teal (#267F99 in VS Code Light+)
+        { token: "type", foreground: "267F99" },
+        { token: "type.identifier", foreground: "267F99" },
+        { token: "type.roku", foreground: "267F99" },
+
+        // Strings - red/brown (#A31515 in VS Code Light+)
+        { token: "string", foreground: "A31515" },
+        { token: "string.quote", foreground: "A31515" },
+        { token: "string.backtick", foreground: "A31515" },
+        { token: "string.escape", foreground: "EE0000" },
+        { token: "string.escape.invalid", foreground: "EE0000" },
+        { token: "string.invalid", foreground: "CD3131" },
+
+        // Comments - green (#008000 in VS Code Light+)
+        { token: "comment", foreground: "008000" },
+        { token: "comment.region", foreground: "008000" },
+
+        // Numbers - dark green (#098658 in VS Code Light+)
+        { token: "number", foreground: "098658" },
+        { token: "number.hex", foreground: "098658" },
+        { token: "number.octal", foreground: "098658" },
+        { token: "number.float", foreground: "098658" },
+
+        // Functions - brown (#795E26 in VS Code Light+)
+        { token: "entity.name.function", foreground: "795E26" },
+
+        // Constants - blue (#0000FF in VS Code Light+)
+        { token: "constant.language", foreground: "0000FF" },
+
+        // Variables - blue (#001080 in VS Code Light+)
+        { token: "variable.language", foreground: "0000FF" },
+        { token: "identifier", foreground: "001080" },
+
+        // Operators - black (#000000 in VS Code Light+)
+        { token: "operator", foreground: "000000" },
+
+        // Delimiters - black (#000000 in VS Code Light+)
+        { token: "delimiter", foreground: "000000" },
+        { token: "delimiter.bracket", foreground: "AF00DB" },
+    ];
+
+    const colors = isDark ? darkColors : lightColors;
+    const baseTheme = isDark ? "vs-dark" : "vs";
+    const customThemeName = isDark ? "brightscript-dark" : "brightscript-light";
+
+    // Define a custom theme that inherits from the base theme
+    monaco.editor.defineTheme(customThemeName, {
+        base: baseTheme,
+        inherit: true,
+        rules: colors,
+        colors: {},
+    });
+
+    // Return the theme name so it can be set by the caller
+    return customThemeName;
 }
