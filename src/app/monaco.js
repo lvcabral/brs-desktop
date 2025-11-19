@@ -19,6 +19,7 @@ export class MonacoManager {
         // Get indentation settings from preferences (default: spaces, size 4)
         const tabSize = editorPrefs.indentationSize || 4;
         const insertSpaces = (editorPrefs.indentationType || "spaces") === "spaces";
+        const fontSize = editorPrefs.fontSize || 14;
 
         this.editor = monaco.editor.create(containerElement, {
             value: "",
@@ -34,7 +35,7 @@ export class MonacoManager {
                 enabled: false,
             },
             scrollBeyondLastLine: false,
-            fontSize: 14,
+            fontSize: fontSize,
             fontFamily: "monospace",
             autoIndent: "full",
             formatOnPaste: false,
@@ -60,9 +61,11 @@ export class MonacoManager {
     setIndentation(editorPrefs) {
         const tabSize = editorPrefs.indentationSize || 4;
         const insertSpaces = (editorPrefs.indentationType || "spaces") === "spaces";
+        const fontSize = editorPrefs.fontSize || 14;
         this.editor.updateOptions({
             tabSize: tabSize,
             insertSpaces: insertSpaces,
+            fontSize: fontSize,
         });
     }
 

@@ -116,6 +116,7 @@ export function getSettings(window) {
             editor: {
                 indentationType: "spaces",
                 indentationSize: 4,
+                fontSize: 14,
             },
         },
         browserWindowOverrides: {
@@ -735,6 +736,14 @@ export function getSettings(window) {
                                     min: 2,
                                     max: 8,
                                     help: "Set the number of spaces per indentation level",
+                                },
+                                {
+                                    label: "Font Size",
+                                    key: "fontSize",
+                                    type: "slider",
+                                    min: 10,
+                                    max: 24,
+                                    help: "Set the font size for the code editor",
                                 },
                             ],
                         },
