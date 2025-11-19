@@ -9,12 +9,16 @@ export class MonacoManager {
     editor;
 
     // CTOR
-    constructor(containerElement, theme) {
+    constructor(containerElement, theme, editorPrefs = {}) {
         // Register BrightScript language
         defineBrightScriptLanguage(monaco);
 
         // Define BrightScript theme matching VS Code colors and get the theme name
         const brightscriptTheme = defineBrightScriptTheme(monaco, theme);
+
+        // Get indentation settings from preferences (default: spaces, size 4)
+        const tabSize = editorPrefs.indentationSize || 4;
+        const insertSpaces = (editorPrefs.indentationType || "spaces") === "spaces";
 
         this.editor = monaco.editor.create(containerElement, {
             value: "",
@@ -22,8 +26,9 @@ export class MonacoManager {
             theme: brightscriptTheme,
             lineNumbers: "on",
             wordWrap: "on",
-            tabSize: 4,
-            insertSpaces: false,
+            tabSize: tabSize,
+            insertSpaces: insertSpaces,
+            detectIndentation: false,
             automaticLayout: false,
             minimap: {
                 enabled: false,
@@ -50,6 +55,15 @@ export class MonacoManager {
 
     setMode(mode) {
         monaco.editor.setModelLanguage(this.editor.getModel(), mode);
+    }
+
+    setIndentation(editorPrefs) {
+        const tabSize = editorPrefs.indentationSize || 4;
+        const insertSpaces = (editorPrefs.indentationType || "spaces") === "spaces";
+        this.editor.updateOptions({
+            tabSize: tabSize,
+            insertSpaces: insertSpaces,
+        });
     }
 
     getValue() {

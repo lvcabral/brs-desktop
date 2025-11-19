@@ -113,6 +113,10 @@ export function getSettings(window) {
                 manualIp: "",
                 password: DEFAULT_USRPWD,
             },
+            editor: {
+                indentationType: "spaces",
+                indentationSize: 4,
+            },
         },
         browserWindowOverrides: {
             title: "Settings",
@@ -693,6 +697,44 @@ export function getSettings(window) {
                                         },
                                     ],
                                     help: "If enabled, the simulator will replicate all pressed control keys on the peer Roku device",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+            {
+                id: "editor",
+                label: "Editor",
+                icon: "pencil",
+                form: {
+                    groups: [
+                        {
+                            label: "Code Editor Settings",
+                            fields: [
+                                {
+                                    label: "Indentation Type",
+                                    key: "indentationType",
+                                    type: "radio",
+                                    options: [
+                                        {
+                                            label: "Spaces",
+                                            value: "spaces",
+                                        },
+                                        {
+                                            label: "Tabs",
+                                            value: "tabs",
+                                        },
+                                    ],
+                                    help: "Choose whether to use spaces or tabs for indentation in the code editor",
+                                },
+                                {
+                                    label: "Indentation Size",
+                                    key: "indentationSize",
+                                    type: "slider",
+                                    min: 2,
+                                    max: 8,
+                                    help: "Set the number of spaces per indentation level",
                                 },
                             ],
                         },

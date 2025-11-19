@@ -116,16 +116,17 @@ function main() {
     // Initialize the Monaco editor
     const preferences = api.getPreferences();
     const theme = preferences?.simulator?.theme || "purple";
+    const editorPrefs = preferences?.editor || {};
     terminal.setColorTheme(theme === "light" ? "light" : "dark");
-    editorManager = new MonacoManager(brsCodeField, theme);
-    
+    editorManager = new MonacoManager(brsCodeField, theme, editorPrefs);
+
     // Force initial layout after a short delay to ensure container has dimensions
     setTimeout(() => {
         if (editorManager && editorManager.editor) {
             editorManager.editor.layout();
         }
     }, 100);
-    
+
     editorManager.editor.onDidChangeModelContent(() => {
         if (codeSelect.value === "0") {
             const code = editorManager.getValue();
@@ -306,7 +307,7 @@ function populateCodeSelector(currentId = "") {
             arrCode[idx][1] = codeId;
         }
     }
-    arrCode.sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: 'base' }));
+    arrCode.sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: "base" }));
     codeSelect.length = 1;
     for (let i = 0; i < arrCode.length; i++) {
         const codeId = arrCode[i][1];
@@ -867,6 +868,9 @@ globalThis.__setTheme = () => {
     layoutContainer.style.colorScheme = theme === "light" ? "light" : "dark";
     if (editorManager) {
         editorManager.setTheme(theme);
+        // Update editor indentation settings
+        const editorPrefs = preferences?.editor || {};
+        editorManager.setIndentation(editorPrefs);
     }
     terminal.setColorTheme(theme === "light" ? "light" : "dark");
 };
