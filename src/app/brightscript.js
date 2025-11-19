@@ -246,7 +246,8 @@ export function defineBrightScriptLanguage(monaco) {
  * These colors match the token colors used in the VS Code BrightScript extension
  */
 export function defineBrightScriptTheme(monaco, theme) {
-    const isDark = theme === "dark";
+    const isDark = theme === "dark" || theme === "purple";
+    const isPurple = theme === "purple";
 
     // VS Code Dark+ theme colors (default dark theme)
     const darkColors = [
@@ -346,14 +347,32 @@ export function defineBrightScriptTheme(monaco, theme) {
 
     const colors = isDark ? darkColors : lightColors;
     const baseTheme = isDark ? "vs-dark" : "vs";
-    const customThemeName = isDark ? "brightscript-dark" : "brightscript-light";
+    let customThemeName;
+    let editorColors = {};
+
+    if (isPurple) {
+        customThemeName = "brightscript-purple";
+        // Purple theme with custom editor background colors
+        editorColors = {
+            "editor.background": "#2d1b3d",
+            "editor.foreground": "#d4d4d4",
+            "editorLineNumber.foreground": "#858585",
+            "editorLineNumber.activeForeground": "#c6c6c6",
+            "editor.selectionBackground": "#5a3d6e",
+            "editor.inactiveSelectionBackground": "#3d2850",
+            "editorCursor.foreground": "#dac7ea",
+            "editor.lineHighlightBackground": "#3d1b56",
+        };
+    } else {
+        customThemeName = isDark ? "brightscript-dark" : "brightscript-light";
+    }
 
     // Define a custom theme that inherits from the base theme
     monaco.editor.defineTheme(customThemeName, {
         base: baseTheme,
         inherit: true,
         rules: colors,
-        colors: {},
+        colors: editorColors,
     });
 
     // Return the theme name so it can be set by the caller
