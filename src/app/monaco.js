@@ -85,6 +85,14 @@ export class MonacoManager {
         return this.editor.hasTextFocus();
     }
 
+    undo() {
+        this.editor.trigger("editor", "undo");
+    }
+
+    redo() {
+        this.editor.trigger("editor", "redo");
+    }
+
     dispose() {
         this.editor.dispose();
     }

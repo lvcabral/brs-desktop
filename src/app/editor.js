@@ -141,9 +141,6 @@ function main() {
             markCodeAsSaved();
         }
     });
-    // editorManager.editor.on("contextmenu", (event) => {
-    //     api.send("contextMenu");
-    // });
     const appPath = simulatorApp?.path;
     if (appPath && !(appPath.endsWith(EDITOR_CODE_BRS) || appPath === BRS_HOME_APP_PATH)) {
         hideEditor(true);
@@ -371,13 +368,13 @@ function resetUndoHistory() {
     }
 }
 
-// api.receive("editorUndo", function () {
-//     editorManager?.editor?.undo();
-// });
+api.receive("editorUndo", function () {
+    editorManager?.undo();
+});
 
-// api.receive("editorRedo", function () {
-//     editorManager?.editor?.redo();
-// });
+api.receive("editorRedo", function () {
+    editorManager?.redo();
+});
 
 function loadCode(id) {
     let code = localStorage.getItem(id);
