@@ -241,7 +241,7 @@ pre {
 .editor {
     display: flex;
     width: 100%;
-    height: 100%;
+    height: calc(100vh - 29px);
     position: fixed;
     top: 29px;
 }
@@ -299,8 +299,9 @@ pre {
     background: var(--background-color);
     display: flex;
     flex-direction: column;
-    flex: 1 1 0%;
+    flex: 1;
     min-width: 470px;
+    height: 100%;
 }
 
 .console .console-header {
@@ -384,15 +385,17 @@ pre {
 
 .editor .console #console-logs {
     font-size: 12px;
-    height: calc(100vh - 78px);
+    flex: 1 1 0%;
     overflow: auto;
 }
 
 .code {
     background: var(--background-color);
-    height: calc(100vh - 72px);
+    display: flex;
+    flex-direction: column;
     width: 60%;
     min-width: 682px;
+    height: 100%;
 }
 
 .code .code-header {
@@ -432,15 +435,21 @@ pre {
     color: var(--header-color);
 }
 
+.code .editor-wrapper {
+    flex: 1 1 0%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
 .code #brsCode {
     display: block;
-    height: 100%;
+    flex: 1 1 0%;
     width: 100%;
     border: none;
     background: var(--sidebar-background-color);
     color: var(--header-color);
-    font-size: 18px;
-    padding: 16px;
 }
 
 .code #brsCode:focus,
@@ -450,29 +459,33 @@ pre {
 }
 
 @media (max-width: 1150px) {
-    body:not(.code-hidden) .code {
-        min-width: unset;
-    }
-
-    body:not(.code-hidden) .console {
-        min-width: unset;
-    }
-
     body:not(.code-hidden) .editor {
         flex-direction: column;
     }
 
-    body:not(.code-hidden) .editor .code,
-    body:not(.code-hidden) .editor .console {
-        width: 100%;
+    body:not(.code-hidden) .code {
+        min-width: unset !important;
+        width: 100% !important;
+        height: 50% !important;
+        max-height: 50%;
+        overflow: hidden;
     }
 
-    body:not(.code-hidden) .editor .code {
-        height: 50%;
+    body:not(.code-hidden) .console {
+        min-width: unset !important;
+        width: 100% !important;
+        height: 50% !important;
+        max-height: 50%;
+        flex: none;
+        overflow: hidden;
     }
 
-    body:not(.code-hidden) .editor .console #console-logs {
-        height: calc(50vh - 78px);
+    body:not(.code-hidden) .code .editor-wrapper {
+        max-height: 100%;
+    }
+
+    body:not(.code-hidden) .code #brsCode {
+        max-height: 100%;
     }
 
     button {

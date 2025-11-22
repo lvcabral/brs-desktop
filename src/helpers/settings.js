@@ -113,6 +113,11 @@ export function getSettings(window) {
                 manualIp: "",
                 password: DEFAULT_USRPWD,
             },
+            editor: {
+                indentationType: "spaces",
+                indentationSize: 4,
+                fontSize: 14,
+            },
         },
         browserWindowOverrides: {
             title: "Settings",
@@ -287,7 +292,7 @@ export function getSettings(window) {
             {
                 id: "device",
                 label: "Device",
-                icon: "roku-box",
+                icon: __dirname + "/images/roku-box.svg",
                 form: {
                     groups: [
                         {
@@ -332,7 +337,7 @@ export function getSettings(window) {
             {
                 id: "remote",
                 label: "Control",
-                icon: "roku-remote",
+                icon: __dirname + "/images/roku-remote.svg",
                 form: {
                     groups: [
                         {
@@ -647,7 +652,7 @@ export function getSettings(window) {
             {
                 id: "peerRoku",
                 label: "Peer Roku",
-                icon: "roku-logo",
+                icon: __dirname + "/images/roku-logo.svg",
                 form: {
                     groups: [
                         {
@@ -693,6 +698,52 @@ export function getSettings(window) {
                                         },
                                     ],
                                     help: "If enabled, the simulator will replicate all pressed control keys on the peer Roku device",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+            {
+                id: "editor",
+                label: "Code Editor",
+                icon: __dirname + "/images/coding.svg",
+                form: {
+                    groups: [
+                        {
+                            label: "Code Editor Settings",
+                            fields: [
+                                {
+                                    label: "Indentation Type",
+                                    key: "indentationType",
+                                    type: "radio",
+                                    options: [
+                                        {
+                                            label: "Spaces",
+                                            value: "spaces",
+                                        },
+                                        {
+                                            label: "Tabs",
+                                            value: "tabs",
+                                        },
+                                    ],
+                                    help: "Choose whether to use spaces or tabs for indentation in the code editor",
+                                },
+                                {
+                                    label: "Indentation Size",
+                                    key: "indentationSize",
+                                    type: "slider",
+                                    min: 2,
+                                    max: 8,
+                                    help: "Set the number of spaces per indentation level",
+                                },
+                                {
+                                    label: "Font Size",
+                                    key: "fontSize",
+                                    type: "slider",
+                                    min: 10,
+                                    max: 24,
+                                    help: "Set the font size for the code editor",
                                 },
                             ],
                         },

@@ -8,7 +8,7 @@
 import Codec from "json-url";
 import WebTerminal from "@lvcabral/terminal";
 import { nanoid } from "nanoid";
-import { CodeMirrorManager, getThemeCss } from "./codemirror";
+import { MonacoManager } from "./monaco";
 import { EDITOR_CODE_BRS, BRS_HOME_APP_PATH } from "../constants";
 import Toastify from "toastify-js";
 import packageInfo from "../../package.json";
@@ -113,33 +113,33 @@ let unchangedCode = "";
 
 function main() {
     updateButtons();
-    // Initialize the Code Mirror manager
+    // Initialize the Monaco editor
     const preferences = api.getPreferences();
     const theme = preferences?.simulator?.theme || "purple";
+    const editorPrefs = preferences?.editor || {};
     terminal.setColorTheme(theme === "light" ? "light" : "dark");
-    editorManager = new CodeMirrorManager(brsCodeField, theme);
-    if (isMacOS) {
-        // Remove binding for Ctrl+V on MacOS to allow remapping
-        // https://github.com/codemirror/codemirror5/issues/5848
-        const cm = document.querySelector(".CodeMirror");
-        delete cm.CodeMirror.constructor.keyMap.emacsy["Ctrl-V"];
+    editorManager = new MonacoManager(brsCodeField, theme, editorPrefs);
+
+    // Force initial layout after a short delay to ensure container has dimensions
+    if (editorManager?.editor) {
+        setTimeout(() => {
+            editorManager.editor.layout();
+        }, 100);
     }
-    editorManager.editor.on("change", () => {
+
+    editorManager.editor.onDidChangeModelContent(() => {
         if (codeSelect.value === "0") {
-            const code = editorManager.editor.getValue();
+            const code = editorManager.getValue();
             if (code && code.trim() === "") {
                 isCodeChanged = false;
                 return;
             }
         }
-        if (editorManager.editor.getValue() !== unchangedCode) {
-            markCodeAsChanged();
-        } else {
+        if (editorManager.getValue() === unchangedCode) {
             markCodeAsSaved();
+        } else {
+            markCodeAsChanged();
         }
-    });
-    editorManager.editor.on("contextmenu", (event) => {
-        api.send("contextMenu");
     });
     const appPath = simulatorApp?.path;
     if (appPath && !(appPath.endsWith(EDITOR_CODE_BRS) || appPath === BRS_HOME_APP_PATH)) {
@@ -166,12 +166,12 @@ function main() {
         endButton.style.display = "inline";
         breakButton.style.display = "inline";
     }
-    editorManager.editor.focus();
+    editorManager.focus();
 
     editorContainer?.addEventListener("click", (event) => {
         const target = event.target;
         if (!target.closest(".code-header")) {
-            editorManager.editor.focus();
+            editorManager.focus();
         }
     });
 }
@@ -304,7 +304,7 @@ function populateCodeSelector(currentId = "") {
             arrCode[idx][1] = codeId;
         }
     }
-    arrCode.sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: 'base' }));
+    arrCode.sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: "base" }));
     codeSelect.length = 1;
     for (let i = 0; i < arrCode.length; i++) {
         const codeId = arrCode[i][1];
@@ -359,15 +359,21 @@ codeSelect.addEventListener("change", async (e) => {
 });
 
 function resetUndoHistory() {
-    editorManager?.editor?.clearHistory();
+    // Monaco doesn't have a clearHistory method, but we can set the value to itself
+    // to effectively reset undo history
+    if (editorManager?.editor) {
+        const value = editorManager.getValue();
+        editorManager.setValue("");
+        editorManager.setValue(value);
+    }
 }
 
 api.receive("editorUndo", function () {
-    editorManager?.editor?.undo();
+    editorManager?.undo();
 });
 
 api.receive("editorRedo", function () {
-    editorManager?.editor?.redo();
+    editorManager?.redo();
 });
 
 function loadCode(id) {
@@ -396,7 +402,7 @@ function renameCode() {
 }
 
 function saveAsCode() {
-    const code = editorManager.editor.getValue();
+    const code = editorManager.getValue();
     if (!code || code.trim() === "") {
         showToast("There is no Source Code to save!", 3000, true);
         return;
@@ -436,7 +442,7 @@ function exportJsonCode() {
 }
 
 function exportCodeAs(format) {
-    const codeContent = editorManager.editor.getValue();
+    const codeContent = editorManager.getValue();
 
     if (typeof codeContent !== "string" || codeContent.trim() === "") {
         showToast("There is no Source Code to export!", 3000, true);
@@ -583,13 +589,13 @@ function resetApp(id = "", code = "") {
         clearTerminal();
     }
     unchangedCode = code;
-    editorManager.editor.setValue(code);
-    editorManager.editor.focus();
+    editorManager.setValue(code);
+    editorManager.focus();
     markCodeAsSaved();
 }
 
 function shareCode() {
-    let code = editorManager.editor.getValue();
+    let code = editorManager.getValue();
     if (code && code.trim() !== "") {
         if (codeSelect.value !== "0") {
             let codeName = codeSelect.options[codeSelect.selectedIndex].text.replace(/^⏺︎ /, "");
@@ -617,7 +623,7 @@ function shareCode() {
 }
 
 function saveCode() {
-    const code = editorManager.editor.getValue();
+    const code = editorManager.getValue();
     if (code && code.trim() !== "") {
         if (codeSelect.value === "0") {
             actionType.value = "save";
@@ -650,7 +656,7 @@ codeDialog.addEventListener("close", (e) => {
             resetDialog();
             return;
         }
-        const code = editorManager.editor.getValue();
+        const code = editorManager.getValue();
         if (actionType.value === "saveas") {
             currentId = nanoid(10);
         }
@@ -692,7 +698,7 @@ function codeNameExists(codeName) {
 }
 
 export function runCode() {
-    const code = editorManager.editor.getValue();
+    const code = editorManager.getValue();
     if (code && code.trim() !== "") {
         try {
             api.send("runCode", code);
@@ -781,17 +787,26 @@ function onMouseMove(e) {
     if (layoutContainer && codeColumn && consoleColumn) {
         const { x, width } = layoutContainer.getBoundingClientRect();
         const separatorPosition = width - (e.clientX - x);
-        const codeColumnWidth = `${width - separatorPosition}px`;
+        const codeColumnWidth = width - separatorPosition;
+        const consoleColumnWidth = separatorPosition;
 
-        const rightRect = consoleColumn.getBoundingClientRect();
-        codeColumn.style.width = codeColumnWidth;
-        consoleColumn.style.width = rightRect.width.toString();
+        codeColumn.style.width = `${codeColumnWidth}px`;
+        consoleColumn.style.width = `${consoleColumnWidth}px`;
+        // Force Monaco editor to recalculate layout during drag
+        setTimeout(() => {
+            editorManager.editor.layout();
+        }, 0);
     }
 }
 
 function onMouseUp() {
     if (isResizing) {
         scrollToBottom();
+        // Clear inline styles if in narrow mode
+        if (globalThis.innerWidth < 1150) {
+            codeColumn.style.width = "";
+            consoleColumn.style.width = "";
+        }
     }
     isResizing = false;
 }
@@ -803,13 +818,23 @@ function onMouseDown(event) {
 }
 
 function onResize() {
-    if (globalThis.innerWidth >= 1150 || editorContainer.classList.contains("hidden")) {
-        const { height } = codeColumn.getBoundingClientRect();
-        editorManager.editor.setSize("100%", `${height - 15}px`);
-    } else {
-        const { top } = consoleColumn.getBoundingClientRect();
-        editorManager.editor.setSize("100%", `${Math.trunc(globalThis.innerHeight - top - 15)}px`);
-        codeColumn.style.width = "100%";
+    // Clear inline styles in narrow mode to let CSS take over
+    if (globalThis.innerWidth < 1150) {
+        if (codeColumn) {
+            codeColumn.style.width = "";
+            codeColumn.style.height = "";
+        }
+        if (consoleColumn) {
+            consoleColumn.style.width = "";
+            consoleColumn.style.height = "";
+        }
+    }
+
+    if (editorManager?.editor) {
+        // Use setTimeout to ensure DOM has updated before layout recalculation
+        setTimeout(() => {
+            editorManager.editor.layout();
+        }, 150);
     }
     scrollToBottom();
 }
@@ -851,7 +876,10 @@ globalThis.__setTheme = () => {
     document.getElementById("close-button-light").style.display = theme === "light" ? "" : "none";
     layoutContainer.style.colorScheme = theme === "light" ? "light" : "dark";
     if (editorManager) {
-        editorManager.editor.setOption("theme", getThemeCss(theme));
+        editorManager.setTheme(theme);
+        // Update editor indentation settings
+        const editorPrefs = preferences?.editor || {};
+        editorManager.setIndentation(editorPrefs);
     }
     terminal.setColorTheme(theme === "light" ? "light" : "dark");
 };
