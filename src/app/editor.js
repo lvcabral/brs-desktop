@@ -121,11 +121,11 @@ function main() {
     editorManager = new MonacoManager(brsCodeField, theme, editorPrefs);
 
     // Force initial layout after a short delay to ensure container has dimensions
-    setTimeout(() => {
-        if (editorManager && editorManager.editor) {
+    if (editorManager?.editor) {
+        setTimeout(() => {
             editorManager.editor.layout();
-        }
-    }, 100);
+        }, 100);
+    }
 
     editorManager.editor.onDidChangeModelContent(() => {
         if (codeSelect.value === "0") {
@@ -135,10 +135,10 @@ function main() {
                 return;
             }
         }
-        if (editorManager.getValue() !== unchangedCode) {
-            markCodeAsChanged();
-        } else {
+        if (editorManager.getValue() === unchangedCode) {
             markCodeAsSaved();
+        } else {
+            markCodeAsChanged();
         }
     });
     const appPath = simulatorApp?.path;
@@ -830,7 +830,7 @@ function onResize() {
         }
     }
 
-    if (editorManager && editorManager.editor) {
+    if (editorManager?.editor) {
         // Use setTimeout to ensure DOM has updated before layout recalculation
         setTimeout(() => {
             editorManager.editor.layout();
