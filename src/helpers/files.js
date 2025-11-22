@@ -140,12 +140,12 @@ function executeFile(window, fileData, filePath, input) {
     if (input == undefined) {
         input = new Map();
     }
-    if (!input.has("source")) {
-        input.set("source", "desktop_app");
-    }
     const deepLink = getDeepLink();
     for (const [key, value] of Object.entries(deepLink)) {
         input.set(key, value);
+    }
+    if (!input.has("source")) {
+        input.set("source", input.size ? "external-control" : "desktop-app");
     }
     window.webContents.send(
         "executeFile",
