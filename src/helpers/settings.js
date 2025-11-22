@@ -292,7 +292,7 @@ export function getSettings(window) {
             {
                 id: "device",
                 label: "Device",
-                icon: __dirname + "/images/roku-box.svg",
+                icon: __dirname + "/images/svg/roku-box.svg",
                 form: {
                     groups: [
                         {
@@ -337,7 +337,7 @@ export function getSettings(window) {
             {
                 id: "remote",
                 label: "Control",
-                icon: __dirname + "/images/roku-remote.svg",
+                icon: __dirname + "/images/svg/roku-remote.svg",
                 form: {
                     groups: [
                         {
@@ -652,7 +652,7 @@ export function getSettings(window) {
             {
                 id: "peerRoku",
                 label: "Peer Roku",
-                icon: __dirname + "/images/roku-logo.svg",
+                icon: __dirname + "/images/svg/roku-logo.svg",
                 form: {
                     groups: [
                         {
@@ -707,7 +707,7 @@ export function getSettings(window) {
             {
                 id: "editor",
                 label: "Code Editor",
-                icon: __dirname + "/images/coding.svg",
+                icon: __dirname + "/images/svg/coding.svg",
                 form: {
                     groups: [
                         {
@@ -1137,8 +1137,15 @@ ipcMain.on("deviceData", (_, deviceData) => {
             if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
                 appDeviceInfo[key] = deviceData[key];
                 if (key === "models" && appDeviceInfo.models?.size) {
-                    settings.options.sections[2].form.groups[0].fields[0].options =
-                        getRokuModelArray();
+                    const deviceSection = settings.options.sections.find(s => s.id === "device");
+                    if (deviceSection) {
+                        const deviceModelField = deviceSection.form.groups
+                            .flatMap(g => g.fields)
+                            .find(f => f.key === "deviceModel");
+                        if (deviceModelField) {
+                            deviceModelField.options = getRokuModelArray();
+                        }
+                    }
                 }
             }
         }
