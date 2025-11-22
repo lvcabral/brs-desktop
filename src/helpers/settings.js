@@ -118,6 +118,10 @@ export function getSettings(window) {
                 indentationSize: 4,
                 fontSize: 14,
             },
+            deepLinking: {
+                sendInput: [],
+                inputMap: {},
+            },
         },
         browserWindowOverrides: {
             title: "Settings",
@@ -229,6 +233,52 @@ export function getSettings(window) {
                 },
             },
             {
+                id: "editor",
+                label: "Code Editor",
+                icon: __dirname + "/images/svg/coding.svg",
+                form: {
+                    groups: [
+                        {
+                            label: "Code Editor Settings",
+                            fields: [
+                                {
+                                    label: "Indentation Type",
+                                    key: "indentationType",
+                                    type: "radio",
+                                    options: [
+                                        {
+                                            label: "Spaces",
+                                            value: "spaces",
+                                        },
+                                        {
+                                            label: "Tabs",
+                                            value: "tabs",
+                                        },
+                                    ],
+                                    help: "Choose whether to use spaces or tabs for indentation in the code editor",
+                                },
+                                {
+                                    label: "Indentation Size",
+                                    key: "indentationSize",
+                                    type: "slider",
+                                    min: 2,
+                                    max: 8,
+                                    help: "Set the number of spaces per indentation level",
+                                },
+                                {
+                                    label: "Font Size",
+                                    key: "fontSize",
+                                    type: "slider",
+                                    min: 10,
+                                    max: 24,
+                                    help: "Set the font size for the code editor",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+            {
                 id: "services",
                 label: "Services",
                 icon: "app-terminal",
@@ -292,7 +342,7 @@ export function getSettings(window) {
             {
                 id: "device",
                 label: "Device",
-                icon: __dirname + "/images/roku-box.svg",
+                icon: __dirname + "/images/svg/roku-box.svg",
                 form: {
                     groups: [
                         {
@@ -337,7 +387,7 @@ export function getSettings(window) {
             {
                 id: "remote",
                 label: "Control",
-                icon: __dirname + "/images/roku-remote.svg",
+                icon: __dirname + "/images/svg/roku-remote.svg",
                 form: {
                     groups: [
                         {
@@ -652,7 +702,7 @@ export function getSettings(window) {
             {
                 id: "peerRoku",
                 label: "Peer Roku",
-                icon: __dirname + "/images/roku-logo.svg",
+                icon: __dirname + "/images/svg/roku-logo.svg",
                 form: {
                     groups: [
                         {
@@ -705,45 +755,33 @@ export function getSettings(window) {
                 },
             },
             {
-                id: "editor",
-                label: "Code Editor",
-                icon: __dirname + "/images/coding.svg",
+                id: "deepLinking",
+                label: "Deep Linking",
+                icon: __dirname + "/images/svg/deep-link.svg",
                 form: {
                     groups: [
                         {
-                            label: "Code Editor Settings",
+                            label: "Deep Linking",
                             fields: [
                                 {
-                                    label: "Indentation Type",
-                                    key: "indentationType",
-                                    type: "radio",
+                                    key: "sendInput",
+                                    type: "checkbox",
                                     options: [
                                         {
-                                            label: "Spaces",
-                                            value: "spaces",
-                                        },
-                                        {
-                                            label: "Tabs",
-                                            value: "tabs",
+                                            label: "Send Deep Linking input parameters when executing an app",
+                                            value: "enabled",
                                         },
                                     ],
-                                    help: "Choose whether to use spaces or tabs for indentation in the code editor",
+                                    help: "If enabled, the simulator will send the input parameters listed below, as deep links, when an app is launched",
                                 },
                                 {
-                                    label: "Indentation Size",
-                                    key: "indentationSize",
-                                    type: "slider",
-                                    min: 2,
-                                    max: 8,
-                                    help: "Set the number of spaces per indentation level",
-                                },
-                                {
-                                    label: "Font Size",
-                                    key: "fontSize",
-                                    type: "slider",
-                                    min: 10,
-                                    max: 24,
-                                    help: "Set the font size for the code editor",
+                                    label: "Input Parameters Map",
+                                    key: "inputMap",
+                                    type: "map",
+                                    keyLabel: "Key",
+                                    valueLabel: "Value",
+                                    addButtonLabel: "Add Parameter",
+                                    help: "Key-value pairs for deep linking input parameters",
                                 },
                             ],
                         },
@@ -1012,8 +1050,16 @@ export function setThemeSource(userTheme, notifyApp) {
 }
 
 export function getSimulatorOption(key) {
-    let options = settings.value("simulator.options");
-    return options ? options.includes(key) : false;
+    const options = settings.value("simulator.options");
+    return options?.includes(key) ?? false;
+}
+
+export function getDeepLink() {
+    const sendInput = settings.value("deepLinking.sendInput");
+    if (!sendInput?.includes("enabled")) {
+        return {};
+    }
+    return settings.value("deepLinking.inputMap") || {};
 }
 
 export function setSimulatorOption(key, enable, menuId) {
@@ -1032,8 +1078,8 @@ export function setSimulatorOption(key, enable, menuId) {
 }
 
 export function getDisplayOption(key) {
-    let options = settings.value("display.options");
-    return options ? options.includes(key) : false;
+    const options = settings.value("display.options");
+    return options?.includes(key) ?? false;
 }
 
 export function setDisplayCheckboxOption(key, enable, menuId) {
@@ -1137,8 +1183,15 @@ ipcMain.on("deviceData", (_, deviceData) => {
             if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
                 appDeviceInfo[key] = deviceData[key];
                 if (key === "models" && appDeviceInfo.models?.size) {
-                    settings.options.sections[2].form.groups[0].fields[0].options =
-                        getRokuModelArray();
+                    const deviceSection = settings.options.sections.find((s) => s.id === "device");
+                    if (deviceSection) {
+                        const deviceModelField = deviceSection.form.groups
+                            .flatMap((g) => g.fields)
+                            .find((f) => f.key === "deviceModel");
+                        if (deviceModelField) {
+                            deviceModelField.options = getRokuModelArray();
+                        }
+                    }
                 }
             }
         }

@@ -11,11 +11,16 @@
     --icon-hover-color: #c090fa;
     --icon-background-color: #6a3aa5;
     --control-background-color: #3d1b56;
-    --control-border-color: #3d1b56;
+    --control-border-color: #6a3aa5;
     --slider-thumb-color: #c090fa;
     --slider-thumb-focus-color: #dac7ea;
     --slider-track-color: rgba(255, 255, 255, 0.1);
     --slider-track-focus-color: rgba(255, 255, 255, 0.2);
+    --button-color: #dac7ea;
+    --button-background-color: #6a3aa5;
+    --button-disabled-color: rgba(255, 255, 255, 0.2);
+    --button-disabled-background-color: #251135;
+
 }
 
 [data-theme^="dark"],
@@ -36,6 +41,10 @@
     --slider-thumb-focus-color: #46a6ff;
     --slider-track-color: rgba(255, 255, 255, 0.1);
     --slider-track-focus-color: rgba(255, 255, 255, 0.2);
+    --button-color: #e0e0e0;
+    --button-background-color: #006dd9;
+    --button-disabled-color: #7f7f7f;
+    --button-disabled-background-color: #404040;
 }
 
 [data-theme^="light"],
@@ -57,6 +66,10 @@
     --slider-thumb-focus-color: #46a6ff;
     --slider-track-color: rgba(0, 0, 0, 0.1);
     --slider-track-focus-color: rgba(0, 0, 0, 0.2);
+    --button-color: #e0e0e0;
+    --button-background-color: #006dd9;
+    --button-disabled-color: #777777;
+    --button-disabled-background-color: #cccccc;
 }
 
 #titlebar {
@@ -146,8 +159,8 @@
 }
 
 @media (-webkit-device-pixel-ratio: 1.5),
-(-webkit-device-pixel-ratio: 2),
-(-webkit-device-pixel-ratio: 3) {
+    (-webkit-device-pixel-ratio: 2),
+    (-webkit-device-pixel-ratio: 3) {
     #window-controls .icon {
         width: 10px;
         height: 10px;
@@ -204,26 +217,26 @@ body {
     border-width: 0 3px 3px 0;
 }
 
-.field-checkbox .checkbox-option input:focus~.check-square {
+.field-checkbox .checkbox-option input:focus ~ .check-square {
     border-color: var(--icon-active-color);
     border-width: 2px;
 }
 
-.field-checkbox .checkbox-option input:checked:focus~.check-square {
+.field-checkbox .checkbox-option input:checked:focus ~ .check-square {
     border-color: var(--icon-active-color);
 }
 
-.field-checkbox .checkbox-option input:checked~.check-square {
+.field-checkbox .checkbox-option input:checked ~ .check-square {
     background-color: var(--icon-active-color);
     border-color: var(--icon-active-color);
 }
 
-.field-checkbox .checkbox-option:hover input:checked~.check-square {
+.field-checkbox .checkbox-option:hover input:checked ~ .check-square {
     background-color: var(--icon-hover-color);
     border-color: var(--icon-hover-color);
 }
 
-.field-radio .radio-option:hover input~.check-circle {
+.field-radio .radio-option:hover input ~ .check-circle {
     background-color: var(--sidebar-hover-color);
 }
 
@@ -235,12 +248,12 @@ body {
     border: 2px solid var(--control-background-color);
 }
 
-.field-radio .radio-option input:checked~.check-circle {
+.field-radio .radio-option input:checked ~ .check-circle {
     background-color: var(--icon-active-color);
     border-color: var(--icon-active-color);
 }
 
-.field-radio .radio-option:hover input:checked~.check-circle {
+.field-radio .radio-option:hover input:checked ~ .check-circle {
     background-color: var(--icon-hover-color);
     border-color: var(--icon-hover-color);
 }
@@ -289,4 +302,77 @@ body {
 
 .group .field .help {
     color: var(--help-color);
+}
+
+.field-map {
+    .ep-map-list-container {
+        background-color: var(--control-background-color);
+        border: 1px solid var(--control-border-color);
+    }
+
+    .ep-map-empty {
+        color: var(--help-color);
+    }
+
+    .ep-map-item {
+        border-bottom-color: var(--control-border-color);
+
+        &:hover {
+            background-color: var(--slider-track-focus-color);
+        }
+    }
+
+    .ep-map-item-key {
+        color: var(--main-color);
+    }
+
+    .ep-map-item-separator {
+        color: var(--help-color);
+    }
+
+    .ep-map-item-value {
+        color: var(--title-color);
+    }
+
+    .ep-map-item-delete {
+        color: var(--main-color);
+
+        &:hover {
+            color: var(--icon-active-color);
+        }
+    }
+
+    .ep-map-input-group {
+        .ep-map-input {
+            color: var(--main-color);
+            background-color: var(--control-background-color);
+            border: 1px solid var(--control-border-color);
+        }
+        .ep-map-input::placeholder {
+            color: var(--help-color);
+        }
+
+        .ep-map-input:focus {
+            border-color: var(--icon-active-color);
+            border-width: 2px;
+        }
+    }
+
+    .ep-map-add-button {
+        color: var(--button-color);
+        background-color: var(--button-background-color);
+        border-color: var(--control-border-color);
+        &:active {
+            color: var(--button-color);
+            background-color: var(--button-background-color);
+            border-color: var(--control-border-color);
+        }
+
+        &:disabled {
+            color: var(--button-disabled-color);
+            background-color: var(--button-disabled-background-color);
+            border-color: var(--control-border-color);
+            opacity: 0.7;
+        }
+    }
 }

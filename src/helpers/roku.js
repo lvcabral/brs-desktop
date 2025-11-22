@@ -54,7 +54,7 @@ export function resetPeerRoku() {
 }
 
 // Function to run app on peer Roku
-export async function runOnPeerRoku(fileData) {
+export async function runOnPeerRoku(fileData, deepLink) {
     const window = BrowserWindow.fromId(1);
     const device = getPeerRoku();
     sendECPKeys = false;
@@ -87,10 +87,27 @@ export async function runOnPeerRoku(fileData) {
                         message = `Error installing app: ${err} ${body}`;
                         isError = true;
                     } else if (response?.status === 200) {
-                        message = `App installed on peer device ${device.friendlyName || device.ip} with success!`;
-                        if (body.includes("Identical to previous version")) {
-                            message = `Identical to previous version, starting "dev" app...`;
-                            await postEcpRequest(device, "/launch/dev");
+                        message = `App installed on peer device ${
+                            device.friendlyName || device.ip
+                        } with success!`;
+                        let queryString = "";
+                        if (deepLink instanceof Map && deepLink.size > 0) {
+                            queryString = "?";
+                            for (const [key, value] of deepLink.entries()) {
+                                queryString += `${encodeURIComponent(key)}=${encodeURIComponent(
+                                    value
+                                )}&`;
+                            }
+                            queryString = queryString.slice(0, -1); // Remove trailing '&'
+                            // Return to home screen before launching with deep link
+                            await postEcpRequest(device, "/keypress/home");
+                        }
+                        if (body.includes("Identical to previous version") || queryString !== "") {
+                            message =
+                                queryString === ""
+                                    ? `Identical to previous version, starting "dev" app...`
+                                    : `Launching "dev" app with deep link parameters...`;
+                            await postEcpRequest(device, `/launch/dev${queryString}`);
                         }
                         sendECPKeys = device.syncControl;
                     } else {

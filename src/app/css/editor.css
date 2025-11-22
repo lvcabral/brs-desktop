@@ -87,7 +87,7 @@
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 #titlebar {
@@ -542,7 +542,7 @@ input::before {
 }
 
 :root {
-    --arrow-icon: url(../images/caret_down.svg);
+    --arrow-icon: url(../images/svg/caret_down.svg);
 }
 
 /* <select> styles */
