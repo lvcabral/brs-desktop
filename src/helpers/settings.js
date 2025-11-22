@@ -118,6 +118,10 @@ export function getSettings(window) {
                 indentationSize: 4,
                 fontSize: 14,
             },
+            deepLinking: {
+                sendInput: [],
+                inputMap: {},
+            },
         },
         browserWindowOverrides: {
             title: "Settings",
@@ -1046,8 +1050,16 @@ export function setThemeSource(userTheme, notifyApp) {
 }
 
 export function getSimulatorOption(key) {
-    let options = settings.value("simulator.options");
-    return options ? options.includes(key) : false;
+    const options = settings.value("simulator.options");
+    return options?.includes(key) ?? false;
+}
+
+export function getDeepLink() {
+    const sendInput = settings.value("deepLinking.sendInput");
+    if (!sendInput?.includes("enabled")) {
+        return {};
+    }
+    return settings.value("deepLinking.inputMap") || {};
 }
 
 export function setSimulatorOption(key, enable, menuId) {
@@ -1066,8 +1078,8 @@ export function setSimulatorOption(key, enable, menuId) {
 }
 
 export function getDisplayOption(key) {
-    let options = settings.value("display.options");
-    return options ? options.includes(key) : false;
+    const options = settings.value("display.options");
+    return options?.includes(key) ?? false;
 }
 
 export function setDisplayCheckboxOption(key, enable, menuId) {

@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getAudioMuted, getSimulatorOption, getDisplayOption } from "./settings";
+import { getAudioMuted, getSimulatorOption, getDisplayOption, getDeepLink } from "./settings";
 import { runOnPeerRoku, resetPeerRoku } from "./roku";
 import { appFocused } from "./window";
 import { isValidUrl } from "./util";
@@ -143,6 +143,10 @@ function executeFile(window, fileData, filePath, input) {
     if (!input.has("source")) {
         input.set("source", "desktop_app");
     }
+    const deepLink = getDeepLink();
+    for (const [key, value] of Object.entries(deepLink)) {
+        input.set(key, value);
+    }
     window.webContents.send(
         "executeFile",
         filePath,
@@ -154,9 +158,9 @@ function executeFile(window, fileData, filePath, input) {
     );
     // Send to the Roku peer
     if (fileExt === ".brs") {
-        runOnPeerRoku(packageBrs(fileData));
+        runOnPeerRoku(packageBrs(fileData), input);
     } else if (fileExt !== ".bpk" && filePath !== BRS_HOME_APP_PATH) {
-        runOnPeerRoku(fileData);
+        runOnPeerRoku(fileData, input);
     }
 }
 

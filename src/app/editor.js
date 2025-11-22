@@ -246,9 +246,13 @@ function updateTerminal(text, level = "print") {
 }
 
 function hideEditor(toggle) {
-    editorContainer.classList.toggle("hidden", toggle);
+    codeColumn.classList.toggle("hidden", toggle);
+    layoutSeparator.classList.toggle("hidden", toggle);
     document.body.classList.toggle("code-hidden", toggle);
-    onResize();
+    // Only trigger resize when showing the editor, not when hiding it
+    if (!toggle) {
+        onResize();
+    }
 }
 
 function scrollToBottom() {
