@@ -292,7 +292,7 @@ export function getSettings(window) {
             {
                 id: "device",
                 label: "Device",
-                icon: "roku-box",
+                icon: __dirname + "/images/roku-box.svg",
                 form: {
                     groups: [
                         {
@@ -337,7 +337,7 @@ export function getSettings(window) {
             {
                 id: "remote",
                 label: "Control",
-                icon: "roku-remote",
+                icon: __dirname + "/images/roku-remote.svg",
                 form: {
                     groups: [
                         {
@@ -652,7 +652,7 @@ export function getSettings(window) {
             {
                 id: "peerRoku",
                 label: "Peer Roku",
-                icon: "roku-logo",
+                icon: __dirname + "/images/roku-logo.svg",
                 form: {
                     groups: [
                         {
@@ -706,8 +706,8 @@ export function getSettings(window) {
             },
             {
                 id: "editor",
-                label: "Editor",
-                icon: "pencil",
+                label: "Code Editor",
+                icon: __dirname + "/images/coding.svg",
                 form: {
                     groups: [
                         {
