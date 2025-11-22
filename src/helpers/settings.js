@@ -229,6 +229,52 @@ export function getSettings(window) {
                 },
             },
             {
+                id: "editor",
+                label: "Code Editor",
+                icon: __dirname + "/images/svg/coding.svg",
+                form: {
+                    groups: [
+                        {
+                            label: "Code Editor Settings",
+                            fields: [
+                                {
+                                    label: "Indentation Type",
+                                    key: "indentationType",
+                                    type: "radio",
+                                    options: [
+                                        {
+                                            label: "Spaces",
+                                            value: "spaces",
+                                        },
+                                        {
+                                            label: "Tabs",
+                                            value: "tabs",
+                                        },
+                                    ],
+                                    help: "Choose whether to use spaces or tabs for indentation in the code editor",
+                                },
+                                {
+                                    label: "Indentation Size",
+                                    key: "indentationSize",
+                                    type: "slider",
+                                    min: 2,
+                                    max: 8,
+                                    help: "Set the number of spaces per indentation level",
+                                },
+                                {
+                                    label: "Font Size",
+                                    key: "fontSize",
+                                    type: "slider",
+                                    min: 10,
+                                    max: 24,
+                                    help: "Set the font size for the code editor",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+            {
                 id: "services",
                 label: "Services",
                 icon: "app-terminal",
@@ -705,45 +751,33 @@ export function getSettings(window) {
                 },
             },
             {
-                id: "editor",
-                label: "Code Editor",
-                icon: __dirname + "/images/svg/coding.svg",
+                id: "deepLinking",
+                label: "Deep Linking",
+                icon: __dirname + "/images/svg/deep-link.svg",
                 form: {
                     groups: [
                         {
-                            label: "Code Editor Settings",
+                            label: "Deep Linking",
                             fields: [
                                 {
-                                    label: "Indentation Type",
-                                    key: "indentationType",
-                                    type: "radio",
+                                    key: "sendInput",
+                                    type: "checkbox",
                                     options: [
                                         {
-                                            label: "Spaces",
-                                            value: "spaces",
-                                        },
-                                        {
-                                            label: "Tabs",
-                                            value: "tabs",
+                                            label: "Send Deep Linking input parameters when executing an app",
+                                            value: "enabled",
                                         },
                                     ],
-                                    help: "Choose whether to use spaces or tabs for indentation in the code editor",
+                                    help: "If enabled, the simulator will send the input parameters listed below, as deep links, when an app is launched",
                                 },
                                 {
-                                    label: "Indentation Size",
-                                    key: "indentationSize",
-                                    type: "slider",
-                                    min: 2,
-                                    max: 8,
-                                    help: "Set the number of spaces per indentation level",
-                                },
-                                {
-                                    label: "Font Size",
-                                    key: "fontSize",
-                                    type: "slider",
-                                    min: 10,
-                                    max: 24,
-                                    help: "Set the font size for the code editor",
+                                    label: "Input Parameters Map",
+                                    key: "inputMap",
+                                    type: "map",
+                                    keyLabel: "Key",
+                                    valueLabel: "Value",
+                                    addButtonLabel: "Add Parameter",
+                                    help: "Key-value pairs for deep linking input parameters",
                                 },
                             ],
                         },
@@ -1137,11 +1171,11 @@ ipcMain.on("deviceData", (_, deviceData) => {
             if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
                 appDeviceInfo[key] = deviceData[key];
                 if (key === "models" && appDeviceInfo.models?.size) {
-                    const deviceSection = settings.options.sections.find(s => s.id === "device");
+                    const deviceSection = settings.options.sections.find((s) => s.id === "device");
                     if (deviceSection) {
                         const deviceModelField = deviceSection.form.groups
-                            .flatMap(g => g.fields)
-                            .find(f => f.key === "deviceModel");
+                            .flatMap((g) => g.fields)
+                            .find((f) => f.key === "deviceModel");
                         if (deviceModelField) {
                             deviceModelField.options = getRokuModelArray();
                         }
