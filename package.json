@@ -90,7 +90,7 @@
         "json-url": "^3.1.0",
         "luxon": "^2.0.1",
         "minimist": "^1.2.5",
-        "monaco-editor": "^0.45.0",
+        "monaco-editor": "^0.54.0",
         "mousetrap": "^1.6.5",
         "nanoid": "^5.0.9",
         "network": "^0.7.0",

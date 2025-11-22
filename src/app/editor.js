@@ -787,11 +787,11 @@ function onMouseMove(e) {
     if (layoutContainer && codeColumn && consoleColumn) {
         const { x, width } = layoutContainer.getBoundingClientRect();
         const separatorPosition = width - (e.clientX - x);
-        const codeColumnWidth = `${width - separatorPosition}px`;
+        const codeColumnWidth = width - separatorPosition;
+        const consoleColumnWidth = separatorPosition;
 
-        const rightRect = consoleColumn.getBoundingClientRect();
-        codeColumn.style.width = codeColumnWidth;
-        consoleColumn.style.width = rightRect.width.toString();
+        codeColumn.style.width = `${codeColumnWidth}px`;
+        consoleColumn.style.width = `${consoleColumnWidth}px`;
         // Force Monaco editor to recalculate layout during drag
         setTimeout(() => {
             editorManager.editor.layout();
@@ -802,6 +802,11 @@ function onMouseMove(e) {
 function onMouseUp() {
     if (isResizing) {
         scrollToBottom();
+        // Clear inline styles if in narrow mode
+        if (globalThis.innerWidth < 1150) {
+            codeColumn.style.width = "";
+            consoleColumn.style.width = "";
+        }
     }
     isResizing = false;
 }
@@ -813,16 +818,23 @@ function onMouseDown(event) {
 }
 
 function onResize() {
+    // Clear inline styles in narrow mode to let CSS take over
+    if (globalThis.innerWidth < 1150) {
+        if (codeColumn) {
+            codeColumn.style.width = "";
+            codeColumn.style.height = "";
+        }
+        if (consoleColumn) {
+            consoleColumn.style.width = "";
+            consoleColumn.style.height = "";
+        }
+    }
+
     if (editorManager && editorManager.editor) {
         // Use setTimeout to ensure DOM has updated before layout recalculation
         setTimeout(() => {
-            if (globalThis.innerWidth >= 1150 || editorContainer.classList.contains("hidden")) {
-                editorManager.editor.layout();
-            } else {
-                codeColumn.style.width = "100%";
-                editorManager.editor.layout();
-            }
-        }, 0);
+            editorManager.editor.layout();
+        }, 150);
     }
     scrollToBottom();
 }
