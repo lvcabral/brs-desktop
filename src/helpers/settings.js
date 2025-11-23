@@ -84,6 +84,9 @@ export function getSettings(window) {
                 keyInfo: "Insert",
                 keyReplay: "Backspace",
                 keyPlayPause: "End",
+                keyRev: "PageUp",
+                keyFwd: "PageDown",
+                keyMute: "F10"
             },
             audio: {
                 maxSimulStreams: globalThis.sharedObject.deviceInfo.maxSimulStreams,
@@ -261,17 +264,29 @@ export function getSettings(window) {
                                     label: "Indentation Size",
                                     key: "indentationSize",
                                     type: "slider",
+                                    style: { width: "50%" },
                                     min: 2,
                                     max: 8,
                                     help: "Set the number of spaces per indentation level",
                                 },
                                 {
+                                    key: "placeholder1",
+                                    type: "message",
+                                    style: { width: "40%" },
+                                },
+                                {
                                     label: "Font Size",
                                     key: "fontSize",
                                     type: "slider",
+                                    style: { width: "50%" },
                                     min: 10,
                                     max: 24,
                                     help: "Set the font size for the code editor",
+                                },
+                                {
+                                    key: "placeholder2",
+                                    type: "message",
+                                    style: { width: "40%" },
                                 },
                             ],
                         },
@@ -309,6 +324,11 @@ export function getSettings(window) {
                                     key: "password",
                                     type: "text",
                                     inputType: "password",
+                                },
+                                {
+                                    key: "placeholder1",
+                                    type: "message",
+                                    style: { width: "20%" },
                                 },
                                 {
                                     label: "External Control Protocol (ECP)",
@@ -397,6 +417,7 @@ export function getSettings(window) {
                                     label: "Button: Back",
                                     key: "keyBack",
                                     type: "accelerator",
+                                    style: { width: "40%" },
                                     help: "Select a keyboard shortcut for the `back` button.",
                                     modifierRequired: false,
                                 },
@@ -404,25 +425,50 @@ export function getSettings(window) {
                                     label: "Button: Home",
                                     key: "keyHome",
                                     type: "accelerator",
+                                    style: { width: "40%" },
                                     help: "Select a keyboard shortcut for the `home` button.",
-                                },
-                                {
-                                    label: "Button: Info",
-                                    key: "keyInfo",
-                                    type: "accelerator",
-                                    help: "Select a keyboard shortcut for the `info` (*) button.",
                                 },
                                 {
                                     label: "Button: Instant Replay",
                                     key: "keyReplay",
                                     type: "accelerator",
-                                    help: "Select a keyboard shortcut for the `instant replay` button.",
+                                    style: { width: "40%" },
+                                    help: "Select a keyboard shortcut for the `replay` button.",
+                                },
+                                {
+                                    label: "Button: Info",
+                                    key: "keyInfo",
+                                    type: "accelerator",
+                                    style: { width: "40%" },
+                                    help: "Select a keyboard shortcut for the `(*)` button.",
+                                },
+                                {
+                                    label: "Button: Rewind",
+                                    key: "keyRev",
+                                    type: "accelerator",
+                                    style: { width: "40%" },
+                                    help: "Select a keyboard shortcut for the `rewind` button.",
+                                },
+                                {
+                                    label: "Button: Forward",
+                                    key: "keyFwd",
+                                    type: "accelerator",
+                                    style: { width: "40%" },
+                                    help: "Select a keyboard shortcut for the `forward` button.",
                                 },
                                 {
                                     label: "Button: Play/Pause",
                                     key: "keyPlayPause",
                                     type: "accelerator",
-                                    help: "Select a keyboard shortcut for the `play/pause` button.",
+                                    style: { width: "40%" },
+                                    help: "Select a keyboard shortcut for the `play` button.",
+                                },
+                                {
+                                    label: "Button: Mute",
+                                    key: "keyMute",
+                                    type: "accelerator",
+                                    style: { width: "40%" },
+                                    help: "Select a keyboard shortcut for the `mute` button.",
                                 },
                             ],
                         },
@@ -531,19 +577,45 @@ export function getSettings(window) {
                                     label: "Maximum Simultaneous Streams",
                                     key: "maxSimulStreams",
                                     type: "slider",
+                                    style: { width: "60%" },
                                     min: 1,
                                     max: 2,
-                                    help: "Maximum number of audio streams that can be mixed together and played simultaneously",
+                                    help: "Maximum number of audio streams that can be mixed together",
+                                },
+                                {
+                                    key: "placeholder1",
+                                    type: "message",
+                                    style: { width: "30%" },
                                 },
                                 {
                                     label: "Sound Effects Volume",
                                     key: "audioVolume",
                                     type: "slider",
+                                    style: { width: "60%" },
                                     min: 0,
                                     max: 100,
                                     help: "Volume level of the app sound effects",
                                 },
                                 {
+                                    key: "placeholder2",
+                                    type: "message",
+                                    style: { width: "30%" },
+                                },
+                                {
+                                    label: "Audio Preferred Language",
+                                    key: "audioLanguage",
+                                    type: "dropdown",
+                                    style: { width: "50%" },
+                                    options: getTracksLanguageArray(),
+                                    help: "Sets the preferred language for audio tracks in video playback",
+                                },
+                                {
+                                    key: "placeholder3",
+                                    type: "message",
+                                    style: { width: "30%" },
+                                },
+                                {
+                                    label: "Mute Audio",
                                     key: "muted",
                                     type: "checkbox",
                                     options: [
@@ -552,13 +624,6 @@ export function getSettings(window) {
                                             value: true,
                                         },
                                     ],
-                                },
-                                {
-                                    label: "Audio Preferred Language",
-                                    key: "audioLanguage",
-                                    type: "dropdown",
-                                    options: getTracksLanguageArray(),
-                                    help: "Sets the preferred language for audio tracks in video playback",
                                 },
                             ],
                         },
@@ -578,8 +643,39 @@ export function getSettings(window) {
                                     label: "Language",
                                     key: "locale",
                                     type: "dropdown",
+                                    style: { width: "40%" },
                                     options: getLocaleIdArray(),
                                     help: "Configure the current locale, this setting only affects BrightScript apps not the simulator UI",
+                                },
+                                {
+                                    key: "placeholder1",
+                                    type: "message",
+                                    style: { width: "30%" },
+                                },
+                                {
+                                    label: "Device Country",
+                                    key: "countryCode",
+                                    type: "dropdown",
+                                    style: { width: "40%" },
+                                    options: getCountryArray(),
+                                    help: "Configure the device country (app store), this is returned by ifDeviceInfo.GetCountryCode()",
+                                },
+                                {
+                                    key: "placeholder2",
+                                    type: "message",
+                                    style: { width: "30%" },
+                                },
+                                {
+                                    label: "Time Zone",
+                                    key: "timeZone",
+                                    style: { width: "40%" },
+                                    type: "dropdown",
+                                    options: getTimezoneArray(),
+                                },
+                                {
+                                    key: "placeholder3",
+                                    type: "message",
+                                    style: { width: "30%" },
                                 },
                                 {
                                     label: "Clock Format",
@@ -595,19 +691,6 @@ export function getSettings(window) {
                                             label: "24-hour format",
                                         },
                                     ],
-                                },
-                                {
-                                    label: "Device Country",
-                                    key: "countryCode",
-                                    type: "dropdown",
-                                    options: getCountryArray(),
-                                    help: "Configure the device country (app store), this is returned by ifDeviceInfo.GetCountryCode()",
-                                },
-                                {
-                                    label: "Time Zone",
-                                    key: "timeZone",
-                                    type: "dropdown",
-                                    options: getTimezoneArray(),
                                 },
                             ],
                         },
@@ -625,7 +708,8 @@ export function getSettings(window) {
                                 {
                                     label: "Captions Mode",
                                     key: "captionMode",
-                                    type: "dropdown",
+                                    type: "radio",
+                                    style: { width: "25%" },
                                     options: [
                                         {
                                             value: "Off",
@@ -644,6 +728,14 @@ export function getSettings(window) {
                                             label: "On Mute",
                                         },
                                     ],
+                                },
+                                {
+                                    label: "Preferred Language",
+                                    key: "captionLanguage",
+                                    type: "dropdown",
+                                    style: { width: "70%" },
+                                    options: getTracksLanguageArray(),
+                                    help: "Sets the preferred language for closed caption tracks in video playback",
                                 },
                                 {
                                     label: "Text Style",
@@ -667,32 +759,29 @@ export function getSettings(window) {
                                     label: "Text Color",
                                     key: "textColor",
                                     type: "dropdown",
+                                    style: { width: "40%" },
                                     options: getCaptionColorArray(),
                                 },
                                 {
                                     label: "Text Opacity",
                                     key: "textOpacity",
                                     type: "dropdown",
+                                    style: { width: "40%" },
                                     options: getTextOpacityArray(),
                                 },
                                 {
                                     label: "Background Color",
                                     key: "backgroundColor",
                                     type: "dropdown",
+                                    style: { width: "40%" },
                                     options: getCaptionColorArray(),
                                 },
                                 {
                                     label: "Background Opacity",
                                     key: "backgroundOpacity",
                                     type: "dropdown",
+                                    style: { width: "40%" },
                                     options: getBackgroundOpacityArray(),
-                                },
-                                {
-                                    label: "Preferred Language",
-                                    key: "captionLanguage",
-                                    type: "dropdown",
-                                    options: getTracksLanguageArray(),
-                                    help: "Sets the preferred language for closed caption tracks in video playback",
                                 },
                             ],
                         },
@@ -723,6 +812,7 @@ export function getSettings(window) {
                                     label: "Roku Device",
                                     key: "ip",
                                     type: "dropdown",
+                                    style: { width: "100%" },
                                     options: getRokuDeviceOptions(),
                                     help: "Select a discovered Roku device or choose manual entry",
                                 },
@@ -730,13 +820,25 @@ export function getSettings(window) {
                                     label: "Manual IP Address",
                                     key: "manualIp",
                                     type: "text",
+                                    style: { width: "40%" },
                                     help: "Enter the IP address when Manual Entry is selected",
+                                },
+                                {
+                                    key: "placeholder1",
+                                    type: "message",
+                                    style: { width: "40%" },
                                 },
                                 {
                                     label: "Installer Password (default: rokudev)",
                                     key: "password",
                                     type: "text",
                                     inputType: "password",
+                                    style: { width: "40%" },
+                                },
+                                {
+                                    key: "placeholder2",
+                                    type: "message",
+                                    style: { width: "40%" },
                                 },
                                 {
                                     key: "syncControl",
@@ -860,6 +962,21 @@ export function setRemoteKeys(defaults, remote) {
         settings.value("remote.keyPlayPause", defaults.keyPlayPause);
     } else if (defaults.keyPlayPause !== remote.keyPlayPause) {
         customKeys.set(convertKey(remote.keyPlayPause), "play");
+    }
+    if (remote.keyRev === "") {
+        settings.value("remote.keyRev", defaults.keyRev);
+    } else if (defaults.keyRev !== remote.keyRev) {
+        customKeys.set(convertKey(remote.keyRev), "rev");
+    }
+    if (remote.keyFwd === "") {
+        settings.value("remote.keyFwd", defaults.keyFwd);
+    } else if (defaults.keyFwd !== remote.keyFwd) {
+        customKeys.set(convertKey(remote.keyFwd), "fwd");
+    }
+    if (remote.keyMute === "") {
+        settings.value("remote.keyMute", defaults.keyMute);
+    } else if (defaults.keyMute !== remote.keyMute) {
+        customKeys.set(convertKey(remote.keyMute), "volumemute");
     }
     if (customKeys.size > 0) {
         const window = BrowserWindow.fromId(1);
