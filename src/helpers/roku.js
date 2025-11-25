@@ -91,7 +91,7 @@ export async function runOnPeerRoku(fileData, deepLink) {
                             device.friendlyName || device.ip
                         } with success!`;
                         let queryString = "";
-                        if (deepLink instanceof Map && deepLink.size > 0) {
+                        if (deepLink instanceof Map && deepLink.size > 1) {
                             queryString = "?";
                             for (const [key, value] of deepLink.entries()) {
                                 queryString += `${encodeURIComponent(key)}=${encodeURIComponent(
