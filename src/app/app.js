@@ -75,7 +75,9 @@ async function main() {
     customKeys.set("Shift+ArrowLeft", "left");
     customKeys.set("Shift+ArrowUp", "up");
     customKeys.set("Shift+ArrowDown", "down");
-
+    // Add SceneGraph extension
+    customDeviceInfo.extensions = new Map([[brs.SupportedExtension.SceneGraph, "./brs-sg.js"]]);
+    // Initialize BRS Engine
     brs.subscribe("desktop", (event, data) => {
         if (event === "loaded") {
             if (!brsHomeMode) {
