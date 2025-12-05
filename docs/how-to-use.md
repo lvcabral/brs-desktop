@@ -53,7 +53,8 @@ This section will describe the options available on the application menu, please
 - Control Keyboard Reference - Opens the [remote control reference documentation](control-reference.md)
 - Release Notes - Opens the [CHANGELOG file](../CHANGELOG.md)
 - View License - Shows the [application license](../LICENSE)
-- About - Shows the about dialog box
+- Check for Updates - Checks if there is a new version of the application available
+- About - Shows the about dialog box - In macOS this option is under the Application menu
 
 ## Settings Screen
 

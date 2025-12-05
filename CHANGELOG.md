@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.1.0"></a>
+
+## [v2.1.0 - Deep Linking and Monaco Editor](https://github.com/lvcabral/brs-desktop/releases/tag/v2.1.0) - 05 Dec 2025
+
+### Release Changes
+
+* Use `Monaco` as code editor by [@lvcabral](https://github.com/lvcabral) in [#223](https://github.com/lvcabral/brs-desktop/pull/223)
+* Add Deep Linking support by [@lvcabral](https://github.com/lvcabral) in [#225](https://github.com/lvcabral/brs-desktop/pull/225)
+* Added new buttons to control customization (rew, ff, mute) and improved settings layout by [@lvcabral](https://github.com/lvcabral) in [#226](https://github.com/lvcabral/brs-desktop/pull/226)
+* Fixed Deep Linking with peer Roku devices by [@lvcabral](https://github.com/lvcabral) in [#227](https://github.com/lvcabral/brs-desktop/pull/227)
+* Upgraded `brs-engine` to v2.0.0 (with RSG extension) and other dependencies by [@lvcabral](https://github.com/lvcabral) in [#228](https://github.com/lvcabral/brs-desktop/pull/228)
+  * Refactored `brs-engine` to support extensions and moved **SceneGraph** code to a separate package
+    * Introduced an extension system with the `BrsExtension` interface and lifecycle hooks
+    * Moved SceneGraph code to the `src/extensions/scenegraph/` directory
+    * Several documentation updates to reflect the new extension model, including a new [Extensions](docs/extensions.md) document
+    * Refactored test file imports to use top-level `brs` exports
+    * Created the new `brs-scenegraph` package with independent build configuration
+  * Added support to field array types: `intarray`, `floatarray`, `boolarray`, `stringarray`, `colorarray` and `timearray`
+  * Fixed `Field.canAcceptValue` to properly validate array values
+  * Refactored `roSGNode` to remove `BrsIterable` and use `SetValue` instead of `Set`
+  * Raise type mismatch error when passing `Uninitialized` value to non-dynamic function parameters
+  * Prevented removing system fields and `setFields` to add fields
+  * Added `BrsEvent` abstract class and `BrsCollection` interface
+  * Prevent media nodes to send messages in task threads
+  * Fixed optional chaining with `roInvalid` when using methods
+  * Changed `Node.ts` to handle all default fields as system fields
+
+[Full Changelog][v2.1.0]
+
 <a name="v2.0.5"></a>
 
 ## [v2.0.5 - Peer Roku SSDP discovery](https://github.com/lvcabral/brs-desktop/releases/tag/v2.0.5) - 15 Nov 2025
@@ -514,6 +543,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.1.0]: https://github.com/lvcabral/brs-desktop/compare/v2.0.5...v2.1.0
 [v2.0.5]: https://github.com/lvcabral/brs-desktop/compare/v2.0.4...v2.0.5
 [v2.0.4]: https://github.com/lvcabral/brs-desktop/compare/v2.0.3...v2.0.4
 [v2.0.3]: https://github.com/lvcabral/brs-desktop/compare/v2.0.2...v2.0.3
