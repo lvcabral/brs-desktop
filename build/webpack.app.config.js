@@ -17,6 +17,7 @@ module.exports = (env) => {
   let libraryName = "brs";
   let fileApi = libraryName + ".api.js";
   let fileWrk = libraryName + ".worker.js";
+  let fileExt = libraryName + "-sg.js";
   return [
     merge(base(env), {
       entry: {
@@ -43,7 +44,8 @@ module.exports = (env) => {
             { context: "src/app", from: "assets/**", to: "../app" },
             { context: "node_modules/brs-engine/lib", from: fileApi, to: "lib" },
             { context: "node_modules/brs-engine/lib", from: fileWrk, to: "lib" },
-            { context: "node_modules/brs-engine/", from: "assets/**", to: "../app" },
+            { context: "node_modules/brs-scenegraph/lib", from: fileExt, to: "lib" },
+            { context: "node_modules/brs-scenegraph/", from: "assets/**", to: "../app" },
           ],
         }),
       ],

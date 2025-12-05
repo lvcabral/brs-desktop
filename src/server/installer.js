@@ -112,24 +112,24 @@ function handlePostRequest(req, res, window) {
     let done = "";
     let fileSize = 0;
     let fileError = null;
-    const busboy = new Busboy({ headers: req.headers });
+    const busboy = Busboy({ headers: req.headers });
 
-    busboy.on("file", (fieldname, file, filename) => {
-        handleFileUpload(file, filename, (size, error) => {
+    busboy.on("file", (fieldname, file, info) => {
+        handleFileUpload(file, info.filename, (size, error) => {
             fileSize = size;
             fileError = error;
             done = "file";
         });
     });
 
-    busboy.on("field", (fieldname, value) => {
+    busboy.on("field", (fieldname, value, info) => {
         const result = handleFormField(fieldname, value, window);
         if (result === "screenshot" || result === "delete") {
             done = result;
         }
     });
 
-    busboy.on("finish", () => {
+    busboy.on("close", () => {
         handlePostResponse(res, done, fileSize, fileError);
     });
 
