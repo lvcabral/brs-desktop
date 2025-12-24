@@ -1524,12 +1524,18 @@ function handleExternalVolumeSettings(window, externalVolume, skipPreUnmount = f
             sendUnmountExternalVolume(window, true);
             return;
         }
-        const zipBuffer = fs.readFileSync(zipPath);
         const label = path.basename(zipPath);
-        sendWhenReady(window, "mountExternalVolume", zipBuffer, label);
-        externalVolumeState.mounted = true;
-        externalVolumeState.zipPath = zipPath;
-        externalVolumeState.label = label;
+        fs.readFile(zipPath, (error, zipBuffer) => {
+            if (error) {
+                notifyExternalVolumeError(window, `Error loading external volume: ${error.message}`);
+                sendUnmountExternalVolume(window, true);
+                return;
+            }
+            sendWhenReady(window, "mountExternalVolume", zipBuffer, label);
+            externalVolumeState.mounted = true;
+            externalVolumeState.zipPath = zipPath;
+            externalVolumeState.label = label;
+        });
     } catch (error) {
         notifyExternalVolumeError(window, `Error loading external volume: ${error.message}`);
         sendUnmountExternalVolume(window, true);
