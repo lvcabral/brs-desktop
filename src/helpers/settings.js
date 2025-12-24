@@ -1564,7 +1564,6 @@ function sendWhenReady(window, channel, ...args) {
     }
     const sendAction = () => {
         if (!window.isDestroyed()) {
-            console.debug(`Sending action: ${channel}`);
             window.webContents.send(channel, ...args);
         }
     };
