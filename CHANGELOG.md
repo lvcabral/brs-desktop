@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.1.1"></a>
+
+## [v2.1.1 - External Storage and SG fixes](https://github.com/lvcabral/brs-desktop/releases/tag/v2.1.1) - 24 Dec 2025
+
+This release adds new settings tab to allow mounting and unmounting an external storage volume (`ext1:/`) in the BrightScript Simulator, allowing apps to access files to this volume as they would on a real Roku device. It also includes several fixes to the SceneGraph implementation, improving stability and compatibility with Roku applications.
+
+## Release Changes
+
+* Added support to mount/unmount an External volume (ext1:/) by [@lvcabral](https://github.com/lvcabral) in [#235](https://github.com/lvcabral/brs-desktop/pull/235)
+* Prevent duplicate `brs-engine` version on About dialog on reset by [@lvcabral](https://github.com/lvcabral) in [#236](https://github.com/lvcabral/brs-desktop/pull/236)
+* Upgraded `brs-engine` to v2.0.3 (with RSG extension), bringing the following changes
+  * (brs) Added support to dynamically mount/unmount `ext1:` volume
+  * (brs) Changed `roFileSystem.getVolumeInfo()` to properly return `ext1:/` information
+  * (rsg) Implemented support for `change` field in `Node`
+  * (rsg) Changed `Task` to update existing `Node` fields to preserve references
+  * (rsg) Fixed `Node` environment `hostNode` initialization
+  * (rsg) Fixed `Node.callFunc()` to not be case sensitive
+
+Full Changelog: [v2.1.1]
+
 <a name="v2.1.0"></a>
 
 ## [v2.1.0 - Deep Linking and Monaco Editor](https://github.com/lvcabral/brs-desktop/releases/tag/v2.1.0) - 05 Dec 2025
@@ -543,6 +563,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.1.1]: https://github.com/lvcabral/brs-desktop/compare/v2.1.0...v2.1.1
 [v2.1.0]: https://github.com/lvcabral/brs-desktop/compare/v2.0.5...v2.1.0
 [v2.0.5]: https://github.com/lvcabral/brs-desktop/compare/v2.0.4...v2.0.5
 [v2.0.4]: https://github.com/lvcabral/brs-desktop/compare/v2.0.3...v2.0.4
