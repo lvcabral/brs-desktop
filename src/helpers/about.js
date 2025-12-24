@@ -26,7 +26,10 @@ const aboutOptions = {
     show_close_button: !isMacOS || isBeforeBigSur ? false : "Close",
 };
 
+let versionAdded = false;
 ipcMain.on("engineVersion", (_, version) => {
+    if (versionAdded) return;
+    versionAdded = true;
     aboutOptions.use_version_info.unshift(["brs-engine", version]);
     aboutOptions.use_version_info.push([osName, osVersion]);
 });
