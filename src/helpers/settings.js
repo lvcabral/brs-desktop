@@ -9,6 +9,7 @@ import { app, BrowserWindow, nativeTheme, ipcMain } from "electron";
 import { DateTime } from "luxon";
 import path from "node:path";
 import http from "node:http";
+import fs from "node:fs";
 import ElectronPreferences from "@lvcabral/electron-preferences";
 import { Client as SSDPClient } from "@lvcabral/node-ssdp";
 import { setAspectRatio } from "./window";
@@ -39,6 +40,7 @@ let statusBarVisible = true;
 let ssdpClient;
 let localIps = [];
 let peerRokuOptionsTimer = null;
+const externalVolumeState = { mounted: false, zipPath: "", label: "" };
 
 export function getSettings(window) {
     if (settings !== undefined) {
@@ -86,7 +88,7 @@ export function getSettings(window) {
                 keyPlayPause: "End",
                 keyRev: "PageUp",
                 keyFwd: "PageDown",
-                keyMute: "F10"
+                keyMute: "F10",
             },
             audio: {
                 maxSimulStreams: globalThis.sharedObject.deviceInfo.maxSimulStreams,
@@ -120,6 +122,10 @@ export function getSettings(window) {
                 indentationType: "spaces",
                 indentationSize: 4,
                 fontSize: 14,
+            },
+            externalVolume: {
+                mount: [],
+                zipPath: "",
             },
             deepLinking: {
                 sendInput: [],
@@ -411,7 +417,7 @@ export function getSettings(window) {
                 form: {
                     groups: [
                         {
-                            label: "Remote Control Keyboard Mapping - Customize Keys",
+                            label: "Remote Control Keyboard Mapping",
                             fields: [
                                 {
                                     label: "Button: Back",
@@ -704,6 +710,7 @@ export function getSettings(window) {
                 form: {
                     groups: [
                         {
+                            label: "Closed Caption Settings",
                             fields: [
                                 {
                                     label: "Captions Mode",
@@ -890,6 +897,43 @@ export function getSettings(window) {
                     ],
                 },
             },
+            {
+                id: "externalVolume",
+                label: "External Volume",
+                icon: __dirname + "/images/svg/usb-stick.svg",
+                form: {
+                    groups: [
+                        {
+                            label: "External Storage - ext1:/",
+                            fields: [
+                                {
+                                    key: "mount",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Mount selected ZIP into ext1:/",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "Enable to simulate mounting an USB drive as ext1:/ volume inside the simulator.",
+                                },
+                                {
+                                    label: "External Volume ZIP",
+                                    key: "zipPath",
+                                    type: "file",
+                                    buttonLabel: "Choose ZIP File",
+                                    filters: [
+                                        { name: "ZIP Files", extensions: ["zip"] },
+                                        { name: "All Files", extensions: ["*"] },
+                                    ],
+                                    properties: ["openFile"],
+                                    help: "Choose the archive (max 32MB) to be mounted as the ext1:/ volume in the simulated device.",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
         ],
     });
     updatePeerRokuFieldOptions();
@@ -924,6 +968,9 @@ export function getSettings(window) {
             setDeviceInfo("captions", "captionMode", true);
             setDeviceInfo("captions", "captionLanguage", true);
             saveCaptionStyle();
+        }
+        if (preferences.externalVolume) {
+            handleExternalVolumeSettings(window, preferences.externalVolume);
         }
     });
     nativeTheme.on("updated", () => {
@@ -1319,6 +1366,16 @@ ipcMain.on("serialNumber", (_, serialNumber) => {
     globalThis.sharedObject.deviceInfo.serialNumber = serialNumber;
 });
 
+ipcMain.on("externalVolumeReady", (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (!window) {
+        return;
+    }
+    if (settings?.preferences?.externalVolume) {
+        handleExternalVolumeSettings(window, settings.preferences.externalVolume, true);
+    }
+});
+
 export function getModelName(model) {
     const modelName = globalThis.sharedObject.deviceInfo.models.get(model);
     return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
@@ -1444,6 +1501,77 @@ function isNumber(str) {
 
 function isLetter(str) {
     return str.length === 1 && str.match(/[a-z]/i);
+}
+
+function handleExternalVolumeSettings(window, externalVolume, skipPreUnmount = false) {
+    if (!externalVolume) {
+        return;
+    }
+    const shouldMount = externalVolume.mount?.includes("enabled") ?? false;
+    const zipPath = externalVolume.zipPath ?? "";
+    if (shouldMount && externalVolumeState.mounted && externalVolumeState.zipPath === zipPath) {
+        // Already mounted, no action needed
+        return;
+    } else if (!shouldMount || zipPath === "") {
+        sendUnmountExternalVolume(window);
+        return;
+    } else if (!skipPreUnmount && externalVolumeState.mounted) {
+        sendUnmountExternalVolume(window, true);
+    }
+    try {
+        if (!fs.existsSync(zipPath)) {
+            notifyExternalVolumeError(window, `External volume file not found: ${zipPath}`);
+            sendUnmountExternalVolume(window, true);
+            return;
+        }
+        const label = path.basename(zipPath);
+        fs.readFile(zipPath, (error, zipBuffer) => {
+            if (error) {
+                notifyExternalVolumeError(window, `Error loading external volume: ${error.message}`);
+                sendUnmountExternalVolume(window, true);
+                return;
+            }
+            sendWhenReady(window, "mountExternalVolume", zipBuffer, label);
+            externalVolumeState.mounted = true;
+            externalVolumeState.zipPath = zipPath;
+            externalVolumeState.label = label;
+        });
+    } catch (error) {
+        notifyExternalVolumeError(window, `Error loading external volume: ${error.message}`);
+        sendUnmountExternalVolume(window, true);
+    }
+}
+
+function sendUnmountExternalVolume(window, force = false) {
+    if (!force && !externalVolumeState.mounted) {
+        return;
+    }
+    sendWhenReady(window, "unmountExternalVolume");
+    externalVolumeState.mounted = false;
+}
+
+function notifyExternalVolumeError(window, message) {
+    if (window && !window.isDestroyed()) {
+        window.webContents.send("console", message, true);
+    } else {
+        console.warn(message);
+    }
+}
+
+function sendWhenReady(window, channel, ...args) {
+    if (!window || window.isDestroyed()) {
+        return;
+    }
+    const sendAction = () => {
+        if (!window.isDestroyed()) {
+            window.webContents.send(channel, ...args);
+        }
+    };
+    if (window.webContents.isLoadingMainFrame()) {
+        window.webContents.once("dom-ready", sendAction);
+    } else {
+        sendAction();
+    }
 }
 
 // Title Overlay Theme

@@ -119,6 +119,7 @@ contextBridge.exposeInMainWorld("api", {
             "reset",
             "openAppPackage",
             "closeSimulator",
+            "externalVolumeReady",
         ];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
@@ -152,6 +153,8 @@ contextBridge.exposeInMainWorld("api", {
             "openEditor",
             "editorUndo",
             "editorRedo",
+            "mountExternalVolume",
+            "unmountExternalVolume",
         ];
         if (validChannels.includes(channel)) {
             // Deliberately strip event as it includes `sender`
