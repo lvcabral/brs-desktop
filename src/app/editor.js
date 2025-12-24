@@ -228,7 +228,7 @@ function handleEngineEvents(event, data) {
 
 function updateTerminal(text, level = "print") {
     let output = text.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-    if (level === "print") {
+    if (level === "print" || level === "debug") {
         const promptLen = `${prompt}&gt; `.length;
         if (output.endsWith(`${prompt}&gt; `)) {
             output = output.slice(0, output.length - promptLen);

@@ -60,6 +60,8 @@ let currentApp = structuredClone(defaultAppInfo);
 let launchAppId = "";
 let debugMode = "continue";
 let editor = null;
+let externalVolumeMountedLabel = "";
+let externalVolumeReadySent = false;
 
 // Initialize BrightScript Engine when window loads
 globalThis.addEventListener("load", main, false);
@@ -141,6 +143,10 @@ async function main() {
         } else if (event === "version") {
             // brs-engine requests the version from the worker as the last step on initialize
             startupProcess();
+            if (!externalVolumeReadySent) {
+                externalVolumeReadySent = true;
+                api.send("externalVolumeReady");
+            }
         }
     });
 
@@ -311,6 +317,32 @@ api.receive("setAudioMute", function (mute) {
 api.receive("setPerfStats", function (enabled) {
     brs.enableStats(enabled);
 });
+api.receive("mountExternalVolume", function (zipData, label = "External volume") {
+    try {
+        const zipBuffer = getExternalVolumeArrayBuffer(zipData);
+        if (!zipBuffer) {
+            showToast("Error mounting external volume: Invalid data provided.", 5000, true);
+            return;
+        }
+        brs.mountExt(zipBuffer);
+        externalVolumeMountedLabel = label;
+        showToast(`${externalVolumeMountedLabel} mounted as ext1:/`, 4000);
+    } catch (error) {
+        showToast(`Error mounting external volume: ${error.message}`, 5000, true);
+    }
+});
+api.receive("unmountExternalVolume", function () {
+    try {
+        brs.umountExt();
+        if (externalVolumeMountedLabel) {
+            showToast(`${externalVolumeMountedLabel} unmounted from ext1:/`, 3000);
+        }
+    } catch (error) {
+        showToast(`Error unmounting external volume: ${error.message}`, 5000, true);
+    } finally {
+        externalVolumeMountedLabel = "";
+    }
+});
 api.receive("setHomeScreenMode", function (enabled) {
     brsHomeMode = enabled;
     if (brsHomeMode) {
@@ -396,6 +428,23 @@ display.onclick = function () {
 };
 
 // Helper functions
+
+function getExternalVolumeArrayBuffer(payload) {
+    if (!payload) {
+        return null;
+    }
+    if (payload instanceof ArrayBuffer) {
+        return payload;
+    }
+    if (ArrayBuffer.isView(payload)) {
+        const { buffer, byteOffset, byteLength } = payload;
+        return buffer.slice(byteOffset, byteOffset + byteLength);
+    }
+    if (payload?.type === "Buffer" && Array.isArray(payload.data)) {
+        return Uint8Array.from(payload.data).buffer;
+    }
+    return null;
+}
 
 function handleAppClosing(event, reason) {
     appTerminated();
