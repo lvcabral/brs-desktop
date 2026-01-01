@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.1.2"></a>
+
+## [v2.1.2 - Bug Fixes on BrightScript Engine](https://github.com/lvcabral/brs-desktop/releases/tag/v2.1.2) - 31 Dec 2025
+
+This release brings several bug fixes to the BrightScript Simulator by upgrading the `brs-engine` dependency to v2.0.4 with RSG extension v.0.0.4. Key fixes include preventing division by zero errors in `roAudioMetadata`, correcting font metric checks in `roFontRegistry`, and addressing rendering issues in `Poster` and `Overhang` components. Additionally, it resolves event handling problems in item components of `ArrayGrid` based nodes, allows assignment of `roPath` to `String` fields in `Field`, and prevents crashes in `Task` when updating fields with `null`.
+
+## Release Changes
+
+* Upgraded `brs-engine` to v2.0.4 (with RSG extension), main changes were:
+  * (brs) Prevented division by zero on `roAudioMetadata`
+  * (brs) Fixed `roFontRegistry` to properly check parsed font metrics
+  * (rsg) Fixed `Poster` rendering to match Roku's automatic scaling
+  * (rsg) Fixed `Overhang` default logo scaling
+  * (rsg) Fixed item component's events on `ArrayGrid` based nodes
+  * (rsg) Changed `Field` to allow assign `roPath` to a `String` field
+  * (rsg) Fixed `Task` to prevent crash on updated fields with `null`
+
+Full Changelog: [v2.1.2]
+
 <a name="v2.1.1"></a>
 
 ## [v2.1.1 - External Storage and SG fixes](https://github.com/lvcabral/brs-desktop/releases/tag/v2.1.1) - 24 Dec 2025
@@ -563,6 +582,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.1.2]: https://github.com/lvcabral/brs-desktop/compare/v2.1.1...v2.1.2
 [v2.1.1]: https://github.com/lvcabral/brs-desktop/compare/v2.1.0...v2.1.1
 [v2.1.0]: https://github.com/lvcabral/brs-desktop/compare/v2.0.5...v2.1.0
 [v2.0.5]: https://github.com/lvcabral/brs-desktop/compare/v2.0.4...v2.0.5
