@@ -12,6 +12,11 @@ import { spawnSync } from "node:child_process";
 
 const isWindows = process.platform === "win32";
 
+/**
+ * Function to check if a string is a valid IP address
+ * @param {string} ip - The IP address to check
+ * @returns {boolean} - True if the IP address is valid, false otherwise
+ */
 export function isValidIP(ip) {
     if (typeof ip !== "string") {
         return false;
@@ -26,6 +31,11 @@ export function isValidIP(ip) {
     );
 }
 
+/**
+ * Function to check if a string is a valid URL
+ * @param {string} string - The string to check
+ * @returns {boolean} - True if the string is a valid URL, false otherwise
+ */
 export function isValidUrl(string) {
     try {
         new URL(string);
@@ -35,6 +45,10 @@ export function isValidUrl(string) {
     }
 }
 
+/**
+ * Function to get the local IP addresses
+ * @returns {string[]} - An array of local IP addresses
+ */
 export function getLocalIps() {
     const ifaces = os.networkInterfaces();
     const ips = [];
@@ -67,10 +81,14 @@ export function getLocalIps() {
     return ips;
 }
 
+/**
+ * Function to get the network gateway
+ * @returns {object} - An object containing the gateway IP address, name, type, and SSID
+ */
 export async function getGateway() {
     const gateWayData = { ip: "", name: "", type: "", ssid: "" };
     try {
-        const gw = await getActiveInterface();
+        const gw = getActiveInterface();
         gateWayData.ip = gw.gateway_ip ?? "";
         gateWayData.name = gw.name ?? "";
         gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";
@@ -88,6 +106,10 @@ export async function getGateway() {
     return gateWayData;
 }
 
+/**
+ * Function to get the active network interface
+ * @returns {object} - An object containing the gateway IP address, name, type, and SSID
+ */
 async function getActiveInterface() {
     return await new Promise((resolve, reject) => {
         if (!isWindows) {
@@ -116,6 +138,10 @@ async function getActiveInterface() {
     });
 }
 
+/**
+ * Function to get the SSID of the current WiFi connection
+ * @returns {string} - The SSID of the current WiFi connection
+ */
 function getSSID() {
     const platform = os.platform();
     let ssid = "WiFi";
@@ -146,4 +172,13 @@ function getSSID() {
         console.warn(`Unable to get SSID: ${err.message}`);
     }
     return ssid;
+}
+
+/**
+ * Function to format a file path with POSIX separators
+ * @param {string} path - The path to format
+ * @returns {string} - The formatted path
+ */
+export function formatPath(path) {
+    return isWindows ? path.replaceAll("\\", "/") : path;
 }
