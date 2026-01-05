@@ -147,3 +147,7 @@ function getSSID() {
     }
     return ssid;
 }
+
+export function formatPath(path) {
+    return isWindows ? path.replace(/\\/g, "/") : path;
+}

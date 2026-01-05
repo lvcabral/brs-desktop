@@ -24,7 +24,7 @@ import {
 } from "../server/installer";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
 import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
-import { getLocalIps } from "./util";
+import { getLocalIps, formatPath } from "./util";
 
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
@@ -244,7 +244,7 @@ export function getSettings(window) {
             {
                 id: "editor",
                 label: "Code Editor",
-                icon: __dirname + "/images/svg/coding.svg",
+                icon: formatPath(path.join(__dirname, "/images/svg/coding.svg")),
                 form: {
                     groups: [
                         {
@@ -368,7 +368,7 @@ export function getSettings(window) {
             {
                 id: "device",
                 label: "Device",
-                icon: __dirname + "/images/svg/roku-box.svg",
+                icon: formatPath(path.join(__dirname, "/images/svg/roku-box.svg")),
                 form: {
                     groups: [
                         {
@@ -413,7 +413,7 @@ export function getSettings(window) {
             {
                 id: "remote",
                 label: "Control",
-                icon: __dirname + "/images/svg/roku-remote.svg",
+                icon: formatPath(path.join(__dirname, "/images/svg/roku-remote.svg")),
                 form: {
                     groups: [
                         {
@@ -798,7 +798,7 @@ export function getSettings(window) {
             {
                 id: "peerRoku",
                 label: "Peer Roku",
-                icon: __dirname + "/images/svg/roku-logo.svg",
+                icon: formatPath(path.join(__dirname, "/images/svg/roku-logo.svg")),
                 form: {
                     groups: [
                         {
@@ -866,7 +866,7 @@ export function getSettings(window) {
             {
                 id: "deepLinking",
                 label: "Deep Linking",
-                icon: __dirname + "/images/svg/deep-link.svg",
+                icon: formatPath(path.join(__dirname, "/images/svg/deep-link.svg")),
                 form: {
                     groups: [
                         {
@@ -900,7 +900,7 @@ export function getSettings(window) {
             {
                 id: "externalVolume",
                 label: "External Volume",
-                icon: __dirname + "/images/svg/usb-stick.svg",
+                icon: formatPath(path.join(__dirname, "/images/svg/usb-stick.svg")),
                 form: {
                     groups: [
                         {
