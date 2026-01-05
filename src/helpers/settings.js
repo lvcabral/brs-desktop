@@ -2023,7 +2023,7 @@ async function discoverRokuDevices() {
             ssdpClient = undefined;
         }
 
-        const client = new SSDPClient();
+        const client = new SSDPClient({ explicitSocketBind: true });
         ssdpClient = client;
 
         client.on("response", (headers, _statusCode, rinfo) => {
