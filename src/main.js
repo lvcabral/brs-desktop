@@ -125,9 +125,7 @@ const argv = minimist(process.argv.slice(1), cliArgumentsConfig);
 
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 
-if (!hasSingleInstanceLock) {
-    app.quit();
-} else {
+if (hasSingleInstanceLock) {
     app.on("second-instance", (event, commandLine) => {
         event.preventDefault();
         const mainWindow = BrowserWindow.fromId(1) ?? BrowserWindow.getAllWindows()[0];
@@ -143,6 +141,8 @@ if (!hasSingleInstanceLock) {
         const secondaryArgv = minimist(commandLine.slice(1), cliArgumentsConfig);
         processArgv(mainWindow, {}, secondaryArgv, { applyStartup: false });
     });
+} else {
+    app.quit();
 }
 
 app.on("ready", () => {
