@@ -154,11 +154,10 @@ export function createWindow(name, options) {
         // macOS windows flags
         win.setMaximizable(true);
         win.setWindowButtonVisibility(true);
-    } else {
-        win.on("resize", () => {
-            setAspectRatio(false);
-        });
     }
+    win.on("resize", () => {
+        setAspectRatio(false);
+    });
     return win;
 }
 
@@ -176,16 +175,12 @@ export function setAspectRatio(changed = true) {
     let height = window.getBounds().height;
     let offset = statusOn ? 45 : 25;
     if (window) {
-        if (isMacOS) {
-            height -= offset;
-            window.setAspectRatio(aspectRatio, { width: 0, height: offset });
-        } else {
-            const width = Math.round((height - offset) * aspectRatio);
-            aspectRatio = width / height;
-            window.setAspectRatio(aspectRatio);
-        }
+        const availableHeight = Math.max(height - offset, 1);
+        const targetWidth = Math.max(Math.round(availableHeight * aspectRatio), 1);
+        const normalizedAspect = targetWidth / height;
+        window.setAspectRatio(normalizedAspect);
         if (changed) {
-            window.setBounds({ width: Math.round(height * aspectRatio) });
+            window.setBounds({ width: targetWidth });
         }
     }
 }
