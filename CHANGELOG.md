@@ -2,13 +2,43 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.1.3"></a>
+
+## [v2.1.3 - Animation and Interpolator Nodes](https://github.com/lvcabral/brs-desktop/releases/tag/v2.1.3) - 06 Jan 2026
+
+This release includes several bug fixes and improvements to the BrightScript Simulator. It addresses issues related to custom Settings icons on Windows OS, Roku devices detection on computers with multiple network interfaces, resizing the main window on macOS, and enforces a single application instance. Additionally, it upgrades the `brs-engine` dependency to v2.0.4 with RSG extension, bringing various fixes and enhancements to the BrightScript language and SceneGraph support including the implementation of `Animation` and `Interpolator` nodes.
+
+![brs-desktop-animation-demo-01-2026](https://github.com/user-attachments/assets/9024d82c-4d57-4134-bc09-c20477ffdf64)
+
+### Release Changes
+
+* Fixed custom Settings icons on Windows OS by [@lvcabral](https://github.com/lvcabral) in [#237](https://github.com/lvcabral/brs-desktop/pull/237)
+* Improved Roku devices detection on computers with several NICs by [@lvcabral](https://github.com/lvcabral) in [#238](https://github.com/lvcabral/brs-desktop/pull/238)
+* Fixed resizing main window on MacOS by [@lvcabral](https://github.com/lvcabral) in [#239](https://github.com/lvcabral/brs-desktop/pull/239)
+* Enforce single application instance by [@lvcabral](https://github.com/lvcabral) in [#240](https://github.com/lvcabral/brs-desktop/pull/240)
+* Upgraded `brs-engine` to v2.0.4 (with RSG extension), main changes were:
+  * (brs) Fixed debugger to restore the context on `RunTimeError`
+  * (brs) Added `toBoolean` for all numeric components
+  * (brs) Fixed `CreateObject` to properly handle boxed parameters and raise `RunTimeError`
+  * (rsg) Fixed `roSGNode` creation using boxed `String` as `nodeType`
+  * (rsg) Fixed focus when `initialFocus` is not set
+  * (rsg) Fixed: `ArrayGrid` based nodes must reset focused item when `content` is updated
+  * (rsg) Fixed `findNode` to prioritize search on `children`
+  * (rsg) Implemented `Animation` and `Interpolator` nodes
+  * (rsg) Changed `Node` to preserve field name case
+  * (rsg) Fixed conflict on `roSGScreen` scene events handling
+  * (cli) Fixed CLI loading SceneGraph components on Windows file system
+  * (rsg) Optimized `roSGScreen` to only render when changes happened
+
+Full Changelog: [v2.1.3]
+
 <a name="v2.1.2"></a>
 
 ## [v2.1.2 - Bug Fixes on BrightScript Engine](https://github.com/lvcabral/brs-desktop/releases/tag/v2.1.2) - 31 Dec 2025
 
 This release brings several bug fixes to the BrightScript Simulator by upgrading the `brs-engine` dependency to v2.0.4 with RSG extension v.0.0.4. Key fixes include preventing division by zero errors in `roAudioMetadata`, correcting font metric checks in `roFontRegistry`, and addressing rendering issues in `Poster` and `Overhang` components. Additionally, it resolves event handling problems in item components of `ArrayGrid` based nodes, allows assignment of `roPath` to `String` fields in `Field`, and prevents crashes in `Task` when updating fields with `null`.
 
-## Release Changes
+### Release Changes
 
 * Upgraded `brs-engine` to v2.0.4 (with RSG extension), main changes were:
   * (brs) Prevented division by zero on `roAudioMetadata`
@@ -27,7 +57,7 @@ Full Changelog: [v2.1.2]
 
 This release adds new settings tab to allow mounting and unmounting an external storage volume (`ext1:/`) in the BrightScript Simulator, allowing apps to access files to this volume as they would on a real Roku device. It also includes several fixes to the SceneGraph implementation, improving stability and compatibility with Roku applications.
 
-## Release Changes
+### Release Changes
 
 * Added support to mount/unmount an External volume (ext1:/) by [@lvcabral](https://github.com/lvcabral) in [#235](https://github.com/lvcabral/brs-desktop/pull/235)
 * Prevent duplicate `brs-engine` version on About dialog on reset by [@lvcabral](https://github.com/lvcabral) in [#236](https://github.com/lvcabral/brs-desktop/pull/236)
@@ -582,6 +612,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.1.3]: https://github.com/lvcabral/brs-desktop/compare/v2.1.2...v2.1.3
 [v2.1.2]: https://github.com/lvcabral/brs-desktop/compare/v2.1.1...v2.1.2
 [v2.1.1]: https://github.com/lvcabral/brs-desktop/compare/v2.1.0...v2.1.1
 [v2.1.0]: https://github.com/lvcabral/brs-desktop/compare/v2.0.5...v2.1.0

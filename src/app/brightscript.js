@@ -4,7 +4,7 @@
  *  Based on the VS Code BrightScript Language Extension:
  *  https://github.com/rokucommunity/vscode-brightscript-language
  *
- *  Copyright (c) 2023-2025 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2025-2026 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/

@@ -2,14 +2,14 @@
     "name": "brs-desktop",
     "productName": "BrightScript Simulator",
     "description": "Roku Device Simulation Tool",
-    "version": "2.1.2",
+    "version": "2.1.3",
     "license": "MIT",
     "author": {
         "name": "Marcelo Lv Cabral",
         "email": "marcelo@lvcabral.com",
         "url": "https://lvcabral.com/"
     },
-    "copyright": "© 2019-2025, Marcelo Lv Cabral",
+    "copyright": "© 2019-2026, Marcelo Lv Cabral",
     "homepage": "https://lvcabral.com/brs/",
     "bugs": {
         "url": "https://github.com/lvcabral/brs-desktop/issues"
@@ -106,8 +106,8 @@
         "@types/luxon": "^1.27.1",
         "@types/request": "^2.47.0",
         "babel-loader": "^8.0.6",
-        "brs-engine": "^2.0.4",
-        "brs-scenegraph": "^0.0.4",
+        "brs-engine": "^2.0.5",
+        "brs-scenegraph": "^0.0.5",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.7.3",
         "dotenv": "^16.4.7",
