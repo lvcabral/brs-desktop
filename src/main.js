@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
- *  Copyright (c) 2019-2025 Marcelo Lv Cabral. All Rights Reserved.
+ *  Copyright (c) 2019-2026 Marcelo Lv Cabral. All Rights Reserved.
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
@@ -106,7 +106,7 @@ getGateway().then((gateway) => {
 });
 
 // Parse CLI parameters
-const argv = minimist(process.argv.slice(1), {
+const cliArgumentsConfig = {
     string: ["o", "p", "m"],
     boolean: ["c", "d", "e", "f", "r"],
     alias: {
@@ -119,9 +119,36 @@ const argv = minimist(process.argv.slice(1), {
         m: "mode",
         r: "rc",
     },
-});
+};
+
+const argv = minimist(process.argv.slice(1), cliArgumentsConfig);
+
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+
+if (!hasSingleInstanceLock) {
+    app.quit();
+} else {
+    app.on("second-instance", (event, commandLine) => {
+        event.preventDefault();
+        const mainWindow = BrowserWindow.fromId(1) ?? BrowserWindow.getAllWindows()[0];
+        if (!mainWindow || mainWindow.isDestroyed()) {
+            return;
+        }
+        if (mainWindow.isMinimized()) {
+            mainWindow.restore();
+        } else if (!mainWindow.isVisible()) {
+            mainWindow.show();
+        }
+        mainWindow.focus({ steal: true });
+        const secondaryArgv = minimist(commandLine.slice(1), cliArgumentsConfig);
+        processArgv(mainWindow, {}, secondaryArgv, { applyStartup: false });
+    });
+}
 
 app.on("ready", () => {
+    if (!hasSingleInstanceLock) {
+        return;
+    }
     // setup the titlebar main process
     setupTitlebar();
     createMenu();
@@ -294,32 +321,34 @@ function loadSettings(mainWindow, startup) {
 }
 
 // Process Command Line switches
-function processArgv(mainWindow, startup) {
+function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
+    const { applyStartup = true } = options;
+    const startupOptions = startup || {};
     let settings = getSettings(mainWindow);
-    const options = settings?.value("simulator.options");
-    if (argv?.fullscreen || options?.includes("fullScreen")) {
+    const simulatorOptions = settings?.value("simulator.options");
+    if (cliArgs?.fullscreen || simulatorOptions?.includes("fullScreen")) {
         mainWindow.setFullScreen(true);
     }
-    if (argv?.ecp || startup.ecpEnabled) {
+    if (cliArgs?.ecp || (applyStartup && startupOptions.ecpEnabled)) {
         enableECP(mainWindow);
     }
-    if (argv?.telnet || startup.telnetEnabled) {
+    if (cliArgs?.telnet || (applyStartup && startupOptions.telnetEnabled)) {
         enableTelnet(mainWindow);
     }
-    if (argv?.pwd && argv.pwd.trim() !== "") {
-        setPassword(argv.pwd.trim());
-        settings.value("services.password", argv.pwd.trim());
+    if (cliArgs?.pwd && cliArgs.pwd.trim() !== "") {
+        setPassword(cliArgs.pwd.trim());
+        settings.value("services.password", cliArgs.pwd.trim());
     }
-    if (argv?.web) {
-        setPort(argv.web);
-        settings.value("services.webPort", Number.parseInt(argv.web));
+    if (cliArgs?.web) {
+        setPort(cliArgs.web);
+        settings.value("services.webPort", Number.parseInt(cliArgs.web));
         enableInstaller(mainWindow);
-    } else if (startup.installerEnabled) {
+    } else if (applyStartup && startupOptions.installerEnabled) {
         enableInstaller(mainWindow);
     }
-    if (argv?.mode && argv.mode.trim() !== "") {
+    if (cliArgs?.mode && cliArgs.mode.trim() !== "") {
         let displayMode = "720p";
-        switch (argv.mode.trim().toLowerCase()) {
+        switch (cliArgs.mode.trim().toLowerCase()) {
             case "sd":
                 displayMode = "480p";
                 break;
@@ -331,21 +360,22 @@ function processArgv(mainWindow, startup) {
         }
         setDisplayOption("displayMode", displayMode, true);
     }
-    if (startup.devTools || argv.devtools) {
+    if ((applyStartup && startupOptions.devTools) || cliArgs.devtools) {
         openDevTools(mainWindow);
     }
-    if (startup.console || argv.console) {
+    if ((applyStartup && startupOptions.console) || cliArgs.console) {
         openCodeEditor();
     }
     let openFile;
-    if (argv?.o) {
-        openFile = argv.o.trim();
+    if (cliArgs?.o) {
+        openFile = cliArgs.o.trim();
     } else {
         try {
-            let index = argv._.length - 1;
-            if (index && argv._[index]) {
-                if (jetpack.exists(argv._[index])) {
-                    openFile = argv._[index];
+            const positionalArgs = cliArgs?._ ?? [];
+            const index = positionalArgs.length - 1;
+            if (index >= 0 && positionalArgs[index]) {
+                if (jetpack.exists(positionalArgs[index])) {
+                    openFile = positionalArgs[index];
                 }
             }
         } catch (error) {
