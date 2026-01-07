@@ -15,6 +15,7 @@ import {
 } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
+import { windowMenuTemplate } from "./windowMenuTemplate";
 import { helpMenuTemplate } from "./helpMenuTemplate";
 import { isInstallerEnabled } from "../server/installer";
 import { isECPEnabled } from "../server/ecp";
@@ -47,6 +48,8 @@ export function createMenu() {
     ];
     if (isMacOS) {
         menuTemplate.unshift(macOSMenuTemplate);
+        // Insert Window menu before Help
+        menuTemplate.splice(-1, 0, windowMenuTemplate);
         if (fileMenuIndex === 0) {
             fileMenuIndex = 1;
             // Only need to do it once

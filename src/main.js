@@ -10,7 +10,7 @@ import url from "node:url";
 import dns from "node:dns";
 import minimist from "minimist";
 import jetpack from "fs-jetpack";
-import { app, screen, BrowserWindow } from "electron";
+import { app, screen, BrowserWindow, session } from "electron";
 import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
@@ -159,6 +159,13 @@ app.on("ready", () => {
         deviceInfo: deviceInfo,
     };
     updateAppList();
+    // Add CORS headers to enable SharedArrayBuffer and cross-origin requests
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        details.responseHeaders["Cross-Origin-Opener-Policy"] = ["same-origin"];
+        details.responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
+        details.responseHeaders["Cross-Origin-Resource-Policy"] = ["cross-origin"];
+        callback({ responseHeaders: details.responseHeaders });
+    });
     // Create Main Window
     let mainWindow = createWindow("main", {
         width: 1280,
@@ -382,12 +389,12 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
             console.error("Invalid parameters!", error);
         }
     }
-    if (openFile) {
+    if (openFile && openFile !== ".") {
         const fileExt = path.parse(openFile).ext.toLowerCase();
         if (fileExt === ".zip" || fileExt === ".bpk" || fileExt === ".brs") {
             loadFile([openFile]);
         } else {
-            console.warn("File format not supported: ", fileExt);
+            console.warn(`File format not supported: ${fileExt}`);
         }
     }
 }

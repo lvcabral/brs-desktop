@@ -1,6 +1,6 @@
 // remove comment to build locally:
 // require('dotenv').config();
-const { notarize } = require("electron-notarize");
+const { notarize } = require("@electron/notarize");
 
 exports.default = async function notarizing(context) {
   const { electronPlatformName, appOutDir } = context;

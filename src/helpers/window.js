@@ -46,13 +46,6 @@ export function createWindow(name, options) {
     );
     require("@electron/remote/main").enable(win.webContents);
 
-    // Enable SharedArrayBuffer
-    win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-        details.responseHeaders["Cross-Origin-Opener-Policy"] = ["same-origin"];
-        details.responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
-        callback({ responseHeaders: details.responseHeaders });
-    });
-
     // Control Child Windows behavior
     win.webContents.setWindowOpenHandler(({ url }) => {
         if (url.endsWith("editor.html")) {

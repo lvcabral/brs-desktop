@@ -78,7 +78,9 @@ async function main() {
     customKeys.set("Shift+ArrowUp", "up");
     customKeys.set("Shift+ArrowDown", "down");
     // Add SceneGraph extension
-    customDeviceInfo.extensions = new Map([[brs.SupportedExtension.SceneGraph, "./brs-sg.js"]]);
+    customDeviceInfo.extensions = new Map([
+        [brs.SupportedExtension.SceneGraph, getExtensionPath("brs-sg.js")],
+    ]);
     // Initialize BRS Engine
     brs.subscribe("desktop", (event, data) => {
         if (event === "loaded") {
@@ -150,7 +152,7 @@ async function main() {
         }
     });
 
-    brs.initialize(customDeviceInfo, {
+    await brs.initialize(customDeviceInfo, {
         debugToConsole: false,
         showStats: false,
         customKeys: customKeys,
@@ -175,6 +177,17 @@ async function main() {
     api.send("serialNumber", brs.getSerialNumber());
     api.send("engineVersion", brs.getVersion());
     brs.redraw(api.isFullScreen());
+}
+
+// Helper function to get the path of the extension script
+function getExtensionPath(lib) {
+    const scripts = document.getElementsByTagName("script");
+    for (const script of scripts) {
+        if (script.src.endsWith("brs.api.js")) {
+            return script.src.replace("brs.api.js", lib);
+        }
+    }
+    return `./${lib}`;
 }
 
 // Events from Main process
