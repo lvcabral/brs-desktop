@@ -181,12 +181,10 @@ async function main() {
 
 // Helper function to get the path of the extension script
 function getExtensionPath(lib) {
-    if (typeof document !== "undefined") {
-        const scripts = document.getElementsByTagName("script");
-        for (const script of scripts) {
-            if (script.src.includes("brs.api.js")) {
-                return script.src.replace("brs.api.js", lib);
-            }
+    const scripts = document.getElementsByTagName("script");
+    for (const script of scripts) {
+        if (script.src.endsWith("brs.api.js")) {
+            return script.src.replace("brs.api.js", lib);
         }
     }
     return `./${lib}`;
