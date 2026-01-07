@@ -49,7 +49,7 @@ export function createMenu() {
     if (isMacOS) {
         menuTemplate.unshift(macOSMenuTemplate);
         // Insert Window menu before Help
-        menuTemplate.splice(menuTemplate.length - 1, 0, windowMenuTemplate);
+        menuTemplate.splice(-1, 0, windowMenuTemplate);
         if (fileMenuIndex === 0) {
             fileMenuIndex = 1;
             // Only need to do it once
