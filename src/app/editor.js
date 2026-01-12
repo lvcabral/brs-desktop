@@ -26,6 +26,7 @@ const endButton = document.querySelector("button.end");
 const shareButton = document.querySelector("button.share");
 const layoutContainer = document.querySelector("main.editor");
 const layoutSeparator = document.querySelector("div.layout-separator");
+const collapseButton = document.getElementById("collapse-button");
 const codeColumn = document.querySelector("div.code");
 const consoleColumn = document.querySelector("div.console");
 const codeSelect = document.getElementById("code-selector");
@@ -83,6 +84,7 @@ resumeButton.addEventListener("click", resumeExecution);
 endButton.addEventListener("click", endExecution);
 shareButton.addEventListener("click", shareCode);
 layoutSeparator.addEventListener("mousedown", resizeColumn);
+collapseButton.addEventListener("click", toggleCodeEditor);
 moreButton.addEventListener("click", function (event) {
     event.stopPropagation();
     if (dropdown.style.display === "block") {
@@ -105,6 +107,9 @@ document.getElementById("export-all-option")?.addEventListener("click", exportAl
 document.getElementById("import-option").addEventListener("click", importCode);
 
 let consoleLogsContainer = document.getElementById("console-logs");
+let isCodeCollapsed = false;
+let isAppRunning = false;
+let wasCollapsed = false;
 let isResizing = false;
 let editorManager;
 let currentId = nanoid(10);
@@ -143,6 +148,7 @@ function main() {
     });
     const appPath = simulatorApp?.path;
     if (appPath && !(appPath.endsWith(EDITOR_CODE_BRS) || appPath === BRS_HOME_APP_PATH)) {
+        isAppRunning = true;
         hideEditor(true);
     }
     populateCodeSelector();
@@ -191,7 +197,12 @@ function handleEngineEvents(event, data) {
         }
         simulatorApp = data;
         const appPath = simulatorApp?.path ?? "";
-        hideEditor(!appPath.endsWith(EDITOR_CODE_BRS));
+        const shouldHide = !appPath.endsWith(EDITOR_CODE_BRS);
+        if (shouldHide) {
+            isAppRunning = true;
+            wasCollapsed = isCodeCollapsed;
+        }
+        hideEditor(shouldHide);
     } else if (event === "started") {
         if (data.path === BRS_HOME_APP_PATH) {
             return;
@@ -222,7 +233,10 @@ function handleEngineEvents(event, data) {
         endButton.style.display = "none";
         resumeButton.style.display = "none";
         breakButton.style.display = "none";
-        hideEditor(false);
+        isAppRunning = false;
+        // Restore the collapsed state that was active before app started
+        hideEditor(wasCollapsed);
+        wasCollapsed = false;
     }
 }
 
@@ -247,11 +261,44 @@ function updateTerminal(text, level = "print") {
 
 function hideEditor(toggle) {
     codeColumn.classList.toggle("hidden", toggle);
-    layoutSeparator.classList.toggle("hidden", toggle);
     document.body.classList.toggle("code-hidden", toggle);
+
+    // Update collapse button and separator visibility
+    if (toggle && isAppRunning) {
+        // Programmatically hidden (e.g., during app execution) - always hide button
+        layoutSeparator.classList.add("hidden");
+        collapseButton.classList.add("hidden");
+    } else if (toggle && isCodeCollapsed) {
+        // Manually collapsed - keep separator visible but collapsed
+        layoutSeparator.classList.remove("hidden");
+        layoutSeparator.classList.add("collapsed");
+        collapseButton.classList.remove("hidden");
+    } else {
+        // Editor visible - normal state
+        layoutSeparator.classList.remove("hidden", "collapsed");
+        collapseButton.classList.remove("hidden");
+    }
+
     // Only trigger resize when showing the editor, not when hiding it
     if (!toggle) {
         onResize();
+    }
+}
+
+function toggleCodeEditor(event) {
+    event.stopPropagation();
+    isCodeCollapsed = !isCodeCollapsed;
+    hideEditor(isCodeCollapsed);
+
+    // Update button icon and title
+    const buttonIcon = collapseButton.querySelector("span");
+    if (isCodeCollapsed) {
+        buttonIcon.textContent = "»";
+        collapseButton.title = "Expand Code Editor";
+    } else {
+        buttonIcon.textContent = "«";
+        collapseButton.title = "Collapse Code Editor";
+        editorManager?.focus();
     }
 }
 
@@ -779,7 +826,11 @@ function isHotKey(event, keyCode) {
     );
 }
 
-function resizeColumn() {
+function resizeColumn(event) {
+    // Don't start resizing if clicking on the collapse button
+    if (event.target.closest(".collapse-button")) {
+        return;
+    }
     isResizing = true;
 }
 

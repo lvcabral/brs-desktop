@@ -509,6 +509,7 @@ pre {
     transition: opacity 1s ease-in-out;
     -moz-transition: opacity 1s ease-in-out;
     -webkit-transition: opacity 1s ease-in-out;
+    position: relative;
 }
 
 .layout-separator:hover {
@@ -517,6 +518,73 @@ pre {
     transition: opacity 0.55s ease-in-out;
     -moz-transition: opacity 0.55s ease-in-out;
     -webkit-transition: opacity 0.55s ease-in-out;
+}
+
+.layout-separator:hover .collapse-button {
+    background-color: var(--button-background-color);
+    border: 1px solid var(--button-border-color);
+    color: var(--button-color);
+    opacity: 1;
+}
+
+.layout-separator.collapsed {
+    width: 0;
+    margin: 0;
+    border: none;
+    cursor: default;
+    background-color: transparent;
+}
+
+.collapse-button {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background-color: var(--background-color);
+    color: var(--main-color);
+    cursor: pointer;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: all 0.3s ease;
+    opacity: 0.9;
+}
+
+.collapse-button:hover {
+    background-color: var(--button-background-color);
+    border: 1px solid var(--button-border-color);
+    color: var(--button-color);
+    opacity: 1;
+    width: 16px;
+}
+
+.collapse-button span {
+    font-size: 12px;
+    pointer-events: none;
+    line-height: 1;
+    margin: 0;
+}
+
+body.code-hidden .collapse-button {
+    left: 0;
+    transform: translateX(-50%);
+}
+
+.layout-separator.collapsed .collapse-button {
+    left: 0;
+    transform: translateX(-50%);
+}
+
+@media (max-width: 1150px) {
+    .collapse-button {
+        display: none;
+    }
 }
 
 input {
