@@ -78,7 +78,7 @@
     },
     "dependencies": {
         "@electron/remote": "^2.0.9",
-        "@lvcabral/electron-preferences": "^3.0.0",
+        "@lvcabral/electron-preferences": "^3.0.1",
         "@lvcabral/node-ssdp": "^4.0.4",
         "@lvcabral/terminal": "^1.1.0",
         "busboy": "^1.6.0",
@@ -109,7 +109,7 @@
         "babel-loader": "^8.0.6",
         "brs-engine": "^2.1.0",
         "brs-scenegraph": "^0.1.0",
-        "copy-webpack-plugin": "^11.0.0",
+        "copy-webpack-plugin": "^14.0.0",
         "css-loader": "^6.7.3",
         "dotenv": "^16.4.7",
         "electron": "^39.2.7",
