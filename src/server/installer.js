@@ -45,7 +45,7 @@ export function enableInstaller() {
             // Skip authentication for image endpoints - they're accessed from already authenticated pages
             const urlPath = req.url.split("?")[0];
             if (urlPath === "/pkgs/dev.png" || urlPath === "/pkgs/dev.jpg") {
-                serveImage(res);
+                serveImage(req, res);
                 return;
             }
 
@@ -56,7 +56,7 @@ export function enableInstaller() {
 
             if (req.method === "POST") {
                 handlePostRequest(req, res, window);
-            } else if (req.method === "GET") {
+            } else if (req.method === "GET" || req.method === "HEAD") {
                 let filePath = "";
                 let contentType = "";
 
@@ -76,10 +76,10 @@ export function enableInstaller() {
                 }
                 // Note: /pkgs/dev.png is handled at the top without authentication
                 if (filePath !== "") {
-                    serveStaticFile(res, filePath, contentType);
+                    serveStaticFile(req, res, filePath, contentType);
                 } else {
                     res.writeHead(404);
-                    res.end("Error 404: Not Found\nFile not found");
+                    res.end(req.method === "HEAD" ? undefined : "Error 404: Not Found\nFile not found");
                 }
             }
         })
@@ -298,28 +298,28 @@ function buildInstallHtml(fileSize, fileError) {
 }
 
 // Request Handler Helper Functions
-function serveImage(res) {
+function serveImage(req, res) {
     const filePath = path.join(app.getPath("userData"), "dev.png");
     fs.readFile(filePath, (error, pgResp) => {
         if (error) {
             res.writeHead(404);
-            res.end("Error 404: Not Found\nFile not found");
+            res.end(req.method === "HEAD" ? undefined : "Error 404: Not Found\nFile not found");
         } else {
             res.writeHead(200, { "Content-Type": "image/png" });
-            res.end(pgResp);
+            res.end(req.method === "HEAD" ? undefined : pgResp);
         }
     });
 }
 
 function performDigestAuth(req, res) {
     if (!req.headers.authorization) {
-        authenticateUser(res);
+        authenticateUser(req, res);
         return false;
     }
     const authInfo = req.headers.authorization.replace(/^Digest /, "");
     const parsedAuth = parseAuthenticationInfo(authInfo);
     if (parsedAuth.username !== credentials.userName) {
-        authenticateUser(res);
+        authenticateUser(req, res);
         return false;
     }
 
@@ -331,20 +331,20 @@ function performDigestAuth(req, res) {
         [ha1, parsedAuth.nonce, parsedAuth.nc, parsedAuth.cnonce, parsedAuth.qop, ha2].join(":")
     );
     if (parsedAuth.response !== expectedResponse) {
-        authenticateUser(res);
+        authenticateUser(req, res);
         return false;
     }
     return true;
 }
 
-function serveStaticFile(res, filePath, contentType) {
+function serveStaticFile(req, res, filePath, contentType) {
     fs.readFile(filePath, (error, pgResp) => {
         if (error) {
             res.writeHead(404);
-            res.end("Error 404: Not Found\nFile not found");
+            res.end(req.method === "HEAD" ? undefined : "Error 404: Not Found\nFile not found");
         } else {
             res.writeHead(200, { "Content-Type": contentType });
-            res.end(pgResp);
+            res.end(req.method === "HEAD" ? undefined : pgResp);
         }
     });
 }
@@ -368,13 +368,13 @@ function cryptoUsingMD5(data) {
     return crypt.createHash("md5").update(data).digest("hex");
 }
 
-function authenticateUser(res) {
+function authenticateUser(req, res) {
     res.writeHead(401, {
         "WWW-Authenticate": `Digest realm="${
             credentials.realm
         }",qop="auth",nonce="${Math.random()}",opaque="${hash}"`,
     });
-    res.end("Authorization is needed.");
+    res.end(req.method === "HEAD" ? undefined : "Authorization is needed.");
 }
 
 function parseAuthenticationInfo(authData) {
