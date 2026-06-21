@@ -858,6 +858,17 @@ export function getSettings(window) {
                                     ],
                                     help: "If enabled, the simulator will replicate all pressed control keys on the peer Roku device",
                                 },
+                                {
+                                    key: "keepAppOpen",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Do not close the app on Roku when Simulator exits",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "If enabled, the app will continue running on the peer Roku device after the simulator finishes",
+                                },
                             ],
                         },
                     ],
@@ -1286,6 +1297,7 @@ export function getPeerRoku() {
         username: DEFAULT_USRPWD,
         password: settings.value("peerRoku.password"),
         syncControl: settings.value("peerRoku.syncControl")?.includes("enabled") || false,
+        keepAppOpen: settings.value("peerRoku.keepAppOpen")?.includes("enabled") || false,
     };
 }
 
