@@ -128,6 +128,8 @@ let unchangedCode = "";
 let markInstance;
 let searchResults = [];
 let currentSearchIndex = -1;
+let consoleLogsObserver;
+let searchTimeout;
 
 function main() {
     updateButtons();
@@ -198,7 +200,19 @@ function main() {
 }
 
 function initSearch() {
-    markInstance = new Mark(document.getElementById("console-logs"));
+    const consoleLogs = document.getElementById("console-logs");
+    markInstance = new Mark(consoleLogs);
+
+    consoleLogsObserver = new MutationObserver(() => {
+        if (!searchContainer.classList.contains("hidden") && searchInput.value) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(true);
+            }, 100);
+        }
+    });
+    
+    reconnectObserver();
 
     searchBtn.addEventListener("click", () => {
         searchContainer.classList.remove("hidden");
@@ -246,8 +260,14 @@ function initSearch() {
     });
 }
 
-function performSearch() {
+function performSearch(keepIndex = false) {
     const keyword = searchInput.value;
+    const oldIndex = currentSearchIndex;
+    
+    if (consoleLogsObserver) {
+        consoleLogsObserver.disconnect();
+    }
+
     markInstance.unmark({
         done: () => {
             if (keyword.length > 0) {
@@ -256,18 +276,36 @@ function performSearch() {
                     acrossElements: true,
                     done: () => {
                         searchResults = document.querySelectorAll("mark");
-                        currentSearchIndex = 0;
+                        if (keepIndex && oldIndex >= 0 && searchResults.length > 0) {
+                            currentSearchIndex = Math.min(oldIndex, searchResults.length - 1);
+                        } else {
+                            currentSearchIndex = 0;
+                        }
                         updateSearchMatches();
-                        jumpToMatch(0);
+                        if (searchResults.length > 0) {
+                            jumpToMatch(currentSearchIndex, !keepIndex);
+                        }
+                        reconnectObserver();
                     }
                 });
             } else {
                 searchResults = [];
                 currentSearchIndex = -1;
                 updateSearchMatches();
+                reconnectObserver();
             }
         }
     });
+}
+
+function reconnectObserver() {
+    if (consoleLogsObserver) {
+        consoleLogsObserver.observe(document.getElementById("console-logs"), {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+    }
 }
 
 function clearSearch() {
@@ -287,7 +325,7 @@ function updateSearchMatches() {
     }
 }
 
-function jumpToMatch(index) {
+function jumpToMatch(index, scroll = true) {
     if (searchResults.length === 0) return;
     
     if (index < 0) {
@@ -305,7 +343,9 @@ function jumpToMatch(index) {
             previousMatch.classList.remove("active");
         }
         currentMatch.classList.add("active");
-        currentMatch.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (scroll) {
+            currentMatch.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
     }
     
     updateSearchMatches();
