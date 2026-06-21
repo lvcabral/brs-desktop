@@ -96,7 +96,7 @@
         "network": "^0.7.0",
         "restana": "^4.9.9",
         "toastify-js": "^1.12.0",
-        "ws": "^7.5.0",
+        "ws": "^7.5.11",
         "xmlbuilder": "^13.0.2"
     },
     "devDependencies": {
