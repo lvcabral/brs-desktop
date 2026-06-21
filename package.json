@@ -100,13 +100,13 @@
         "xmlbuilder": "^13.0.2"
     },
     "devDependencies": {
-        "@babel/core": "^7.14.3",
-        "@babel/preset-env": "^7.14.4",
+        "@babel/core": "^8.0.1",
+        "@babel/preset-env": "^8.0.2",
         "@electron/notarize": "^2.5.0",
         "@soda/friendly-errors-webpack-plugin": "^1.8.1",
         "@types/luxon": "^1.27.1",
         "@types/request": "^2.47.0",
-        "babel-loader": "^8.0.6",
+        "babel-loader": "^10.1.1",
         "brs-engine": "^2.1.0",
         "brs-scenegraph": "^0.1.0",
         "copy-webpack-plugin": "^14.0.0",
