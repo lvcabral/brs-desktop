@@ -230,6 +230,20 @@ function initSearch() {
 
     searchPrev.addEventListener("click", () => jumpToMatch(currentSearchIndex - 1));
     searchNext.addEventListener("click", () => jumpToMatch(currentSearchIndex + 1));
+
+    document.addEventListener("keydown", (e) => {
+        const isSearchShortcut = (isMacOS && e.metaKey && !e.ctrlKey) || (!isMacOS && !e.metaKey && e.ctrlKey);
+        if (isSearchShortcut && e.key === "f") {
+            const codeEl = document.querySelector(".code");
+            if (codeEl && !codeEl.contains(document.activeElement)) {
+                e.preventDefault();
+                searchContainer.classList.remove("hidden");
+                searchBtn.style.display = "none";
+                searchInput.focus();
+                searchInput.select();
+            }
+        }
+    });
 }
 
 function performSearch() {
