@@ -42,8 +42,10 @@ ipcMain.on("currentApp", (_, data) => {
             return;
         }
         if (isValidIP(device.ip)) {
-            postEcpRequest(device, "/exit-app/dev");
-            postEcpRequest(device, "/keypress/home");
+            if (!device.keepAppOpen) {
+                postEcpRequest(device, "/exit-app/dev");
+                postEcpRequest(device, "/keypress/home");
+            }
         }
     }
 });
