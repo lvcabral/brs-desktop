@@ -87,10 +87,20 @@
     </div>
     <div class="console">
       <div class="console-header">
-        <div>
+        <div style="display: flex; align-items: center; gap: 10px;">
           <h4>Console</h4>
+          <div id="console-search-container" class="console-search-container hidden">
+            <input type="text" id="console-search-input" placeholder="Find in console..." />
+            <span id="console-search-matches" class="console-search-matches">0/0</span>
+            <button id="console-search-prev" title="Previous Match" class="icon-btn"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button>
+            <button id="console-search-next" title="Next Match" class="icon-btn"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+            <button id="console-search-close" title="Close Search" class="icon-btn"><i class="icon-cancel"></i></button>
+          </div>
         </div>
         <div>
+          <button title="Search Console" id="console-search-btn" class="search-btn" style="display:inline-flex; align-items:center; justify-content:center;">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
           <button title="Pause and Debug" style="display:none" class="break">
             <i class="icon-pause"></i>
             <span>DEBUG</span>

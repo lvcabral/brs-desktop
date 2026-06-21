@@ -342,6 +342,74 @@ pre {
     margin-right: 0.2em;
 }
 
+.console-search-container {
+    display: flex;
+    align-items: center;
+    background: var(--input-background-color);
+    border: 1px solid var(--input-border-color);
+    border-radius: 4px;
+    padding: 2px;
+    margin-left: 10px;
+}
+
+.console-search-container input {
+    border: none;
+    background: transparent;
+    color: var(--input-color);
+    padding: 0 4px;
+    width: 150px;
+    height: 22px;
+    font-size: 14px;
+}
+
+.console-search-container input:focus {
+    outline: none;
+    background: var(--input-active-color);
+}
+
+.console-search-matches {
+    font-size: 12px;
+    color: var(--input-color);
+    margin: 0 8px;
+    min-width: 30px;
+    text-align: center;
+}
+
+.console .console-header .console-search-container button {
+    background: transparent;
+    color: var(--input-color);
+    padding: 0;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.console .console-header .console-search-container button:hover {
+    background: var(--icon-hover-color);
+}
+
+.console .console-header .console-search-container button span {
+    font-size: 10px;
+    margin: 0;
+}
+
+.console .console-header .console-search-container button i {
+    font-size: 12px;
+    margin: 0;
+}
+
+mark {
+    background-color: #f8fb3c;
+    color: #000;
+}
+
+mark.active {
+    background-color: #ff9632;
+    color: #000;
+}
+
 .console iframe {
     border: none;
     width: 0;

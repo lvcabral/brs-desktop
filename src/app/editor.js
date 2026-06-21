@@ -6,6 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import Codec from "json-url";
+import Mark from "mark.js";
 import WebTerminal from "@lvcabral/terminal";
 import { nanoid } from "nanoid";
 import { MonacoManager } from "./monaco";
@@ -39,6 +40,14 @@ const confirmButton = document.getElementById("confirm-button");
 const cancelButton = document.getElementById("cancel-button");
 const moreButton = document.getElementById("more-options");
 const dropdown = document.getElementById("more-options-dropdown");
+
+const searchBtn = document.getElementById("console-search-btn");
+const searchContainer = document.getElementById("console-search-container");
+const searchInput = document.getElementById("console-search-input");
+const searchMatches = document.getElementById("console-search-matches");
+const searchPrev = document.getElementById("console-search-prev");
+const searchNext = document.getElementById("console-search-next");
+const searchClose = document.getElementById("console-search-close");
 
 const simulator = globalThis.opener;
 const [brs, currentApp, consoleBuffer, debugMode] = simulator.getEngineContext();
@@ -116,6 +125,10 @@ let currentId = nanoid(10);
 let isCodeChanged = false;
 let unchangedCode = "";
 
+let markInstance;
+let searchResults = [];
+let currentSearchIndex = -1;
+
 function main() {
     updateButtons();
     // Initialize the Monaco editor
@@ -180,6 +193,108 @@ function main() {
             editorManager.focus();
         }
     });
+    
+    initSearch();
+}
+
+function initSearch() {
+    markInstance = new Mark(document.getElementById("console-logs"));
+
+    searchBtn.addEventListener("click", () => {
+        searchContainer.classList.remove("hidden");
+        searchBtn.style.display = "none";
+        searchInput.focus();
+    });
+
+    searchClose.addEventListener("click", () => {
+        searchContainer.classList.add("hidden");
+        searchBtn.style.display = "inline-flex";
+        searchInput.value = "";
+        clearSearch();
+    });
+
+    searchInput.addEventListener("input", performSearch);
+    
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (e.shiftKey) {
+                jumpToMatch(currentSearchIndex - 1);
+            } else {
+                jumpToMatch(currentSearchIndex + 1);
+            }
+        } else if (e.key === "Escape") {
+            searchClose.click();
+        }
+    });
+
+    searchPrev.addEventListener("click", () => jumpToMatch(currentSearchIndex - 1));
+    searchNext.addEventListener("click", () => jumpToMatch(currentSearchIndex + 1));
+}
+
+function performSearch() {
+    const keyword = searchInput.value;
+    markInstance.unmark({
+        done: () => {
+            if (keyword.length > 0) {
+                markInstance.mark(keyword, {
+                    separateWordSearch: false,
+                    acrossElements: true,
+                    done: () => {
+                        searchResults = document.querySelectorAll("mark");
+                        currentSearchIndex = 0;
+                        updateSearchMatches();
+                        jumpToMatch(0);
+                    }
+                });
+            } else {
+                searchResults = [];
+                currentSearchIndex = -1;
+                updateSearchMatches();
+            }
+        }
+    });
+}
+
+function clearSearch() {
+    if (markInstance) {
+        markInstance.unmark();
+    }
+    searchResults = [];
+    currentSearchIndex = -1;
+    updateSearchMatches();
+}
+
+function updateSearchMatches() {
+    if (searchResults.length > 0) {
+        searchMatches.textContent = `${currentSearchIndex + 1}/${searchResults.length}`;
+    } else {
+        searchMatches.textContent = "0/0";
+    }
+}
+
+function jumpToMatch(index) {
+    if (searchResults.length === 0) return;
+    
+    if (index < 0) {
+        currentSearchIndex = searchResults.length - 1;
+    } else if (index >= searchResults.length) {
+        currentSearchIndex = 0;
+    } else {
+        currentSearchIndex = index;
+    }
+
+    const currentMatch = searchResults[currentSearchIndex];
+    if (currentMatch) {
+        const previousMatch = document.querySelector("mark.active");
+        if (previousMatch) {
+            previousMatch.classList.remove("active");
+        }
+        currentMatch.classList.add("active");
+        currentMatch.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    
+    updateSearchMatches();
 }
 
 function updateButtons() {
@@ -256,6 +371,10 @@ function updateTerminal(text, level = "print") {
     const lines = output.trim().split(/\r?\n/);
     for (const line of lines) {
         terminal.output(line || "&zwnj;");
+    }
+    
+    if (!searchContainer.classList.contains("hidden") && searchInput.value.length > 0) {
+        performSearch();
     }
 }
 
