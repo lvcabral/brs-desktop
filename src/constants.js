@@ -11,6 +11,7 @@
 // Network services default ports
 export const ECP_PORT = 8060;
 export const TELNET_PORT = 8085;
+export const DEBUG_PORT = 8080;
 export const WEB_INSTALLER_PORT = 80;
 export const SSDP_PORT = 1900;
 

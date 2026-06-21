@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { isECPEnabled, enableECP, disableECP } from "../server/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../server/telnet";
+import { isDebugEnabled, enableDebugServer, disableDebugServer } from "../server/debug";
 import { isInstallerEnabled, enableInstaller, disableInstaller } from "../server/installer";
 import { setLocaleId, setDisplayOption, setPeerRoku } from "../helpers/settings";
 import { reloadDevice } from "../helpers/window";
@@ -204,6 +205,19 @@ export const deviceMenuTemplate = {
                     disableTelnet();
                 } else {
                     enableTelnet();
+                }
+            },
+        },
+        {
+            id: "debug-server",
+            label: "BrightScript Debug Server",
+            type: "checkbox",
+            checked: false,
+            click: (item, window) => {
+                if (isDebugEnabled) {
+                    disableDebugServer();
+                } else {
+                    enableDebugServer();
                 }
             },
         },

@@ -15,8 +15,9 @@ import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
+import { enableDebugServer } from "./server/debug";
 import { randomUUID } from "node:crypto";
-import { ECP_PORT, TELNET_PORT, UPDATE_CHECK_STARTUP, UPDATE_CHECK_INTERVAL } from "./constants";
+import { ECP_PORT, TELNET_PORT, DEBUG_PORT, UPDATE_CHECK_STARTUP, UPDATE_CHECK_INTERVAL } from "./constants";
 import {
     createMenu,
     enableMenuItem,
@@ -187,6 +188,7 @@ app.on("ready", () => {
         runLastChannel: false,
         ecpEnabled: false,
         telnetEnabled: false,
+        debugServerEnabled: false,
         installerEnabled: false,
     };
     loadSettings(mainWindow, startup);
@@ -227,6 +229,12 @@ app.on("ready", () => {
                 "telnet",
                 settings.value("services.telnet").includes(status),
                 TELNET_PORT
+            );
+            updateServerStatus(
+                "Debug",
+                "debug-server",
+                settings.value("services.debug").includes(status),
+                DEBUG_PORT
             );
             updateServerStatus(
                 "Installer",
@@ -283,6 +291,7 @@ function loadSettings(mainWindow, startup) {
     if (settings.preferences.services) {
         startup.ecpEnabled = settings.value("services.ecp").includes("enabled");
         startup.telnetEnabled = settings.value("services.telnet").includes("enabled");
+        startup.debugServerEnabled = settings.value("services.debug").includes("enabled");
         startup.installerEnabled = settings.value("services.installer").includes("enabled");
         setPassword(settings.value("services.password"));
         setPort(settings.value("services.webPort"));
@@ -341,6 +350,9 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
     }
     if (cliArgs?.telnet || (applyStartup && startupOptions.telnetEnabled)) {
         enableTelnet(mainWindow);
+    }
+    if (applyStartup && startupOptions.debugServerEnabled) {
+        enableDebugServer();
     }
     if (cliArgs?.pwd && cliArgs.pwd.trim() !== "") {
         setPassword(cliArgs.pwd.trim());

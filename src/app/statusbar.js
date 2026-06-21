@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { ECP_PORT, WEB_INSTALLER_PORT } from "../constants";
+import { ECP_PORT, WEB_INSTALLER_PORT, DEBUG_PORT } from "../constants";
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
@@ -27,6 +27,8 @@ const statusECP = document.getElementById("statusECP");
 const statusECPText = document.getElementById("statusECPText");
 const statusTelnet = document.getElementById("statusTelnet");
 const statusTelnetText = document.getElementById("statusTelnetText");
+const statusDebug = document.getElementById("statusDebug");
+const statusDebugText = document.getElementById("statusDebugText");
 const statusWeb = document.getElementById("statusWeb");
 const statusWebText = document.getElementById("statusWebText");
 const colorValues = getComputedStyle(document.documentElement);
@@ -161,6 +163,13 @@ export function setServerStatus(server, enabled, port) {
             statusTelnet.style.display = "";
         } else {
             statusTelnet.style.display = "none";
+        }
+    } else if (server === "Debug") {
+        if (enabled) {
+            statusDebugText.innerText = port.toString();
+            statusDebug.style.display = "";
+        } else {
+            statusDebug.style.display = "none";
         }
     }
 }

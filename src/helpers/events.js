@@ -9,7 +9,8 @@ import { app, BrowserWindow } from "electron";
 import { subscribeInstaller } from "../server/installer";
 import { subscribeECP } from "../server/ecp";
 import { subscribeTelnet } from "../server/telnet";
-import { ECP_PORT, TELNET_PORT } from "../constants";
+import { subscribeDebugServer } from "../server/debug";
+import { ECP_PORT, TELNET_PORT, DEBUG_PORT } from "../constants";
 import { getRecentPackage, getAppList } from "../menu/menuService";
 import { updateServerStatus } from "./settings";
 import { loadFile } from "./files";
@@ -22,6 +23,7 @@ export function subscribeServerEvents() {
     subscribeECP("events", ecpEvents);
     subscribeInstaller("events", installerEvents);
     subscribeTelnet("events", telnetEvents);
+    subscribeDebugServer("events", debugServerEvents);
 }
 
 function ecpEvents(event, data) {
@@ -75,5 +77,11 @@ function installerEvents(event, data) {
 function telnetEvents(event, enabled) {
     if (event === "enabled") {
         updateServerStatus("Telnet", "telnet", enabled, TELNET_PORT);
+    }
+}
+
+function debugServerEvents(event, enabled) {
+    if (event === "enabled") {
+        updateServerStatus("Debug", "debug-server", enabled, DEBUG_PORT);
     }
 }
