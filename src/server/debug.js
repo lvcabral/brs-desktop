@@ -46,6 +46,33 @@ const HELP_COMMANDS = [
     { cmd: "type", args: "", desc: "Send a literal text sequence." }
 ];
 
+const PRESS_HELP = [
+    "h            Home",
+    "u            Up",
+    "d            Down",
+    "r            Right",
+    "l            Left",
+    "s            Select",
+    "f,>          Fwd",
+    "b,<          Rev",
+    "p            Play",
+    "y            InstantReplay",
+    "i            Info",
+    "k            Back",
+    "=            Backspace",
+    "o            PlayOnly",
+    "t            Stop",
+    "e            Enter",
+    "v            Pause",
+    "+            Channel Up",
+    "-            Channel Down",
+    "\\            Volume Mute",
+    "#            PowerOff",
+    "a            A",
+    "c            B",
+    "0-9          Digits 0 to 9",
+].join("\r\n");
+
 function getHelpText(command) {
     if (!command) {
         return HELP_COMMANDS.map(c => {
@@ -156,16 +183,16 @@ function processTypeQueue() {
     }
     isTyping = true;
     const step = typeQueue.shift();
-    if (step.char === null) {
+    if (step.key === null) {
         if (!step.client.destroyed) {
             step.client.write(">");
         }
         processTypeQueue();
     } else {
         if (!step.client.destroyed) {
-            step.window.webContents.send("postKeyPress", `lit_${step.char}`);
+            step.window.webContents.send("postKeyPress", step.key);
         }
-        setTimeout(processTypeQueue, 50);
+        setTimeout(processTypeQueue, 300);
     }
 }
 
@@ -174,20 +201,77 @@ function sendDebugCommand(line, client) {
     const cmd = expr[0].toLowerCase();
     
     if (cmd === "exit" || cmd === "quit" || cmd === "q") {
-        client.write("bye!\r\n");
+        client.write("Quit command received, exiting.\r\n");
         client.destroy();
         return;
     } else if (cmd === "help" || cmd === "?") {
         const arg = expr[1] ? expr[1].trim() : "";
         client.write(getHelpText(arg));
+    } else if (cmd === "press") {
+        const arg = expr[1] ? expr[1].trim() : "";
+        if (!arg) {
+            client.write(PRESS_HELP + "\r\n");
+        } else {
+            const window = BrowserWindow.fromId(1);
+            if (window) {
+                for (const char of arg) {
+                    let key;
+                    switch (char.toLowerCase()) {
+                        case 'h': key = "home"; break;
+                        case 'k': key = "back"; break;
+                        case 'u': key = "up"; break;
+                        case 'd': key = "down"; break;
+                        case 'l': key = "left"; break;
+                        case 'r': key = "right"; break;
+                        case 's': key = "select"; break;
+                        case 'y': key = "instantreplay"; break;
+                        case '<': key = "rev"; break;
+                        case 'b': key = "rev"; break;
+                        case '>': key = "fwd"; break;
+                        case 'f': key = "fwd"; break;
+                        case 'i': key = "info"; break;
+                        case '=': key = "backspace"; break;
+                        case 'p': key = "play"; break;
+                        case 'v': key = "pause"; break;
+                        case 'e': key = "enter"; break;
+                        case 'a': key = "a"; break;
+                        case 'c': key = "b"; break;
+                        case 'o': key = "playonly"; break;
+                        case 't': key = "stop"; break;
+                        case '+': key = "channelup"; break;
+                        case '-': key = "channeldown"; break;
+                        case '\\': key = "volumemute"; break;
+                        case '#': key = "poweroff"; break;
+                        case '0': key = "lit_0"; break;
+                        case '1': key = "lit_1"; break;
+                        case '2': key = "lit_2"; break;
+                        case '3': key = "lit_3"; break;
+                        case '4': key = "lit_4"; break;
+                        case '5': key = "lit_5"; break;
+                        case '6': key = "lit_6"; break;
+                        case '7': key = "lit_7"; break;
+                        case '8': key = "lit_8"; break;
+                        case '9': key = "lit_9"; break;
+                    }
+                    if (key) {
+                        typeQueue.push({ key, window, client });
+                    }
+                }
+                typeQueue.push({ key: null, window, client });
+                if (!isTyping) {
+                    processTypeQueue();
+                }
+                return;
+            }
+        }
     } else if (cmd === "type") {
         const text = expr[1] || "";
         const window = BrowserWindow.fromId(1);
         if (window) {
             for (const char of text) {
-                typeQueue.push({ char, window, client });
+                typeQueue.push({ key: `lit_${char}`, window, client });
             }
-            typeQueue.push({ char: null, window, client });
+            typeQueue.push({ key: null, window, client });
             if (!isTyping) {
                 processTypeQueue();
             }
