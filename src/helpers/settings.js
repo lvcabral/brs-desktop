@@ -1436,31 +1436,32 @@ function saveSimulatorSettings(options, window) {
 }
 
 function saveServicesSettings(services, window) {
-    if (services) {
-        if (services.installer.includes("enabled")) {
-            if (!isInstallerEnabled) {
-                setPort(services.webPort);
-                setPassword(services.password);
-                enableInstaller(window);
-            }
-        } else {
-            disableInstaller(window);
+    if (!services) {
+        return;
+    }
+    if (services.installer?.includes("enabled")) {
+        if (!isInstallerEnabled) {
+            setPort(services.webPort);
+            setPassword(services.password);
+            enableInstaller(window);
         }
-        if (services.ecp.includes("enabled")) {
-            enableECP(window);
-        } else {
-            disableECP(window);
-        }
-        if (services.telnet.includes("enabled")) {
-            enableTelnet(window);
-        } else {
-            disableTelnet(window);
-        }
-        if (services.debug && services.debug.includes("enabled")) {
-            enableDebugServer(window, settings);
-        } else {
-            disableDebugServer();
-        }
+    } else {
+        disableInstaller(window);
+    }
+    if (services.ecp?.includes("enabled")) {
+        enableECP(window);
+    } else {
+        disableECP(window);
+    }
+    if (services.telnet?.includes("enabled")) {
+        enableTelnet(window);
+    } else {
+        disableTelnet(window);
+    }
+    if (services.debug?.includes("enabled")) {
+        enableDebugServer(window, settings);
+    } else {
+        disableDebugServer();
     }
 }
 
