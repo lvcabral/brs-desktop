@@ -20,6 +20,7 @@ import { helpMenuTemplate } from "./helpMenuTemplate";
 import { isInstallerEnabled } from "../server/installer";
 import { isECPEnabled } from "../server/ecp";
 import { isTelnetEnabled } from "../server/telnet";
+import { isDebugEnabled } from "../server/debug";
 import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile, loadUrl } from "../helpers/files";
 import path from "node:path";
@@ -245,6 +246,7 @@ function rebuildMenu(template = false) {
                 checkMenuItem("web-installer", isInstallerEnabled);
                 checkMenuItem("ecp-api", isECPEnabled);
                 checkMenuItem("telnet", isTelnetEnabled);
+                checkMenuItem("debug-server", isDebugEnabled);
                 const peerRoku = getPeerRoku();
                 checkMenuItem("peer-roku-deploy", peerRoku.deploy);
                 checkMenuItem("peer-roku-control", peerRoku.syncControl);

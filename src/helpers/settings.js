@@ -15,6 +15,7 @@ import { Client as SSDPClient } from "@lvcabral/node-ssdp";
 import { setAspectRatio } from "./window";
 import { enableECP, disableECP } from "../server/ecp";
 import { enableTelnet, disableTelnet } from "../server/telnet";
+import { enableDebugServer, disableDebugServer } from "../server/debug";
 import {
     enableInstaller,
     disableInstaller,
@@ -66,6 +67,7 @@ export function getSettings(window) {
                 password: DEFAULT_USRPWD,
                 ecp: ["enabled"],
                 telnet: ["enabled"],
+                debug: ["enabled"],
             },
             device: {
                 deviceModel: globalThis.sharedObject.deviceInfo.deviceModel,
@@ -349,7 +351,7 @@ export function getSettings(window) {
                                     help: "ECP service allows the simulator to be controlled over the network",
                                 },
                                 {
-                                    label: "BrightScript Remote Console (Telnet)",
+                                    label: "BrightScript Remote Console (Telnet Port 8085)",
                                     key: "telnet",
                                     type: "checkbox",
                                     options: [
@@ -359,6 +361,18 @@ export function getSettings(window) {
                                         },
                                     ],
                                     help: "Remote Console can be accessed using an application such as PuTTY or terminal on Mac and Linux",
+                                },
+                                {
+                                    label: "BrightScript Debug Server (Telnet Port 8080)",
+                                    key: "debug",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Service Enabled",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "Debug Server can be accessed using an application such as PuTTY or terminal on Mac and Linux",
                                 },
                             ],
                         },
@@ -1088,6 +1102,8 @@ export async function showSettings() {
             checkMenuItem("ecp-api", ecpEnabled);
             const telnetEnabled = settings.value("services.telnet").includes("enabled");
             checkMenuItem("telnet", telnetEnabled);
+            const debugEnabled = settings.value("services.debug")?.includes("enabled") ?? false;
+            checkMenuItem("debug-server", debugEnabled);
             const options = settings.value("simulator.options");
             if (options) {
                 checkMenuItem("on-top", options.includes("alwaysOnTop"));
@@ -1420,26 +1436,32 @@ function saveSimulatorSettings(options, window) {
 }
 
 function saveServicesSettings(services, window) {
-    if (services) {
-        if (services.installer.includes("enabled")) {
-            if (!isInstallerEnabled) {
-                setPort(services.webPort);
-                setPassword(services.password);
-                enableInstaller(window);
-            }
-        } else {
-            disableInstaller(window);
+    if (!services) {
+        return;
+    }
+    if (services.installer?.includes("enabled")) {
+        if (!isInstallerEnabled) {
+            setPort(services.webPort);
+            setPassword(services.password);
+            enableInstaller(window);
         }
-        if (services.ecp.includes("enabled")) {
-            enableECP(window);
-        } else {
-            disableECP(window);
-        }
-        if (services.telnet.includes("enabled")) {
-            enableTelnet(window);
-        } else {
-            disableTelnet(window);
-        }
+    } else {
+        disableInstaller(window);
+    }
+    if (services.ecp?.includes("enabled")) {
+        enableECP(window);
+    } else {
+        disableECP(window);
+    }
+    if (services.telnet?.includes("enabled")) {
+        enableTelnet(window);
+    } else {
+        disableTelnet(window);
+    }
+    if (services.debug?.includes("enabled")) {
+        enableDebugServer(window, settings);
+    } else {
+        disableDebugServer();
     }
 }
 

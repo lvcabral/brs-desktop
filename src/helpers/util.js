@@ -182,3 +182,25 @@ function getSSID() {
 export function formatPath(path) {
     return isWindows ? path.replaceAll("\\", "/") : path;
 }
+
+/*
+ * Function to get the Roku OS version
+ * @param {string} firmware - The firmware version
+ * @param {boolean} version - Whether to return the version or the build
+ * @param {bolean} full - Whether to return the full version with build
+ * @returns {string} - The Roku OS version
+ */
+export function getRokuOS(firmware, version = true, full = false) {
+    if (firmware && firmware.length > 12) {
+        if (!version) {
+            return firmware.slice(8, 12);
+        }
+        const versions = "0123456789ACDEFGHJKLMNPRSTUVWXY";
+        const major = versions.indexOf(firmware.charAt(2));
+        const minor = firmware.slice(4, 5);
+        const revision = firmware.slice(5, 6);
+        const base = `${major}.${minor}.${revision}`;
+        return full ? `${base}.${firmware.slice(8, 12)}` : base;
+    }
+    return "";
+}
