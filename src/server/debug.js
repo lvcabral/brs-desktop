@@ -5,16 +5,19 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { app, BrowserWindow } from "electron";
+import { BrowserWindow } from "electron";
 import { DEBUG_PORT } from "../constants";
+import { getRokuOS } from "../helpers/util";
 import * as telnet from "net";
 
 let server;
+let device;
 let clientId = 0;
 let clients = new Map();
 let lines = new Map();
 let typeQueue = [];
 let isTyping = false;
+let rendezvousTrackingEnabled = false;
 
 export let isDebugEnabled = false;
 
@@ -111,7 +114,11 @@ export function enableDebugServer() {
             clients.delete(id);
             lines.delete(id);
         });
-        client.write(`Connected to ${app.getName()} Debug Server\r\n> `);
+        if (!device) {
+            device = globalThis.sharedObject.deviceInfo;
+        }
+        const version = getRokuOS(device.firmwareVersion, true, true);
+        client.write(`${device.serialNumber} (${device.friendlyName} - ${version})\r\n>`);
         clients.set(id, client);
         lines.set(id, "");
     });
@@ -198,15 +205,37 @@ function processTypeQueue() {
 
 function sendDebugCommand(line, client) {
     const expr = line.trim().split(/(?<=^\S+)\s/);
-    const cmd = expr[0].toLowerCase();
+    const cmd = expr[0];
     
-    if (cmd === "exit" || cmd === "quit" || cmd === "q") {
+    if (["exit", "quit", "q"].includes(cmd)) {
         client.write("Quit command received, exiting.\r\n");
         client.destroy();
         return;
     } else if (cmd === "help" || cmd === "?") {
         const arg = expr[1] ? expr[1].trim() : "";
         client.write(getHelpText(arg));
+    } else if (cmd === "showkey") {
+        client.write(`Dev ID: ${device?.developerId ?? "<unkeyed>"}\r\n`);
+    } else if (cmd === "fps_display") {
+        // No reply. Enable the FPS display on the simulator
+    } else if (cmd === "clear_launch_caches") {
+        client.write("Done.\r\n");
+    } else if (["bsprof-status","bsprof-pause","bsprof-resume"].includes(cmd)) {
+        client.write("No profiling session\r\n");
+    } else if (cmd === "loaded_textures") {
+        client.write("loaded_textures only works when a Scene Graph screen is displayed\r\n");
+    } else if (cmd === "logrendezvous") {
+        let arg = expr[1]?.trim();
+        if (arg && ["on", "off"].includes(arg)) {
+            rendezvousTrackingEnabled = arg === "on";
+        } else if (!arg) {
+            arg = rendezvousTrackingEnabled ? "on" : "off";
+        }
+        if (["on", "off"].includes(arg)) {
+            client.write(`logrendezvous: rendezvous logging is ${arg}\r\n`);
+        } else {
+            client.write("usage: logrendezvous [on|off]\r\n");
+        }
     } else if (cmd === "press") {
         const arg = expr[1] ? expr[1].trim() : "";
         if (!arg) {

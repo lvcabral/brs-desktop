@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { isValidIP } from "../helpers/util";
+import { isValidIP, getRokuOS } from "../helpers/util";
 import { ECP_PORT, SSDP_PORT } from "../constants";
 import { Server as SSDP } from "@lvcabral/node-ssdp";
 import xmlbuilder from "xmlbuilder";
@@ -630,20 +630,6 @@ function getMacAddress() {
         mac = "87:3e:aa:9f:77:70";
     }
     return mac;
-}
-
-function getRokuOS(firmware, version = true) {
-    if (firmware && firmware.length > 0) {
-        if (version) {
-            const versions = "0123456789ACDEFGHJKLMNPRSTUVWXY";
-            const major = versions.indexOf(firmware.charAt(2));
-            const minor = firmware.slice(4, 5);
-            const revision = firmware.slice(5, 6);
-            return `${major}.${minor}.${revision}`;
-        } else {
-            return firmware.slice(8, 12);
-        }
-    }
 }
 
 function getAppIconPath(appID) {
