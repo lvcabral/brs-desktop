@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { ECP_PORT, WEB_INSTALLER_PORT, DEBUG_PORT } from "../constants";
+import { ECP_PORT, WEB_INSTALLER_PORT } from "../constants";
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
