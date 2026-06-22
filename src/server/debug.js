@@ -234,7 +234,7 @@ function sendDebugCommand(line, client) {
             if (!displayOptions.includes("perfStats") && arg !== "0") {
                 displayOptions.push("perfStats");
                 window.webContents.send("setPerfStats", true);
-            } else if (arg === "" || arg ==="0") {
+            } else if (arg === "" || arg === "0") {
                 displayOptions.splice(displayOptions.indexOf("perfStats"), 1);
                 window.webContents.send("setPerfStats", false);
             }
@@ -259,7 +259,7 @@ function sendDebugCommand(line, client) {
             client.write("usage: logrendezvous [on|off]\r\n");
         }
     } else if (cmd === "plugins") {
-        if (device && device.appList) {
+        if (device?.appList) {
             for (const app of device.appList) {
                 const idStr = app.id.toString().padStart(20, " ");
                 client.write(` F-C + S - S6 ${idStr} [usg     0] [ref  0]       ${app.title}, ${app.version}\r\n`);
@@ -269,9 +269,9 @@ function sendDebugCommand(line, client) {
         const arg = expr[1] ? expr[1].trim() : "";
         if (!arg) {
             client.write("Usage: remove_plugin <channel id>\r\n");
-        } else if (device && device.appList) {
+        } else if (device?.appList) {
             const index = device.appList.findIndex(app => app.id === arg || app.id.toString() === arg);
-            if (index !== -1) {
+            if (index > -1) {
                 const title = device.appList[index].title;
                 device.appList.splice(index, 1);
                 client.write(`Removed plugin id: ${arg}, name: ${title}\r\n`);
@@ -282,9 +282,7 @@ function sendDebugCommand(line, client) {
         }
     } else if (cmd === "press") {
         const arg = expr[1] ? expr[1].trim() : "";
-        if (!arg) {
-            client.write(PRESS_HELP + "\r\n");
-        } else {
+        if (arg) {
             const window = BrowserWindow.fromId(1);
             if (window) {
                 for (const char of arg) {
@@ -336,6 +334,8 @@ function sendDebugCommand(line, client) {
                 }
                 return;
             }
+        } else {
+            client.write(PRESS_HELP + "\r\n");
         }
     } else if (cmd === "type") {
         const text = expr[1] || "";
