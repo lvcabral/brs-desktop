@@ -1457,9 +1457,9 @@ function saveServicesSettings(services, window) {
             disableTelnet(window);
         }
         if (services.debug && services.debug.includes("enabled")) {
-            enableDebugServer(window);
+            enableDebugServer(window, settings);
         } else {
-            disableDebugServer(window);
+            disableDebugServer();
         }
     }
 }

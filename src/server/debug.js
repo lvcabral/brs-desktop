@@ -8,10 +8,13 @@
 import { BrowserWindow } from "electron";
 import { DEBUG_PORT } from "../constants";
 import { getRokuOS } from "../helpers/util";
+import { reloadDevice } from "../helpers/window";
 import * as telnet from "net";
 
 let server;
 let device;
+let window;
+let settings;
 let clientId = 0;
 let clients = new Map();
 let lines = new Map();
@@ -93,9 +96,15 @@ function getHelpText(command) {
     return `No help found for '${command}'.\r\n`;
 }
 
-export function enableDebugServer() {
+export function enableDebugServer(win, prefs) {
     if (isDebugEnabled) {
         return;
+    }
+    if (!window && win) {
+        window = win;
+    }
+    if (!settings && prefs) {
+        settings = prefs;
     }
     server = telnet.createServer();
     server.on("connection", (client) => {
@@ -167,12 +176,12 @@ function processData(data, id) {
         const client = clients.get(id);
         let line = lines.get(id);
         const hexData = data.toString('hex');
-        
+
         // Ignore telnet control characters
         if (data[0] === 0xff || data[0] === 0x03) {
             return;
         }
-        
+
         line += data.toString();
         if (!hexData.endsWith("0d") && !hexData.endsWith("0a")) {
             lines.set(id, line);
@@ -206,7 +215,7 @@ function processTypeQueue() {
 function sendDebugCommand(line, client) {
     const expr = line.trim().split(/(?<=^\S+)\s/);
     const cmd = expr[0];
-    
+
     if (["exit", "quit", "q"].includes(cmd)) {
         client.write("Quit command received, exiting.\r\n");
         client.destroy();
@@ -214,13 +223,26 @@ function sendDebugCommand(line, client) {
     } else if (cmd === "help" || cmd === "?") {
         const arg = expr[1] ? expr[1].trim() : "";
         client.write(getHelpText(arg));
+    } else if (cmd === "genkey") {
+        client.write("Setup your Developer Id in Settings->Device.\r\n");
     } else if (cmd === "showkey") {
         client.write(`Dev ID: ${device?.developerId ?? "<unkeyed>"}\r\n`);
     } else if (cmd === "fps_display") {
-        // No reply. Enable the FPS display on the simulator
+        let arg = expr[1]?.trim() ?? "";
+        const displayOptions = settings?.value("display.options");
+        if (displayOptions && window) {
+            if (!displayOptions.includes("perfStats") && arg !== "0") {
+                displayOptions.push("perfStats");
+                window.webContents.send("setPerfStats", true);
+            } else if (arg === "" || arg ==="0") {
+                displayOptions.splice(displayOptions.indexOf("perfStats"), 1);
+                window.webContents.send("setPerfStats", false);
+            }
+            settings.value("display.options", displayOptions);
+        }
     } else if (cmd === "clear_launch_caches") {
         client.write("Done.\r\n");
-    } else if (["bsprof-status","bsprof-pause","bsprof-resume"].includes(cmd)) {
+    } else if (["bsprof-status", "bsprof-pause", "bsprof-resume"].includes(cmd)) {
         client.write("No profiling session\r\n");
     } else if (cmd === "loaded_textures") {
         client.write("loaded_textures only works when a Scene Graph screen is displayed\r\n");
@@ -235,6 +257,28 @@ function sendDebugCommand(line, client) {
             client.write(`logrendezvous: rendezvous logging is ${arg}\r\n`);
         } else {
             client.write("usage: logrendezvous [on|off]\r\n");
+        }
+    } else if (cmd === "plugins") {
+        if (device && device.appList) {
+            for (const app of device.appList) {
+                const idStr = app.id.toString().padStart(20, " ");
+                client.write(` F-C + S - S6 ${idStr} [usg     0] [ref  0]       ${app.title}, ${app.version}\r\n`);
+            }
+        }
+    } else if (cmd === "remove_plugin") {
+        const arg = expr[1] ? expr[1].trim() : "";
+        if (!arg) {
+            client.write("Usage: remove_plugin <channel id>\r\n");
+        } else if (device && device.appList) {
+            const index = device.appList.findIndex(app => app.id === arg || app.id.toString() === arg);
+            if (index !== -1) {
+                const title = device.appList[index].title;
+                device.appList.splice(index, 1);
+                client.write(`Removed plugin id: ${arg}, name: ${title}\r\n`);
+                reloadDevice();
+            } else {
+                client.write(`Failed to remove plugin id: ${arg}, name: unknown. Plugin is NOT installed on the device\r\n`);
+            }
         }
     } else if (cmd === "press") {
         const arg = expr[1] ? expr[1].trim() : "";
@@ -295,7 +339,6 @@ function sendDebugCommand(line, client) {
         }
     } else if (cmd === "type") {
         const text = expr[1] || "";
-        const window = BrowserWindow.fromId(1);
         if (window) {
             for (const char of text) {
                 typeQueue.push({ key: `lit_${char}`, window, client });

@@ -352,7 +352,7 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
         enableTelnet(mainWindow);
     }
     if (applyStartup && startupOptions.debugServerEnabled) {
-        enableDebugServer();
+        enableDebugServer(mainWindow, settings);
     }
     if (cliArgs?.pwd && cliArgs.pwd.trim() !== "") {
         setPassword(cliArgs.pwd.trim());
