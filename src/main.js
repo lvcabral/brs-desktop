@@ -250,9 +250,10 @@ app.on("ready", () => {
     setupEvents(mainWindow);
     subscribeServerEvents();
     // Initialize version checking (only in production and if not disabled)
-    if (app.isPackaged && !getSimulatorOption("disableCheckForUpdates")) {
+    if (app.isPackaged) {
         // Check for updates 15 seconds after app start
         setTimeout(async () => {
+            if (getSimulatorOption("disableCheckForUpdates")) return;
             try {
                 await checkForUpdates();
             } catch (error) {
@@ -262,6 +263,7 @@ app.on("ready", () => {
 
         // Check for updates every 24 hours
         setInterval(async () => {
+            if (getSimulatorOption("disableCheckForUpdates")) return;
             try {
                 await checkForUpdates();
             } catch (error) {
