@@ -28,5 +28,5 @@ export const EDITOR_CODE_BRS = "editor_code.brs";
 export const MAX_PACKAGE_SIZE_MB = 7;
 
 // Update check intervals (in milliseconds)
-export const UPDATE_CHECK_STARTUP = 10000; // 30 seconds
-export const UPDATE_CHECK_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
+export const UPDATE_CHECK_STARTUP = 15000; // 15 seconds
+export const UPDATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours

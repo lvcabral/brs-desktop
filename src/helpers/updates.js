@@ -8,6 +8,7 @@
 import { app, dialog, BrowserWindow, shell } from "electron";
 import https from "node:https";
 import packageInfo from "../../package.json";
+import { getSettings } from "./settings";
 
 let updateAvailable = false;
 let latestVersion = null;
@@ -46,7 +47,7 @@ function showUpdateAvailableDialog(version) {
             title: "Update Available",
             message: `A new version (${version}) is available!`,
             detail: "Click 'Download' to visit the releases page and download the latest version.",
-            buttons: ["Download", "Later"],
+            buttons: ["Download", "Later", "Skip this Version"],
             defaultId: 0,
         })
         .then((result) => {
@@ -54,6 +55,10 @@ function showUpdateAvailableDialog(version) {
                 // User chose to download - open releases page
                 const repoUrl = packageInfo.repository.url.replace(/\.git$/, "");
                 shell.openExternal(`${repoUrl}/releases/latest`);
+            } else if (result.response === 2) {
+                // User chose to skip this version
+                const settings = getSettings(mainWindow);
+                settings?.value("simulator.skippedUpdateVersion", version);
             }
             // Reset flag when dialog is dismissed
             dialogShown = false;
@@ -79,7 +84,24 @@ function showNoUpdatesDialog(version) {
 
 // Handle version comparison result
 function handleVersionCheck(currentVersion, forceCheck, resolve) {
+    const mainWindow = BrowserWindow.fromId(1);
+    let skippedVersion = "";
+    if (mainWindow) {
+        const settings = getSettings(mainWindow);
+        skippedVersion = settings?.value("simulator.skippedUpdateVersion");
+        if (!app.isPackaged && skippedVersion) {
+            console.log(`Skipped version: ${skippedVersion}`);
+        }
+    }
+
     if (compareVersions(currentVersion, latestVersion) === 1) {
+        if (!forceCheck && skippedVersion === latestVersion) {
+            // Silently ignore skipped version if not manually forced
+            updateAvailable = false;
+            resolve({ updateAvailable: false, version: currentVersion });
+            return;
+        }
+
         updateAvailable = true;
         if (!app.isPackaged) {
             console.log(`Update available: ${latestVersion}`);
