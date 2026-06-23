@@ -251,7 +251,7 @@ app.on("ready", () => {
     subscribeServerEvents();
     // Initialize version checking (only in production and if not disabled)
     if (app.isPackaged && !getSimulatorOption("disableCheckForUpdates")) {
-        // Check for updates 30 seconds after app start
+        // Check for updates 15 seconds after app start
         setTimeout(async () => {
             try {
                 await checkForUpdates();
@@ -260,7 +260,7 @@ app.on("ready", () => {
             }
         }, UPDATE_CHECK_STARTUP);
 
-        // Check for updates every 4 hours
+        // Check for updates every 24 hours
         setInterval(async () => {
             try {
                 await checkForUpdates();

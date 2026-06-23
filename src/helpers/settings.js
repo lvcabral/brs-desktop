@@ -60,6 +60,7 @@ export function getSettings(window) {
             simulator: {
                 options: ["statusBar", "debugOnCrash"],
                 theme: "purple",
+                skippedUpdateVersion: "",
             },
             services: {
                 installer: isLinux ? [] : ["enabled"],
