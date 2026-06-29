@@ -287,6 +287,9 @@ api.receive("console", function (text, error) {
     }
     showToast(text, 5000, error);
 });
+api.receive("showToast", function (message, duration, error) {
+    showToast(message, duration, error);
+});
 api.receive("debugCommand", function (cmd) {
     brs.debug(cmd);
 });
