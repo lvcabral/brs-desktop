@@ -1,4 +1,4 @@
-﻿/*---------------------------------------------------------------------------------------------
+/*---------------------------------------------------------------------------------------------
  *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
  *
  *  Copyright (c) 2019-2026 Marcelo Lv Cabral. All Rights Reserved.
@@ -155,6 +155,7 @@ contextBridge.exposeInMainWorld("api", {
             "editorRedo",
             "mountExternalVolume",
             "unmountExternalVolume",
+            "showToast",
         ];
         if (validChannels.includes(channel)) {
             // Deliberately strip event as it includes `sender`

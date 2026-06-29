@@ -75,6 +75,13 @@ export function createWindow(name, options) {
         return { action: "allow" };
     });
 
+    // OOM / Crash Detection — render-process-gone fires when Electron detects the renderer terminated
+    win.webContents.on("render-process-gone", (event, details) => {
+        if (details.reason === "oom" || details.reason === "crashed") {
+            handleRendererOOM(win, `render-process-gone: ${details.reason}`);
+        }
+    });
+
     // Window Focus Events
     win.on("focus", () => {
         appFocused = true;
@@ -275,4 +282,26 @@ function windowWithinBounds(windowState, bounds) {
         windowState.x + windowState.width <= bounds.x + bounds.width &&
         windowState.y + windowState.height <= bounds.y + bounds.height
     );
+}
+
+// OOM Recovery — reloads the device and shows an error toast after reload
+let isRecovering = false;
+function handleRendererOOM(win, source) {
+    if (isRecovering || win.isDestroyed()) return;
+    isRecovering = true;
+    console.error(`[OOM Watch] Renderer crash detected via ${source}. Reloading device...`);
+    reloadDevice();
+    win.webContents.once("did-finish-load", () => {
+        win.webContents.send(
+            "showToast",
+            "Out of memory! The running app exhausted the available memory. Device has been reset.",
+            8000,
+            true
+        );
+        isRecovering = false;
+    });
+    // Safety: clear recovering flag after a timeout in case did-finish-load never fires
+    setTimeout(() => {
+        isRecovering = false;
+    }, 15000);
 }

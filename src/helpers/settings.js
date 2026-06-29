@@ -183,12 +183,12 @@ export function getSettings(window) {
                                             value: "consoleStartup",
                                         },
                                         {
-                                            label: "Open Console when the Micro Debugger starts",
-                                            value: "consoleOnDebug",
+                                            label: "Developer Mode: Debugger Starts on Crashes or STOP Statement",
+                                            value: "debugOnCrash",
                                         },
                                         {
-                                            label: "Start the Micro Debugger when the App Crashes",
-                                            value: "debugOnCrash",
+                                            label: "Open Console screen when the Debugger starts",
+                                            value: "consoleOnDebug",
                                         },
                                         {
                                             label: "Pause App when the Simulator loses the Focus",
