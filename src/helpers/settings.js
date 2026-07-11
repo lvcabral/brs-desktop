@@ -50,6 +50,9 @@ export function getSettings(window) {
     const bounds = window.getBounds();
     const x = Math.round(bounds.x + Math.abs(bounds.width - w) / 2);
     const y = Math.round(bounds.y + Math.abs(bounds.height - h + 25) / 2);
+    if (!app.isPackaged) {
+        console.log("Loading settings from:", path.resolve(app.getPath("userData"), "brs-settings.json"));
+    }
     settings = new ElectronPreferences({
         debug: false,
         config: {
