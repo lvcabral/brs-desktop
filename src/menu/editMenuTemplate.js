@@ -30,12 +30,15 @@ export const editMenuTemplate = {
         {
             label: "Paste",
             accelerator: "CmdOrCtrl+V",
-            click: () => {
-                const window = BrowserWindow.fromId(1);
-                if (window) {
-                    const text = clipboard.readText();
-                    if (text && text.length > 0) {
-                        window.webContents.send("pasteText", text);
+            click: (item, focusedWindow) => {
+                if (focusedWindow) {
+                    if (focusedWindow.id === 1) {
+                        const text = clipboard.readText();
+                        if (text && text.length > 0) {
+                            focusedWindow.webContents.send("pasteText", text);
+                        }
+                    } else {
+                        focusedWindow.webContents.paste();
                     }
                 }
             },

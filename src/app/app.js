@@ -324,7 +324,7 @@ function processPasteQueue() {
     }
     isPasting = true;
     const key = pasteQueue.shift();
-    brs.sendKeyPress(key);
+    brs.sendKeyPress(key, 50);
     setTimeout(processPasteQueue, 100);
 }
 let lastPasteTime = 0;
