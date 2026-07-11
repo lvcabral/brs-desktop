@@ -5,6 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
+import { clipboard, BrowserWindow } from "electron";
 import { showSettings } from "../helpers/settings";
 import { copyScreenshot } from "../helpers/window";
 const isMacOS = process.platform === "darwin";
@@ -26,7 +27,19 @@ export const editMenuTemplate = {
                 copyScreenshot();
             },
         },
-        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:", visible: isMacOS },
+        {
+            label: "Paste",
+            accelerator: "CmdOrCtrl+V",
+            click: () => {
+                const window = BrowserWindow.fromId(1);
+                if (window) {
+                    const text = clipboard.readText();
+                    if (text && text.length > 0) {
+                        window.webContents.send("pasteText", text);
+                    }
+                }
+            },
+        },
         {
             label: "Select All",
             accelerator: "CmdOrCtrl+A",

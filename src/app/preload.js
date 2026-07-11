@@ -23,6 +23,21 @@ globalThis.addEventListener("DOMContentLoaded", () => {
         getCurrentWebContents().send("copyScreenshot");
         return false;
     });
+    // Intercept Cmd+V / Ctrl+V in capture phase to prevent "v" from reaching brs-engine
+    // Only apply in the main simulator window (which has the #display canvas)
+    if (document.getElementById("display")) {
+        document.addEventListener("keydown", function (e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === "v") {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                const { clipboard } = require("electron");
+                const text = clipboard.readText();
+                if (text && text.length > 0) {
+                    getCurrentWebContents().send("pasteText", text);
+                }
+            }
+        }, true); // capture phase fires before brs-engine's bubbling-phase handler
+    }
 });
 
 contextBridge.exposeInMainWorld("api", {
@@ -149,6 +164,7 @@ contextBridge.exposeInMainWorld("api", {
             "serverStatus",
             "copyScreenshot",
             "saveScreenshot",
+            "pasteText",
             "executeFile",
             "openEditor",
             "editorUndo",

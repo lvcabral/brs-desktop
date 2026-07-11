@@ -314,6 +314,48 @@ api.receive("copyScreenshot", function () {
 api.receive("saveScreenshot", function (file) {
     takeScreenshot(file);
 });
+// Paste Text Handler - sends each character as a sequential Lit_ keypress
+let pasteQueue = [];
+let isPasting = false;
+function processPasteQueue() {
+    if (pasteQueue.length === 0) {
+        isPasting = false;
+        return;
+    }
+    isPasting = true;
+    const key = pasteQueue.shift();
+    brs.sendKeyPress(key);
+    setTimeout(processPasteQueue, 100);
+}
+let lastPasteTime = 0;
+api.receive("pasteText", function (text) {
+    if (!currentApp.running) {
+        return;
+    }
+    // Debounce to prevent double-paste from menu accelerator + capture handler
+    const now = Date.now();
+    if (now - lastPasteTime < 200) {
+        return;
+    }
+    lastPasteTime = now;
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === "\r") {
+            pasteQueue.push("enter");
+            // Skip the following \n in a \r\n sequence
+            if (i + 1 < text.length && text[i + 1] === "\n") {
+                i++;
+            }
+        } else if (char === "\n") {
+            pasteQueue.push("enter");
+        } else {
+            pasteQueue.push(`Lit_${char}`);
+        }
+    }
+    if (!isPasting) {
+        processPasteQueue();
+    }
+});
 api.receive("setDisplay", function (mode) {
     if (mode !== brs.getDisplayMode()) {
         brs.setDisplayMode(mode);
