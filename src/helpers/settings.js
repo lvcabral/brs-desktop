@@ -969,18 +969,18 @@ export function getSettings(window) {
             {
                 id: "customization",
                 label: "Customization",
-                icon: formatPath(path.join(__dirname, "/images/svg/coding.svg")),
+                icon: formatPath(path.join(__dirname, "/images/svg/custom-features.svg")),
                 form: {
                     groups: [
                         {
-                            label: "Custom Features",
+                            label: "Customization",
                             fields: [
                                 {
-                                    label: "Custom Features List",
+                                    label: "Custom Feature Flags",
                                     key: "customFeatures",
                                     type: "list",
                                     addItemLabel: "Add Feature",
-                                    help: "Add custom features to be passed to the BrightScript app via roDeviceInfo.hasFeature() method.",
+                                    help: "Add custom feature flags to be passed to the BrightScript app via roDeviceInfo.hasFeature() method.",
                                 },
                             ],
                         },
