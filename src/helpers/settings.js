@@ -137,6 +137,9 @@ export function getSettings(window) {
                 sendInput: [],
                 inputMap: {},
             },
+            customization: {
+                customFeatures: [],
+            },
         },
         browserWindowOverrides: {
             title: "Settings",
@@ -963,6 +966,27 @@ export function getSettings(window) {
                     ],
                 },
             },
+            {
+                id: "customization",
+                label: "Customization",
+                icon: formatPath(path.join(__dirname, "/images/svg/coding.svg")),
+                form: {
+                    groups: [
+                        {
+                            label: "Custom Features",
+                            fields: [
+                                {
+                                    label: "Custom Features List",
+                                    key: "customFeatures",
+                                    type: "list",
+                                    addItemLabel: "Add Feature",
+                                    help: "Add custom features to be passed to the BrightScript app via roDeviceInfo.hasFeature() method.",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
         ],
     });
     updatePeerRokuFieldOptions();
@@ -1000,6 +1024,9 @@ export function getSettings(window) {
         }
         if (preferences.externalVolume) {
             handleExternalVolumeSettings(window, preferences.externalVolume);
+        }
+        if (preferences.customization) {
+            setDeviceInfo("customization", "customFeatures", true);
         }
     });
     nativeTheme.on("updated", () => {
@@ -1135,11 +1162,15 @@ export function setPreference(key, value) {
 export function setDeviceInfo(section, key, notifyApp) {
     const oldValue = globalThis.sharedObject.deviceInfo[key];
     const newValue = settings.value(`${section}.${key}`);
-    if (newValue && newValue !== oldValue) {
-        globalThis.sharedObject.deviceInfo[key] = newValue;
+    let isDifferent = newValue !== oldValue;
+    if (Array.isArray(newValue) && Array.isArray(oldValue)) {
+        isDifferent = JSON.stringify(newValue) !== JSON.stringify(oldValue);
+    }
+    if (newValue !== undefined && isDifferent) {
+        globalThis.sharedObject.deviceInfo[key] = Array.isArray(newValue) ? [...newValue] : newValue;
         if (notifyApp) {
             const window = BrowserWindow.fromId(1);
-            window?.webContents.send("setDeviceInfo", key, newValue);
+            window?.webContents.send("setDeviceInfo", key, Array.isArray(newValue) ? [...newValue] : newValue);
         }
     }
 }

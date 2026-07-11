@@ -92,6 +92,7 @@ const deviceInfo = {
     tmpVolSize: 100 * 1024 * 1024, // 100 MB
     cacheFSVolSize: 100 * 1024 * 1024, // 100 MB
     appList: getAppList(),
+    customFeatures: [],
 };
 
 // Get Network Gateway
@@ -335,6 +336,9 @@ function loadSettings(mainWindow, startup) {
         const peerRoku = getPeerRoku();
         checkMenuItem("peer-roku-deploy", peerRoku.deploy);
         checkMenuItem("peer-roku-control", peerRoku.syncControl);
+    }
+    if (settings.preferences.customization) {
+        setDeviceInfo("customization", "customFeatures");
     }
 }
 
