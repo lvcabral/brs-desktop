@@ -2165,7 +2165,6 @@ async function discoverRokuDevices() {
         client.on("error", (error) => {
             const message = `SSDP discovery error: ${error.message}`;
             console.error(message);
-            sendRokuDiscoveryLog(message, true);
         });
 
         client.search("roku:ecp");
@@ -2277,7 +2276,6 @@ function getDeviceMetadata(ipAddr, serialNumber) {
         request.on("error", (error) => {
             const message = `Failed to retrieve Roku device details from ${ipAddr}: ${error.message}`;
             console.error(message);
-            sendRokuDiscoveryLog(message, true);
             resolve({
                 ipAddr,
                 serialNumber: serialNumber || "",
