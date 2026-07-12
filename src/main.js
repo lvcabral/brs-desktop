@@ -87,7 +87,6 @@ const deviceInfo = {
     },
     localIps: localIps,
     startTime: Date.now(),
-    autoPlayEnabled: true,
     maxSimulStreams: 2,
     audioVolume: 50,
     audioLanguage: "en",
