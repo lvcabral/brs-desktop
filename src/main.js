@@ -66,6 +66,7 @@ const deviceInfo = {
     deviceModel: "4200X",
     clientId: randomUUID(), // Unique identifier of the device
     RIDA: randomUUID(), // Unique identifier for advertisement tracking
+    autoPlayEnabled: true,
     countryCode: "US",
     timeZone: dt.zoneName,
     timeZoneIANA: dt.zoneName,
@@ -86,6 +87,7 @@ const deviceInfo = {
     },
     localIps: localIps,
     startTime: Date.now(),
+    autoPlayEnabled: true,
     maxSimulStreams: 2,
     audioVolume: 50,
     audioLanguage: "en",
@@ -304,6 +306,10 @@ function loadSettings(mainWindow, startup) {
         setDeviceInfo("device", "clientId");
         setDeviceInfo("device", "RIDA");
         setDeviceInfo("device", "developerId");
+        const autoPlayEnabled = settings.value("device.autoPlayEnabled");
+        if (Array.isArray(autoPlayEnabled)) {
+            globalThis.sharedObject.deviceInfo.autoPlayEnabled = autoPlayEnabled.includes("enabled");
+        }
     }
     if (settings.preferences.display) {
         setDisplayOption("displayMode");

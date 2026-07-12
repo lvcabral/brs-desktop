@@ -79,6 +79,7 @@ export function getSettings(window) {
                 RIDA: globalThis.sharedObject.deviceInfo.RIDA,
                 developerId: globalThis.sharedObject.deviceInfo.developerId,
                 developerPwd: "",
+                autoPlayEnabled: globalThis.sharedObject.deviceInfo.autoPlayEnabled ? ["enabled"] : [],
             },
             display: {
                 displayMode: "720p",
@@ -418,13 +419,27 @@ export function getSettings(window) {
                                     label: "Developer Id",
                                     key: "developerId",
                                     type: "text",
+                                    style: { width: "45%" },
                                     help: "Unique id to segregate registry data, the registry only changes after a reset or app restart",
                                 },
                                 {
                                     label: "Developer Password",
                                     key: "developerPwd",
                                     type: "text",
+                                    style: { width: "45%" },
                                     help: "Password used to encrypt and decrypt the app package source code, needs to be 32 bytes long",
+                                },
+                                {
+                                    label: "Video Auto-Play",
+                                    key: "autoPlayEnabled",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Enabled",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "Enables or disables Video Auto-Play setting returned by ifDeviceInfo.IsAutoPlayEnabled()",
                                 },
                             ],
                         },
@@ -997,6 +1012,11 @@ export function getSettings(window) {
         setDeviceInfo("device", "clientId", true);
         setDeviceInfo("device", "RIDA", true);
         setDeviceInfo("device", "developerId"); // Do not notify app to avoid change registry without reset
+        const autoPlay = preferences.device.autoPlayEnabled.includes("enabled");
+        if (globalThis.sharedObject.deviceInfo.autoPlayEnabled !== autoPlay) {
+            globalThis.sharedObject.deviceInfo.autoPlayEnabled = autoPlay;
+            window.webContents.send("setDeviceInfo", "autoPlayEnabled", autoPlay);
+        }
         saveDisplaySettings(window);
         setRemoteKeys(settings.defaults.remote, preferences.remote);
         if (preferences.audio) {
