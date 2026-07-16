@@ -11,6 +11,44 @@ import { closeChannel } from "../helpers/window";
 import { loadUrl } from "../helpers/files";
 import { loadPackage, clearRecentFiles } from "./menuService";
 
+export const maxMenuFiles = 15;
+
+// Generate recent file menu items dynamically
+function buildRecentSubmenu() {
+    const items = [];
+    for (let i = 0; i < maxMenuFiles; i++) {
+        const entry = {
+            id: `zip-${i}`,
+            label: "",
+            visible: false,
+            click: () => {
+                loadPackage(i);
+            },
+        };
+        if (i === 0) {
+            entry.accelerator = "CmdOrCtrl+R";
+        }
+        items.push(entry);
+    }
+    items.push(
+        {
+            id: "zip-empty",
+            label: "No app .zip/.bpk file Recently Opened",
+            enabled: false,
+        },
+        { type: "separator" },
+        {
+            id: "file-clear",
+            label: "Clear Recently Opened",
+            enabled: false,
+            click: () => {
+                clearRecentFiles();
+            },
+        },
+    );
+    return items;
+}
+
 export const fileMenuTemplate = {
     label: "&File",
     submenu: [
@@ -39,9 +77,10 @@ export const fileMenuTemplate = {
                         height: 177,
                         icon: __dirname + "/images/icon.ico",
                         type: "input",
-                        customStylesheet: __dirname + `/css/prompt-${userTheme}.css`,
+                        customStylesheet:
+                            __dirname + `/css/prompt-${userTheme}.css`,
                     },
-                    window
+                    window,
                 )
                     .then((url) => {
                         if (url) {
@@ -54,79 +93,7 @@ export const fileMenuTemplate = {
         {
             id: "file-open-recent",
             label: "Open Recent",
-            submenu: [
-                {
-                    id: "zip-0",
-                    label: "",
-                    accelerator: "CmdOrCtrl+R",
-                    visible: false,
-                    click: (item, window) => {
-                        loadPackage(0);
-                    },
-                },
-                {
-                    id: "zip-1",
-                    label: "",
-                    visible: false,
-                    click: (item, window) => {
-                        loadPackage(1);
-                    },
-                },
-                {
-                    id: "zip-2",
-                    label: "",
-                    visible: false,
-                    click: (item, window) => {
-                        loadPackage(2);
-                    },
-                },
-                {
-                    id: "zip-3",
-                    label: "",
-                    visible: false,
-                    click: (item, window) => {
-                        loadPackage(3);
-                    },
-                },
-                {
-                    id: "zip-4",
-                    label: "",
-                    visible: false,
-                    click: (item, window) => {
-                        loadPackage(4);
-                    },
-                },
-                {
-                    id: "zip-5",
-                    label: "",
-                    visible: false,
-                    click: (item, window) => {
-                        loadPackage(5);
-                    },
-                },
-                {
-                    id: "zip-6",
-                    label: "",
-                    visible: false,
-                    click: (item, window) => {
-                        loadPackage(6);
-                    },
-                },
-                {
-                    id: "zip-empty",
-                    label: "No app .zip/.bpk file Recently Opened",
-                    enabled: false,
-                },
-                { type: "separator" },
-                {
-                    id: "file-clear",
-                    label: "Clear Recently Opened",
-                    enabled: false,
-                    click: (item, window) => {
-                        clearRecentFiles();
-                    },
-                },
-            ],
+            submenu: buildRecentSubmenu(),
         },
         { type: "separator" },
         {
