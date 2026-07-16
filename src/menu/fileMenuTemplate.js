@@ -35,15 +35,17 @@ function buildRecentSubmenu() {
         label: "No app .zip/.bpk file Recently Opened",
         enabled: false,
     });
-    items.push({ type: "separator" });
-    items.push({
-        id: "file-clear",
-        label: "Clear Recently Opened",
-        enabled: false,
-        click: () => {
-            clearRecentFiles();
+    items.push(
+        { type: "separator" },
+        {
+            id: "file-clear",
+            label: "Clear Recently Opened",
+            enabled: false,
+            click: () => {
+                clearRecentFiles();
+            },
         },
-    });
+    );
     return items;
 }
 
@@ -75,9 +77,10 @@ export const fileMenuTemplate = {
                         height: 177,
                         icon: __dirname + "/images/icon.ico",
                         type: "input",
-                        customStylesheet: __dirname + `/css/prompt-${userTheme}.css`,
+                        customStylesheet:
+                            __dirname + `/css/prompt-${userTheme}.css`,
                     },
-                    window
+                    window,
                 )
                     .then((url) => {
                         if (url) {
