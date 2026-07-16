@@ -30,12 +30,12 @@ function buildRecentSubmenu() {
         }
         items.push(entry);
     }
-    items.push({
-        id: "zip-empty",
-        label: "No app .zip/.bpk file Recently Opened",
-        enabled: false,
-    });
     items.push(
+        {
+            id: "zip-empty",
+            label: "No app .zip/.bpk file Recently Opened",
+            enabled: false,
+        },
         { type: "separator" },
         {
             id: "file-clear",
