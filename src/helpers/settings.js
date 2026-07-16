@@ -328,7 +328,7 @@ export function getSettings(window) {
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "This service allows to remotely side load an app, to change port and password restart the service",
+                                    help: "This service allows to remotely side load an app, to make port change effective, restart the service",
                                 },
                                 {
                                     label: "Port (default: 80)",
@@ -1495,9 +1495,9 @@ function saveServicesSettings(services, window) {
         return;
     }
     if (services.installer?.includes("enabled")) {
+        setPassword(services.password);
         if (!isInstallerEnabled) {
             setPort(services.webPort);
-            setPassword(services.password);
             enableInstaller(window);
         }
     } else {
