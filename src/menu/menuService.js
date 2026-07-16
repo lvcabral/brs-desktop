@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, Menu, ipcMain } from "electron";
 import { macOSMenuTemplate } from "./macOSMenuTemplate";
-import { fileMenuTemplate } from "./fileMenuTemplate";
+import { fileMenuTemplate, maxMenuFiles } from "./fileMenuTemplate";
 import {
     editMenuTemplate,
     editSettingsMenuTemplate,
@@ -28,8 +28,7 @@ import jetpack from "fs-jetpack";
 import "../helpers/hash";
 
 const isMacOS = process.platform === "darwin";
-const maxFiles = 21;
-const maxMenuFiles = 7;
+const maxFiles = 30;
 const userDataDir = jetpack.cwd(app.getPath("userData"));
 const recentFilesJson = "recent-files.json";
 const recentMenuIndex = 2;
