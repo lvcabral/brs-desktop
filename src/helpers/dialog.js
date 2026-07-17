@@ -33,7 +33,10 @@ export function openChannelPackage() {
 export function saveScreenshot() {
     const opts = {
         title: "Save the Screenshot as",
-        filters: getFileFilter("PNG Image", ["png"]),
+        filters: [
+            { name: "PNG Image", extensions: ["png"] },
+            { name: "JPEG Image", extensions: ["jpg", "jpeg"] },
+        ],
     };
     const window = BrowserWindow.fromId(1);
     dialog
