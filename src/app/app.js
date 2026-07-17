@@ -545,7 +545,9 @@ function takeScreenshot(file = "") {
     const canvas = new OffscreenCanvas(screenshot.width, screenshot.height);
     const ctx = canvas.getContext("2d");
     ctx.putImageData(screenshot, 0, 0);
-    canvas.convertToBlob().then(function (blob) {
+    const ext = file.split(".").pop().toLowerCase();
+    const mimeType = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : "image/png";
+    canvas.convertToBlob({ type: mimeType }).then(function (blob) {
         // Copy to clipboard
         if (file === "") {
             const item = new ClipboardItem({ "image/png": blob });
