@@ -85,7 +85,7 @@ function convertSettingsKey(keyCode) {
 }
 
 function convertSettingsChar(keyChar) {
-    if (/^[0-9]$/.test(keyChar)) {
+    if (/^\d$/.test(keyChar)) {
         return `Digit${keyChar}`;
     } else if (/^[a-zA-Z]$/.test(keyChar)) {
         return `Key${keyChar.toUpperCase()}`;
