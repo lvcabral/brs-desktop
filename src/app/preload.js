@@ -23,9 +23,9 @@ globalThis.addEventListener("DOMContentLoaded", () => {
         getCurrentWebContents().send("copyScreenshot");
         return false;
     });
-    // Intercept Cmd+V / Ctrl+V in capture phase to prevent "v" from reaching brs-engine
-    // Only apply in the main simulator window (which has the #display canvas)
+    // Only apply keyboard interceptions in the main simulator window (which has the #display canvas)
     if (document.getElementById("display")) {
+        // Intercept Cmd+V / Ctrl+V in capture phase to prevent "v" from reaching brs-engine
         document.addEventListener("keydown", function (e) {
             if ((e.metaKey || e.ctrlKey) && e.key === "v") {
                 e.preventDefault();
@@ -37,8 +37,88 @@ globalThis.addEventListener("DOMContentLoaded", () => {
                 }
             }
         }, true); // capture phase fires before brs-engine's bubbling-phase handler
+
+        // Intercept the Home remote key to act as "Close App"
+        let homeKeyCode = convertSettingsKey(
+            ipcRenderer.sendSync("getPreferences")?.remote?.keyHome ?? "Home"
+        );
+        document.addEventListener("keydown", function (e) {
+            if (matchesKey(e, homeKeyCode)) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                getCurrentWebContents().send("closeChannel", "EXIT_USER_NAV");
+            }
+        }, true); // capture phase fires before brs-engine's bubbling-phase handler
+
+        // Update the Home key binding when preferences change
+        ipcRenderer.on("preferencesUpdated", (_, preferences) => {
+            if (preferences?.remote?.keyHome) {
+                homeKeyCode = convertSettingsKey(preferences.remote.keyHome);
+            }
+        });
     }
 });
+
+// Convert a Settings key name to KeyboardEvent.code format
+// Mirrors the convertKey/convertChar logic from settings.js
+function convertSettingsKey(keyCode) {
+    if (!keyCode) {
+        return "Home";
+    }
+    const arrows = new Set(["Left", "Right", "Up", "Down"]);
+    let newCode = keyCode.replaceAll(" ", "");
+    if (keyCode.includes("+")) {
+        const parts = keyCode.split("+");
+        const leftKey = parts[0];
+        const rightKey = parts[1];
+        if (rightKey.length === 1) {
+            newCode = `${leftKey}+${convertSettingsChar(rightKey)}`;
+        } else if (arrows.has(rightKey)) {
+            newCode = `${leftKey}+Arrow${rightKey}`;
+        }
+    } else if (keyCode.length === 1) {
+        newCode = convertSettingsChar(keyCode);
+    } else if (arrows.has(keyCode)) {
+        newCode = `Arrow${keyCode}`;
+    }
+    return newCode;
+}
+
+function convertSettingsChar(keyChar) {
+    if (/^\d$/.test(keyChar)) {
+        return `Digit${keyChar}`;
+    } else if (/^[a-zA-Z]$/.test(keyChar)) {
+        return `Key${keyChar.toUpperCase()}`;
+    }
+    const keyMap = {
+        "`": "Backquote", "-": "Minus", "=": "Equal",
+        "[": "BracketLeft", "]": "BracketRight", ";": "Semicolon",
+        "'": "Quote", ",": "Comma", ".": "Period",
+        "\\": "Backslash", "/": "Slash",
+    };
+    return keyMap[keyChar] ?? keyChar;
+}
+
+// Check if a KeyboardEvent matches a converted key code
+// Supports modifier+key combos (e.g. "Shift+KeyA")
+function matchesKey(event, keyCode) {
+    if (keyCode.includes("+")) {
+        const parts = keyCode.split("+");
+        const modifier = parts[0].toLowerCase();
+        const code = parts[1];
+        const hasModifier =
+            (modifier === "shift" && event.shiftKey) ||
+            (modifier === "control" && event.ctrlKey) ||
+            (modifier === "alt" && event.altKey) ||
+            (modifier === "meta" && event.metaKey) ||
+            (modifier === "shiftleft" && event.shiftKey) ||
+            (modifier === "shiftright" && event.shiftKey) ||
+            (modifier === "controlleft" && event.ctrlKey) ||
+            (modifier === "controlright" && event.ctrlKey);
+        return hasModifier && event.code === code;
+    }
+    return event.code === keyCode && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey;
+}
 
 contextBridge.exposeInMainWorld("api", {
     showPreferences: () => {
