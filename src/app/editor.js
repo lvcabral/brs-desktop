@@ -395,6 +395,17 @@ function handleEngineEvents(event, data) {
             updateTerminal(data.content, data.level);
         }
         scrollToBottom();
+        // Re-focus terminal input after a short delay to run after
+        // WebTerminal's MutationObserver callback (10ms delay), preventing
+        // intermittent focus loss from the race between scrollIntoView
+        // and scrollToBottom operating on different scroll targets
+        if (data.level !== "continue") {
+            setTimeout(() => {
+                if (!terminal.DOM.command.classList.contains("idle")) {
+                    terminal.DOM.input.focus();
+                }
+            }, 20);
+        }
     } else if (event === "closed" || event === "error") {
         simulatorApp = data;
         terminal.idle();
