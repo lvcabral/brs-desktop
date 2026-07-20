@@ -19,7 +19,7 @@ let titleColor;
 
 globalThis.addEventListener("DOMContentLoaded", () => {
     // Detect Clipboard Copy to create Screenshot
-    Mousetrap.bind(["command+c", "ctrl+c"], function () {
+    Mousetrap.bind(isMacOS ? "command+c" : "ctrl+c", function () {
         getCurrentWebContents().send("copyScreenshot");
         return false;
     });
