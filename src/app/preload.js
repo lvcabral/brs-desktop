@@ -127,6 +127,9 @@ contextBridge.exposeInMainWorld("api", {
     getPreferences: () => {
         return ipcRenderer.sendSync("getPreferences");
     },
+    setPreference: (key, value) => {
+        ipcRenderer.send("setPreference", key, value);
+    },
     onPreferencesUpdated: (handler) => {
         onPreferencesUpdatedHandler = handler;
     },
@@ -215,6 +218,7 @@ contextBridge.exposeInMainWorld("api", {
             "openAppPackage",
             "closeSimulator",
             "externalVolumeReady",
+            "setPreference",
         ];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);

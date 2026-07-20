@@ -469,7 +469,8 @@ display.ondblclick = function () {
 // Warn user to use keyboard
 display.onclick = function () {
     const settings = api.getPreferences();
-    const displayToast = !settings?.simulator?.options?.includes("disableClickToast");
+    const options = settings?.simulator?.options ?? [];
+    const displayToast = !options.includes("disableClickToast");
     if (currentApp.running && displayToast) {
         // Delay the toast to allow double-click to cancel it
         if (clickTimeout) {
@@ -477,8 +478,17 @@ display.onclick = function () {
         }
         clickTimeout = setTimeout(() => {
             showToast(
-                "Use the keyboard or a gamepad to interact with the app. Double click toggles full screen.",
-                5000
+                "Use the keyboard or a gamepad to interact with the app. Double click toggles full screen. Click here to disable this warning.",
+                7000,
+                false,
+                function () {
+                    const currentSettings = api.getPreferences();
+                    const currentOptions = currentSettings?.simulator?.options ?? [];
+                    if (!currentOptions.includes("disableClickToast")) {
+                        currentOptions.push("disableClickToast");
+                        api.setPreference("simulator.options", currentOptions);
+                    }
+                }
             );
             clickTimeout = null;
         }, 250); // 250ms delay to detect double-click
