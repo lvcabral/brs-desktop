@@ -1413,6 +1413,10 @@ export function getAudioMuted() {
     return muted[0] ? muted[0] : false;
 }
 
+ipcMain.on("setPreference", (_, key, value) => {
+    setPreference(key, value);
+});
+
 ipcMain.on("setAudioMute", (event, mute) => {
     settings.value("audio.muted", mute ? [mute] : []);
 });

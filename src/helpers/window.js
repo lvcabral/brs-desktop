@@ -163,6 +163,14 @@ export function createWindow(name, options) {
 
 export function openDevTools(window) {
     window.openDevTools({ mode: "detach" });
+    if (window.id === 1) {
+        window.webContents.send(
+            "showToast",
+            "Warning: DevTools severely impacts interpreter performance. Once you close it, use Device > Reset Device in the menu to restore the performance.",
+            10000,
+            true
+        );
+    }
 }
 
 export function setAspectRatio(changed = true) {

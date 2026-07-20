@@ -203,9 +203,9 @@ function shortenPath(bigPath, maxLen) {
 }
 
 // Function to display a Toast (from the bottom) with messages to the user
-export function showToast(message, duration = 3000, error = false) {
+export function showToast(message, duration = 3000, error = false, onClick = null) {
     const toastColor = error ? "--status-error-color" : "--status-background-color";
-    Toastify({
+    const options = {
         text: message,
         duration: duration,
         close: false,
@@ -217,7 +217,15 @@ export function showToast(message, duration = 3000, error = false) {
             background: colorValues.getPropertyValue(toastColor).trim(),
             fontSize: "14px",
         },
-    }).showToast();
+    };
+    if (typeof onClick === "function") {
+        options.onClick = function () {
+            toast.hideToast();
+            onClick();
+        };
+    }
+    const toast = Toastify(options);
+    toast.showToast();
 }
 
 // Events from Main process
