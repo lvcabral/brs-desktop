@@ -935,6 +935,12 @@ function codeNameExists(codeName) {
 export function runCode() {
     const code = editorManager.getValue();
     if (code && code.trim() !== "") {
+        // Auto-save if "Save on Run" is enabled and snippet is already saved
+        const preferences = api.getPreferences();
+        const editorOptions = preferences?.editor?.options || [];
+        if (editorOptions.includes("saveOnRun") && codeSelect.value !== "0" && isCodeChanged) {
+            saveCode();
+        }
         try {
             api.send("runCode", code);
             terminal.output(`<br /><pre>Executing source code...</pre><br /><br />`);

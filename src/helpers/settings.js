@@ -129,6 +129,7 @@ export function getSettings(window) {
                 indentationType: "spaces",
                 indentationSize: 4,
                 fontSize: 14,
+                options: [],
             },
             externalVolume: {
                 mount: [],
@@ -303,6 +304,18 @@ export function getSettings(window) {
                                     key: "placeholder2",
                                     type: "message",
                                     style: { width: "40%" },
+                                },
+                                {
+                                    label: "Options",
+                                    key: "options",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Save Code Snippet on Run",
+                                            value: "saveOnRun",
+                                        },
+                                    ],
+                                    help: "Automatically save the current code snippet when running it (only applies to already saved snippets)",
                                 },
                             ],
                         },
