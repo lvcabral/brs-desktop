@@ -95,12 +95,11 @@ describe("convertKey", () => {
         expect(convertKey("Control+Home")).toBe("Control+Home");
     });
 
-    // Characterization: only the first two segments are inspected. A three-part chord has
-    // a multi-character second segment, so no branch matches and the whole string passes
-    // through with spaces stripped — the trailing "+A" is never converted to "+KeyA".
-    it("leaves a three-part combination unconverted", () => {
-        expect(convertKey("Control+Shift+A")).toBe("Control+Shift+A");
-        expect(convertKey("Control + Shift + A")).toBe("Control+Shift+A");
+    it("converts the key of a three-part combination", () => {
+        expect(convertKey("Control+Shift+A")).toBe("Control+Shift+KeyA");
+        expect(convertKey("Control + Shift + A")).toBe("Control+Shift+KeyA");
+        expect(convertKey("Control+Alt+Left")).toBe("Control+Alt+ArrowLeft");
+        expect(convertKey("Control+Shift+Enter")).toBe("Control+Shift+Enter");
     });
 });
 
