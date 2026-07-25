@@ -137,10 +137,18 @@ describe("getRokuOS", () => {
         expect(getRokuOS(null)).toBe("");
     });
 
-    // Characterization: a character outside the alphabet yields indexOf() === -1 rather
-    // than an error or a fallback, so the major version comes back negative.
-    it("reports a negative major version for an unknown alphabet character", () => {
-        expect(getRokuOS("XXB.30E04170A")).toBe("-1.3.0");
+    it("returns an empty string for a character outside the version alphabet", () => {
+        // B, I, O, Q and Z are deliberately absent from the alphabet. Treat an
+        // unrecognised character the same as firmware that is too short to decode,
+        // rather than reporting a negative major version.
+        expect(getRokuOS("XXB.30E04170A")).toBe("");
+        expect(getRokuOS("XXZ.30E04170A")).toBe("");
+        expect(getRokuOS("XXB.30E04170A", true, true)).toBe("");
+    });
+
+    it("still returns the build for an unknown character when asked for the build", () => {
+        // The build is a plain slice and does not depend on the alphabet.
+        expect(getRokuOS("XXB.30E04170A", false)).toBe("4170");
     });
 });
 
