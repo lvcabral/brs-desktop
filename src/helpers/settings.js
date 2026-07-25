@@ -1092,43 +1092,46 @@ export function getSettings(window) {
 }
 
 export function setRemoteKeys(defaults, remote) {
+    // Each key is restored to its default when it is missing, not just when it is empty:
+    // a settings file from an older build can omit one entirely, and convertKey would
+    // throw on the nullish value from inside the settings-save handler.
     const customKeys = new Map();
-    if (remote.keyBack === "") {
+    if (!remote.keyBack) {
         settings.value("remote.keyBack", defaults.keyBack);
     } else if (defaults.keyBack !== remote.keyBack) {
         customKeys.set(convertKey(remote.keyBack), "back");
     }
-    if (remote.keyHome === "") {
+    if (!remote.keyHome) {
         settings.value("remote.keyHome", defaults.keyHome);
     } else if (defaults.keyHome !== remote.keyHome) {
         customKeys.set(convertKey(remote.keyHome), "home");
     }
-    if (remote.keyInfo === "") {
+    if (!remote.keyInfo) {
         settings.value("remote.keyInfo", defaults.keyInfo);
     } else if (defaults.keyInfo !== remote.keyInfo) {
         customKeys.set(convertKey(remote.keyInfo), "info");
     }
-    if (remote.keyReplay === "") {
+    if (!remote.keyReplay) {
         settings.value("remote.keyReplay", defaults.keyReplay);
     } else if (defaults.keyReplay !== remote.keyReplay) {
         customKeys.set(convertKey(remote.keyReplay), "instantreplay");
     }
-    if (remote.keyPlayPause === "") {
+    if (!remote.keyPlayPause) {
         settings.value("remote.keyPlayPause", defaults.keyPlayPause);
     } else if (defaults.keyPlayPause !== remote.keyPlayPause) {
         customKeys.set(convertKey(remote.keyPlayPause), "play");
     }
-    if (remote.keyRev === "") {
+    if (!remote.keyRev) {
         settings.value("remote.keyRev", defaults.keyRev);
     } else if (defaults.keyRev !== remote.keyRev) {
         customKeys.set(convertKey(remote.keyRev), "rev");
     }
-    if (remote.keyFwd === "") {
+    if (!remote.keyFwd) {
         settings.value("remote.keyFwd", defaults.keyFwd);
     } else if (defaults.keyFwd !== remote.keyFwd) {
         customKeys.set(convertKey(remote.keyFwd), "fwd");
     }
-    if (remote.keyMute === "") {
+    if (!remote.keyMute) {
         settings.value("remote.keyMute", defaults.keyMute);
     } else if (defaults.keyMute !== remote.keyMute) {
         customKeys.set(convertKey(remote.keyMute), "volumemute");
