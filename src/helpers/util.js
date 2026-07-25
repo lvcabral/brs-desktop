@@ -115,7 +115,7 @@ export function getLocalIps() {
 
 /**
  * Function to get the network gateway
- * @returns {object} - An object containing the gateway IP address, name, type, and SSID
+ * @returns {Promise<object>} - Resolves to an object containing the gateway IP address, name, type, and SSID
  */
 export async function getGateway() {
     const gateWayData = { ip: "", name: "", type: "", ssid: "" };
@@ -140,7 +140,7 @@ export async function getGateway() {
 
 /**
  * Function to get the active network interface
- * @returns {object} - An object containing the gateway IP address, name, type, and SSID
+ * @returns {Promise<object>} - Resolves to the active interface reported by the `network` package
  */
 async function getActiveInterface() {
     return new Promise((resolve, reject) => {
