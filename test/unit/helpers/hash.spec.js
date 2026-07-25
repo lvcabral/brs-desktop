@@ -38,13 +38,18 @@ describe("String.prototype.hashCode", () => {
         expect("日本語.zip".hashCode()).toMatch(/^\d+$/);
     });
 
-    // Characterization: the empty-string early return yields the *number* 0, while every
-    // other input goes through Math.abs(hash).toString() and yields a string. Callers use
-    // the result to build filenames (see genAppRegistry in src/server/ecp.js), where the
-    // implicit coercion hides the inconsistency.
-    it("returns the number 0 for an empty string, not the string \"0\"", () => {
-        expect("".hashCode()).toBe(0);
-        expect(typeof "".hashCode()).toBe("number");
+    it("returns a string for the empty string, like every other input", () => {
+        // The early return used to yield the number 0 while every other input went
+        // through Math.abs(hash).toString(). Callers build filenames from the result,
+        // so implicit coercion hid the inconsistency rather than removing it.
+        expect("".hashCode()).toBe("0");
+        expect(typeof "".hashCode()).toBe("string");
+    });
+
+    it("returns a string for every input", () => {
+        for (const sample of ["", "a", "/tmp/x.zip", "\u{1F600}"]) {
+            expect(typeof sample.hashCode()).toBe("string");
+        }
     });
 
     it("never returns a negative value", () => {
