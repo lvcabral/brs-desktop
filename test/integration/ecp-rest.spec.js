@@ -161,16 +161,33 @@ describe("ECP REST API", () => {
     });
 
     describe("endpoints that read bundled files", () => {
-        // These resolve paths with path.join(__dirname, ...). Under vite-node __dirname is
-        // src/server/, not the webpack bundle's app/ directory, so the assets are absent.
-        // They work in the packaged app; only the test environment cannot reach them.
-        it.each(["/device-image.png", "/ecp_SCPD.xml", "/query/icon/dev"])(
-            "%s fails in the test environment because __dirname differs",
-            async (route) => {
-                const response = await fetch(`${base}${route}`);
-                expect(response.status).toBeGreaterThanOrEqual(400);
-            }
-        );
+        it("serves the device image", async () => {
+            const response = await fetch(`${base}/device-image.png`);
+            expect(response.status).toBe(200);
+            expect(response.headers.get("content-type")).toContain("image/png");
+            const body = Buffer.from(await response.arrayBuffer());
+            expect(body.length).toBeGreaterThan(0);
+            // PNG magic number, so a stub or an error page would not pass.
+            expect(body.subarray(0, 4)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+        });
+
+        it.each(["/ecp_SCPD.xml", "/dial_SCPD.xml"])("serves %s", async (route) => {
+            const response = await fetch(`${base}${route}`);
+            expect(response.status).toBe(200);
+            expect(response.headers.get("content-type")).toContain("application/xml");
+            const body = await response.text();
+            expect(body).toContain("<?xml");
+            expect(body).toContain("scpd");
+        });
+
+        it("serves the fallback icon for an app with no icon on disk", async () => {
+            // The fixture's icon path does not exist, so this exercises the fallback.
+            const response = await fetch(`${base}/query/icon/dev`);
+            expect(response.status).toBe(200);
+            expect(response.headers.get("content-type")).toContain("image/png");
+            const body = Buffer.from(await response.arrayBuffer());
+            expect(body.subarray(0, 4)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+        });
     });
 });
 
