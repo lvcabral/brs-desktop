@@ -19,9 +19,8 @@ import path from "node:path";
 // is src/server/ and the same assets sit in src/app/. Resolve once, preferring the
 // bundled layout, so both arrangements use one code path.
 const ASSET_BASE =
-    [__dirname, path.join(__dirname, "..", "app")].find((base) =>
-        fs.existsSync(path.join(base, "images"))
-    ) ?? __dirname;
+    [__dirname, path.join(__dirname, "..", "app")].find((base) => fs.existsSync(path.join(base, "images"))) ??
+    __dirname;
 
 const WebSocket = require("ws");
 const url = require("node:url");
@@ -104,11 +103,7 @@ export function enableECP(win, port = ECP_PORT) {
             // Start server on all interfaces
             ssdp.start()
                 .catch((e) => {
-                    window.webContents.send(
-                        "console",
-                        `Failed to start SSDP server:${e.message}`,
-                        true
-                    );
+                    window.webContents.send("console", `Failed to start SSDP server:${e.message}`, true);
                 })
                 .then(() => {
                     isECPEnabled = true;
@@ -631,11 +626,7 @@ export function getMacAddress() {
     const ifaces = os.networkInterfaces();
     let mac = "";
     for (const ifname of Object.keys(ifaces)) {
-        if (
-            mac !== "" ||
-            ifname.toLowerCase().startsWith("vmware") ||
-            ifname.toLowerCase().startsWith("virtualbox")
-        ) {
+        if (mac !== "" || ifname.toLowerCase().startsWith("vmware") || ifname.toLowerCase().startsWith("virtualbox")) {
             continue;
         }
         for (const iface of ifaces[ifname]) {

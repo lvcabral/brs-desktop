@@ -11,7 +11,7 @@ exports.default = async function notarizing(context) {
   const appName = context.packager.appInfo.productFilename;
 
   return await notarize({
-    tool: 'notarytool',
+    tool: "notarytool",
     teamId: process.env.APPLE_TEAM_ID,
     appBundleId: "com.lvcabral.brs-desktop.app",
     appPath: `${appOutDir}/${appName}.app`,

@@ -42,12 +42,7 @@ export default defineConfig({
             reporter: ["text", "lcov"],
             include: ["src/**/*.js"],
             // Webpack entry points with module-scope side effects; not unit testable.
-            exclude: [
-                "src/main.js",
-                "src/app/app.js",
-                "src/app/editor.js",
-                "src/app/monaco.js",
-            ],
+            exclude: ["src/main.js", "src/app/app.js", "src/app/editor.js", "src/app/monaco.js"],
         },
     },
 });

@@ -14,7 +14,11 @@
 
 export const HELP_COMMANDS = [
     { cmd: "?", args: "[str]", desc: "Display the help." },
-    { cmd: "brightscript_warnings", args: "<num-warnings>", desc: "Set the maximum number of brightscript warnings displayed" },
+    {
+        cmd: "brightscript_warnings",
+        args: "<num-warnings>",
+        desc: "Set the maximum number of brightscript warnings displayed",
+    },
     { cmd: "bsprof-pause", args: "", desc: "Pause BS profiling" },
     { cmd: "bsprof-resume", args: "", desc: "Resume BS profiling" },
     { cmd: "bsprof-status", args: "", desc: "Get BS profiling status" },
@@ -37,7 +41,7 @@ export const HELP_COMMANDS = [
     { cmd: "sgperf", args: "", desc: "SceneGraph node operation performance metrics." },
     { cmd: "showkey", args: "", desc: "Show the current developer key." },
     { cmd: "target", args: "list | <n> | <name> | -p <pid>)", desc: "List or select command execution target" },
-    { cmd: "type", args: "", desc: "Send a literal text sequence." }
+    { cmd: "type", args: "", desc: "Send a literal text sequence." },
 ];
 
 export const PRESS_HELP = [
@@ -74,13 +78,15 @@ export const PRESS_HELP = [
  */
 export function getHelpText(command) {
     if (!command) {
-        return HELP_COMMANDS.map(c => {
-            const prefix = c.cmd + (c.args ? ` ${c.args}` : "");
-            const padding = prefix.length >= 24 ? " " : " ".repeat(24 - prefix.length);
-            return `${prefix}${padding}${c.desc}`;
-        }).join("\r\n") + "\r\n";
+        return (
+            HELP_COMMANDS.map((c) => {
+                const prefix = c.cmd + (c.args ? ` ${c.args}` : "");
+                const padding = prefix.length >= 24 ? " " : " ".repeat(24 - prefix.length);
+                return `${prefix}${padding}${c.desc}`;
+            }).join("\r\n") + "\r\n"
+        );
     }
-    const found = HELP_COMMANDS.find(c => c.cmd.toLowerCase() === command.toLowerCase());
+    const found = HELP_COMMANDS.find((c) => c.cmd.toLowerCase() === command.toLowerCase());
     if (found) {
         const prefix = found.cmd + (found.args ? ` ${found.args}` : "");
         const padding = prefix.length >= 24 ? " " : " ".repeat(24 - prefix.length);

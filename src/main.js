@@ -42,13 +42,7 @@ import {
     closeSettings,
     initRokuDeviceDiscovery,
 } from "./helpers/settings";
-import {
-    createWindow,
-    openCodeEditor,
-    openDevTools,
-    setAspectRatio,
-    saveWindowState,
-} from "./helpers/window";
+import { createWindow, openCodeEditor, openDevTools, setAspectRatio, saveWindowState } from "./helpers/window";
 import { subscribeServerEvents } from "./helpers/events";
 import { getGateway, getLocalIps } from "./helpers/util";
 import { checkForUpdates } from "./helpers/updates";
@@ -109,7 +103,6 @@ getGateway().then((gateway) => {
     }
 });
 
-
 const argv = minimist(process.argv.slice(1), cliArgumentsConfig);
 
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
@@ -164,10 +157,7 @@ app.on("ready", () => {
     // Configure Window and load content
     const winBounds = mainWindow.getBounds();
     const display = screen.getDisplayNearestPoint({ x: winBounds.x, y: winBounds.y });
-    mainWindow.setMinimumSize(
-        Math.min(346, display.size.width),
-        Math.min(264, display.size.height)
-    );
+    mainWindow.setMinimumSize(Math.min(346, display.size.width), Math.min(264, display.size.height));
     let firstLoad = true;
     // Load application settings
     const startup = {
@@ -206,24 +196,9 @@ app.on("ready", () => {
         let settings = getSettings(mainWindow);
         const status = "enabled";
         if (!firstLoad) {
-            updateServerStatus(
-                "ECP",
-                "ecp-api",
-                settings.value("services.ecp").includes(status),
-                ECP_PORT
-            );
-            updateServerStatus(
-                "Telnet",
-                "telnet",
-                settings.value("services.telnet").includes(status),
-                TELNET_PORT
-            );
-            updateServerStatus(
-                "Debug",
-                "debug-server",
-                settings.value("services.debug").includes(status),
-                DEBUG_PORT
-            );
+            updateServerStatus("ECP", "ecp-api", settings.value("services.ecp").includes(status), ECP_PORT);
+            updateServerStatus("Telnet", "telnet", settings.value("services.telnet").includes(status), TELNET_PORT);
+            updateServerStatus("Debug", "debug-server", settings.value("services.debug").includes(status), DEBUG_PORT);
             updateServerStatus(
                 "Installer",
                 "web-installer",

@@ -98,7 +98,7 @@ export function processData(data, id, window) {
     if (data?.length > 0) {
         const client = clients.get(id);
         let line = lines.get(id);
-        const hexData = data.toString('hex');
+        const hexData = data.toString("hex");
         if (data[0] === 0xff) {
             // Telnet command
             if (hexData === "fff4fffd06") {

@@ -68,14 +68,7 @@ module.exports = (env) => {
           // Only include built-in languages - brightscript is registered manually
           languages: ["xml", "ini"],
           // Disable features we don't need to reduce bundle size
-          features: [
-            "!gotoSymbol",
-            "!quickCommand",
-            "!quickOutline",
-            "!format",
-            "!codeAction",
-            "!suggest",
-          ],
+          features: ["!gotoSymbol", "!quickCommand", "!quickOutline", "!format", "!codeAction", "!suggest"],
         }),
         new HtmlWebpackPlugin({
           chunks: ["editor"],

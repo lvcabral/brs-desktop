@@ -29,9 +29,7 @@ describe("telnet sendDebugCommand", () => {
 
     it("stops the running app on quit", () => {
         sendDebugCommand("quit", client, win);
-        expect(win.sentOn("closeChannel")).toEqual([
-            { channel: "closeChannel", args: ["EXIT_BRIGHTSCRIPT_STOP"] },
-        ]);
+        expect(win.sentOn("closeChannel")).toEqual([{ channel: "closeChannel", args: ["EXIT_BRIGHTSCRIPT_STOP"] }]);
         // quit leaves the connection open, unlike close.
         expect(client.destroy).not.toHaveBeenCalled();
     });
@@ -39,9 +37,7 @@ describe("telnet sendDebugCommand", () => {
     it("sends a bare newline for an empty line", () => {
         // Pressing enter at the MicroDebugger prompt steps to the next statement.
         sendDebugCommand("", client, win);
-        expect(win.sentOn("debugCommand")).toEqual([
-            { channel: "debugCommand", args: ["\n"] },
-        ]);
+        expect(win.sentOn("debugCommand")).toEqual([{ channel: "debugCommand", args: ["\n"] }]);
     });
 
     it("forwards any other command to the engine verbatim", () => {
@@ -50,9 +46,7 @@ describe("telnet sendDebugCommand", () => {
         for (const command of ["bt", "var", "cont", "step", "print x"]) {
             win.sent.length = 0;
             sendDebugCommand(command, client, win);
-            expect(win.sentOn("debugCommand")).toEqual([
-                { channel: "debugCommand", args: [command] },
-            ]);
+            expect(win.sentOn("debugCommand")).toEqual([{ channel: "debugCommand", args: [command] }]);
         }
     });
 

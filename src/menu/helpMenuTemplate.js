@@ -26,9 +26,7 @@ export const helpMenuTemplate = {
             label: "Control Keyboard Reference",
             accelerator: "CmdOrCtrl+F1",
             click: () => {
-                shell.openExternal(
-                    `${packageInfo.repository.url}/blob/master/docs/control-reference.md`
-                );
+                shell.openExternal(`${packageInfo.repository.url}/blob/master/docs/control-reference.md`);
             },
         },
         { type: "separator" },

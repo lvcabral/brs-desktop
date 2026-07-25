@@ -56,22 +56,16 @@ describe("extract", () => {
 
 describe("extractAny", () => {
     it("returns the first pattern that matches", () => {
-        expect(
-            extractAny(
-                [/<nope>(.*?)<\/nope>/i, /<model-number>(.*?)<\/model-number>/i],
-                DEVICE_INFO_XML
-            )
-        ).toBe("4800X");
+        expect(extractAny([/<nope>(.*?)<\/nope>/i, /<model-number>(.*?)<\/model-number>/i], DEVICE_INFO_XML)).toBe(
+            "4800X"
+        );
     });
 
     it("skips patterns that match empty content", () => {
         // An empty tag must not shadow a later pattern that has a real value.
         const xml = "<model-name></model-name><friendly-model-name>Roku Ultra</friendly-model-name>";
         expect(
-            extractAny(
-                [/<model-name>(.*?)<\/model-name>/i, /<friendly-model-name>(.*?)<\/friendly-model-name>/i],
-                xml
-            )
+            extractAny([/<model-name>(.*?)<\/model-name>/i, /<friendly-model-name>(.*?)<\/friendly-model-name>/i], xml)
         ).toBe("Roku Ultra");
     });
 
@@ -104,9 +98,7 @@ describe("extractSerialNumberFromUSN", () => {
     });
 
     it("stops at the next colon", () => {
-        expect(extractSerialNumberFromUSN("uuid:roku:ecp:X005001::urn:roku-com:service:ecp:1")).toBe(
-            "X005001"
-        );
+        expect(extractSerialNumberFromUSN("uuid:roku:ecp:X005001::urn:roku-com:service:ecp:1")).toBe("X005001");
     });
 
     it("is case insensitive", () => {

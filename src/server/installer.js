@@ -7,11 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow } from "electron";
 import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
-import {
-    cryptoUsingMD5,
-    parseAuthenticationInfo,
-    computeDigestResponse,
-} from "../helpers/digest";
+import { cryptoUsingMD5, parseAuthenticationInfo, computeDigestResponse } from "../helpers/digest";
 import Busboy from "busboy";
 import fs from "node:fs";
 import path from "node:path";
@@ -67,11 +63,7 @@ export function enableInstaller(win) {
                 if (urlPath === "/css/styles.min.css") {
                     filePath = path.join(__dirname, "css", "styles.min.css");
                     contentType = "text/css";
-                } else if (
-                    urlPath === "/" ||
-                    urlPath === "/index.html" ||
-                    urlPath === "/plugin_install"
-                ) {
+                } else if (urlPath === "/" || urlPath === "/index.html" || urlPath === "/plugin_install") {
                     filePath = path.join(__dirname, "web", "installer.html");
                     contentType = "text/html";
                 } else if (urlPath === "/plugin_inspect") {
@@ -373,10 +365,7 @@ function notifyAll(eventName, eventData) {
 
 function authenticateUser(req, res) {
     res.writeHead(401, {
-        "WWW-Authenticate": `Digest realm="${
-            credentials.realm
-        }",qop="auth",nonce="${Math.random()}",opaque="${hash}"`,
+        "WWW-Authenticate": `Digest realm="${credentials.realm}",qop="auth",nonce="${Math.random()}",opaque="${hash}"`,
     });
     res.end(req.method === "HEAD" ? undefined : "Authorization is needed.");
 }
-

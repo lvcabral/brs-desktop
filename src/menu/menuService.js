@@ -8,11 +8,7 @@
 import { app, BrowserWindow, Menu, nativeTheme, ipcMain } from "electron";
 import { macOSMenuTemplate } from "./macOSMenuTemplate";
 import { fileMenuTemplate, maxMenuFiles } from "./fileMenuTemplate";
-import {
-    editMenuTemplate,
-    editSettingsMenuTemplate,
-    editContextMenuTemplate,
-} from "./editMenuTemplate";
+import { editMenuTemplate, editSettingsMenuTemplate, editContextMenuTemplate } from "./editMenuTemplate";
 import { deviceMenuTemplate } from "./deviceMenuTemplate";
 import { viewMenuTemplate } from "./viewMenuTemplate";
 import { windowMenuTemplate } from "./windowMenuTemplate";
@@ -38,13 +34,7 @@ let menuTemplate;
 restoreRecentFiles();
 // External Functions
 export function createMenu() {
-    menuTemplate = [
-        fileMenuTemplate,
-        editMenuTemplate,
-        deviceMenuTemplate,
-        viewMenuTemplate,
-        helpMenuTemplate,
-    ];
+    menuTemplate = [fileMenuTemplate, editMenuTemplate, deviceMenuTemplate, viewMenuTemplate, helpMenuTemplate];
     if (isMacOS) {
         menuTemplate.unshift(macOSMenuTemplate);
         // Insert Window menu before Help

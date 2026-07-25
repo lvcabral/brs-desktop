@@ -9,18 +9,18 @@ const translateEnvToMode = (env) => {
   return "development";
 };
 
-module.exports = env => {
+module.exports = (env) => {
   return {
     target: "electron-renderer",
     node: {
       __dirname: false,
-      __filename: false
+      __filename: false,
     },
     externals: [nodeExternals()],
     resolve: {
       alias: {
-        env: path.resolve(__dirname, `../config/env_${translateEnvToMode(env)}.json`)
-      }
+        env: path.resolve(__dirname, `../config/env_${translateEnvToMode(env)}.json`),
+      },
     },
     devtool: "source-map",
     module: {
@@ -28,16 +28,14 @@ module.exports = env => {
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          use: ["babel-loader"]
+          use: ["babel-loader"],
         },
         {
           test: /\.css$/,
-          use: ["style-loader", "css-loader"]
-        }
-      ]
+          use: ["style-loader", "css-loader"],
+        },
+      ],
     },
-    plugins: [
-      new FriendlyErrorsWebpackPlugin({ clearConsole: env.development })
-    ]
+    plugins: [new FriendlyErrorsWebpackPlugin({ clearConsole: env.development })],
   };
 };

@@ -51,11 +51,7 @@ function ecpEvents(event, data) {
             loadFile([zipPath], input);
         } else {
             const window = BrowserWindow.fromId(1);
-            window?.webContents.send(
-                "console",
-                `ECP Launch: File not found! App Id=${appID}`,
-                true
-            );
+            window?.webContents.send("console", `ECP Launch: File not found! App Id=${appID}`, true);
         }
     } else {
         console.warn("ECP Unknown Event:", event, data);

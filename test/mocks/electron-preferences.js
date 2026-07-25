@@ -46,9 +46,7 @@ export default class ElectronPreferences extends EventEmitter {
         this.show = vi.fn(() => null);
         this.close = vi.fn();
         this.broadcastSections = vi.fn();
-        this.getSectionByName = vi.fn((name) =>
-            options.sections?.find((section) => section.id === name)
-        );
+        this.getSectionByName = vi.fn((name) => options.sections?.find((section) => section.id === name));
     }
 
     /**

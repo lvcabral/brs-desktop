@@ -61,11 +61,7 @@ export function waitForSendCount(win, channel, count, timeout = 3000) {
             if (messages.length >= count) {
                 resolve(messages);
             } else if (Date.now() > deadline) {
-                reject(
-                    new Error(
-                        `Timed out waiting for ${count} sends on "${channel}" (saw ${messages.length})`
-                    )
-                );
+                reject(new Error(`Timed out waiting for ${count} sends on "${channel}" (saw ${messages.length})`));
             } else {
                 setTimeout(poll, 10);
             }

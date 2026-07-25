@@ -26,7 +26,6 @@ let rendezvousTrackingEnabled = false;
 
 export let isDebugEnabled = false;
 
-
 export function enableDebugServer(win, prefs, port = DEBUG_PORT) {
     if (isDebugEnabled) {
         return;
@@ -106,7 +105,7 @@ export function processData(data, id) {
     if (data?.length > 0) {
         const client = clients.get(id);
         let line = lines.get(id);
-        const hexData = data.toString('hex');
+        const hexData = data.toString("hex");
 
         // Ignore telnet control characters
         if (data[0] === 0xff || data[0] === 0x03) {
@@ -262,14 +261,16 @@ function handleRemovePlugin(arg, client) {
     if (!arg) {
         client.write("Usage: remove_plugin <channel id>\r\n");
     } else if (device?.appList) {
-        const index = device.appList.findIndex(app => app.id === arg || app.id.toString() === arg);
+        const index = device.appList.findIndex((app) => app.id === arg || app.id.toString() === arg);
         if (index > -1) {
             const title = device.appList[index].title;
             device.appList.splice(index, 1);
             client.write(`Removed plugin id: ${arg}, name: ${title}\r\n`);
             reloadDevice();
         } else {
-            client.write(`Failed to remove plugin id: ${arg}, name: unknown. Plugin is NOT installed on the device\r\n`);
+            client.write(
+                `Failed to remove plugin id: ${arg}, name: unknown. Plugin is NOT installed on the device\r\n`
+            );
         }
     }
 }
@@ -320,7 +321,7 @@ function queueTerminator(target, client) {
 }
 
 function handleUnknown(cmd, client) {
-    const isValid = HELP_COMMANDS.some(c => c.cmd.toLowerCase() === cmd);
+    const isValid = HELP_COMMANDS.some((c) => c.cmd.toLowerCase() === cmd);
     if (isValid) {
         client.write(`Command not implemented yet: ${cmd}\r\n`);
     } else {

@@ -11,13 +11,7 @@ import { createFakeWindow, __registerWindow } from "../mocks/electron.js";
 import { makeSharedObject, makeEngineDeviceInfo } from "../fixtures/sharedObject.js";
 import { getFreePort } from "../helpers/freePort.js";
 import { waitForSend } from "../helpers/fakeWindow.js";
-import {
-    initECP,
-    enableECP,
-    disableECP,
-    subscribeECP,
-    unsubscribeECP,
-} from "../../src/server/ecp";
+import { initECP, enableECP, disableECP, subscribeECP, unsubscribeECP } from "../../src/server/ecp";
 
 /**
  * The ECP-2 WebSocket protocol, over a real socket on an ephemeral port.

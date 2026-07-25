@@ -56,16 +56,9 @@ export function parseDeviceMetadata(ipAddr, sn, data) {
         };
     }
     const serialNumber =
-        sn ||
-        extractAny(
-            [/<serial-number>(.*?)<\/serial-number>/i, /<serialNumber>(.*?)<\/serialNumber>/i],
-            data
-        );
+        sn || extractAny([/<serial-number>(.*?)<\/serial-number>/i, /<serialNumber>(.*?)<\/serialNumber>/i], data);
     const friendlyName = extractAny(
-        [
-            /<friendly-device-name>(.*?)<\/friendly-device-name>/i,
-            /<user-device-name>(.*?)<\/user-device-name>/i,
-        ],
+        [/<friendly-device-name>(.*?)<\/friendly-device-name>/i, /<user-device-name>(.*?)<\/user-device-name>/i],
         data
     );
     const modelNumber = extractAny(
