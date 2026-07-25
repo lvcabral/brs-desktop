@@ -135,16 +135,21 @@ function matchesKey(event, keyCode) {
         const parts = keyCode.split("+");
         const modifier = parts[0].toLowerCase();
         const code = parts[1];
-        const hasModifier =
-            (modifier === "shift" && event.shiftKey) ||
-            (modifier === "control" && event.ctrlKey) ||
-            (modifier === "alt" && event.altKey) ||
-            (modifier === "meta" && event.metaKey) ||
-            (modifier === "shiftleft" && event.shiftKey) ||
-            (modifier === "shiftright" && event.shiftKey) ||
-            (modifier === "controlleft" && event.ctrlKey) ||
-            (modifier === "controlright" && event.ctrlKey);
-        return hasModifier && event.code === code;
+        const wantsShift = modifier === "shift" || modifier === "shiftleft" || modifier === "shiftright";
+        const wantsControl =
+            modifier === "control" || modifier === "controlleft" || modifier === "controlright";
+        const wantsAlt = modifier === "alt";
+        const wantsMeta = modifier === "meta";
+        // The binding names the modifiers it wants, so anything else held is a different
+        // chord: Ctrl+Shift+A must not satisfy a "Shift+KeyA" binding. The bare-key branch
+        // below has always required every modifier to be absent; this keeps the two consistent.
+        return (
+            event.code === code &&
+            event.shiftKey === wantsShift &&
+            event.ctrlKey === wantsControl &&
+            event.altKey === wantsAlt &&
+            event.metaKey === wantsMeta
+        );
     }
     return event.code === keyCode && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey;
 }
