@@ -1496,7 +1496,9 @@ ipcMain.on("externalVolumeReady", (event) => {
 });
 
 export function getModelName(model) {
-    const modelName = globalThis.sharedObject.deviceInfo.models.get(model);
+    // See the note on the matching helper in src/server/ecp.js: `models` only exists once
+    // the renderer has sent deviceData.
+    const modelName = globalThis.sharedObject.deviceInfo.models?.get(model);
     return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }
 

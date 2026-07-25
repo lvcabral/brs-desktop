@@ -99,13 +99,18 @@ describe("ECP payload builders", () => {
             expect(genDeviceInfoXml(false)).not.toContain("virtual-device-id");
         });
 
-        // Design hazard: device.models arrives from the renderer via the deviceData IPC,
-        // and is absent from the object main.js builds at startup. An ECP client that
-        // queries between enableECP() and that first message gets a 500.
-        it("throws when queried before the renderer has reported device data", () => {
+        // device.models arrives from the renderer via the deviceData IPC and is absent from
+        // the object main.js builds at startup, so an ECP client can query in that window --
+        // the VS Code BrightScript extension polls on connect. Answering with the generic
+        // model name beats returning a 500.
+        it("falls back to a generic model name before the renderer has reported device data", () => {
             globalThis.sharedObject = makeSharedObject(makeDeviceInfo());
             initECP();
-            expect(() => genDeviceInfoXml(false)).toThrow();
+            const xml = genDeviceInfoXml(false);
+            // The serial number also arrives with deviceData, so it is legitimately blank
+            // here; what matters is that the model falls back instead of throwing.
+            expect(xml).toContain("Roku (4200X)");
+            expect(xml).toContain("<device-info>");
         });
     });
 

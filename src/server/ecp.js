@@ -539,7 +539,8 @@ export function genAppRegistry(plugin, encrypt) {
         const secsXml = regXml.ele("sections");
         let curSection = "";
         let scXml, itsXml, itXml;
-        const registry = new Map([...device.registry].sort());
+        // Same startup window as getModelName: spreading an undefined registry would throw.
+        const registry = new Map([...(device.registry ?? [])].sort());
         for (const [key, value] of registry) {
             const sections = key.split(".");
             if (sections.length > 2 && sections[0] === device.developerId) {
@@ -640,6 +641,9 @@ function getAppIconPath(appID) {
 }
 
 export function getModelName(model) {
-    const modelName = device.models.get(model);
+    // `models` is populated by the renderer's deviceData message, so it is absent for the
+    // first moments after startup. The generic fallback below already covers an unknown
+    // model; without the optional chaining it is unreachable and the caller 500s instead.
+    const modelName = device.models?.get(model);
     return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }
