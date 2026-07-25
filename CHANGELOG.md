@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.3.0"></a>
+
+## v2.3.0 - Unreleased
+
+* Removed the `fs-jetpack` dependency, replacing its five usages with Node's built-in `fs` module and
+  two small helpers (`readJsonFile`/`writeJsonFile` in `src/helpers/util.js`) that preserve the previous
+  behaviour, including atomic writes of `recent-files.json` and `window-state-*.json`
+* Upgraded `monaco-editor` to v0.56.0 and added `overrides` for `dompurify`, `@electron/asar`,
+  `@electron/universal` and `filelist` to resolve `npm audit` reports
+* `npm audit` went from 19 vulnerabilities (2 moderate, 17 high) to 10 (all high), and
+  `npm audit --omit=dev` now reports **0 vulnerabilities** — nothing vulnerable ships in the application
+* Removed `build/webpack.unit.config.js` and `build/webpack.e2e.config.js`, unused leftovers from the
+  electron-boilerplate template
+
 <a name="v2.2.0"></a>
 
 ## [v2.2.0 - Hide Editor and Electron 39](https://github.com/lvcabral/brs-desktop/releases/tag/v2.2.0) - 11 Feb 2026

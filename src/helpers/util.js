@@ -6,6 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app } from "electron";
+import fs from "node:fs";
 import os from "node:os";
 import network from "network";
 import { spawnSync } from "node:child_process";
@@ -43,6 +44,37 @@ export function isValidUrl(string) {
     } catch (err) {
         return false;
     }
+}
+
+/**
+ * Function to read and parse a JSON file
+ * @param {string} filePath - The path of the JSON file to read
+ * @returns {object|undefined} - The parsed content, or undefined if the file does not exist
+ */
+export function readJsonFile(filePath) {
+    let data;
+    try {
+        data = fs.readFileSync(filePath, "utf8");
+    } catch (err) {
+        if (err.code === "ENOENT") {
+            // If the file doesn't exist return undefined instead of throwing
+            return undefined;
+        }
+        throw err;
+    }
+    return JSON.parse(data);
+}
+
+/**
+ * Function to save a JSON file atomically, writing to a temporary file first, so an
+ * interrupted write (app crash, power loss) can never corrupt the original file
+ * @param {string} filePath - The path of the JSON file to write
+ * @param {object} data - The content to serialize and save
+ */
+export function writeJsonFile(filePath, data) {
+    const tmpFile = `${filePath}.__new__`;
+    fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2));
+    fs.renameSync(tmpFile, filePath);
 }
 
 /**
