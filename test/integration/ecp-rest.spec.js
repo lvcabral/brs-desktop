@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { createFakeWindow, __registerWindow, ipcMain } from "../mocks/electron.js";
-import { makeSharedObject, makeEngineDeviceInfo } from "../fixtures/sharedObject.js";
+import { makeSharedObject, makeDeviceInfo, makeEngineDeviceInfo } from "../fixtures/sharedObject.js";
 import { getFreePort } from "../helpers/freePort.js";
 import {
     initECP,
@@ -171,5 +171,54 @@ describe("ECP REST API", () => {
                 expect(response.status).toBeGreaterThanOrEqual(400);
             }
         );
+    });
+});
+
+describe("ECP REST API before the renderer reports device data", () => {
+    // makeDeviceInfo() is the object main.js builds at startup: no `models`, no `registry`.
+    // A client that queries in the window before the renderer's first deviceData message
+    // used to get a 500; it should get a usable answer instead.
+    let win;
+    let base;
+
+    beforeAll(async () => {
+        globalThis.sharedObject = makeSharedObject(makeDeviceInfo());
+        win = __registerWindow(createFakeWindow(1));
+        const port = await getFreePort();
+        initECP();
+        await new Promise((resolve) => {
+            subscribeECP("test-startup", (event, enabled) => {
+                if (event === "enabled" && enabled) {
+                    resolve();
+                }
+            });
+            enableECP(win, port);
+        });
+        unsubscribeECP("test-startup");
+        base = `http://127.0.0.1:${port}`;
+    });
+
+    afterAll(() => {
+        disableECP();
+    });
+
+    it("answers device-info with a generic model name rather than 500", async () => {
+        const response = await fetch(`${base}/query/device-info`);
+        expect(response.status).toBe(200);
+        const body = await response.text();
+        expect(body).toContain("Roku (4200X)");
+        expect(body).toContain("<device-info>");
+    });
+
+    it("answers the app registry rather than 500", async () => {
+        const response = await fetch(`${base}/query/registry/dev`);
+        expect(response.status).toBe(200);
+        expect(await response.text()).toContain("<dev-id>brs-dev-id</dev-id>");
+    });
+
+    it("serves the UPnP root rather than 500", async () => {
+        const response = await fetch(`${base}/`);
+        expect(response.status).toBe(200);
+        expect(await response.text()).toContain("<modelName>");
     });
 });
