@@ -9,13 +9,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { createFakeWindow, __registerWindow, ipcMain } from "../mocks/electron.js";
 import { makeSharedObject, makeDeviceInfo, makeEngineDeviceInfo } from "../fixtures/sharedObject.js";
 import { getFreePort } from "../helpers/freePort.js";
-import {
-    initECP,
-    enableECP,
-    disableECP,
-    subscribeECP,
-    unsubscribeECP,
-} from "../../src/server/ecp";
+import { initECP, enableECP, disableECP, subscribeECP, unsubscribeECP } from "../../src/server/ecp";
 
 /**
  * The real ECP REST API, running in-process on an ephemeral port.
@@ -134,10 +128,7 @@ describe("ECP REST API", () => {
             subscribeECP("launch-test", observer);
             try {
                 await fetch(`${base}/launch/dev?contentId=123&mediaType=movie`, { method: "POST" });
-                expect(observer).toHaveBeenCalledWith(
-                    "launch",
-                    expect.objectContaining({ appID: "dev" })
-                );
+                expect(observer).toHaveBeenCalledWith("launch", expect.objectContaining({ appID: "dev" }));
             } finally {
                 unsubscribeECP("launch-test");
             }

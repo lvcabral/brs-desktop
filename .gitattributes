@@ -1,1 +1,15 @@
+# Normalize all text files to LF in the repository and in the working tree,
+# so Windows checkouts don't reintroduce CRLF that Prettier would rewrite.
+* text=auto eol=lf
+
+# Assets git should never touch
+*.png binary
+*.ico binary
+*.mp4 binary
+*.zip binary
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+
 *.css linguist-language=Javascript

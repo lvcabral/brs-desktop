@@ -9,11 +9,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import { getPeerRoku } from "./settings";
 import { isValidIP } from "./util";
 import { ECP_PORT } from "../constants";
-import {
-    parseDigestChallenge,
-    generateDigestResponse,
-    formatDigestHeader,
-} from "./digest";
+import { parseDigestChallenge, generateDigestResponse, formatDigestHeader } from "./digest";
 
 let sendECPKeys = false;
 
@@ -93,16 +89,12 @@ export async function runOnPeerRoku(fileData, deepLink) {
                         message = `Error installing app: ${err} ${body}`;
                         isError = true;
                     } else if (response?.status === 200) {
-                        message = `App installed on peer device ${
-                            device.friendlyName || device.ip
-                        } with success!`;
+                        message = `App installed on peer device ${device.friendlyName || device.ip} with success!`;
                         let queryString = "";
                         if (deepLink instanceof Map && deepLink.size > 1) {
                             queryString = "?";
                             for (const [key, value] of deepLink.entries()) {
-                                queryString += `${encodeURIComponent(key)}=${encodeURIComponent(
-                                    value
-                                )}&`;
+                                queryString += `${encodeURIComponent(key)}=${encodeURIComponent(value)}&`;
                             }
                             queryString = queryString.slice(0, -1); // Remove trailing '&'
                             // Return to home screen before launching with deep link
@@ -127,11 +119,7 @@ export async function runOnPeerRoku(fileData, deepLink) {
                 }
             );
         } catch (error) {
-            window.webContents.send(
-                "console",
-                `Error running on peer Roku ${device.ip}:${error.message}`,
-                true
-            );
+            window.webContents.send("console", `Error running on peer Roku ${device.ip}:${error.message}`, true);
         }
     } else if (device.ip?.length) {
         window.webContents.send("console", `Invalid peer Roku IP address: ${device.ip}`, true);
@@ -201,13 +189,7 @@ async function postInstallerRequest(device, path, formData, callback) {
             const authHeader = response.headers.get("www-authenticate");
             if (authHeader?.toLowerCase().startsWith("digest")) {
                 const challenge = parseDigestChallenge(authHeader);
-                const digestParams = generateDigestResponse(
-                    device.username,
-                    device.password,
-                    "POST",
-                    path,
-                    challenge
-                );
+                const digestParams = generateDigestResponse(device.username, device.password, "POST", path, challenge);
                 const authHeaderValue = formatDigestHeader(digestParams);
 
                 // Recreate the form data for the second request

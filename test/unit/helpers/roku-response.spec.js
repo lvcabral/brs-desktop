@@ -29,7 +29,7 @@ describe("isCompileError", () => {
         expect(isCompileError("Install Failure:  Compilation Failed")).toBe(true);
         expect(isCompileError("Install  Failure:\n\n  Compilation\tFailed")).toBe(true);
         // Real pages wrap the text in markup, so the spacing is not under our control.
-        expect(isCompileError("<font color=\"red\">Install Failure:\n    Compilation Failed</font>")).toBe(true);
+        expect(isCompileError('<font color="red">Install Failure:\n    Compilation Failed</font>')).toBe(true);
     });
 
     it("returns false for a successful install", () => {

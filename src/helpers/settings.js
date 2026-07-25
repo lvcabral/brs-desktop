@@ -35,13 +35,7 @@ import { setAspectRatio } from "./window";
 import { enableECP, disableECP } from "../server/ecp";
 import { enableTelnet, disableTelnet } from "../server/telnet";
 import { enableDebugServer, disableDebugServer } from "../server/debug";
-import {
-    enableInstaller,
-    disableInstaller,
-    setPort,
-    isInstallerEnabled,
-    setPassword,
-} from "../server/installer";
+import { enableInstaller, disableInstaller, setPort, isInstallerEnabled, setPassword } from "../server/installer";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
 import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
 import { getLocalIps, formatPath } from "./util";
@@ -1909,9 +1903,6 @@ export function getRokuDeviceOptions() {
     return options;
 }
 
-
-
-
 function stopSsdpClient(client) {
     if (!client) {
         return;
@@ -1922,7 +1913,6 @@ function stopSsdpClient(client) {
         console.warn(`Unable to stop SSDP client: ${error.message}`);
     }
 }
-
 
 async function discoverRokuDevices() {
     return new Promise((resolve) => {
@@ -1980,11 +1970,7 @@ async function discoverRokuDevices() {
 
             discoveredDevices.set(deviceIP, mergedDevice);
 
-            if (
-                !previousDevice &&
-                !mergedDevice.metadataFetched &&
-                !pendingMetadataRequests.has(deviceIP)
-            ) {
+            if (!previousDevice && !mergedDevice.metadataFetched && !pendingMetadataRequests.has(deviceIP)) {
                 pendingMetadataRequests.add(deviceIP);
                 const metadataPromise = getDeviceMetadata(deviceIP, serialNumber)
                     .then((details) => {
@@ -2049,9 +2035,7 @@ export async function initRokuDeviceDiscovery() {
 export function updateDeviceMetadata(deviceIP, mergedDevice, details) {
     const normalizedDetailsIp = normalizeIpAddress(details?.ipAddr);
     const deviceKey =
-        normalizedDetailsIp && discoveredDevices.has(normalizedDetailsIp)
-            ? normalizedDetailsIp
-            : deviceIP;
+        normalizedDetailsIp && discoveredDevices.has(normalizedDetailsIp) ? normalizedDetailsIp : deviceIP;
     const baseDevice = discoveredDevices.get(deviceKey) || mergedDevice;
     const nextFriendly = details?.friendlyName?.trim();
     const nextModel = details?.modelName?.trim();
@@ -2078,9 +2062,7 @@ function getDeviceMetadata(ipAddr, serialNumber) {
             host = locationUrl.hostname || host;
             port = Number(locationUrl.port) || port;
         } catch (error) {
-            console.warn(
-                `Unable to parse Roku device location ${deviceEntry.location}: ${error.message}`
-            );
+            console.warn(`Unable to parse Roku device location ${deviceEntry.location}: ${error.message}`);
         }
     }
     const options = {
@@ -2123,5 +2105,3 @@ function getDeviceMetadata(ipAddr, serialNumber) {
         request.end();
     });
 }
-
-

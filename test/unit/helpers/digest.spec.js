@@ -119,8 +119,7 @@ describe("parseAuthenticationInfo", () => {
 
 describe("parseDigestChallenge", () => {
     it("parses a WWW-Authenticate challenge", () => {
-        const challenge =
-            'Digest realm="BrightScript Simulator",qop="auth",nonce="0.987654",opaque="cafebabe"';
+        const challenge = 'Digest realm="BrightScript Simulator",qop="auth",nonce="0.987654",opaque="cafebabe"';
         expect(parseDigestChallenge(challenge)).toEqual({
             realm: "BrightScript Simulator",
             qop: "auth",
@@ -158,7 +157,15 @@ describe("generateDigestResponse", () => {
     it("returns the full qop=auth parameter set", () => {
         const result = generateDigestResponse("rokudev", "rokudev", "POST", "/plugin_install", challenge);
         expect(Object.keys(result).sort()).toEqual([
-            "cnonce", "nc", "nonce", "opaque", "qop", "realm", "response", "uri", "username",
+            "cnonce",
+            "nc",
+            "nonce",
+            "opaque",
+            "qop",
+            "realm",
+            "response",
+            "uri",
+            "username",
         ]);
         expect(result.nc).toBe("00000001");
         expect(result.cnonce).toMatch(/^[0-9a-f]{16}$/);

@@ -12,17 +12,19 @@ const builders = Object.entries(options).filter(([name]) => name.startsWith("get
 
 describe("preference option arrays", () => {
     it("exports all nine builders", () => {
-        expect(builders.map(([name]) => name).sort()).toEqual([
-            "getBackgroundOpacityArray",
-            "getCaptionColorArray",
-            "getCountryArray",
-            "getLocaleIdArray",
-            "getTextEffectArray",
-            "getTextFontArray",
-            "getTextOpacityArray",
-            "getTracksLanguageArray",
-            "getTextSizeArray",
-        ].sort());
+        expect(builders.map(([name]) => name).sort()).toEqual(
+            [
+                "getBackgroundOpacityArray",
+                "getCaptionColorArray",
+                "getCountryArray",
+                "getLocaleIdArray",
+                "getTextEffectArray",
+                "getTextFontArray",
+                "getTextOpacityArray",
+                "getTracksLanguageArray",
+                "getTextSizeArray",
+            ].sort()
+        );
     });
 
     it.each(builders)("%s matches its snapshot", (_name, build) => {

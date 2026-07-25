@@ -56,9 +56,7 @@ describe.each(["darwin", "win32", "linux"])("recent files menu on %s", (platform
     it("records a recent package without throwing", () => {
         // The non-macOS path reaches the submenu through getMenuItemById, which only works
         // if a built MenuItem's submenu answers that call the way Electron's does.
-        expect(() =>
-            addRecentPackage({ id: "1", path: "/tmp/one.zip", title: "One", version: "1.0.0" })
-        ).not.toThrow();
+        expect(() => addRecentPackage({ id: "1", path: "/tmp/one.zip", title: "One", version: "1.0.0" })).not.toThrow();
         expect(menuService.getRecentPackage(0)).toBe("/tmp/one.zip");
     });
 

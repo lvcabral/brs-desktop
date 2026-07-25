@@ -9,11 +9,7 @@ import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import { createFakeWindow, __registerWindow } from "../mocks/electron.js";
 import { makeSharedObject, makeEngineDeviceInfo } from "../fixtures/sharedObject.js";
 import { getFreePort } from "../helpers/freePort.js";
-import {
-    parseDigestChallenge,
-    generateDigestResponse,
-    formatDigestHeader,
-} from "../../src/helpers/digest";
+import { parseDigestChallenge, generateDigestResponse, formatDigestHeader } from "../../src/helpers/digest";
 import {
     setPassword,
     setPort,

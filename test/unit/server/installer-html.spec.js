@@ -6,11 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import {
-    buildScreenshotHtml,
-    buildInstallHtml,
-    handlePostResponse,
-} from "../../../src/server/installer";
+import { buildScreenshotHtml, buildInstallHtml, handlePostResponse } from "../../../src/server/installer";
 
 /**
  * Build a stand-in for a Node ServerResponse
@@ -82,9 +78,7 @@ describe("handlePostResponse", () => {
         try {
             handlePostResponse(res, "nonesuch", 0, null);
             expect(res.writeHead).toHaveBeenCalledWith(501);
-            expect(res.end).toHaveBeenCalledWith(
-                "Error 501: Not Implemented\nMethod not Implemented"
-            );
+            expect(res.end).toHaveBeenCalledWith("Error 501: Not Implemented\nMethod not Implemented");
             expect(warn).toHaveBeenCalled();
         } finally {
             warn.mockRestore();

@@ -44,7 +44,7 @@ function buildRecentSubmenu() {
             click: () => {
                 clearRecentFiles();
             },
-        },
+        }
     );
     return items;
 }
@@ -77,10 +77,9 @@ export const fileMenuTemplate = {
                         height: 177,
                         icon: __dirname + "/images/icon.ico",
                         type: "input",
-                        customStylesheet:
-                            __dirname + `/css/prompt-${userTheme}.css`,
+                        customStylesheet: __dirname + `/css/prompt-${userTheme}.css`,
                     },
-                    window,
+                    window
                 )
                     .then((url) => {
                         if (url) {

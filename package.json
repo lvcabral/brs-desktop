@@ -69,6 +69,8 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "test:coverage": "vitest run --coverage",
+        "prettier": "prettier --check \"{build,src,test}/**/*.{js,mjs}\" \"*.{js,mjs,json}\"",
+        "prettier:write": "prettier --write \"{build,src,test}/**/*.{js,mjs}\" \"*.{js,mjs,json}\"",
         "build": "webpack --config build/webpack.app.config.js",
         "dist": "webpack --config build/webpack.app.config.js --env production && electron-builder",
         "dist-win": "webpack --config build/webpack.app.config.js --env production && electron-builder -w --x64 --ia32",
@@ -121,6 +123,7 @@
         "html-webpack-plugin": "^5.5.3",
         "monaco-editor-webpack-plugin": "^7.1.0",
         "postinstall-postinstall": "^2.1.0",
+        "prettier": "^3.9.6",
         "source-map-support": "^0.5.6",
         "style-loader": "^3.3.1",
         "vitest": "^4.1.10",
@@ -134,5 +137,18 @@
         "@electron/asar": "^4.2.1",
         "@electron/universal": "^3.0.6",
         "filelist": "^2.0.2"
+    },
+    "prettier": {
+        "trailingComma": "es5",
+        "tabWidth": 4,
+        "printWidth": 120,
+        "overrides": [
+            {
+                "files": "build/**/*.js",
+                "options": {
+                    "tabWidth": 2
+                }
+            }
+        ]
     }
 }

@@ -116,9 +116,7 @@ export function generateDigestResponse(username, password, method, path, challen
     if (challenge.qop === "auth" || challenge.qop === "auth-int") {
         const nc = "00000001";
         const cnonce = crypto.randomBytes(8).toString("hex");
-        response = cryptoUsingMD5(
-            `${ha1}:${challenge.nonce}:${nc}:${cnonce}:${challenge.qop}:${ha2}`
-        );
+        response = cryptoUsingMD5(`${ha1}:${challenge.nonce}:${nc}:${cnonce}:${challenge.qop}:${ha2}`);
 
         return {
             username,

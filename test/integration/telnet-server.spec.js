@@ -11,12 +11,7 @@ import { makeSharedObject, makeEngineDeviceInfo } from "../fixtures/sharedObject
 import { getFreePort } from "../helpers/freePort.js";
 import { waitForSend } from "../helpers/fakeWindow.js";
 import { connectSocket } from "../helpers/socketClient.js";
-import {
-    enableTelnet,
-    disableTelnet,
-    subscribeTelnet,
-    unsubscribeTelnet,
-} from "../../src/server/telnet";
+import { enableTelnet, disableTelnet, subscribeTelnet, unsubscribeTelnet } from "../../src/server/telnet";
 
 /**
  * The remote console on a real TCP socket.

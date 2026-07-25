@@ -169,9 +169,7 @@ export function checkForUpdates(forceCheck = false) {
     }
 
     return new Promise((resolve, reject) => {
-        const repoUrl = packageInfo.repository.url
-            .replace(/^https?:\/\/github\.com\//, "")
-            .replace(/\.git$/, "");
+        const repoUrl = packageInfo.repository.url.replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "");
         const currentVersion = "v" + packageInfo.version;
 
         fetchLatestRelease(repoUrl, currentVersion, forceCheck, resolve, reject);
