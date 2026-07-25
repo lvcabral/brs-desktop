@@ -17,25 +17,52 @@
  * @returns {string} - The shortened path, or the original when it already fits
  */
 export function shortenPath(bigPath, maxLen) {
-    let path = bigPath;
-    if (path.length > maxLen) {
-        const splitter = bigPath.includes("/") ? "/" : "\\";
-        const tokens = bigPath.split(splitter);
-        const drive = bigPath.includes(":") ? tokens[0] : "";
-        const fileName = tokens.at(-1);
-        const len = drive.length + fileName.length;
-        const remLen = maxLen - len - 3; // remove the current length and also space for ellipsis char and 2 slashes
-        //remove first and last elements from the array
-        tokens.splice(0, 1);
-        tokens.splice(-1, 1);
-        //recreate our path
-        path = tokens.join(splitter);
-        //rebuild the path from beginning and end
-        const pathA = path.substring(0, Math.ceil(remLen / 2));
-        const pathB = path.substring(path.length - Math.floor(remLen / 2));
-        path = `${drive}${splitter}${pathA}…${pathB}${splitter}${fileName}`;
+    if (bigPath.length <= maxLen) {
+        return bigPath;
     }
-    return path;
+    const splitter = bigPath.includes("/") ? "/" : "\\";
+    const tokens = bigPath.split(splitter);
+    const fileName = tokens.at(-1);
+
+    // Nothing to elide between the drive and the filename, so shorten the name itself
+    // rather than inventing separators the original path never had.
+    if (tokens.length < 3) {
+        return elide(fileName, maxLen);
+    }
+
+    const drive = bigPath.includes(":") ? tokens[0] : "";
+    // Budget for the directories: the total, less the drive, the filename, the ellipsis
+    // and the two separators around it. Clamped, because the filename alone can exceed it.
+    const remLen = Math.max(0, maxLen - drive.length - fileName.length - 3);
+    if (remLen === 0) {
+        // No room for any directory context; keep the filename, elided if need be.
+        return elide(fileName, maxLen);
+    }
+
+    const middle = tokens.slice(1, -1).join(splitter);
+    const head = middle.substring(0, Math.ceil(remLen / 2));
+    const tail = middle.substring(middle.length - Math.floor(remLen / 2));
+    return `${drive}${splitter}${head}…${tail}${splitter}${fileName}`;
+}
+
+/**
+ * Shorten a single name to fit, eliding its middle
+ * @param {string} name - The name to shorten
+ * @param {number} maxLen - The maximum length
+ * @returns {string} - The name, no longer than maxLen
+ */
+function elide(name, maxLen) {
+    if (name.length <= maxLen) {
+        return name;
+    }
+    if (maxLen <= 1) {
+        return name.substring(0, Math.max(0, maxLen));
+    }
+    // Keep the extension visible: it is the part that identifies the file type.
+    const keep = maxLen - 1;
+    const head = Math.ceil(keep / 2);
+    const tail = Math.floor(keep / 2);
+    return `${name.substring(0, head)}…${tail > 0 ? name.substring(name.length - tail) : ""}`;
 }
 
 /**

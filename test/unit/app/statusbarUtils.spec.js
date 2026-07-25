@@ -56,19 +56,37 @@ describe("shortenPath", () => {
         expect(windows).not.toContain("/");
     });
 
-    // Characterization: when the filename alone nearly fills maxLen, remLen goes negative.
-    // substring() then receives inverted or negative arguments, and the result can come
-    // back *longer* than maxLen. The status bar is cosmetic so this is pinned, not fixed —
-    // the right behaviour (truncate the filename? show only the basename?) is a UI decision.
-    it("can exceed maxLen when the filename is longer than the budget", () => {
+    it("never exceeds maxLen, even when the filename alone is longer", () => {
+        // remLen used to go negative here, handing substring() inverted arguments and
+        // producing a result longer than the budget it was asked to fit.
         const path = "/Users/test/Documents/a-very-long-channel-filename-indeed.zip";
         const maxLen = 30;
         const result = shortenPath(path, maxLen);
-        expect(result.length).toBeGreaterThan(maxLen);
+        expect(result.length).toBeLessThanOrEqual(maxLen);
         expect(result).toMatchSnapshot();
     });
 
-    it("handles a path with no directory component", () => {
-        expect(shortenPath("averyveryverylongfilenamewithnoslashes.zip", 10)).toMatchSnapshot();
+    it("never exceeds maxLen across a range of budgets", () => {
+        const paths = [
+            "/Users/test/Documents/Projects/BrightScript/channels/mychannel.zip",
+            "/Users/test/Documents/a-very-long-channel-filename-indeed.zip",
+            "C:\\Users\\test\\Documents\\Projects\\a-long-name.zip",
+            "averyveryverylongfilenamewithnoslashes.zip",
+        ];
+        for (const path of paths) {
+            for (let maxLen = 8; maxLen <= 60; maxLen++) {
+                expect(shortenPath(path, maxLen).length).toBeLessThanOrEqual(maxLen);
+            }
+        }
+    });
+
+    it("leaves a bare filename alone rather than injecting separators", () => {
+        // There is no directory to elide, so the old code inserted backslashes into a
+        // name that never contained any.
+        const bare = "averyveryverylongfilenamewithnoslashes.zip";
+        const result = shortenPath(bare, 20);
+        expect(result).not.toContain("\\");
+        expect(result.length).toBeLessThanOrEqual(20);
+        expect(result).toMatchSnapshot();
     });
 });
