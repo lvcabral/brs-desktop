@@ -246,9 +246,36 @@ function findItemById(template, id) {
     return undefined;
 }
 
+/**
+ * Give every submenu in a template a `getMenuItemById`, the way Electron does.
+ *
+ * In Electron a MenuItem's `submenu` is a Menu instance, not the plain array from the
+ * template, so code can chain `getMenuItemById("x").submenu.getMenuItemById("y")` — which
+ * src/menu/menuService.js does on every platform except macOS. The method is defined
+ * non-enumerably and in place, so the arrays stay arrays for the code paths that index
+ * them positionally, and mutations still land on the original template objects that the
+ * tests assert against.
+ * @param {object[]} template - The menu template to augment, recursively
+ * @returns {object[]} - The same template
+ */
+function addSubmenuLookup(template) {
+    if (!Array.isArray(template) || Object.hasOwn(template, "getMenuItemById")) {
+        return template;
+    }
+    Object.defineProperty(template, "getMenuItemById", {
+        value: (id) => findItemById(template, id),
+        enumerable: false,
+        configurable: true,
+    });
+    for (const item of template) {
+        addSubmenuLookup(item?.submenu);
+    }
+    return template;
+}
+
 export const Menu = {
     buildFromTemplate: vi.fn((template) => ({
-        template,
+        template: addSubmenuLookup(template),
         items: template,
         getMenuItemById: (id) => findItemById(template, id),
         popup: vi.fn(),

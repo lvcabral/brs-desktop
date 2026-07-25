@@ -7,6 +7,10 @@ on:
       - dev-*
     tags:
       - '**'
+  # Run the test job on pull requests too. Without this, a branch is only ever tested
+  # after it has been merged, so a platform-specific failure lands on master before
+  # anyone sees it. The release job stays gated on a tag, so this adds no publishing.
+  pull_request:
 
 jobs:
   test:
