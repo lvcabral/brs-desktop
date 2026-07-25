@@ -163,9 +163,13 @@ describe("matchesKey", () => {
         expect(matchesKey(keyEvent("KeyA", { shiftKey: true }), "SHIFT+KeyA")).toBe(true);
     });
 
-    it("ignores extra modifiers in a combination", () => {
-        // Characterization: only the named modifier is checked, so Ctrl+Shift+A also
-        // satisfies a "Shift+KeyA" binding.
-        expect(matchesKey(keyEvent("KeyA", { shiftKey: true, ctrlKey: true }), "Shift+KeyA")).toBe(true);
+    it("rejects a combination when an unnamed modifier is also held", () => {
+        // A binding names the modifiers it wants; anything else held means the user pressed
+        // a different chord. The bare-key branch above has always enforced this.
+        expect(matchesKey(keyEvent("KeyA", { shiftKey: true, ctrlKey: true }), "Shift+KeyA")).toBe(false);
+        expect(matchesKey(keyEvent("KeyA", { shiftKey: true, altKey: true }), "Shift+KeyA")).toBe(false);
+        expect(matchesKey(keyEvent("KeyA", { shiftKey: true, metaKey: true }), "Shift+KeyA")).toBe(false);
+        // The named modifier on its own still matches.
+        expect(matchesKey(keyEvent("KeyA", { shiftKey: true }), "Shift+KeyA")).toBe(true);
     });
 });
