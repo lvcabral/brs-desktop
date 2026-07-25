@@ -356,8 +356,13 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
         settings.value("services.password", cliArgs.pwd.trim());
     }
     if (cliArgs?.web) {
+        const webPort = Number.parseInt(cliArgs.web, 10);
         setPort(cliArgs.web);
-        settings.value("services.webPort", Number.parseInt(cliArgs.web));
+        // Only persist a port that actually parsed: writing NaN into the settings file
+        // would leave the web installer unable to start on the next launch.
+        if (!Number.isNaN(webPort)) {
+            settings.value("services.webPort", webPort);
+        }
         enableInstaller(mainWindow);
     } else if (applyStartup && startupOptions.installerEnabled) {
         enableInstaller(mainWindow);
