@@ -229,6 +229,12 @@ export function getRokuOS(firmware, version = true, full = false) {
         }
         const versions = "0123456789ACDEFGHJKLMNPRSTUVWXY";
         const major = versions.indexOf(firmware.charAt(2));
+        if (major < 0) {
+            // Not a character this encoding uses (B, I, O, Q and Z are excluded to avoid
+            // digit lookalikes). Report nothing, as for firmware too short to decode,
+            // rather than a negative major version in the ECP XML and telnet banner.
+            return "";
+        }
         const minor = firmware.slice(4, 5);
         const revision = firmware.slice(5, 6);
         const base = `${major}.${minor}.${revision}`;
