@@ -540,7 +540,17 @@ export function genAppRegistry(plugin, encrypt) {
         let curSection = "";
         let scXml, itsXml, itXml;
         // Same startup window as getModelName: spreading an undefined registry would throw.
-        const registry = new Map([...(device.registry ?? [])].sort());
+        // Sorted explicitly by key: a bare .sort() compares the "key,value" string each
+        // entry coerces to, which happens to order by key but only by accident. Registry
+        // keys are unique, so comparing them alone is equivalent and says what it means.
+        const registry = new Map(
+            [...(device.registry ?? [])].sort(([keyA], [keyB]) => {
+                if (keyA === keyB) {
+                    return 0;
+                }
+                return keyA < keyB ? -1 : 1;
+            })
+        );
         for (const [key, value] of registry) {
             const sections = key.split(".");
             if (sections.length > 2 && sections[0] === device.developerId) {
