@@ -9,7 +9,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, it, expect, beforeEach } from "vitest";
 import { app, ipcMain, createFakeWindow, __registerWindow } from "../../mocks/electron.js";
-import { maxMenuFiles } from "../../../src/menu/fileMenuTemplate";
+import { fileMenuTemplate, maxMenuFiles } from "../../../src/menu/fileMenuTemplate";
 import { getSettings } from "../../../src/helpers/settings";
 import {
     createMenu,
@@ -188,12 +188,51 @@ describe("clearRecentFiles", () => {
     });
 });
 
-describe("recent-file limits", () => {
-    it("shows no more entries than the store keeps", () => {
-        // rebuildMenu() indexes recentMenu[maxMenuFiles] for the "empty" placeholder, so
-        // the menu length and the store cap are coupled: raising maxMenuFiles past the
-        // store size would index past the end of the generated submenu.
-        expect(maxMenuFiles).toBe(15);
-        expect(maxMenuFiles).toBeLessThanOrEqual(30);
+describe("recent-file menu", () => {
+    beforeEach(() => {
+        setupMenu();
+    });
+
+    /**
+     * The generated "Open Recent" submenu from the live template
+     * @returns {object[]} - The submenu items
+     */
+    function recentSubmenu() {
+        return fileMenuTemplate.submenu.find((item) => item.id === "file-open-recent").submenu;
+    }
+
+    it("generates one entry per menu slot plus the placeholder controls", () => {
+        const ids = recentSubmenu().map((item) => item.id ?? item.type);
+        for (let index = 0; index < maxMenuFiles; index++) {
+            expect(ids).toContain(`zip-${index}`);
+        }
+        expect(ids).toContain("zip-empty");
+        expect(ids).toContain("file-clear");
+    });
+
+    it("shows the placeholder only while the store is empty", () => {
+        const placeholder = () => recentSubmenu().find((item) => item.id === "zip-empty");
+        const clear = () => recentSubmenu().find((item) => item.id === "file-clear");
+        expect(placeholder().visible).toBe(true);
+        expect(clear().enabled).toBe(false);
+
+        addRecentPackage({ id: "1", path: "/tmp/one.zip", title: "One", version: "1.0.0" });
+        expect(placeholder().visible).toBe(false);
+        expect(clear().enabled).toBe(true);
+    });
+
+    it("shows at most maxMenuFiles entries however many are stored", () => {
+        // The store keeps more than the menu displays, so rebuilding with a full store
+        // must not run off the end of the generated submenu.
+        for (let index = 0; index < maxMenuFiles + 10; index++) {
+            addRecentPackage({
+                id: String(index),
+                path: `/tmp/app${index}.zip`,
+                title: `App ${index}`,
+                version: "1.0.0",
+            });
+        }
+        const visible = recentSubmenu().filter((item) => item.id?.startsWith("zip-") && item.visible);
+        expect(visible).toHaveLength(maxMenuFiles);
     });
 });
