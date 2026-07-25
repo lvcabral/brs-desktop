@@ -1,0 +1,63 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`IPC channel whitelists > matches their snapshots 1`] = `
+[
+  "telnet",
+  "addRecentPackage",
+  "openConsole",
+  "debugStarted",
+  "setAudioMute",
+  "setCaptionMode",
+  "deviceData",
+  "serialNumber",
+  "engineVersion",
+  "saveFile",
+  "saveIcon",
+  "updateRegistry",
+  "showEditor",
+  "contextMenu",
+  "keySent",
+  "runCode",
+  "runFile",
+  "runUrl",
+  "currentApp",
+  "reset",
+  "openAppPackage",
+  "closeSimulator",
+  "externalVolumeReady",
+  "setPreference",
+]
+`;
+
+exports[`IPC channel whitelists > matches their snapshots 2`] = `
+[
+  "console",
+  "postKeyDown",
+  "postKeyUp",
+  "postKeyPress",
+  "postInputParams",
+  "closeChannel",
+  "debugCommand",
+  "setTheme",
+  "setDisplay",
+  "setOverscan",
+  "setDeviceInfo",
+  "setCaptionStyle",
+  "setCustomKeys",
+  "setAudioMute",
+  "setPerfStats",
+  "setHomeScreenMode",
+  "toggleStatusBar",
+  "serverStatus",
+  "copyScreenshot",
+  "saveScreenshot",
+  "pasteText",
+  "executeFile",
+  "openEditor",
+  "editorUndo",
+  "editorRedo",
+  "mountExternalVolume",
+  "unmountExternalVolume",
+  "showToast",
+]
+`;

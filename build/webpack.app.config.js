@@ -36,7 +36,9 @@ module.exports = (env) => {
         }),
         new CopyWebpackPlugin({
           patterns: [
-            { context: "src/app/", from: "preload.js", to: "../app" },
+            // Glob covers preload.js and preloadKeys.js; both are copied unbundled because
+            // Electron loads preload scripts as CommonJS.
+            { context: "src/app/", from: "preload*.js", to: "../app" },
             { context: "src/app/", from: "images/**", to: "../app" },
             { context: "src/app/", from: "fonts/**", to: "../app" },
             { context: "src/app/", from: "css/**", to: "../app" },

@@ -7,6 +7,7 @@ Thumbs.db
 /dist
 /temp
 /out
+/coverage
 
 # ignore everything in 'app' folder what had been generated from 'src' folder
 /app

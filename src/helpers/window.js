@@ -267,7 +267,7 @@ function restoreWindowState(stateStoreFile, defaultSize) {
     return ensureVisibleOnSomeDisplay({ ...defaultSize, ...restoredState }, defaultSize);
 }
 
-function ensureVisibleOnSomeDisplay(windowState, defaultSize) {
+export function ensureVisibleOnSomeDisplay(windowState, defaultSize) {
     const visible = screen.getAllDisplays().some((display) => {
         return windowWithinBounds(windowState, display.bounds);
     });
@@ -283,7 +283,7 @@ function ensureVisibleOnSomeDisplay(windowState, defaultSize) {
     return windowState;
 }
 
-function windowWithinBounds(windowState, bounds) {
+export function windowWithinBounds(windowState, bounds) {
     return (
         windowState.x >= bounds.x &&
         windowState.y >= bounds.y &&

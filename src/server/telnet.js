@@ -15,11 +15,11 @@ let clients = new Map();
 let lines = new Map();
 
 export let isTelnetEnabled = false;
-export function enableTelnet() {
+export function enableTelnet(win, port = TELNET_PORT) {
     if (isTelnetEnabled) {
         return;
     }
-    const window = BrowserWindow.fromId(1);
+    const window = win ?? BrowserWindow.fromId(1);
     server = telnet.createServer();
     server.on("connection", (client) => {
         let id = clientId;
@@ -59,7 +59,7 @@ export function enableTelnet() {
         ipcMain.removeAllListeners("telnet");
         window.webContents.send("console", `Remote console server error: ${error.message}`, true);
     });
-    server.listen(TELNET_PORT);
+    server.listen(port);
 }
 
 export function disableTelnet() {
@@ -94,7 +94,7 @@ function notifyAll(eventName, eventData) {
 
 // Data Processing
 
-function processData(data, id, window) {
+export function processData(data, id, window) {
     if (data?.length > 0) {
         const client = clients.get(id);
         let line = lines.get(id);
@@ -128,7 +128,7 @@ function processData(data, id, window) {
     }
 }
 
-function sendDebugCommand(line, client, window) {
+export function sendDebugCommand(line, client, window) {
     const expr = line.trim().split(/(?<=^\S+)\s/);
     const cmd = expr[0].toLowerCase();
     if (cmd.toLowerCase() === "close") {

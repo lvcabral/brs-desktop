@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { app, BrowserWindow, Menu, ipcMain } from "electron";
+import { app, BrowserWindow, Menu, nativeTheme, ipcMain } from "electron";
 import { macOSMenuTemplate } from "./macOSMenuTemplate";
 import { fileMenuTemplate, maxMenuFiles } from "./fileMenuTemplate";
 import {
@@ -177,7 +177,7 @@ ipcMain.on("contextMenu", (event) => {
 });
 
 // Internal functions
-function restoreRecentFiles() {
+export function restoreRecentFiles() {
     let recentFilesDefault = { ids: [], zip: [], names: [], versions: [] };
     try {
         recentFiles = readJsonFile(recentFilesJson);

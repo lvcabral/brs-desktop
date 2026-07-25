@@ -115,12 +115,12 @@ export function getLocalIps() {
 
 /**
  * Function to get the network gateway
- * @returns {object} - An object containing the gateway IP address, name, type, and SSID
+ * @returns {Promise<object>} - Resolves to an object containing the gateway IP address, name, type, and SSID
  */
 export async function getGateway() {
     const gateWayData = { ip: "", name: "", type: "", ssid: "" };
     try {
-        const gw = getActiveInterface();
+        const gw = await getActiveInterface();
         gateWayData.ip = gw.gateway_ip ?? "";
         gateWayData.name = gw.name ?? "";
         gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";
@@ -140,10 +140,10 @@ export async function getGateway() {
 
 /**
  * Function to get the active network interface
- * @returns {object} - An object containing the gateway IP address, name, type, and SSID
+ * @returns {Promise<object>} - Resolves to the active interface reported by the `network` package
  */
 async function getActiveInterface() {
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if (!isWindows) {
             network.get_active_interface((err, obj) => {
                 if (err) {

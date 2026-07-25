@@ -8,6 +8,12 @@
 const { contextBridge, ipcRenderer, shell } = require("electron");
 const { getCurrentWebContents, getGlobal } = require("@electron/remote");
 const customTitlebar = require("custom-electron-titlebar");
+const {
+    SEND_CHANNELS,
+    RECEIVE_CHANNELS,
+    convertSettingsKey,
+    matchesKey,
+} = require("./preloadKeys");
 const Mousetrap = require("mousetrap");
 const path = require("node:path");
 const isMacOS = process.platform === "darwin";
@@ -59,66 +65,8 @@ globalThis.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Convert a Settings key name to KeyboardEvent.code format
-// Mirrors the convertKey/convertChar logic from settings.js
-function convertSettingsKey(keyCode) {
-    if (!keyCode) {
-        return "Home";
-    }
-    const arrows = new Set(["Left", "Right", "Up", "Down"]);
-    let newCode = keyCode.replaceAll(" ", "");
-    if (keyCode.includes("+")) {
-        const parts = keyCode.split("+");
-        const leftKey = parts[0];
-        const rightKey = parts[1];
-        if (rightKey.length === 1) {
-            newCode = `${leftKey}+${convertSettingsChar(rightKey)}`;
-        } else if (arrows.has(rightKey)) {
-            newCode = `${leftKey}+Arrow${rightKey}`;
-        }
-    } else if (keyCode.length === 1) {
-        newCode = convertSettingsChar(keyCode);
-    } else if (arrows.has(keyCode)) {
-        newCode = `Arrow${keyCode}`;
-    }
-    return newCode;
-}
 
-function convertSettingsChar(keyChar) {
-    if (/^\d$/.test(keyChar)) {
-        return `Digit${keyChar}`;
-    } else if (/^[a-zA-Z]$/.test(keyChar)) {
-        return `Key${keyChar.toUpperCase()}`;
-    }
-    const keyMap = {
-        "`": "Backquote", "-": "Minus", "=": "Equal",
-        "[": "BracketLeft", "]": "BracketRight", ";": "Semicolon",
-        "'": "Quote", ",": "Comma", ".": "Period",
-        "\\": "Backslash", "/": "Slash",
-    };
-    return keyMap[keyChar] ?? keyChar;
-}
 
-// Check if a KeyboardEvent matches a converted key code
-// Supports modifier+key combos (e.g. "Shift+KeyA")
-function matchesKey(event, keyCode) {
-    if (keyCode.includes("+")) {
-        const parts = keyCode.split("+");
-        const modifier = parts[0].toLowerCase();
-        const code = parts[1];
-        const hasModifier =
-            (modifier === "shift" && event.shiftKey) ||
-            (modifier === "control" && event.ctrlKey) ||
-            (modifier === "alt" && event.altKey) ||
-            (modifier === "meta" && event.metaKey) ||
-            (modifier === "shiftleft" && event.shiftKey) ||
-            (modifier === "shiftright" && event.shiftKey) ||
-            (modifier === "controlleft" && event.ctrlKey) ||
-            (modifier === "controlright" && event.ctrlKey);
-        return hasModifier && event.code === code;
-    }
-    return event.code === keyCode && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey;
-}
 
 contextBridge.exposeInMainWorld("api", {
     showPreferences: () => {
@@ -193,71 +141,14 @@ contextBridge.exposeInMainWorld("api", {
         return process.platform;
     },
     send: (channel, data) => {
-        // whitelist channels
-        let validChannels = [
-            "telnet",
-            "addRecentPackage",
-            "openConsole",
-            "debugStarted",
-            "setAudioMute",
-            "setCaptionMode",
-            "deviceData",
-            "serialNumber",
-            "engineVersion",
-            "saveFile",
-            "saveIcon",
-            "updateRegistry",
-            "showEditor",
-            "contextMenu",
-            "keySent",
-            "runCode",
-            "runFile",
-            "runUrl",
-            "currentApp",
-            "reset",
-            "openAppPackage",
-            "closeSimulator",
-            "externalVolumeReady",
-            "setPreference",
-        ];
-        if (validChannels.includes(channel)) {
+        if (SEND_CHANNELS.includes(channel)) {
             ipcRenderer.send(channel, data);
         } else {
             console.warn(`api.send() - invalid channel: ${channel}`);
         }
     },
     receive: (channel, func) => {
-        let validChannels = [
-            "console",
-            "postKeyDown",
-            "postKeyUp",
-            "postKeyPress",
-            "postInputParams",
-            "closeChannel",
-            "debugCommand",
-            "setTheme",
-            "setDisplay",
-            "setOverscan",
-            "setDeviceInfo",
-            "setCaptionStyle",
-            "setCustomKeys",
-            "setAudioMute",
-            "setPerfStats",
-            "setHomeScreenMode",
-            "toggleStatusBar",
-            "serverStatus",
-            "copyScreenshot",
-            "saveScreenshot",
-            "pasteText",
-            "executeFile",
-            "openEditor",
-            "editorUndo",
-            "editorRedo",
-            "mountExternalVolume",
-            "unmountExternalVolume",
-            "showToast",
-        ];
-        if (validChannels.includes(channel)) {
+        if (RECEIVE_CHANNELS.includes(channel)) {
             // Deliberately strip event as it includes `sender`
             ipcRenderer.on(channel, (event, ...args) => func(...args));
         } else {

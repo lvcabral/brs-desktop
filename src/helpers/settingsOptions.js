@@ -1,0 +1,140 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
+ *
+ *  Copyright (c) 2019-2026 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+// Static {label, value} option lists backing the preferences dropdowns.
+//
+// getRokuModelArray() and getTimezoneArray() deliberately stay in settings.js: they read
+// globalThis.sharedObject and the module-level timeZoneLabels map respectively, so they
+// are not pure the way these nine are.
+
+export function getLocaleIdArray() {
+    return [
+        { label: "US English (en-US)", value: "en_US" },
+        { label: "British English (en-GB)", value: "en_GB" },
+        { label: "Australian English (en-AU)", value: "en_AU" },
+        { label: "Canadian English (en-CA)", value: "en_CA" },
+        { label: "Canadian French (fr-CA)", value: "fr_CA" },
+        { label: "International Spanish (es-ES)", value: "es_ES" },
+        { label: "Mexican Spanish (es-MX)", value: "es_MX" },
+        { label: "German (de-DE)", value: "de_DE" },
+        { label: "Italian (it-IT)", value: "it_IT" },
+        { label: "Brazilian Portuguese (pt-BR)", value: "pt_BR" },
+    ];
+}
+export function getTextFontArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Serif fixed width", value: "serif fixed width" },
+        { label: "Serif proportional", value: "serif proportional" },
+        { label: "Sans Serif fixed width", value: "sans serif fixed width" },
+        { label: "Sans Serif proportional", value: "sans serif proportional" },
+        { label: "Casual", value: "casual" },
+        { label: "Cursive", value: "cursive" },
+        { label: "Small Caps", value: "small caps" },
+    ];
+}
+export function getTextEffectArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "None", value: "none" },
+        { label: "Raised", value: "raised" },
+        { label: "Depressed", value: "depressed" },
+        { label: "Uniform", value: "uniform" },
+        { label: "Drop shadow (left)", value: "drop shadow (left)" },
+        { label: "Drop shadow (right)", value: "drop shadow (right)" },
+    ];
+}
+export function getTextSizeArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Extra Large", value: "extra large" },
+        { label: "Large", value: "large" },
+        { label: "Medium", value: "medium" },
+        { label: "Small", value: "small" },
+        { label: "Extra Small", value: "extra small" },
+    ];
+}
+export function getCaptionColorArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Bright White", value: "bright white" },
+        { label: "White", value: "white" },
+        { label: "Black", value: "black" },
+        { label: "Red", value: "red" },
+        { label: "Green", value: "green" },
+        { label: "Blue", value: "blue" },
+        { label: "Yellow", value: "yellow" },
+        { label: "Magenta", value: "magenta" },
+        { label: "Cyan", value: "cyan" },
+    ];
+}
+export function getTextOpacityArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "25%", value: "25%" },
+        { label: "50%", value: "50%" },
+        { label: "75%", value: "75%" },
+        { label: "100%", value: "100%" },
+    ];
+}
+export function getBackgroundOpacityArray() {
+    return [
+        { label: "Default", value: "default" },
+        { label: "Off", value: "off" },
+        { label: "25%", value: "25%" },
+        { label: "50%", value: "50%" },
+        { label: "75%", value: "75%" },
+        { label: "100%", value: "100%" },
+    ];
+}
+
+export function getTracksLanguageArray() {
+    return [
+        { label: "English", value: "en" },
+        { label: "Spanish (español)", value: "es" },
+        { label: "French (français)", value: "fr" },
+        { label: "German (deutsch)", value: "de" },
+        { label: "Italian (italiano)", value: "it" },
+        { label: "Portuguese (português)", value: "pt" },
+        { label: "Russian (русский)", value: "ru" },
+        { label: "Turkish (Türkçe)", value: "tr" },
+        { label: "Polish (polski)", value: "pl" },
+        { label: "Ukrainian (українська)", value: "uk" },
+        { label: "Romansh (rumantsch)", value: "rm" },
+        { label: "Dutch (Nederlands)", value: "nl" },
+        { label: "Croatian (hrvatski)", value: "hr" },
+        { label: "Hungarian (magyar)", value: "hu" },
+        { label: "Greek (ελληνικά)", value: "el" },
+        { label: "Czech (čeština)", value: "cs" },
+        { label: "Swedish (svenska)", value: "sv" },
+    ];
+}
+
+export function getCountryArray() {
+    return [
+        { label: "United States (US)", value: "US" },
+        { label: "Argentina (AR)", value: "AR" },
+        { label: "Brazil (BR)", value: "BR" },
+        { label: "Canada (CA)", value: "CA" },
+        { label: "Chile (CL)", value: "CL" },
+        { label: "Colombia (CO)", value: "CO" },
+        { label: "Costa Rica (CR)", value: "CR" },
+        { label: "El Salvador (SV)", value: "SV" },
+        { label: "France (FR)", value: "FR" },
+        { label: "Guatemala (GT)", value: "GT" },
+        { label: "Germany (DE)", value: "DE" },
+        { label: "Honduras (HN)", value: "HN" },
+        { label: "Ireland (IE)", value: "IE" },
+        { label: "Mexico (MX)", value: "MX" },
+        { label: "Nicaragua (NI)", value: "NI" },
+        { label: "Panama (PA)", value: "PA" },
+        { label: "Peru (PE)", value: "PE" },
+        { label: "United Kingdom (GB)", value: "GB" },
+        { label: "Rest of the World (OT)", value: "OT" },
+    ];
+}

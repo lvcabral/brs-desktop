@@ -17,6 +17,7 @@ import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
 import { enableDebugServer } from "./server/debug";
 import { randomUUID } from "node:crypto";
+import { cliArgumentsConfig } from "./cliArgs";
 import { ECP_PORT, TELNET_PORT, DEBUG_PORT, UPDATE_CHECK_STARTUP, UPDATE_CHECK_INTERVAL } from "./constants";
 import {
     createMenu,
@@ -108,21 +109,6 @@ getGateway().then((gateway) => {
     }
 });
 
-// Parse CLI parameters
-const cliArgumentsConfig = {
-    string: ["o", "p", "m"],
-    boolean: ["c", "d", "e", "f", "r"],
-    alias: {
-        c: "console",
-        d: "devtools",
-        e: "ecp",
-        f: "fullscreen",
-        w: "web",
-        p: "pwd",
-        m: "mode",
-        r: "rc",
-    },
-};
 
 const argv = minimist(process.argv.slice(1), cliArgumentsConfig);
 

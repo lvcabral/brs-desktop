@@ -20,6 +20,9 @@ npm run build          # webpack dev build into app/
 npm run release        # webpack production build into app/ (what CI runs)
 npm run dist           # production build + electron-builder installers for the current platform -> dist/<version>/
 npm run clean          # wipe app/
+npm test               # vitest run — unit + service integration tests
+npm run test:watch     # vitest watch mode
+npm run test:coverage  # v8 coverage into coverage/
 ```
 
 Other `dist-*` scripts target Windows / Linux (appimage, deb, arm). Installers must be built on their
@@ -28,8 +31,67 @@ native OS.
 CLI args can be appended to `npm run start` (e.g. `npm run start -- --devtools --console -m hd`); see
 `docs/how-to-use.md` for the full list (`-o/-f/-m/-e/-r/-w/-p/-c/-d`).
 
-There is **no test framework wired up**: no `*.spec.js` files, no `e2e/` folder, and no `test` script.
-Don't claim tests were run; verify changes by running the app.
+## Tests
+
+Tests run on **Vitest** (`test/**/*.spec.js`, config in `vitest.config.mjs`). Two layers:
+
+- `test/unit/**` mirrors the `src/` tree and covers pure logic.
+- `test/integration/**` boots the real ECP, web installer, telnet and debug servers in-process on
+  **ephemeral ports** against a fake window, and drives them over real sockets.
+
+There is **no E2E/Playwright layer**. Window behaviour, menus and anything visual still have to be
+verified by running the app — `npm test` passing does not mean the UI works.
+
+**Electron is never loaded.** `vitest.config.mjs` aliases `electron`, `@electron/remote`,
+`@lvcabral/electron-preferences`, `@lvcabral/node-ssdp`, `network`, `electron-prompt` and
+`electron-about-window` to stubs in `test/mocks/`. Mocking SSDP is what keeps UDP multicast out of CI.
+`test/setup/global.js` polyfills `process.getSystemVersion()`, points `app.getPath("userData")` at a
+temp dir, and installs a fresh `globalThis.sharedObject` before each test.
+
+Two traps worth knowing:
+
+- Several modules register `ipcMain` handlers **at module-evaluation time** and can never re-register.
+  Do not call `ipcMain.removeAllListeners()` in a shared hook — it silently disables the code under
+  test. Drive those handlers with `ipcMain.emit(channel, {}, payload)`.
+- Routes that read bundled assets via `path.join(__dirname, …)` resolve to `src/` under vite-node
+  rather than the webpack bundle's `app/`, so they fail in tests only. Those cases are marked.
+
+When adding an IPC channel, a `gen*Xml` builder, or a debug command, add the matching test — the
+whitelist-parity, XML and command-shell specs are the guardrails for those three contracts.
+
+### Static analysis (SonarCloud)
+
+Every PR is gated on SonarCloud's **new code** Quality Gate: A ratings for security, reliability and
+maintainability, and hotspots 100% reviewed. The project key is `lvcabral_brs-emu-app`, which does not
+match the repo name. Query findings with `resolved=false`, or already-closed issues come back too and
+the list looks far worse than it is:
+
+```bash
+gh pr checks <PR>
+curl -s "https://sonarcloud.io/api/issues/search?componentKeys=lvcabral_brs-emu-app&pullRequest=<PR>&resolved=false&ps=100"
+```
+
+**Moving code re-attributes it to new code**, so an extraction can pull an existing finding onto your
+PR without you having written anything new. Check what a finding points at before assuming you caused it.
+
+Rules this codebase trips most often, worth writing to up front:
+
+| Rule | What it wants |
+| --- | --- |
+| S4790 | No weak hashes (MD5, SHA-1). Where a wire protocol mandates one, route every call through a single helper carrying the justification, so there is one documented exemption instead of many. |
+| S5443 | No fixed path under a shared temp directory. Use `fs.mkdtempSync(path.join(os.tmpdir(), …))` — unique and owner-only. |
+| S1313 | No hardcoded IP addresses. In fixtures and docs use the RFC 5737 ranges (`192.0.2.0/24`); loopback and subnet masks are fine. |
+| S2699 | Every test needs at least one explicit `expect()`. A helper that throws on timeout does not count — assert the outcome after awaiting it. Empty `it.skip` bodies are flagged too; a comment explaining the gap says more. |
+| S4123 | `@returns` on an `async` function must be `Promise<T>`. Type inference reads JSDoc and trusts it over the `async` keyword, so a wrong annotation makes correct `await` code look like a bug. |
+| S3776 | Keep cognitive complexity under 25. A lookup table beats a long `switch` or `else if` chain. |
+| S8786 | No super-linear regex on externally supplied input. Measure before rewriting: emulated atomic groups remove backtracking inside a pattern but not the cost of a global scan retrying every start position. |
+| S1128 | Remove the imports a refactor leaves behind. |
+| S6594, S6353 | `RegExp.test()` or `.exec()` over `String.match()`; `\d` over `[0-9]`. |
+| S7755, S7771 | `.at(-1)` and negative `splice` indices over `length - n`. |
+| S7781, S7780, S7757 | `replaceAll` over `replace(/…/g)`; `String.raw` over escaped backslashes; class fields over constructor assignment of constants. |
+
+When a finding is deliberately left open, record why in a comment at the code rather than only in the
+PR description — the next person to meet it will be reading the file, not the pull request.
 
 ### `npm audit`
 
@@ -48,6 +110,9 @@ pins `rimraf ~2.6.2`, and `electron-builder-squirrel-windows` is a non-optional 
 - `npm audit fix --force` wants to *downgrade* dependencies. Don't run it.
 
 Revisit when `electron-builder@27` ships stable.
+
+Vitest and `@vitest/coverage-v8` (Vite + esbuild + rollup) add nothing to that chain — the finding
+count is unchanged and `npm audit --omit=dev` is still 0. Re-check after bumping them.
 
 Releases: bump `package.json` version, update `CHANGELOG.md`, then `git tag -a vX.Y.Z && git push --follow-tags`.
 The GitHub Actions workflow builds a draft release. Local notarized builds need the `.env` Apple
@@ -115,7 +180,14 @@ service events back into settings/status/file-loading.
 - `debug.js` — MicroDebugger command shell (port 8080), implements the Roku debug command set
   (`bt`, `var`, `chanperf`, `sgnodes`, `press`, `type`, …).
 
-Default ports live in `src/constants.js`, not scattered literals.
+Default ports live in `src/constants.js`, not scattered literals. Each service takes the port as an
+optional trailing parameter defaulting to that constant — `enableECP(win, port)`,
+`enableTelnet(win, port)`, `enableDebugServer(win, prefs, port)`, and `setPort()` for the installer
+(whose default, 80, is privileged). Integration tests rely on this to bind ephemeral ports; don't
+reintroduce a hard-coded `listen(CONSTANT)`.
+
+The Electron-free halves live alongside: `src/server/debugHelp.js` (help text), `src/server/debugKeys.js`
+(the `press` character map) and `src/helpers/digest.js` (both the server and client sides of digest auth).
 
 ### Settings (`src/helpers/settings.js`, ~2.4k lines)
 
@@ -136,8 +208,9 @@ means editing that plugin config in `build/webpack.app.config.js`.
 ## Conventions
 
 - All `src/` files start with the standard copyright header block; match it in new files.
-- ESM (`import`/`export`) everywhere under `src/`, except `preload.js` (CommonJS, unbundled) and
-  `build/*.js` (CommonJS).
+- ESM (`import`/`export`) everywhere under `src/`, except `preload.js` and `preloadKeys.js`
+  (CommonJS, copied unbundled — `preloadKeys.js` holds the IPC channel whitelists and the key
+  conversion that mirrors `src/helpers/keyCodes.js`) and `build/*.js` (CommonJS).
 - 4-space indent in `src/` (see `.vscode/settings.json`), 2-space in `build/`.
 - Node builtins are imported with the `node:` prefix.
 

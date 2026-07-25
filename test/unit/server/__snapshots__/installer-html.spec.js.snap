@@ -1,0 +1,24 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`buildInstallHtml > matches its snapshot in both states 1`] = `
+"
+                                <div style="margin-top: 20px;">
+                                    <div style="background-color: #d4edda; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 12px; font-weight: 500;">
+                                        Application Received: 2048 bytes stored.
+                                    </div>
+                                    <div style="background-color: #d4edda; color: #155724; padding: 12px 20px; border-radius: 8px; font-weight: 500;">
+                                        Install Success
+                                    </div>
+                                </div>
+                            </div>"
+`;
+
+exports[`buildInstallHtml > matches its snapshot in both states 2`] = `
+"
+                                <div style="margin-top: 20px;">
+                                    <div style="background-color: #f8d7da; color: #721c24; padding: 12px 20px; border-radius: 8px; font-weight: 500;">
+                                        Installation failed: EACCES
+                                    </div>
+                                </div>
+                            </div>"
+`;

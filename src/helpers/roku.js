@@ -9,7 +9,11 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import { getPeerRoku } from "./settings";
 import { isValidIP } from "./util";
 import { ECP_PORT } from "../constants";
-import crypto from "node:crypto";
+import {
+    parseDigestChallenge,
+    generateDigestResponse,
+    formatDigestHeader,
+} from "./digest";
 
 let sendECPKeys = false;
 
@@ -250,78 +254,12 @@ async function postInstallerRequest(device, path, formData, callback) {
 }
 
 // Helper function to parse digest authentication challenge
-function parseDigestChallenge(authHeader) {
-    const params = {};
-    const regex = /(\w+)=(?:"([^"]+)"|([^\s,]+))/g;
-    let match;
-    while ((match = regex.exec(authHeader))) {
-        params[match[1]] = match[2] || match[3];
-    }
-    return params;
-}
 
 // Helper function to generate digest authentication response
-function generateDigestResponse(username, password, method, path, challenge) {
-    const ha1 = crypto
-        .createHash("md5")
-        .update(`${username}:${challenge.realm}:${password}`)
-        .digest("hex");
-
-    const ha2 = crypto.createHash("md5").update(`${method}:${path}`).digest("hex");
-
-    let response;
-    if (challenge.qop === "auth" || challenge.qop === "auth-int") {
-        const nc = "00000001";
-        const cnonce = crypto.randomBytes(8).toString("hex");
-        response = crypto
-            .createHash("md5")
-            .update(`${ha1}:${challenge.nonce}:${nc}:${cnonce}:${challenge.qop}:${ha2}`)
-            .digest("hex");
-
-        return {
-            username,
-            realm: challenge.realm,
-            nonce: challenge.nonce,
-            uri: path,
-            qop: challenge.qop,
-            nc,
-            cnonce,
-            response,
-            opaque: challenge.opaque,
-        };
-    } else {
-        response = crypto
-            .createHash("md5")
-            .update(`${ha1}:${challenge.nonce}:${ha2}`)
-            .digest("hex");
-
-        return {
-            username,
-            realm: challenge.realm,
-            nonce: challenge.nonce,
-            uri: path,
-            response,
-            opaque: challenge.opaque,
-        };
-    }
-}
 
 // Helper function to format digest auth header
-function formatDigestHeader(params) {
-    const parts = [];
-    for (const [key, value] of Object.entries(params)) {
-        if (value !== undefined) {
-            if (key === "nc" || key === "qop") {
-                parts.push(`${key}=${value}`);
-            } else {
-                parts.push(`${key}="${value}"`);
-            }
-        }
-    }
-    return `Digest ${parts.join(", ")}`;
-}
 
 // Helper function to check for compilation error in response body
-function isCompileError(responseHtml) {
+export function isCompileError(responseHtml) {
     return !!/install\sfailure:\scompilation\sfailed/i.exec(responseHtml);
 }

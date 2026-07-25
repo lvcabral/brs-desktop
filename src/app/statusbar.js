@@ -6,6 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { ECP_PORT, WEB_INSTALLER_PORT } from "../constants";
+import { shortenPath, getUIType } from "./statusbarUtils";
 
 // Status Bar Objects
 const statusBar = document.getElementById("status");
@@ -179,29 +180,6 @@ export function clearCounters() {
     warnCount = 0;
 }
 
-// Function that shortens a path (based on code by https://stackoverflow.com/users/2149492/johnpan)
-function shortenPath(bigPath, maxLen) {
-    let path = bigPath;
-    if (path.length > maxLen) {
-        const splitter = bigPath.includes("/") ? "/" : "\\";
-        const tokens = bigPath.split(splitter);
-        const drive = bigPath.includes(":") ? tokens[0] : "";
-        const fileName = tokens[tokens.length - 1];
-        const len = drive.length + fileName.length;
-        const remLen = maxLen - len - 3; // remove the current length and also space for ellipsis char and 2 slashes
-        //remove first and last elements from the array
-        tokens.splice(0, 1);
-        tokens.splice(tokens.length - 1, 1);
-        //recreate our path
-        path = tokens.join(splitter);
-        //rebuild the path from beginning and end
-        const pathA = path.substring(0, Math.ceil(remLen / 2));
-        const pathB = path.substring(path.length - Math.floor(remLen / 2));
-        path = `${drive}${splitter}${pathA}…${pathB}${splitter}${fileName}`;
-    }
-    return path;
-}
-
 // Function to display a Toast (from the bottom) with messages to the user
 export function showToast(message, duration = 3000, error = false, onClick = null) {
     const toastColor = error ? "--status-error-color" : "--status-background-color";
@@ -297,11 +275,3 @@ function redrawStatus(fullscreen) {
     }
 }
 
-function getUIType(resolution) {
-    if (resolution === "480p") {
-        return "SD";
-    } else if (resolution === "1080p") {
-        return "FHD";
-    }
-    return "HD";
-}
