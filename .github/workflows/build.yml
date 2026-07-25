@@ -7,6 +7,10 @@ on:
       - dev-*
     tags:
       - '**'
+  # Run the test job on pull requests too. Without this, a branch is only ever tested
+  # after it has been merged, so a platform-specific failure lands on master before
+  # anyone sees it. The release job stays gated on a tag, so this adds no publishing.
+  pull_request:
 
 jobs:
   test:
@@ -41,6 +45,10 @@ jobs:
 
   release:
     needs: test
+    # Push events only. Pull requests run the test job for feedback; building installers
+    # on three platforms for every push to a PR branch would cost minutes and publish
+    # nothing, since the release step is gated on a tag anyway.
+    if: github.event_name == 'push'
     runs-on: ${{ matrix.os }}
 
     strategy:
