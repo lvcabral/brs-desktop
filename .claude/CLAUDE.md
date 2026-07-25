@@ -28,9 +28,26 @@ native OS.
 CLI args can be appended to `npm run start` (e.g. `npm run start -- --devtools --console -m hd`); see
 `docs/how-to-use.md` for the full list (`-o/-f/-m/-e/-r/-w/-p/-c/-d`).
 
-There is **no test framework wired up**: `build/webpack.unit.config.js` and `build/webpack.e2e.config.js`
-are leftovers from the electron-boilerplate template — there are no `*.spec.js` files, no `e2e/` folder,
-and no `test` script. Don't claim tests were run; verify changes by running the app.
+There is **no test framework wired up**: no `*.spec.js` files, no `e2e/` folder, and no `test` script.
+Don't claim tests were run; verify changes by running the app.
+
+### `npm audit`
+
+`npm audit` reports ~10 high findings; `npm audit --omit=dev` reports **0** — nothing vulnerable ships.
+All residual findings are one dev-only chain: `electron-builder` → `app-builder-lib` →
+`electron-builder-squirrel-windows` → `electron-winstaller` → `temp` → `rimraf@2` → `glob@7` →
+`minimatch@3` → `brace-expansion@1`. There is **no upstream fix**: `temp@0.9.4` is current and still
+pins `rimraf ~2.6.2`, and `electron-builder-squirrel-windows` is a non-optional peer dep of
+`app-builder-lib` (npm installs it; this project builds NSIS, never Squirrel). Don't try to "fix" these:
+
+- Never override `brace-expansion` to 5.x or `minimatch` to 10.x globally — their CJS entries export
+  objects, while `minimatch@3/5` and `glob@7` call them as functions. It resolves the audit and breaks
+  the build at runtime.
+- The `overrides` block in `package.json` is deliberate; `@electron/asar@4` + `@electron/universal@3`
+  mirror what `electron-builder@27-alpha` uses upstream and require Node >=22.12.
+- `npm audit fix --force` wants to *downgrade* dependencies. Don't run it.
+
+Revisit when `electron-builder@27` ships stable.
 
 Releases: bump `package.json` version, update `CHANGELOG.md`, then `git tag -a vX.Y.Z && git push --follow-tags`.
 The GitHub Actions workflow builds a draft release. Local notarized builds need the `.env` Apple

@@ -23,14 +23,13 @@ import { isTelnetEnabled } from "../server/telnet";
 import { isDebugEnabled } from "../server/debug";
 import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile, loadUrl } from "../helpers/files";
+import { readJsonFile, writeJsonFile } from "../helpers/util";
 import path from "node:path";
-import jetpack from "fs-jetpack";
 import "../helpers/hash";
 
 const isMacOS = process.platform === "darwin";
 const maxFiles = 30;
-const userDataDir = jetpack.cwd(app.getPath("userData"));
-const recentFilesJson = "recent-files.json";
+const recentFilesJson = path.join(app.getPath("userData"), "recent-files.json");
 const recentMenuIndex = 2;
 
 let fileMenuIndex = 0;
@@ -181,7 +180,7 @@ ipcMain.on("contextMenu", (event) => {
 function restoreRecentFiles() {
     let recentFilesDefault = { ids: [], zip: [], names: [], versions: [] };
     try {
-        recentFiles = userDataDir.read(recentFilesJson, "json");
+        recentFiles = readJsonFile(recentFilesJson);
     } catch (err) {
         console.error("error reading recent files json");
     }
@@ -204,7 +203,7 @@ function restoreRecentFiles() {
 
 function saveRecentFiles() {
     try {
-        userDataDir.write(recentFilesJson, recentFiles, { atomic: true });
+        writeJsonFile(recentFilesJson, recentFiles);
     } catch (err) {
         console.error("error saving recent files json");
     }

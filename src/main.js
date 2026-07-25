@@ -9,7 +9,7 @@ import path from "node:path";
 import url from "node:url";
 import dns from "node:dns";
 import minimist from "minimist";
-import jetpack from "fs-jetpack";
+import fs from "node:fs";
 import { app, screen, BrowserWindow, session } from "electron";
 import { DateTime } from "luxon";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
@@ -404,7 +404,7 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
             const positionalArgs = cliArgs?._ ?? [];
             const index = positionalArgs.length - 1;
             if (index >= 0 && positionalArgs[index]) {
-                if (jetpack.exists(positionalArgs[index])) {
+                if (fs.existsSync(positionalArgs[index])) {
                     openFile = positionalArgs[index];
                 }
             }

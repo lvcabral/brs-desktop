@@ -8,10 +8,10 @@
 import { app, BrowserWindow, ipcMain, screen } from "electron";
 import { getSimulatorOption, getTitleOverlayTheme } from "./settings";
 import * as dialog from "../helpers/dialog";
+import { readJsonFile, writeJsonFile } from "./util";
 import path from "node:path";
-import jetpack from "fs-jetpack";
 
-const userDataDir = jetpack.cwd(app.getPath("userData"));
+const userDataDir = app.getPath("userData");
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
 
@@ -240,7 +240,7 @@ export function saveWindowState(stateStoreFile, state, win) {
         Object.assign(state, getWindowState(win));
     }
     if (state.width && state.height) {
-        userDataDir.write(stateStoreFile, state, { atomic: true });
+        writeJsonFile(path.join(userDataDir, stateStoreFile), state);
     }
 }
 
@@ -259,7 +259,7 @@ function getWindowState(win) {
 function restoreWindowState(stateStoreFile, defaultSize) {
     let restoredState = {};
     try {
-        restoredState = userDataDir.read(stateStoreFile, "json");
+        restoredState = readJsonFile(path.join(userDataDir, stateStoreFile));
     } catch (err) {
         // For some reason json can't be read (might be corrupted).
         // No worries, we have defaults.
