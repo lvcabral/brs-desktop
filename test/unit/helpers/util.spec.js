@@ -52,14 +52,23 @@ describe("isValidIP", () => {
         expect(isValidIP(["1.2.3.4"])).toBe(false);
     });
 
-    // The implementation coerces each octet with Number(), which is more permissive than a
-    // strict parser. These are characterization tests: they pin what the function does today
-    // so a future tightening is a deliberate, visible change.
-    it("accepts inputs a strict parser would reject", () => {
-        expect(isValidIP("1.2.3.")).toBe(true); // Number("") === 0
-        expect(isValidIP(" 1.2.3.4")).toBe(true); // Number(" 1") === 1
-        expect(isValidIP("0x10.1.1.1")).toBe(true); // Number("0x10") === 16
-        expect(isValidIP("1.2.3.4e0")).toBe(true); // Number("4e0") === 4
+    it("rejects octets that are not plain decimal numbers", () => {
+        // Number() coercion used to accept all of these: "" is 0, " 1" is 1, "0x10" is 16
+        // and "4e0" is 4. A configured peer address that looks like one of these is a
+        // typo, and failing here beats a confusing network error later.
+        expect(isValidIP("1.2.3.")).toBe(false);
+        expect(isValidIP(" 1.2.3.4")).toBe(false);
+        expect(isValidIP("0x10.1.1.1")).toBe(false);
+        expect(isValidIP("1.2.3.4e0")).toBe(false);
+        expect(isValidIP("1.2.3.+4")).toBe(false);
+        expect(isValidIP("1.2.3.0004")).toBe(false);
+    });
+
+    it("still accepts ordinary addresses", () => {
+        // Guard against over-tightening: leading zeros within three digits are common in
+        // hand-typed addresses and remain acceptable.
+        expect(isValidIP("192.168.001.1")).toBe(true);
+        expect(isValidIP("010.0.0.1")).toBe(true);
     });
 });
 
