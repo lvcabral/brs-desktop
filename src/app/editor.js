@@ -584,11 +584,11 @@ codeSelect.addEventListener("change", async (e) => {
             return;
         }
     }
-    if (codeSelect.value !== "0") {
-        loadCode(codeSelect.value);
-    } else {
+    if (codeSelect.value === "0") {
         currentId = nanoid(10);
         resetApp();
+    } else {
+        loadCode(codeSelect.value);
     }
     resetUndoHistory();
 });
@@ -696,9 +696,9 @@ function exportCodeAs(format) {
         const codeName = codeSelect.options[codeSelect.selectedIndex].text;
         fileName = codeName
             .toLowerCase()
-            .replace(/\s+/g, "-")
+            .replaceAll(/\s+/g, "-")
             .replace(/^⏺︎ /, "")
-            .replace(/[^a-z0-9-]/g, "");
+            .replaceAll(/[^a-z0-9-]/g, "");
     }
 
     // Create file content and blob

@@ -23,7 +23,15 @@ npm run clean          # wipe app/
 npm test               # vitest run — unit + service integration tests
 npm run test:watch     # vitest watch mode
 npm run test:coverage  # v8 coverage into coverage/
+npm run lint           # eslint (flat config in eslint.config.mjs)
+npm run lint:fix       # eslint --fix
+npm run prettier       # prettier --check
+npm run prettier:write # prettier --write
 ```
+
+**Always run `npm run lint` and `npm run prettier` before committing**, and fix what they report —
+CI runs both, and a formatting-only diff on a later PR re-attributes untouched code to that PR's new
+code in SonarCloud (see below). `npm run lint:fix` and `npm run prettier:write` handle most of it.
 
 Other `dist-*` scripts target Windows / Linux (appimage, deb, arm). Installers must be built on their
 native OS.
@@ -211,7 +219,16 @@ means editing that plugin config in `build/webpack.app.config.js`.
 - ESM (`import`/`export`) everywhere under `src/`, except `preload.js` and `preloadKeys.js`
   (CommonJS, copied unbundled — `preloadKeys.js` holds the IPC channel whitelists and the key
   conversion that mirrors `src/helpers/keyCodes.js`) and `build/*.js` (CommonJS).
-- 4-space indent in `src/` (see `.vscode/settings.json`), 2-space in `build/`.
+- 4-space indent in `src/` (see `.vscode/settings.json`), 2-space in `build/`. Both are enforced by
+  Prettier (config block in `package.json`, ported from `brs-engine`: `tabWidth` 4, `printWidth` 120,
+  `trailingComma` es5, with a `build/**/*.js` override at `tabWidth` 2) — don't hand-format.
+- `eslint.config.mjs` is flat config and ports the JS-applicable half of `brs-engine`'s `.eslintrc.js`
+  (the `@typescript-eslint` rules have no meaning here). `eslint-config-prettier` is last in the array
+  so Prettier alone owns formatting; keep it there. Renderer globals injected by preload (`api`,
+  `__setTheme`) and `electron` as an `import/core-modules` entry are declared there rather than
+  suppressed at each call site. A rule that must be disabled gets an `eslint-disable-next-line` with
+  the reason at the code, as in `src/helpers/hash.js`.
+- LF line endings everywhere, enforced by `* text=auto eol=lf` in `.gitattributes`.
 - Node builtins are imported with the `node:` prefix.
 
 ## Other AI/agent docs in this repo

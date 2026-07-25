@@ -137,9 +137,7 @@ function executeFile(window, fileData, filePath, input) {
     }
     // Send the app to the simulator to be executed
     let fileExt = path.parse(filePath).ext.toLowerCase().split("?")[0];
-    if (input == undefined) {
-        input = new Map();
-    }
+    input ??= new Map();
     const deepLink = getDeepLink();
     for (const [key, value] of Object.entries(deepLink)) {
         input.set(key, value);

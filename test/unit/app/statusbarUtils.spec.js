@@ -42,7 +42,7 @@ describe("shortenPath", () => {
     });
 
     it("keeps the drive letter on a Windows path", () => {
-        const long = "C:\\Users\\test\\Documents\\Projects\\BrightScript\\mychannel.zip";
+        const long = String.raw`C:\Users\test\Documents\Projects\BrightScript\mychannel.zip`;
         const result = shortenPath(long, 40);
         expect(result.startsWith("C:\\")).toBe(true);
         expect(result.endsWith("mychannel.zip")).toBe(true);
@@ -52,7 +52,7 @@ describe("shortenPath", () => {
     it("splits on the separator the path actually uses", () => {
         const posix = shortenPath("/a/bbbbbbbbbb/cccccccccc/dddddddddd/file.zip", 25);
         expect(posix).not.toContain("\\");
-        const windows = shortenPath("D:\\a\\bbbbbbbbbb\\cccccccccc\\dddddddddd\\file.zip", 25);
+        const windows = shortenPath(String.raw`D:\a\bbbbbbbbbb\cccccccccc\dddddddddd\file.zip`, 25);
         expect(windows).not.toContain("/");
     });
 
@@ -70,7 +70,7 @@ describe("shortenPath", () => {
         const paths = [
             "/Users/test/Documents/Projects/BrightScript/channels/mychannel.zip",
             "/Users/test/Documents/a-very-long-channel-filename-indeed.zip",
-            "C:\\Users\\test\\Documents\\Projects\\a-long-name.zip",
+            String.raw`C:\Users\test\Documents\Projects\a-long-name.zip`,
             "averyveryverylongfilenamewithnoslashes.zip",
         ];
         for (const path of paths) {

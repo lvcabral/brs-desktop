@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
-import { createFakeWindow, __registerWindow, ipcMain } from "../mocks/electron.js";
+import { createFakeWindow, __registerWindow } from "../mocks/electron.js";
 import { makeSharedObject, makeDeviceInfo, makeEngineDeviceInfo } from "../fixtures/sharedObject.js";
 import { getFreePort } from "../helpers/freePort.js";
 import { initECP, enableECP, disableECP, subscribeECP, unsubscribeECP } from "../../src/server/ecp";

@@ -104,7 +104,7 @@ describe("formatPath", () => {
             // against the stubbed platform.
             vi.resetModules();
             const fresh = await import("../../../src/helpers/util");
-            expect(fresh.formatPath("C:\\Users\\test\\app.zip")).toBe("C:/Users/test/app.zip");
+            expect(fresh.formatPath(String.raw`C:\Users\test\app.zip`)).toBe("C:/Users/test/app.zip");
             expect(fresh.formatPath("already/posix")).toBe("already/posix");
         } finally {
             Object.defineProperty(process, "platform", original);

@@ -137,7 +137,7 @@ export function sendDebugCommand(line, client, window) {
     } else if (cmd === "quit") {
         window.webContents.send("closeChannel", "EXIT_BRIGHTSCRIPT_STOP");
     } else if (cmd === "") {
-        window.webContents.send("debugCommand", String.fromCharCode(10));
+        window.webContents.send("debugCommand", "\n");
     } else {
         window.webContents.send("debugCommand", expr.join(" "));
     }

@@ -145,7 +145,7 @@ describe("values containing an equals sign", () => {
     it("accepts a client that separates parameters without a space", () => {
         const challenge = parseDigestChallenge(serverChallenge());
         const params = generateDigestResponse(USER, PASSWORD, "GET", "/", challenge);
-        const header = formatDigestHeader(params).replace(/, /g, ",");
+        const header = formatDigestHeader(params).replaceAll(", ", ",");
         expect(serverVerify(header, "GET")).toBe(true);
     });
 });

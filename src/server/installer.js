@@ -72,11 +72,11 @@ export function enableInstaller(win) {
                     contentType = "text/html";
                 }
                 // Note: /pkgs/dev.png is handled at the top without authentication
-                if (filePath !== "") {
-                    serveStaticFile(req, res, filePath, contentType);
-                } else {
+                if (filePath === "") {
                     res.writeHead(404);
                     res.end(req.method === "HEAD" ? undefined : "Error 404: Not Found\nFile not found");
+                } else {
+                    serveStaticFile(req, res, filePath, contentType);
                 }
             }
         })

@@ -53,9 +53,7 @@ export function enableDebugServer(win, prefs, port = DEBUG_PORT) {
             clients.delete(id);
             lines.delete(id);
         });
-        if (!device) {
-            device = globalThis.sharedObject.deviceInfo;
-        }
+        device ||= globalThis.sharedObject.deviceInfo;
         const version = getRokuOS(device.firmwareVersion, true, true);
         client.write(`${device.serialNumber} (${device.friendlyName} - ${version})\r\n>`);
         clients.set(id, client);
@@ -238,8 +236,8 @@ function handleLogRendezvous(arg, client) {
     let state = arg;
     if (state && ["on", "off"].includes(state)) {
         rendezvousTrackingEnabled = state === "on";
-    } else if (!state) {
-        state = rendezvousTrackingEnabled ? "on" : "off";
+    } else {
+        state ||= rendezvousTrackingEnabled ? "on" : "off";
     }
     if (["on", "off"].includes(state)) {
         client.write(`logrendezvous: rendezvous logging is ${state}\r\n`);
