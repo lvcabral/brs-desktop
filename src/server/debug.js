@@ -143,117 +143,187 @@ function processTypeQueue() {
     }
 }
 
-// Static analysis flags this chain's cognitive complexity (S3776). Splitting it into a
-// command table would be a straight improvement and is now safe to do — every branch below
-// has integration coverage in test/integration/debug-server.spec.js — but it changes
-// behaviour rather than tests, so it belongs in its own change.
+// Handlers return SUPPRESS_PROMPT when they take responsibility for writing the prompt
+// themselves -- the key queue emits it once the last key has been sent, and quitting emits
+// none at all. Anything else gets the trailing ">" from sendDebugCommand.
+const SUPPRESS_PROMPT = Symbol("suppress-prompt");
+
+/**
+ * Handlers for the dev-console command set, keyed by command name. Aliases point at the
+ * same function. Each receives the trimmed argument, the client socket, and the raw
+ * (untrimmed) argument for the commands that treat whitespace as data.
+ */
+const commandHandlers = {
+    exit: handleQuit,
+    quit: handleQuit,
+    q: handleQuit,
+    help: handleHelp,
+    "?": handleHelp,
+    genkey: handleGenkey,
+    showkey: handleShowkey,
+    fps_display: handleFpsDisplay,
+    clear_launch_caches: handleClearLaunchCaches,
+    "bsprof-status": handleBsprof,
+    "bsprof-pause": handleBsprof,
+    "bsprof-resume": handleBsprof,
+    loaded_textures: handleLoadedTextures,
+    logrendezvous: handleLogRendezvous,
+    plugins: handlePlugins,
+    remove_plugin: handleRemovePlugin,
+    press: handlePress,
+    type: handleType,
+};
+
 export function sendDebugCommand(line, client) {
     const expr = line.trim().split(/(?<=^\S+)\s/);
     const cmd = expr[0];
+    const raw = expr[1] ?? "";
+    const arg = raw.trim();
 
-    if (["exit", "quit", "q"].includes(cmd)) {
-        client.write("Quit command received, exiting.\r\n");
-        client.destroy();
-        return;
-    } else if (cmd === "help" || cmd === "?") {
-        const arg = expr[1] ? expr[1].trim() : "";
-        client.write(getHelpText(arg));
-    } else if (cmd === "genkey") {
-        client.write("Setup your Developer Id in Settings->Device.\r\n");
-    } else if (cmd === "showkey") {
-        client.write(`Dev ID: ${device?.developerId ?? "<unkeyed>"}\r\n`);
-    } else if (cmd === "fps_display") {
-        let arg = expr[1]?.trim() ?? "";
-        const displayOptions = settings?.value("display.options");
-        if (displayOptions && window) {
-            if (!displayOptions.includes("perfStats") && arg !== "0") {
-                displayOptions.push("perfStats");
-                window.webContents.send("setPerfStats", true);
-            } else if (arg === "" || arg === "0") {
-                displayOptions.splice(displayOptions.indexOf("perfStats"), 1);
-                window.webContents.send("setPerfStats", false);
-            }
-            settings.value("display.options", displayOptions);
-        }
-    } else if (cmd === "clear_launch_caches") {
-        client.write("Done.\r\n");
-    } else if (["bsprof-status", "bsprof-pause", "bsprof-resume"].includes(cmd)) {
-        client.write("No profiling session\r\n");
-    } else if (cmd === "loaded_textures") {
-        client.write("loaded_textures only works when a Scene Graph screen is displayed\r\n");
-    } else if (cmd === "logrendezvous") {
-        let arg = expr[1]?.trim();
-        if (arg && ["on", "off"].includes(arg)) {
-            rendezvousTrackingEnabled = arg === "on";
-        } else if (!arg) {
-            arg = rendezvousTrackingEnabled ? "on" : "off";
-        }
-        if (["on", "off"].includes(arg)) {
-            client.write(`logrendezvous: rendezvous logging is ${arg}\r\n`);
-        } else {
-            client.write("usage: logrendezvous [on|off]\r\n");
-        }
-    } else if (cmd === "plugins") {
-        if (device?.appList) {
-            for (const app of device.appList) {
-                const idStr = app.id.toString().padStart(20, " ");
-                client.write(` F-C + S - S6 ${idStr} [usg     0] [ref  0]       ${app.title}, ${app.version}\r\n`);
-            }
-        }
-    } else if (cmd === "remove_plugin") {
-        const arg = expr[1] ? expr[1].trim() : "";
-        if (!arg) {
-            client.write("Usage: remove_plugin <channel id>\r\n");
-        } else if (device?.appList) {
-            const index = device.appList.findIndex(app => app.id === arg || app.id.toString() === arg);
-            if (index > -1) {
-                const title = device.appList[index].title;
-                device.appList.splice(index, 1);
-                client.write(`Removed plugin id: ${arg}, name: ${title}\r\n`);
-                reloadDevice();
-            } else {
-                client.write(`Failed to remove plugin id: ${arg}, name: unknown. Plugin is NOT installed on the device\r\n`);
-            }
-        }
-    } else if (cmd === "press") {
-        const arg = expr[1] ? expr[1].trim() : "";
-        if (arg) {
-            const window = BrowserWindow.fromId(1);
-            if (window) {
-                for (const char of arg) {
-                    const key = getPressKey(char);
-                    if (key) {
-                        typeQueue.push({ key, window, client });
-                    }
-                }
-                typeQueue.push({ key: null, window, client });
-                if (!isTyping) {
-                    processTypeQueue();
-                }
-                return;
-            }
-        } else {
-            client.write(PRESS_HELP + "\r\n");
-        }
-    } else if (cmd === "type") {
-        const text = expr[1] || "";
-        if (window) {
-            for (const char of text) {
-                typeQueue.push({ key: `lit_${char}`, window, client });
-            }
-            typeQueue.push({ key: null, window, client });
-            if (!isTyping) {
-                processTypeQueue();
-            }
+    const handler = commandHandlers[cmd];
+    if (handler) {
+        if (handler(arg, client, raw) === SUPPRESS_PROMPT) {
             return;
         }
     } else if (cmd !== "") {
-        const isValid = HELP_COMMANDS.some(c => c.cmd.toLowerCase() === cmd);
-        if (isValid) {
-            client.write(`Command not implemented yet: ${cmd}\r\n`);
-        } else {
-            client.write("Command not recognized\r\n");
-        }
+        handleUnknown(cmd, client);
     }
     client.write(">");
+}
+
+function handleQuit(arg, client) {
+    client.write("Quit command received, exiting.\r\n");
+    client.destroy();
+    return SUPPRESS_PROMPT;
+}
+
+function handleHelp(arg, client) {
+    client.write(getHelpText(arg));
+}
+
+function handleGenkey(arg, client) {
+    client.write("Setup your Developer Id in Settings->Device.\r\n");
+}
+
+function handleShowkey(arg, client) {
+    client.write(`Dev ID: ${device?.developerId ?? "<unkeyed>"}\r\n`);
+}
+
+function handleFpsDisplay(arg) {
+    const displayOptions = settings?.value("display.options");
+    if (displayOptions && window) {
+        if (!displayOptions.includes("perfStats") && arg !== "0") {
+            displayOptions.push("perfStats");
+            window.webContents.send("setPerfStats", true);
+        } else if (arg === "" || arg === "0") {
+            displayOptions.splice(displayOptions.indexOf("perfStats"), 1);
+            window.webContents.send("setPerfStats", false);
+        }
+        settings.value("display.options", displayOptions);
+    }
+}
+
+function handleClearLaunchCaches(arg, client) {
+    client.write("Done.\r\n");
+}
+
+function handleBsprof(arg, client) {
+    client.write("No profiling session\r\n");
+}
+
+function handleLoadedTextures(arg, client) {
+    client.write("loaded_textures only works when a Scene Graph screen is displayed\r\n");
+}
+
+function handleLogRendezvous(arg, client) {
+    let state = arg;
+    if (state && ["on", "off"].includes(state)) {
+        rendezvousTrackingEnabled = state === "on";
+    } else if (!state) {
+        state = rendezvousTrackingEnabled ? "on" : "off";
+    }
+    if (["on", "off"].includes(state)) {
+        client.write(`logrendezvous: rendezvous logging is ${state}\r\n`);
+    } else {
+        client.write("usage: logrendezvous [on|off]\r\n");
+    }
+}
+
+function handlePlugins(arg, client) {
+    if (device?.appList) {
+        for (const app of device.appList) {
+            const idStr = app.id.toString().padStart(20, " ");
+            client.write(` F-C + S - S6 ${idStr} [usg     0] [ref  0]       ${app.title}, ${app.version}\r\n`);
+        }
+    }
+}
+
+function handleRemovePlugin(arg, client) {
+    if (!arg) {
+        client.write("Usage: remove_plugin <channel id>\r\n");
+    } else if (device?.appList) {
+        const index = device.appList.findIndex(app => app.id === arg || app.id.toString() === arg);
+        if (index > -1) {
+            const title = device.appList[index].title;
+            device.appList.splice(index, 1);
+            client.write(`Removed plugin id: ${arg}, name: ${title}\r\n`);
+            reloadDevice();
+        } else {
+            client.write(`Failed to remove plugin id: ${arg}, name: unknown. Plugin is NOT installed on the device\r\n`);
+        }
+    }
+}
+
+function handlePress(arg, client) {
+    if (!arg) {
+        client.write(PRESS_HELP + "\r\n");
+        return undefined;
+    }
+    // Resolved per call rather than using the cached module-level window, matching the
+    // original: the key queue needs whatever window is current.
+    const pressWindow = BrowserWindow.fromId(1);
+    if (!pressWindow) {
+        return undefined;
+    }
+    for (const char of arg) {
+        const key = getPressKey(char);
+        if (key) {
+            typeQueue.push({ key, window: pressWindow, client });
+        }
+    }
+    return queueTerminator(pressWindow, client);
+}
+
+function handleType(arg, client, raw) {
+    if (!window) {
+        return undefined;
+    }
+    // Uses the untrimmed argument: trailing spaces are part of the text to send.
+    for (const char of raw) {
+        typeQueue.push({ key: `lit_${char}`, window, client });
+    }
+    return queueTerminator(window, client);
+}
+
+/**
+ * Close a run of queued keys and start draining, if not already draining
+ * @param {object} target - The window the keys are sent to
+ * @param {object} client - The client socket awaiting the prompt
+ * @returns {symbol} - SUPPRESS_PROMPT, since the queue writes the prompt when it drains
+ */
+function queueTerminator(target, client) {
+    typeQueue.push({ key: null, window: target, client });
+    if (!isTyping) {
+        processTypeQueue();
+    }
+    return SUPPRESS_PROMPT;
+}
+
+function handleUnknown(cmd, client) {
+    const isValid = HELP_COMMANDS.some(c => c.cmd.toLowerCase() === cmd);
+    if (isValid) {
+        client.write(`Command not implemented yet: ${cmd}\r\n`);
+    } else {
+        client.write("Command not recognized\r\n");
+    }
 }
