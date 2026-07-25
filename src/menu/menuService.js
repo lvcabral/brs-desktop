@@ -214,8 +214,13 @@ function rebuildMenu(template = false) {
     const appMenu = app.applicationMenu;
     if (isMacOS || template) {
         const recentMenu = menuTemplate[fileMenuIndex].submenu[recentMenuIndex].submenu;
+        // Look items up by id rather than by position. Indexing assumed the placeholder sat
+        // at exactly recentMenu[maxMenuFiles], so reordering the submenu or changing the
+        // entry count would silently set properties on undefined. The non-macOS branch
+        // below has always resolved these by id.
+        const findItem = (id) => recentMenu.find((item) => item.id === id);
         for (let index = 0; index < maxMenuFiles; index++) {
-            let fileMenu = recentMenu[index];
+            const fileMenu = findItem(`zip-${index}`);
             if (index < recentFiles.zip.length) {
                 fileMenu.label = recentFiles.zip[index];
                 fileMenu.visible = true;
@@ -223,8 +228,8 @@ function rebuildMenu(template = false) {
                 fileMenu.visible = false;
             }
         }
-        recentMenu[maxMenuFiles].visible = recentFiles.zip.length === 0;
-        recentMenu.at(-1).enabled = recentFiles.zip.length > 0;
+        findItem("zip-empty").visible = recentFiles.zip.length === 0;
+        findItem("file-clear").enabled = recentFiles.zip.length > 0;
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         if (isMacOS && window) {
             if (appMenu.getMenuItemById("view-menu")) {
