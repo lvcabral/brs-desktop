@@ -86,6 +86,11 @@ export function computeDigestResponse({ username, realm, password, method, uri, 
  */
 export function parseDigestChallenge(authHeader) {
     const params = {};
+    // Static analysis flags this as super-linear (S8786), and it is: the global scan retries
+    // every start position, so it is quadratic in the header length. Left as is deliberately.
+    // Emulating an atomic group (`(?=(\w+))\1`) removes backtracking inside the pattern but
+    // not the repeated scan, and measures no better than quadratic either — about 25 ms for
+    // an 8 KB input, which Node's header size cap already bounds.
     const regex = /(\w+)=(?:"([^"]+)"|([^\s,]+))/g;
     let match;
     while ((match = regex.exec(authHeader))) {

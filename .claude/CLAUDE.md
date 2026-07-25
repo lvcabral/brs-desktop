@@ -61,55 +61,37 @@ whitelist-parity, XML and command-shell specs are the guardrails for those three
 
 ### Static analysis (SonarCloud)
 
-Every PR is analysed by SonarCloud and gated on the **new code** Quality Gate: security, reliability
-and maintainability ratings must be A, and hotspots 100% reviewed. The project key is
-`lvcabral_brs-emu-app`, which does not match the repo name. To read the findings:
+Every PR is gated on SonarCloud's **new code** Quality Gate: A ratings for security, reliability and
+maintainability, and hotspots 100% reviewed. The project key is `lvcabral_brs-emu-app`, which does not
+match the repo name. Query findings with `resolved=false`, or already-closed issues come back too and
+the list looks far worse than it is:
 
 ```bash
 gh pr checks <PR>
 curl -s "https://sonarcloud.io/api/issues/search?componentKeys=lvcabral_brs-emu-app&pullRequest=<PR>&resolved=false&ps=100"
 ```
 
-Pass `resolved=false`. Without it the response also lists already-closed issues, which looks alarming
-and is not; closed ones come back with `line: null`.
+**Moving code re-attributes it to new code**, so an extraction can pull an existing finding onto your
+PR without you having written anything new. Check what a finding points at before assuming you caused it.
 
-**Moving code counts as writing it.** An extraction re-attributes every moved line to new code, so a
-pure refactor can drop the security rating without introducing a single new problem. Expect this when
-splitting a file, and check what the findings actually point at before assuming you caused them.
+Rules this codebase trips most often, worth writing to up front:
 
-Rules to write to, rather than discover in review:
+| Rule | What it wants |
+| --- | --- |
+| S4790 | No weak hashes (MD5, SHA-1). Where a wire protocol mandates one, route every call through a single helper carrying the justification, so there is one documented exemption instead of many. |
+| S5443 | No fixed path under a shared temp directory. Use `fs.mkdtempSync(path.join(os.tmpdir(), …))` — unique and owner-only. |
+| S1313 | No hardcoded IP addresses. In fixtures and docs use the RFC 5737 ranges (`192.0.2.0/24`); loopback and subnet masks are fine. |
+| S2699 | Every test needs at least one explicit `expect()`. A helper that throws on timeout does not count — assert the outcome after awaiting it. Empty `it.skip` bodies are flagged too; a comment explaining the gap says more. |
+| S4123 | `@returns` on an `async` function must be `Promise<T>`. Type inference reads JSDoc and trusts it over the `async` keyword, so a wrong annotation makes correct `await` code look like a bug. |
+| S3776 | Keep cognitive complexity under 25. A lookup table beats a long `switch` or `else if` chain. |
+| S8786 | No super-linear regex on externally supplied input. Measure before rewriting: emulated atomic groups remove backtracking inside a pattern but not the cost of a global scan retrying every start position. |
+| S1128 | Remove the imports a refactor leaves behind. |
+| S6594, S6353 | `RegExp.test()` or `.exec()` over `String.match()`; `\d` over `[0-9]`. |
+| S7755, S7771 | `.at(-1)` and negative `splice` indices over `length - n`. |
+| S7781, S7780, S7757 | `replaceAll` over `replace(/…/g)`; `String.raw` over escaped backslashes; class fields over constructor assignment of constants. |
 
-- **MD5 in `src/helpers/digest.js` is mandated by the protocol** (RFC 2617, and what real Roku devices
-  implement — a stronger hash cannot interoperate). Every hash goes through `cryptoUsingMD5`, which
-  carries the justification and the single `NOSONAR`. Don't scatter `createHash("md5")` calls back
-  across the file; each one is a fresh CRITICAL finding (S4790).
-- **Never hardcode a path under a shared temp directory** (S5443). Use
-  `fs.mkdtempSync(path.join(os.tmpdir(), …))` — unique and owner-only. A fixed `/tmp/<name>` is both
-  flagged and a way for one test run to observe another's leftovers.
-- **Test fixtures use RFC 5737 documentation addresses** (`192.0.2.0/24`), never routable-looking ones
-  like `8.8.8.8` or `192.168.x.x` (S1313). Loopback and subnet masks are fine.
-- **Every test needs at least one explicit `expect()`** (S2699). The socket helpers `waitForText`,
-  `waitFor` and `waitForSend` do assert in practice by throwing on timeout, but neither the analyser
-  nor a reader skimming the file can see that — assert the outcome after awaiting them. An empty
-  `it.skip` body is also flagged; a plain comment explaining the gap says more.
-- **`@returns` on an `async` function must say `Promise<T>`** (S4123). SonarCloud infers types from
-  JSDoc and trusts it over the `async` keyword, so a wrong annotation makes correct `await` code look
-  like a bug — and misleads human readers identically.
-- Prefer `RegExp.test()` over `String.match()` when the result is used as a boolean (S6594), `\d` over
-  `[0-9]` (S6353), `.at(-1)` and negative `splice` indices (S7755/S7771), `replaceAll` over
-  `replace(/…/g)` (S7781), `String.raw` over escaped backslashes (S7780), and class fields over
-  constructor assignment of constants (S7757).
-- Delete the imports an extraction leaves behind (S1128).
-
-Two open findings are **accepted, not oversights**. Read this before "fixing" either:
-
-- `S8786` on the challenge regex in `parseDigestChallenge`. It is quadratic — but so is the
-  atomic-group rewrite `(?=(\w+))\1`, because the cost is the global scan retrying every start
-  position, not backtracking inside the pattern. Benchmarked at ~25 ms for an 8 KB header, and Node
-  caps header size, so contorting a protocol parser buys nothing.
-- `S3776` cognitive complexity on `sendDebugCommand` in `src/server/debug.js`. A pre-existing if/else
-  chain over the command set. Now safe to refactor thanks to the integration coverage, but it is a
-  behavioural change and belongs in its own PR.
+When a finding is deliberately left open, record why in a comment at the code rather than only in the
+PR description — the next person to meet it will be reading the file, not the pull request.
 
 ### `npm audit`
 

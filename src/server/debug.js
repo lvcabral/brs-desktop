@@ -143,6 +143,10 @@ function processTypeQueue() {
     }
 }
 
+// Static analysis flags this chain's cognitive complexity (S3776). Splitting it into a
+// command table would be a straight improvement and is now safe to do — every branch below
+// has integration coverage in test/integration/debug-server.spec.js — but it changes
+// behaviour rather than tests, so it belongs in its own change.
 export function sendDebugCommand(line, client) {
     const expr = line.trim().split(/(?<=^\S+)\s/);
     const cmd = expr[0];
