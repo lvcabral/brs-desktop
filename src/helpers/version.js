@@ -12,9 +12,24 @@
  * @param {string} latest - The version to compare against
  * @returns {number} - 1 when latest is newer, -1 when current is newer, 0 when equal
  */
+/**
+ * Split a version into numeric segments, ignoring any suffix on each one
+ * @param {string} version - The version string, with or without a leading "v"
+ * @returns {number[]} - The numeric segments
+ */
+function toSegments(version) {
+    // parseInt rather than Number so a pre-release suffix reads as its release number:
+    // Number("1-beta") is NaN, which the `|| 0` below would collapse to zero, making
+    // 2.3.1-beta compare equal to 2.3.0.
+    return version
+        .replace("v", "")
+        .split(".")
+        .map((segment) => Number.parseInt(segment, 10));
+}
+
 export function compareVersions(current, latest) {
-    const currentParts = current.replace("v", "").split(".").map(Number);
-    const latestParts = latest.replace("v", "").split(".").map(Number);
+    const currentParts = toSegments(current);
+    const latestParts = toSegments(latest);
 
     for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
         const currentPart = currentParts[i] || 0;

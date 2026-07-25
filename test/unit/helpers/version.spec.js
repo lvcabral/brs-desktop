@@ -50,11 +50,24 @@ describe("compareVersions", () => {
         expect(compareVersions("3.0.0", "2.99.99")).toBe(-1);
     });
 
-    // Characterization: segments are parsed with Number(), so a pre-release suffix becomes
-    // NaN and the `|| 0` fallback treats it as zero. "2.3.1-beta" therefore compares equal
-    // to "2.3.0", and the user is never told about a pre-release.
-    it("treats a non-numeric segment as zero", () => {
-        expect(compareVersions("2.3.0", "2.3.1-beta")).toBe(0);
+    it("reads the numeric prefix of a segment with a suffix", () => {
+        // 2.3.1-beta is release 2.3.1 as far as ordering goes; the suffix is ignored rather
+        // than collapsing the whole segment to zero.
+        expect(compareVersions("2.3.0", "2.3.1-beta")).toBe(1);
+        expect(compareVersions("2.3.1-beta", "2.3.0")).toBe(-1);
+    });
+
+    it("treats a pre-release of the same version as that version", () => {
+        // Deliberate: the updater offers stable releases, so 2.3.0-alpha is not "newer"
+        // than 2.3.0 and does not trigger a notification.
         expect(compareVersions("2.3.0-alpha", "2.3.0")).toBe(0);
+        expect(compareVersions("2.3.0", "2.3.0-rc1")).toBe(0);
+    });
+
+    it("does not offer an unparseable version as an update", () => {
+        // Guard, not a fix: an unparseable segment already falls back to zero, so a
+        // malformed tag reads as older and never triggers a notification.
+        expect(compareVersions("2.3.0", "garbage")).toBe(-1);
+        expect(compareVersions("2.3.0", "")).toBe(-1);
     });
 });
