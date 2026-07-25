@@ -150,3 +150,15 @@ To keep the execution environment safe, code running in the Chromium Renderer ca
     *   **macOS**: `~/Library/Application Support/brs-desktop/`
     *   **Windows**: `%APPDATA%\brs-desktop\`
     *   **Linux**: `~/.config/brs-desktop/`
+
+## Automated Testing
+The project is covered by a [Vitest](https://vitest.dev) suite, run with `npm test` (`npm run test:watch` while developing, `npm run test:coverage` for a report). It is organised in two layers:
+
+*   **Unit specs** (`test/unit/**`) mirror the `src/` tree and exercise pure logic: the Roku firmware-version decoder, digest-authentication arithmetic, key-code conversion, ECP payload builders, the debug shell's help and key tables, and the recent-files store.
+*   **Integration specs** (`test/integration/**`) start the real network services in-process — ECP REST and its ECP-2 WebSocket, the web installer, the telnet console and the debug command shell — and drive them over genuine sockets. Each binds an ephemeral port supplied by `getFreePort()`, so the suites can run concurrently and never collide with a running simulator.
+
+**Electron is never launched.** `vitest.config.mjs` aliases the `electron` module, `@electron/remote`, `@lvcabral/electron-preferences`, `@lvcabral/node-ssdp`, `network`, `electron-prompt` and `electron-about-window` to hand-written stubs in `test/mocks/`. Stubbing SSDP in particular removes UDP multicast from the test run, which would otherwise be both a permissions hazard and a source of flakiness on CI. Assertions about main-to-renderer traffic go through the fake window's `webContents.send` spy; renderer-to-main handlers are driven with `ipcMain.emit(channel, {}, payload)`.
+
+Two characteristics of this codebase shape how tests must be written. First, several modules register their `ipcMain` handlers at module-evaluation time and cannot re-register them, so a blanket `ipcMain.removeAllListeners()` in a shared hook will quietly disable the code under test. Second, handlers that read bundled assets through `path.join(__dirname, …)` resolve against `src/` under the test runner rather than the webpack bundle's `app/`, so those specific routes fail only in tests; the affected cases are marked as such.
+
+There is deliberately **no end-to-end layer**. Window management, menus, and anything visual are not covered, and still require running the application to verify.

@@ -9,28 +9,11 @@ import { app, dialog, BrowserWindow, shell } from "electron";
 import https from "node:https";
 import packageInfo from "../../package.json";
 import { getSettings } from "./settings";
+import { compareVersions } from "./version";
 
 let updateAvailable = false;
 let latestVersion = null;
 let dialogShown = false;
-
-// Function to compare version strings
-function compareVersions(current, latest) {
-    const currentParts = current.replace("v", "").split(".").map(Number);
-    const latestParts = latest.replace("v", "").split(".").map(Number);
-
-    for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
-        const currentPart = currentParts[i] || 0;
-        const latestPart = latestParts[i] || 0;
-
-        if (latestPart > currentPart) {
-            return 1; // Latest is newer
-        } else if (latestPart < currentPart) {
-            return -1; // Current is newer
-        }
-    }
-    return 0; // Same version
-}
 
 // Show update available dialog
 function showUpdateAvailableDialog(version) {

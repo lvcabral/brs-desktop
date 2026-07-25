@@ -1,0 +1,187 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HELP_COMMANDS > matches its snapshot 1`] = `
+[
+  {
+    "args": "[str]",
+    "cmd": "?",
+    "desc": "Display the help.",
+  },
+  {
+    "args": "<num-warnings>",
+    "cmd": "brightscript_warnings",
+    "desc": "Set the maximum number of brightscript warnings displayed",
+  },
+  {
+    "args": "",
+    "cmd": "bsprof-pause",
+    "desc": "Pause BS profiling",
+  },
+  {
+    "args": "",
+    "cmd": "bsprof-resume",
+    "desc": "Resume BS profiling",
+  },
+  {
+    "args": "",
+    "cmd": "bsprof-status",
+    "desc": "Get BS profiling status",
+  },
+  {
+    "args": "[-r <repeat-seconds>]",
+    "cmd": "chanperf",
+    "desc": "Show channel CPU and memory usage",
+  },
+  {
+    "args": "",
+    "cmd": "clear_launch_caches",
+    "desc": "Clear all caches that can affect channel launch time",
+  },
+  {
+    "args": "",
+    "cmd": "exit",
+    "desc": "Exits the debug terminal.",
+  },
+  {
+    "args": "",
+    "cmd": "fps_display",
+    "desc": "display onscreen graphics statistics [1|0].",
+  },
+  {
+    "args": "",
+    "cmd": "free",
+    "desc": "Return the output of the free(1) command",
+  },
+  {
+    "args": "",
+    "cmd": "genkey",
+    "desc": "Generate a new developer key.",
+  },
+  {
+    "args": "[str]",
+    "cmd": "help",
+    "desc": "Display the help.",
+  },
+  {
+    "args": "[overlay]",
+    "cmd": "loaded_textures",
+    "desc": "Show loaded textures (default main RenderContext)",
+  },
+  {
+    "args": "[on|off]",
+    "cmd": "logrendezvous",
+    "desc": "Turn Rendezvous Logging on or off",
+  },
+  {
+    "args": "",
+    "cmd": "plugins",
+    "desc": "Show list of all installed plugins.",
+  },
+  {
+    "args": "{hudrlsp<fb>yikoteacn}",
+    "cmd": "press",
+    "desc": "Simulate a keypress. (no param lists keys)",
+  },
+  {
+    "args": "",
+    "cmd": "quit",
+    "desc": "Exits the debug terminal.",
+  },
+  {
+    "args": "",
+    "cmd": "q",
+    "desc": "Exits the debug terminal.",
+  },
+  {
+    "args": "",
+    "cmd": "r2d2_bitmaps",
+    "desc": "Enumerate R2D2 bitmaps",
+  },
+  {
+    "args": "",
+    "cmd": "remove_plugin",
+    "desc": "Remove a plugin from the account and device.",
+  },
+  {
+    "args": "",
+    "cmd": "sgnodes",
+    "desc": "List SceneGraph nodes.",
+  },
+  {
+    "args": "",
+    "cmd": "sgperf",
+    "desc": "SceneGraph node operation performance metrics.",
+  },
+  {
+    "args": "",
+    "cmd": "showkey",
+    "desc": "Show the current developer key.",
+  },
+  {
+    "args": "list | <n> | <name> | -p <pid>)",
+    "cmd": "target",
+    "desc": "List or select command execution target",
+  },
+  {
+    "args": "",
+    "cmd": "type",
+    "desc": "Send a literal text sequence.",
+  },
+]
+`;
+
+exports[`PRESS_HELP > matches its snapshot 1`] = `
+"h            Home
+u            Up
+d            Down
+r            Right
+l            Left
+s            Select
+f,>          Fwd
+b,<          Rev
+p            Play
+y            InstantReplay
+i            Info
+k            Back
+=            Backspace
+o            PlayOnly
+t            Stop
+e            Enter
+v            Pause
++            Channel Up
+-            Channel Down
+\\            Volume Mute
+#            PowerOff
+a            A
+c            B
+0-9          Digits 0 to 9"
+`;
+
+exports[`getHelpText with no argument > matches its snapshot 1`] = `
+"? [str]                 Display the help.
+brightscript_warnings <num-warnings> Set the maximum number of brightscript warnings displayed
+bsprof-pause            Pause BS profiling
+bsprof-resume           Resume BS profiling
+bsprof-status           Get BS profiling status
+chanperf [-r <repeat-seconds>] Show channel CPU and memory usage
+clear_launch_caches     Clear all caches that can affect channel launch time
+exit                    Exits the debug terminal.
+fps_display             display onscreen graphics statistics [1|0].
+free                    Return the output of the free(1) command
+genkey                  Generate a new developer key.
+help [str]              Display the help.
+loaded_textures [overlay] Show loaded textures (default main RenderContext)
+logrendezvous [on|off]  Turn Rendezvous Logging on or off
+plugins                 Show list of all installed plugins.
+press {hudrlsp<fb>yikoteacn} Simulate a keypress. (no param lists keys)
+quit                    Exits the debug terminal.
+q                       Exits the debug terminal.
+r2d2_bitmaps            Enumerate R2D2 bitmaps
+remove_plugin           Remove a plugin from the account and device.
+sgnodes                 List SceneGraph nodes.
+sgperf                  SceneGraph node operation performance metrics.
+showkey                 Show the current developer key.
+target list | <n> | <name> | -p <pid>) List or select command execution target
+type                    Send a literal text sequence.
+"
+`;

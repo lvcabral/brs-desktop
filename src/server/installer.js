@@ -7,11 +7,15 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow } from "electron";
 import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
+import {
+    cryptoUsingMD5,
+    parseAuthenticationInfo,
+    computeDigestResponse,
+} from "../helpers/digest";
 import Busboy from "busboy";
 import fs from "node:fs";
 import path from "node:path";
 import http from "node:http";
-import crypt from "node:crypto";
 
 const credentials = {
     userName: DEFAULT_USRPWD,
@@ -34,11 +38,11 @@ export function setPort(customPort) {
         port = Number.parseInt(customPort);
     }
 }
-export function enableInstaller() {
+export function enableInstaller(win) {
     if (isInstallerEnabled) {
         return; // already started do nothing
     }
-    const window = BrowserWindow.fromId(1);
+    const window = win ?? BrowserWindow.fromId(1);
     hash = cryptoUsingMD5(credentials.realm);
     server = http
         .createServer(function (req, res) {
@@ -84,6 +88,9 @@ export function enableInstaller() {
             }
         })
         .listen(port, () => {
+            // Report the port actually bound, which differs from the requested one when
+            // port 0 was used to let the OS choose.
+            port = server.address().port;
             isInstallerEnabled = true;
             notifyAll("enabled", { enabled: true, port: port });
         });
@@ -193,7 +200,7 @@ function handleFormField(fieldname, value, window) {
     return value;
 }
 
-function handlePostResponse(res, done, fileSize, fileError) {
+export function handlePostResponse(res, done, fileSize, fileError) {
     if (done === "screenshot") {
         handleScreenshotResponse(res);
     } else if (done === "file") {
@@ -231,7 +238,7 @@ function handleScreenshotResponse(res) {
     }, 1000);
 }
 
-function buildScreenshotHtml(screenshotExists) {
+export function buildScreenshotHtml(screenshotExists) {
     if (screenshotExists) {
         const timestamp = Date.now();
         return `
@@ -274,7 +281,7 @@ function handleFileInstallResponse(res, fileSize, fileError) {
     });
 }
 
-function buildInstallHtml(fileSize, fileError) {
+export function buildInstallHtml(fileSize, fileError) {
     if (fileError) {
         return `
                                 <div style="margin-top: 20px;">
@@ -323,13 +330,12 @@ function performDigestAuth(req, res) {
         return false;
     }
 
-    const ha1 = cryptoUsingMD5(
-        `${parsedAuth.username}:${credentials.realm}:${credentials.password}`
-    );
-    const ha2 = cryptoUsingMD5(`${req.method}:${parsedAuth.uri}`);
-    const expectedResponse = cryptoUsingMD5(
-        [ha1, parsedAuth.nonce, parsedAuth.nc, parsedAuth.cnonce, parsedAuth.qop, ha2].join(":")
-    );
+    const expectedResponse = computeDigestResponse({
+        ...parsedAuth,
+        realm: credentials.realm,
+        password: credentials.password,
+        method: req.method,
+    });
     if (parsedAuth.response !== expectedResponse) {
         authenticateUser(req, res);
         return false;
@@ -364,9 +370,6 @@ function notifyAll(eventName, eventData) {
 }
 
 // Helper Functions
-function cryptoUsingMD5(data) {
-    return crypt.createHash("md5").update(data).digest("hex");
-}
 
 function authenticateUser(req, res) {
     res.writeHead(401, {
@@ -377,11 +380,3 @@ function authenticateUser(req, res) {
     res.end(req.method === "HEAD" ? undefined : "Authorization is needed.");
 }
 
-function parseAuthenticationInfo(authData) {
-    let authenticationObj = {};
-    for (const d of authData.split(", ")) {
-        const [key, value] = d.split("=");
-        authenticationObj[key] = value.replace(/"/g, "");
-    }
-    return authenticationObj;
-}

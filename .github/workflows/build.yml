@@ -9,7 +9,38 @@ on:
       - '**'
 
 jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+
+    strategy:
+      # Do not let a failure on one OS hide the results from the others: formatPath,
+      # getSSID and several isMacOS/isWindows branches are platform specific.
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # --ignore-scripts skips the postinstall `electron-builder install-app-deps`, which
+      # downloads Electron headers and rebuilds native modules. The tests alias Electron
+      # away entirely, so none of that is needed here.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run tests
+        run: npm test
+
   release:
+    needs: test
     runs-on: ${{ matrix.os }}
 
     strategy:

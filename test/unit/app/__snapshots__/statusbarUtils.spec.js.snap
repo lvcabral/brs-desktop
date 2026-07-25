@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`shortenPath > can exceed maxLen when the filename is longer than the budget 1`] = `"/…/a-very-long-channel-filename-indeed.zip"`;
+
+exports[`shortenPath > handles a path with no directory component 1`] = `"\\…\\averyveryverylongfilenamewithnoslashes.zip"`;

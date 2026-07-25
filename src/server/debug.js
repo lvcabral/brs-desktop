@@ -7,6 +7,8 @@
  *--------------------------------------------------------------------------------------------*/
 import { BrowserWindow } from "electron";
 import { DEBUG_PORT } from "../constants";
+import { HELP_COMMANDS, PRESS_HELP, getHelpText } from "./debugHelp";
+import { getPressKey } from "./debugKeys";
 import { getRokuOS } from "../helpers/util";
 import { reloadDevice } from "../helpers/window";
 import * as telnet from "net";
@@ -24,79 +26,8 @@ let rendezvousTrackingEnabled = false;
 
 export let isDebugEnabled = false;
 
-const HELP_COMMANDS = [
-    { cmd: "?", args: "[str]", desc: "Display the help." },
-    { cmd: "brightscript_warnings", args: "<num-warnings>", desc: "Set the maximum number of brightscript warnings displayed" },
-    { cmd: "bsprof-pause", args: "", desc: "Pause BS profiling" },
-    { cmd: "bsprof-resume", args: "", desc: "Resume BS profiling" },
-    { cmd: "bsprof-status", args: "", desc: "Get BS profiling status" },
-    { cmd: "chanperf", args: "[-r <repeat-seconds>]", desc: "Show channel CPU and memory usage" },
-    { cmd: "clear_launch_caches", args: "", desc: "Clear all caches that can affect channel launch time" },
-    { cmd: "exit", args: "", desc: "Exits the debug terminal." },
-    { cmd: "fps_display", args: "", desc: "display onscreen graphics statistics [1|0]." },
-    { cmd: "free", args: "", desc: "Return the output of the free(1) command" },
-    { cmd: "genkey", args: "", desc: "Generate a new developer key." },
-    { cmd: "help", args: "[str]", desc: "Display the help." },
-    { cmd: "loaded_textures", args: "[overlay]", desc: "Show loaded textures (default main RenderContext)" },
-    { cmd: "logrendezvous", args: "[on|off]", desc: "Turn Rendezvous Logging on or off" },
-    { cmd: "plugins", args: "", desc: "Show list of all installed plugins." },
-    { cmd: "press", args: "{hudrlsp<fb>yikoteacn}", desc: "Simulate a keypress. (no param lists keys)" },
-    { cmd: "quit", args: "", desc: "Exits the debug terminal." },
-    { cmd: "q", args: "", desc: "Exits the debug terminal." },
-    { cmd: "r2d2_bitmaps", args: "", desc: "Enumerate R2D2 bitmaps" },
-    { cmd: "remove_plugin", args: "", desc: "Remove a plugin from the account and device." },
-    { cmd: "sgnodes", args: "", desc: "List SceneGraph nodes." },
-    { cmd: "sgperf", args: "", desc: "SceneGraph node operation performance metrics." },
-    { cmd: "showkey", args: "", desc: "Show the current developer key." },
-    { cmd: "target", args: "list | <n> | <name> | -p <pid>)", desc: "List or select command execution target" },
-    { cmd: "type", args: "", desc: "Send a literal text sequence." }
-];
 
-const PRESS_HELP = [
-    "h            Home",
-    "u            Up",
-    "d            Down",
-    "r            Right",
-    "l            Left",
-    "s            Select",
-    "f,>          Fwd",
-    "b,<          Rev",
-    "p            Play",
-    "y            InstantReplay",
-    "i            Info",
-    "k            Back",
-    "=            Backspace",
-    "o            PlayOnly",
-    "t            Stop",
-    "e            Enter",
-    "v            Pause",
-    "+            Channel Up",
-    "-            Channel Down",
-    "\\            Volume Mute",
-    "#            PowerOff",
-    "a            A",
-    "c            B",
-    "0-9          Digits 0 to 9",
-].join("\r\n");
-
-function getHelpText(command) {
-    if (!command) {
-        return HELP_COMMANDS.map(c => {
-            const prefix = c.cmd + (c.args ? ` ${c.args}` : "");
-            const padding = prefix.length >= 24 ? " " : " ".repeat(24 - prefix.length);
-            return `${prefix}${padding}${c.desc}`;
-        }).join("\r\n") + "\r\n";
-    }
-    const found = HELP_COMMANDS.find(c => c.cmd.toLowerCase() === command.toLowerCase());
-    if (found) {
-        const prefix = found.cmd + (found.args ? ` ${found.args}` : "");
-        const padding = prefix.length >= 24 ? " " : " ".repeat(24 - prefix.length);
-        return `${prefix}${padding}${found.desc}\r\n`;
-    }
-    return `No help found for '${command}'.\r\n`;
-}
-
-export function enableDebugServer(win, prefs) {
+export function enableDebugServer(win, prefs, port = DEBUG_PORT) {
     if (isDebugEnabled) {
         return;
     }
@@ -138,7 +69,7 @@ export function enableDebugServer(win, prefs) {
     server.on("error", (error) => {
         console.error(`Debug server error: ${error.message}`);
     });
-    server.listen(DEBUG_PORT);
+    server.listen(port);
 }
 
 export function disableDebugServer() {
@@ -171,7 +102,7 @@ function notifyAll(eventName, eventData) {
 }
 
 // Data Processing
-function processData(data, id) {
+export function processData(data, id) {
     if (data?.length > 0) {
         const client = clients.get(id);
         let line = lines.get(id);
@@ -212,7 +143,7 @@ function processTypeQueue() {
     }
 }
 
-function sendDebugCommand(line, client) {
+export function sendDebugCommand(line, client) {
     const expr = line.trim().split(/(?<=^\S+)\s/);
     const cmd = expr[0];
 
@@ -286,44 +217,7 @@ function sendDebugCommand(line, client) {
             const window = BrowserWindow.fromId(1);
             if (window) {
                 for (const char of arg) {
-                    let key;
-                    switch (char.toLowerCase()) {
-                        case 'h': key = "home"; break;
-                        case 'k': key = "back"; break;
-                        case 'u': key = "up"; break;
-                        case 'd': key = "down"; break;
-                        case 'l': key = "left"; break;
-                        case 'r': key = "right"; break;
-                        case 's': key = "select"; break;
-                        case 'y': key = "instantreplay"; break;
-                        case '<': key = "rev"; break;
-                        case 'b': key = "rev"; break;
-                        case '>': key = "fwd"; break;
-                        case 'f': key = "fwd"; break;
-                        case 'i': key = "info"; break;
-                        case '=': key = "backspace"; break;
-                        case 'p': key = "play"; break;
-                        case 'v': key = "pause"; break;
-                        case 'e': key = "enter"; break;
-                        case 'a': key = "a"; break;
-                        case 'c': key = "b"; break;
-                        case 'o': key = "playonly"; break;
-                        case 't': key = "stop"; break;
-                        case '+': key = "channelup"; break;
-                        case '-': key = "channeldown"; break;
-                        case '\\': key = "volumemute"; break;
-                        case '#': key = "poweroff"; break;
-                        case '0': key = "lit_0"; break;
-                        case '1': key = "lit_1"; break;
-                        case '2': key = "lit_2"; break;
-                        case '3': key = "lit_3"; break;
-                        case '4': key = "lit_4"; break;
-                        case '5': key = "lit_5"; break;
-                        case '6': key = "lit_6"; break;
-                        case '7': key = "lit_7"; break;
-                        case '8': key = "lit_8"; break;
-                        case '9': key = "lit_9"; break;
-                    }
+                    const key = getPressKey(char);
                     if (key) {
                         typeQueue.push({ key, window, client });
                     }

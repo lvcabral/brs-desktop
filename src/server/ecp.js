@@ -8,6 +8,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import { isValidIP, getRokuOS } from "../helpers/util";
 import { ECP_PORT, SSDP_PORT } from "../constants";
+import "../helpers/hash"; // installs String.prototype.hashCode, used by genAppRegistry
 import { Server as SSDP } from "@lvcabral/node-ssdp";
 import xmlbuilder from "xmlbuilder";
 import fs from "node:fs";
@@ -32,8 +33,8 @@ export let isECPEnabled = false;
 export function initECP() {
     device = globalThis.sharedObject.deviceInfo;
 }
-export function enableECP() {
-    window = BrowserWindow.fromId(1);
+export function enableECP(win, port = ECP_PORT) {
+    window = win ?? BrowserWindow.fromId(1);
     if (isECPEnabled) {
         return; // already started do nothing
     }
@@ -70,7 +71,7 @@ export function enableECP() {
             return next();
         });
     }
-    ecp.start(ECP_PORT)
+    ecp.start(port)
         .catch((error) => {
             window.webContents.send("console", `ECP server error:${error.message}`, true);
         })
@@ -78,7 +79,7 @@ export function enableECP() {
             // Create SSDP Server
             ssdp = new SSDP({
                 location: {
-                    port: ECP_PORT,
+                    port: port,
                     path: "/",
                 },
                 adInterval: 120000,
@@ -165,7 +166,7 @@ function notifyAll(eventName, eventData) {
 }
 
 // ECP-2 WebSocket API
-function processRequest(ws, message) {
+export function processRequest(ws, message) {
     if (message) {
         if (DEBUG) {
             console.log("received: %s", message);
@@ -200,7 +201,7 @@ function processRequest(ws, message) {
     }
 }
 
-function queryReply(msg, statusOK) {
+export function queryReply(msg, statusOK) {
     const request = msg["request"];
     const xml = `<?xml version="1.0" encoding="UTF-8" ?>`;
     const xml64 = Buffer.from(xml).toString("base64");
@@ -329,7 +330,7 @@ function sendKeyPress(req, res) {
 }
 
 // Content Generation Functions
-function genDeviceRootXml() {
+export function genDeviceRootXml() {
     const xml = xmlbuilder.create("root").att("xmlns", "urn:schemas-upnp-org:device-1-0");
     const spec = xml.ele("specVersion");
     spec.ele("major", {}, 1);
@@ -368,7 +369,7 @@ function genDeviceRootXml() {
     return xml.end({ pretty: true });
 }
 
-function genDeviceInfoXml(encrypt) {
+export function genDeviceInfoXml(encrypt) {
     const xml = xmlbuilder.create("device-info");
     const modelName = getModelName(device.deviceModel);
     xml.ele("udn", {}, UDN);
@@ -436,7 +437,7 @@ function genDeviceInfoXml(encrypt) {
     return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
 
-function genThemesXml(encrypt) {
+export function genThemesXml(encrypt) {
     const xml = xmlbuilder.create("themes");
     xml.ele("theme", { id: "brand", selected: true }, "Roku (default)");
     xml.ele("theme", { id: "Graphene" }, "Graphene");
@@ -446,7 +447,7 @@ function genThemesXml(encrypt) {
     return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
 
-function genScrsvXml(encrypt) {
+export function genScrsvXml(encrypt) {
     const xml = xmlbuilder.create("screensavers");
     xml.ele("screensaver", { default: true, id: "5533", selected: true }, "Roku Digital Clock");
     xml.ele("screensaver", { id: "5534" }, "Roku Analog Clock");
@@ -454,7 +455,7 @@ function genScrsvXml(encrypt) {
     return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
 
-function genAppsXml(encrypt) {
+export function genAppsXml(encrypt) {
     const xml = xmlbuilder.create("apps");
     if (device.appList === undefined || device.appList.length < 2) {
         // Dummy app as Roku Deep Linking Tester requires at least 2 apps
@@ -474,7 +475,7 @@ function genAppIcon(appID, encrypt) {
     return encrypt ? image.toString("base64") : image;
 }
 
-function genActiveApp(encrypt) {
+export function genActiveApp(encrypt) {
     try {
         const xml = xmlbuilder.create("active-app");
         const firstApp = device.appList[0];
@@ -495,7 +496,7 @@ function genActiveApp(encrypt) {
     }
 }
 
-function genMediaPlayer(encrypt) {
+export function genMediaPlayer(encrypt) {
     try {
         const xml = xmlbuilder.create("player");
         xml.att("state", "close");
@@ -518,7 +519,7 @@ function genMediaPlayer(encrypt) {
     }
 }
 
-function genAppRegistry(plugin, encrypt) {
+export function genAppRegistry(plugin, encrypt) {
     const xml = xmlbuilder.create("plugin-registry");
     const plugins = Array.from(device.appList.values()).map((value) => {
         return value.id;
@@ -566,7 +567,7 @@ function genAppRegistry(plugin, encrypt) {
     return encrypt ? Buffer.from(strXml).toString("base64") : strXml;
 }
 
-function genGraphicsFrameRate(encrypt) {
+export function genGraphicsFrameRate(encrypt) {
     try {
         const xml = xmlbuilder.create("graphics-frame-rate");
         xml.ele("fps", {}, "0.000000");
@@ -580,7 +581,7 @@ function genGraphicsFrameRate(encrypt) {
     }
 }
 
-function genAppState(appID, encrypt) {
+export function genAppState(appID, encrypt) {
     try {
         const app = device.appList.find((app) => app.id === appID);
         const xml = xmlbuilder.create("app-state");
@@ -605,7 +606,7 @@ function genAppState(appID, encrypt) {
 
 // Helper Functions
 
-function getMacAddress() {
+export function getMacAddress() {
     const os = require("node:os");
     const ifaces = os.networkInterfaces();
     let mac = "";
@@ -638,7 +639,7 @@ function getAppIconPath(appID) {
     return iconPath && fs.existsSync(iconPath) ? iconPath : fallbackIcon;
 }
 
-function getModelName(model) {
+export function getModelName(model) {
     const modelName = device.models.get(model);
     return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }

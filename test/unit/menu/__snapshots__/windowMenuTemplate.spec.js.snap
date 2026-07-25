@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`windowMenuTemplate > matches its snapshot 1`] = `
+{
+  "label": "Window",
+  "role": "window",
+  "submenu": [
+    {
+      "accelerator": "CmdOrCtrl+M",
+      "label": "Minimize",
+      "role": "minimize",
+    },
+    {
+      "label": "Zoom",
+      "role": "zoom",
+    },
+    {
+      "type": "separator",
+    },
+    {
+      "label": "Bring All to Front",
+      "role": "front",
+    },
+  ],
+}
+`;

@@ -11,6 +11,27 @@ import path from "node:path";
 import http from "node:http";
 import fs from "node:fs";
 import ElectronPreferences from "@lvcabral/electron-preferences";
+import { convertKey } from "./keyCodes";
+import {
+    extractFirmwareFromServer,
+    extractSerialNumberFromUSN,
+    normalizeIpAddress,
+    isRokuDiscoveryResponse,
+    parseDeviceMetadata,
+    extract,
+    extractAny,
+} from "./discovery";
+import {
+    getLocaleIdArray,
+    getTextFontArray,
+    getTextEffectArray,
+    getTextSizeArray,
+    getCaptionColorArray,
+    getTextOpacityArray,
+    getBackgroundOpacityArray,
+    getTracksLanguageArray,
+    getCountryArray,
+} from "./settingsOptions";
 import { Client as SSDPClient } from "@lvcabral/node-ssdp";
 import { setAspectRatio } from "./window";
 import { enableECP, disableECP } from "../server/ecp";
@@ -1559,56 +1580,6 @@ function saveDisplaySettings(window) {
     }
 }
 
-function convertKey(keyCode) {
-    const arrows = new Set(["Left", "Right", "Up", "Down"]);
-    let newCode = keyCode.replaceAll(" ", "");
-    if (keyCode.includes("+")) {
-        const leftKey = keyCode.split("+")[0];
-        const rightKey = keyCode.split("+")[1];
-        if (rightKey.length === 1) {
-            newCode = `${leftKey}+${convertChar(rightKey)}`;
-        } else if (arrows.has(rightKey)) {
-            newCode = `${leftKey}+Arrow${rightKey}`;
-        }
-    } else if (keyCode.length === 1) {
-        newCode = convertChar(keyCode);
-    } else if (arrows.has(keyCode)) {
-        newCode = `Arrow${keyCode}`;
-    }
-    return newCode;
-}
-
-function convertChar(keyChar) {
-    if (isNumber(keyChar)) {
-        return `Digit${keyChar}`;
-    } else if (isLetter(keyChar)) {
-        return `Key${keyChar}`;
-    } else {
-        const keyMap = new Map([
-            ["`", "Backquote"],
-            ["-", "Minus"],
-            ["=", "Equal"],
-            ["[", "BracketLeft"],
-            ["]", "BracketRight"],
-            [";", "Semicolon"],
-            ["'", "quote"],
-            [",", "Comma"],
-            [".", "Period"],
-            ["\\", "Backslash"],
-            ["/", "Slash"],
-        ]);
-        return keyMap.get(keyChar) ?? keyChar;
-    }
-}
-
-function isNumber(str) {
-    return str.length === 1 && str.match(/[0-9]/i);
-}
-
-function isLetter(str) {
-    return str.length === 1 && str.match(/[a-z]/i);
-}
-
 function handleExternalVolumeSettings(window, externalVolume, skipPreUnmount = false) {
     if (!externalVolume) {
         return;
@@ -1694,7 +1665,7 @@ export function getTitleOverlayTheme(userTheme) {
 
 // Data Arrays
 
-function getRokuModelArray() {
+export function getRokuModelArray() {
     const modelArray = [];
     if (globalThis.sharedObject.deviceInfo?.models?.size) {
         for (const [key, value] of globalThis.sharedObject.deviceInfo.models) {
@@ -1702,134 +1673,6 @@ function getRokuModelArray() {
         }
     }
     return modelArray;
-}
-
-function getLocaleIdArray() {
-    return [
-        { label: "US English (en-US)", value: "en_US" },
-        { label: "British English (en-GB)", value: "en_GB" },
-        { label: "Australian English (en-AU)", value: "en_AU" },
-        { label: "Canadian English (en-CA)", value: "en_CA" },
-        { label: "Canadian French (fr-CA)", value: "fr_CA" },
-        { label: "International Spanish (es-ES)", value: "es_ES" },
-        { label: "Mexican Spanish (es-MX)", value: "es_MX" },
-        { label: "German (de-DE)", value: "de_DE" },
-        { label: "Italian (it-IT)", value: "it_IT" },
-        { label: "Brazilian Portuguese (pt-BR)", value: "pt_BR" },
-    ];
-}
-function getTextFontArray() {
-    return [
-        { label: "Default", value: "default" },
-        { label: "Serif fixed width", value: "serif fixed width" },
-        { label: "Serif proportional", value: "serif proportional" },
-        { label: "Sans Serif fixed width", value: "sans serif fixed width" },
-        { label: "Sans Serif proportional", value: "sans serif proportional" },
-        { label: "Casual", value: "casual" },
-        { label: "Cursive", value: "cursive" },
-        { label: "Small Caps", value: "small caps" },
-    ];
-}
-function getTextEffectArray() {
-    return [
-        { label: "Default", value: "default" },
-        { label: "None", value: "none" },
-        { label: "Raised", value: "raised" },
-        { label: "Depressed", value: "depressed" },
-        { label: "Uniform", value: "uniform" },
-        { label: "Drop shadow (left)", value: "drop shadow (left)" },
-        { label: "Drop shadow (right)", value: "drop shadow (right)" },
-    ];
-}
-function getTextSizeArray() {
-    return [
-        { label: "Default", value: "default" },
-        { label: "Extra Large", value: "extra large" },
-        { label: "Large", value: "large" },
-        { label: "Medium", value: "medium" },
-        { label: "Small", value: "small" },
-        { label: "Small", value: "small" },
-        { label: "Extra Small", value: "extra small" },
-    ];
-}
-function getCaptionColorArray() {
-    return [
-        { label: "Default", value: "default" },
-        { label: "Bright White", value: "bright white" },
-        { label: "White", value: "white" },
-        { label: "Black", value: "black" },
-        { label: "Red", value: "red" },
-        { label: "Green", value: "green" },
-        { label: "Blue", value: "blue" },
-        { label: "Yellow", value: "yellow" },
-        { label: "Magenta", value: "magenta" },
-        { label: "Cyan", value: "cyan" },
-    ];
-}
-function getTextOpacityArray() {
-    return [
-        { label: "Default", value: "default" },
-        { label: "25%", value: "25%" },
-        { label: "50%", value: "50%" },
-        { label: "75%", value: "75%" },
-        { label: "100%", value: "100%" },
-    ];
-}
-function getBackgroundOpacityArray() {
-    return [
-        { label: "Default", value: "default" },
-        { label: "Off", value: "off" },
-        { label: "25%", value: "25%" },
-        { label: "50%", value: "50%" },
-        { label: "75%", value: "75%" },
-        { label: "100%", value: "100%" },
-    ];
-}
-
-function getTracksLanguageArray() {
-    return [
-        { label: "English", value: "en" },
-        { label: "Spanish (español)", value: "es" },
-        { label: "French (français)", value: "fr" },
-        { label: "German (deutsch)", value: "de" },
-        { label: "Italian (italiano)", value: "it" },
-        { label: "Portuguese (português)", value: "pt" },
-        { label: "Russian (русский)", value: "ru" },
-        { label: "Turkish (Türkçe)", value: "tr" },
-        { label: "Polish (polski)", value: "pl" },
-        { label: "Ukrainian (українська)", value: "uk" },
-        { label: "Romansh (rumantsch)", value: "rm" },
-        { label: "Dutch (Nederlands)", value: "nl" },
-        { label: "Croatian (hrvatski)", value: "hr" },
-        { label: "Hungarian (magyar)", value: "hu" },
-        { label: "Greek (ελληνικά)", value: "el" },
-        { label: "Czech (čeština)", value: "cs" },
-        { label: "Swedish (svenska)", value: "sv" },
-    ];
-}
-
-function getCountryArray() {
-    return [
-        { label: "United States (US)", value: "US" },
-        { label: "Argentina (AR)", value: "AR" },
-        { label: "Brazil (BR)", value: "BR" },
-        { label: "Canada (CA)", value: "CA" },
-        { label: "Chile (CL)", value: "CL" },
-        { label: "Colombia (CO)", value: "CO" },
-        { label: "Costa Rica (CR)", value: "CR" },
-        { label: "El Salvador (SV)", value: "SV" },
-        { label: "France (FR)", value: "FR" },
-        { label: "Guatemala (GT)", value: "GT" },
-        { label: "Germany (DE)", value: "DE" },
-        { label: "Honduras (HN)", value: "HN" },
-        { label: "Ireland (IE)", value: "IE" },
-        { label: "Mexico (MX)", value: "MX" },
-        { label: "Nicaragua (NI)", value: "NI" },
-        { label: "Panama (PA)", value: "PA" },
-        { label: "Peru (PE)", value: "PE" },
-        { label: "United Kingdom (GB)", value: "GB" },
-        { label: "Rest of the World (OT)", value: "OT" },
-    ];
 }
 
 function getTimezoneArray() {
@@ -2026,7 +1869,7 @@ function applyPeerRokuFieldOptions() {
 }
 
 // SSDP discovery helpers
-function getRokuDeviceOptions() {
+export function getRokuDeviceOptions() {
     const options = [{ label: "Manual Entry", value: "manual" }];
 
     for (const [ip, device] of discoveredDevices) {
@@ -2063,28 +1906,8 @@ function getRokuDeviceOptions() {
     return options;
 }
 
-function extractFirmwareFromServer(serverHeader) {
-    if (!serverHeader) {
-        return "";
-    }
-    const match = serverHeader.match(/Roku\/[\d.]+\s+UPnP\/[\d.]+\s+Roku\/([^(]+)/);
-    return match ? match[1].trim() : "";
-}
 
-function extractSerialNumberFromUSN(usnHeader) {
-    if (!usnHeader) {
-        return "";
-    }
-    const match = usnHeader.match(/uuid:roku:ecp:([^:]+)/i);
-    return match ? match[1] : "";
-}
 
-function normalizeIpAddress(ipAddress) {
-    if (!ipAddress) {
-        return "";
-    }
-    return ipAddress.startsWith("::ffff:") ? ipAddress.slice(7) : ipAddress;
-}
 
 function stopSsdpClient(client) {
     if (!client) {
@@ -2097,14 +1920,6 @@ function stopSsdpClient(client) {
     }
 }
 
-function isRokuDiscoveryResponse(headers) {
-    if (!headers) {
-        return false;
-    }
-    const serviceType = headers.ST?.toLowerCase() ?? "";
-    const uniqueServiceName = headers.USN?.toLowerCase() ?? "";
-    return serviceType.includes("roku:ecp") || uniqueServiceName.includes("roku:ecp");
-}
 
 async function discoverRokuDevices() {
     return new Promise((resolve) => {
@@ -2228,7 +2043,7 @@ export async function initRokuDeviceDiscovery() {
 }
 
 // Update the stored device metadata with new details
-function updateDeviceMetadata(deviceIP, mergedDevice, details) {
+export function updateDeviceMetadata(deviceIP, mergedDevice, details) {
     const normalizedDetailsIp = normalizeIpAddress(details?.ipAddr);
     const deviceKey =
         normalizedDetailsIp && discoveredDevices.has(normalizedDetailsIp)
@@ -2306,60 +2121,4 @@ function getDeviceMetadata(ipAddr, serialNumber) {
     });
 }
 
-function parseDeviceMetadata(ipAddr, sn, data) {
-    if (!data) {
-        return {
-            ipAddr,
-            serialNumber: sn || "",
-            friendlyName: "",
-            modelNumber: "",
-            modelName: "",
-        };
-    }
-    const serialNumber =
-        sn ||
-        extractAny(
-            [/<serial-number>(.*?)<\/serial-number>/i, /<serialNumber>(.*?)<\/serialNumber>/i],
-            data
-        );
-    const friendlyName = extractAny(
-        [
-            /<friendly-device-name>(.*?)<\/friendly-device-name>/i,
-            /<user-device-name>(.*?)<\/user-device-name>/i,
-        ],
-        data
-    );
-    const modelNumber = extractAny(
-        [/<model-number>(.*?)<\/model-number>/i, /<modelNumber>(.*?)<\/modelNumber>/i],
-        data
-    );
-    const modelName = extractAny(
-        [/<model-name>(.*?)<\/model-name>/i, /<friendly-model-name>(.*?)<\/friendly-model-name>/i],
-        data
-    );
 
-    return {
-        ipAddr,
-        serialNumber,
-        friendlyName,
-        modelNumber,
-        modelName,
-    };
-}
-
-// Use a regular expression to extract a field from some data,
-// returning an empty string if the field is not found
-function extract(re, data) {
-    const match = re.exec(data);
-    return Array.isArray(match) && match.length === 2 ? match[1].trim() : "";
-}
-
-function extractAny(patterns, data) {
-    for (const pattern of patterns) {
-        const value = extract(pattern, data);
-        if (value) {
-            return value;
-        }
-    }
-    return "";
-}

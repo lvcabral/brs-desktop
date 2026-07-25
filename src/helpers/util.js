@@ -120,7 +120,7 @@ export function getLocalIps() {
 export async function getGateway() {
     const gateWayData = { ip: "", name: "", type: "", ssid: "" };
     try {
-        const gw = getActiveInterface();
+        const gw = await getActiveInterface();
         gateWayData.ip = gw.gateway_ip ?? "";
         gateWayData.name = gw.name ?? "";
         gateWayData.type = gw.type === "Wireless" ? "WiFiConnection" : "WiredConnection";

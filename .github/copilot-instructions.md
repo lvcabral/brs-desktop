@@ -236,7 +236,10 @@ npm run dist-deb64       # Linux x64 Debian
 - **Linux**: AppImage and Debian package formats
 
 ## Testing & Quality
-- **CI/CD**: GitHub Actions in `.github/workflows/build.yml`
+- **Test Runner**: Vitest (`npm test`). Specs live in `test/unit/**` (pure logic, mirroring the `src/` tree) and `test/integration/**` (the real ECP, installer, telnet and debug servers on ephemeral ports)
+- **Electron Stubs**: `test/mocks/electron.js` plus the alias list in `vitest.config.mjs`; Electron is never launched. Assert IPC through the fake window's `webContents.send` spy, and drive main-process handlers with `ipcMain.emit(channel, {}, payload)`
+- **No E2E layer**: window, menu and visual changes must still be verified by running the app
+- **CI/CD**: GitHub Actions in `.github/workflows/build.yml` — the `test` job runs on all three platforms and gates the `release` job
 - **Code Signing**: macOS notarization via Apple Developer credentials
 - **Multi-arch**: Universal macOS builds, x64/x86 Windows, ARM Linux support
 

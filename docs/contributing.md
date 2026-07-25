@@ -49,4 +49,22 @@ Regardless of whether you're fixing bugs or implementing new features, there's a
 There aren't to many mandatory things for pull requests, besides what you'd expect from any open-source project (e.g. "don't delete all the code", "don't delete a user's home directory at runtime").  The most important project-specific "must-haves" that we'll look for that are:
 
 1. Pull requests should be based on a pretty recent version of the `master` branch, to minimize merge conflicts.
-1. Unit tests are welcome, but at this point are not required.
+1. Please include tests, and run `npm test` before opening the pull request. A bug fix should come with a test that fails before the fix and passes after it. CI runs the same command on macOS, Ubuntu and Windows, and the build job will not start until it passes.
+
+## Running the Tests
+
+```bash
+npm ci                 # or npm install
+npm test               # run everything once
+npm run test:watch     # re-run affected tests as you edit
+npm run test:coverage  # coverage report into coverage/
+```
+
+Tests use [Vitest](https://vitest.dev). Electron itself is never launched: `vitest.config.mjs` maps `electron` and a handful of Electron-dependent packages to stubs in `test/mocks/`, so the suite runs headless and needs no display.
+
+Where new tests belong:
+
+- **Pure logic** goes in `test/unit/`, mirroring the path of the file under test (`src/helpers/util.js` → `test/unit/helpers/util.spec.js`).
+- **Anything needing a live socket** goes in `test/integration/`. Use the `getFreePort()` helper rather than the default port from `src/constants.js`, so spec files can run concurrently without colliding.
+
+There is no end-to-end layer, so changes to windows, menus or anything visual still need to be checked by running the app with `npm run start`.

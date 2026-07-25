@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ECP payload builders > genGraphicsFrameRate > is deterministic under a frozen clock 1`] = `
+"<?xml version="1.0"?>
+<graphics-frame-rate>
+  <fps>0.000000</fps>
+  <timestamp>1784980800000</timestamp>
+  <status>OK</status>
+</graphics-frame-rate>"
+`;
+
+exports[`ECP payload builders > genThemesXml and genScrsvXml > match their snapshots 1`] = `
+"<?xml version="1.0"?>
+<themes>
+  <theme id="brand" selected="true">Roku (default)</theme>
+  <theme id="Graphene">Graphene</theme>
+  <theme id="Brown">Decaf</theme>
+  <theme id="Space">Nebula</theme>
+</themes>"
+`;
+
+exports[`ECP payload builders > genThemesXml and genScrsvXml > match their snapshots 2`] = `
+"<?xml version="1.0"?>
+<screensavers>
+  <screensaver default="true" id="5533" selected="true">Roku Digital Clock</screensaver>
+  <screensaver id="5534">Roku Analog Clock</screensaver>
+</screensavers>"
+`;
