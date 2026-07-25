@@ -261,5 +261,7 @@ async function postInstallerRequest(device, path, formData, callback) {
 
 // Helper function to check for compilation error in response body
 export function isCompileError(responseHtml) {
-    return !!/install\sfailure:\scompilation\sfailed/i.exec(responseHtml);
+    // \s+ rather than \s: the phrase is embedded in an HTML page whose whitespace and line
+    // wrapping vary between Roku firmware versions, so a single-space match is too strict.
+    return !!/install\s+failure:\s+compilation\s+failed/i.exec(responseHtml);
 }

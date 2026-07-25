@@ -25,11 +25,11 @@ describe("isCompileError", () => {
         expect(isCompileError("Install\tFailure:\nCompilation Failed")).toBe(true);
     });
 
-    // Characterization: the pattern uses \s rather than \s+, so it matches exactly one
-    // whitespace character between words. Doubled spacing slips past the check and the
-    // failure is reported as a generic install error instead of a compile error.
-    it("does not match when the words are separated by more than one space", () => {
-        expect(isCompileError("Install Failure:  Compilation Failed")).toBe(false);
+    it("tolerates any run of whitespace between the words", () => {
+        expect(isCompileError("Install Failure:  Compilation Failed")).toBe(true);
+        expect(isCompileError("Install  Failure:\n\n  Compilation\tFailed")).toBe(true);
+        // Real pages wrap the text in markup, so the spacing is not under our control.
+        expect(isCompileError("<font color=\"red\">Install Failure:\n    Compilation Failed</font>")).toBe(true);
     });
 
     it("returns false for a successful install", () => {
