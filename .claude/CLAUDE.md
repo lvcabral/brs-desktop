@@ -59,6 +59,58 @@ Two traps worth knowing:
 When adding an IPC channel, a `gen*Xml` builder, or a debug command, add the matching test — the
 whitelist-parity, XML and command-shell specs are the guardrails for those three contracts.
 
+### Static analysis (SonarCloud)
+
+Every PR is analysed by SonarCloud and gated on the **new code** Quality Gate: security, reliability
+and maintainability ratings must be A, and hotspots 100% reviewed. The project key is
+`lvcabral_brs-emu-app`, which does not match the repo name. To read the findings:
+
+```bash
+gh pr checks <PR>
+curl -s "https://sonarcloud.io/api/issues/search?componentKeys=lvcabral_brs-emu-app&pullRequest=<PR>&resolved=false&ps=100"
+```
+
+Pass `resolved=false`. Without it the response also lists already-closed issues, which looks alarming
+and is not; closed ones come back with `line: null`.
+
+**Moving code counts as writing it.** An extraction re-attributes every moved line to new code, so a
+pure refactor can drop the security rating without introducing a single new problem. Expect this when
+splitting a file, and check what the findings actually point at before assuming you caused them.
+
+Rules to write to, rather than discover in review:
+
+- **MD5 in `src/helpers/digest.js` is mandated by the protocol** (RFC 2617, and what real Roku devices
+  implement — a stronger hash cannot interoperate). Every hash goes through `cryptoUsingMD5`, which
+  carries the justification and the single `NOSONAR`. Don't scatter `createHash("md5")` calls back
+  across the file; each one is a fresh CRITICAL finding (S4790).
+- **Never hardcode a path under a shared temp directory** (S5443). Use
+  `fs.mkdtempSync(path.join(os.tmpdir(), …))` — unique and owner-only. A fixed `/tmp/<name>` is both
+  flagged and a way for one test run to observe another's leftovers.
+- **Test fixtures use RFC 5737 documentation addresses** (`192.0.2.0/24`), never routable-looking ones
+  like `8.8.8.8` or `192.168.x.x` (S1313). Loopback and subnet masks are fine.
+- **Every test needs at least one explicit `expect()`** (S2699). The socket helpers `waitForText`,
+  `waitFor` and `waitForSend` do assert in practice by throwing on timeout, but neither the analyser
+  nor a reader skimming the file can see that — assert the outcome after awaiting them. An empty
+  `it.skip` body is also flagged; a plain comment explaining the gap says more.
+- **`@returns` on an `async` function must say `Promise<T>`** (S4123). SonarCloud infers types from
+  JSDoc and trusts it over the `async` keyword, so a wrong annotation makes correct `await` code look
+  like a bug — and misleads human readers identically.
+- Prefer `RegExp.test()` over `String.match()` when the result is used as a boolean (S6594), `\d` over
+  `[0-9]` (S6353), `.at(-1)` and negative `splice` indices (S7755/S7771), `replaceAll` over
+  `replace(/…/g)` (S7781), `String.raw` over escaped backslashes (S7780), and class fields over
+  constructor assignment of constants (S7757).
+- Delete the imports an extraction leaves behind (S1128).
+
+Two open findings are **accepted, not oversights**. Read this before "fixing" either:
+
+- `S8786` on the challenge regex in `parseDigestChallenge`. It is quadratic — but so is the
+  atomic-group rewrite `(?=(\w+))\1`, because the cost is the global scan retrying every start
+  position, not backtracking inside the pattern. Benchmarked at ~25 ms for an 8 KB header, and Node
+  caps header size, so contorting a protocol parser buys nothing.
+- `S3776` cognitive complexity on `sendDebugCommand` in `src/server/debug.js`. A pre-existing if/else
+  chain over the command set. Now safe to refactor thanks to the integration coverage, but it is a
+  behavioural change and belongs in its own PR.
+
 ### `npm audit`
 
 `npm audit` reports ~10 high findings; `npm audit --omit=dev` reports **0** — nothing vulnerable ships.
