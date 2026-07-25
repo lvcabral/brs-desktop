@@ -14,6 +14,15 @@ import xmlbuilder from "xmlbuilder";
 import fs from "node:fs";
 import path from "node:path";
 
+// Bundled, this module lives at app/main.js so __dirname is app/, alongside the copied
+// images/ and web/ directories. Loaded directly from source -- by the tests -- __dirname
+// is src/server/ and the same assets sit in src/app/. Resolve once, preferring the
+// bundled layout, so both arrangements use one code path.
+const ASSET_BASE =
+    [__dirname, path.join(__dirname, "..", "app")].find((base) =>
+        fs.existsSync(path.join(base, "images"))
+    ) ?? __dirname;
+
 const WebSocket = require("ws");
 const url = require("node:url");
 const DEBUG = false;
@@ -259,13 +268,13 @@ function sendMediaPlayer(req, res) {
 }
 
 function sendDeviceImage(req, res) {
-    let image = fs.readFileSync(path.join(__dirname, "images", "device-image.png"));
+    let image = fs.readFileSync(path.join(ASSET_BASE, "images", "device-image.png"));
     res.setHeader("content-type", "image/png");
     res.send(image);
 }
 
 function sendScpdXML(req, res) {
-    let file = fs.readFileSync(path.join(__dirname, "web", "ecp_SCPD.xml"));
+    let file = fs.readFileSync(path.join(ASSET_BASE, "web", "ecp_SCPD.xml"));
     res.setHeader("content-type", "application/xml");
     res.send(file);
 }
@@ -645,7 +654,7 @@ export function getMacAddress() {
 }
 
 function getAppIconPath(appID) {
-    const fallbackIcon = path.join(__dirname, "images", "channel-icon.png");
+    const fallbackIcon = path.join(ASSET_BASE, "images", "channel-icon.png");
     const iconPath = device.appList.find((app) => app.id === appID)?.icon.replaceAll("file://", "");
     return iconPath && fs.existsSync(iconPath) ? iconPath : fallbackIcon;
 }
