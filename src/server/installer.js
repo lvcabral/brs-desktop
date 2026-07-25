@@ -9,6 +9,7 @@ import { app, BrowserWindow } from "electron";
 import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
 import { cryptoUsingMD5, parseAuthenticationInfo, computeDigestResponse } from "../helpers/digest";
 import Busboy from "busboy";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import http from "node:http";
@@ -364,8 +365,11 @@ function notifyAll(eventName, eventData) {
 // Helper Functions
 
 function authenticateUser(req, res) {
+    // The challenge nonce has to be unpredictable: a Math.random() value is guessable, which lets a
+    // client precompute digest responses. Matches the cnonce generation in helpers/digest.js.
+    const nonce = crypto.randomBytes(16).toString("hex");
     res.writeHead(401, {
-        "WWW-Authenticate": `Digest realm="${credentials.realm}",qop="auth",nonce="${Math.random()}",opaque="${hash}"`,
+        "WWW-Authenticate": `Digest realm="${credentials.realm}",qop="auth",nonce="${nonce}",opaque="${hash}"`,
     });
     res.end(req.method === "HEAD" ? undefined : "Authorization is needed.");
 }
