@@ -45,6 +45,10 @@ jobs:
 
   release:
     needs: test
+    # Push events only. Pull requests run the test job for feedback; building installers
+    # on three platforms for every push to a PR branch would cost minutes and publish
+    # nothing, since the release step is gated on a tag anyway.
+    if: github.event_name == 'push'
     runs-on: ${{ matrix.os }}
 
     strategy:
