@@ -14,11 +14,9 @@ import net from "node:net";
  * inspect raw bytes (the telnet IAC negotiation is asserted as hex).
  */
 export class SocketClient {
-    constructor() {
-        this.socket = null;
-        this.chunks = [];
-        this.closed = false;
-    }
+    socket = null;
+    chunks = [];
+    closed = false;
 
     /**
      * Open the connection and resolve once it is established

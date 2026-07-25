@@ -106,18 +106,18 @@ describe("convertKey", () => {
 
 describe("isNumber / isLetter", () => {
     it("recognises single digits", () => {
-        expect(isNumber("0")).toBeTruthy();
-        expect(isNumber("9")).toBeTruthy();
-        expect(isNumber("a")).toBeFalsy();
-        expect(isNumber("12")).toBeFalsy();
-        expect(isNumber("")).toBeFalsy();
+        expect(isNumber("0")).toBe(true);
+        expect(isNumber("9")).toBe(true);
+        expect(isNumber("a")).toBe(false);
+        expect(isNumber("12")).toBe(false);
+        expect(isNumber("")).toBe(false);
     });
 
     it("recognises single letters in either case", () => {
-        expect(isLetter("a")).toBeTruthy();
-        expect(isLetter("Z")).toBeTruthy();
-        expect(isLetter("1")).toBeFalsy();
-        expect(isLetter("ab")).toBeFalsy();
-        expect(isLetter("")).toBeFalsy();
+        expect(isLetter("a")).toBe(true);
+        expect(isLetter("Z")).toBe(true);
+        expect(isLetter("1")).toBe(false);
+        expect(isLetter("ab")).toBe(false);
+        expect(isLetter("")).toBe(false);
     });
 });

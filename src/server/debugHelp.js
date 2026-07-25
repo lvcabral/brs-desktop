@@ -60,7 +60,7 @@ export const PRESS_HELP = [
     "v            Pause",
     "+            Channel Up",
     "-            Channel Down",
-    "\\            Volume Mute",
+    String.raw`\            Volume Mute`,
     "#            PowerOff",
     "a            A",
     "c            B",

@@ -22,12 +22,12 @@ export function shortenPath(bigPath, maxLen) {
         const splitter = bigPath.includes("/") ? "/" : "\\";
         const tokens = bigPath.split(splitter);
         const drive = bigPath.includes(":") ? tokens[0] : "";
-        const fileName = tokens[tokens.length - 1];
+        const fileName = tokens.at(-1);
         const len = drive.length + fileName.length;
         const remLen = maxLen - len - 3; // remove the current length and also space for ellipsis char and 2 slashes
         //remove first and last elements from the array
         tokens.splice(0, 1);
-        tokens.splice(tokens.length - 1, 1);
+        tokens.splice(-1, 1);
         //recreate our path
         path = tokens.join(splitter);
         //rebuild the path from beginning and end

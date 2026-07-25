@@ -143,7 +143,7 @@ export async function getGateway() {
  * @returns {object} - An object containing the gateway IP address, name, type, and SSID
  */
 async function getActiveInterface() {
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if (!isWindows) {
             network.get_active_interface((err, obj) => {
                 if (err) {

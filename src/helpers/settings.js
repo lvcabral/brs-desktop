@@ -18,8 +18,6 @@ import {
     normalizeIpAddress,
     isRokuDiscoveryResponse,
     parseDeviceMetadata,
-    extract,
-    extractAny,
 } from "./discovery";
 import {
     getLocaleIdArray,

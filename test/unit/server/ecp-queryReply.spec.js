@@ -73,7 +73,6 @@ describe("queryReply", () => {
     // vite-node __dirname is src/server/, not the webpack bundle's app/ directory, so the
     // file is absent and the read throws. The content-type rewrite it performs is covered
     // by test/integration/ecp-websocket.spec.js instead.
-    it.skip("rewrites the content type for an icon query", () => {});
 
     it("answers query-textedit-state with JSON", () => {
         const reply = JSON.parse(queryReply({ request: "query-textedit-state" }, STATUS_OK));

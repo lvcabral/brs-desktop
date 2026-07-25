@@ -13,6 +13,9 @@
  * plus a handful of test-only helpers prefixed with `__`.
  */
 import { EventEmitter } from "node:events";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { vi } from "vitest";
 
 // --- window registry --------------------------------------------------------
@@ -115,12 +118,21 @@ function makeDefaultApplicationMenu() {
 
 // --- app --------------------------------------------------------------------
 
-let userDataPath = "/tmp/brs-desktop-test";
+// Normally set by test/setup/global.js. The fallback creates a private directory via
+// mkdtemp rather than naming a fixed path under the shared temp directory: a predictable
+// name in a world-writable location is both a hazard and a way for one run to observe
+// another's leftovers. mkdtemp gives a unique name with owner-only permissions.
+// The fallback matters for specs that call vi.resetModules(), which hands them a fresh
+// copy of this module that the setup file has not initialised.
+let userDataPath;
 
 export const app = {
     getName: vi.fn(() => "BrightScript Simulator"),
     getVersion: vi.fn(() => "2.3.0"),
-    getPath: vi.fn(() => userDataPath),
+    getPath: vi.fn(() => {
+        userDataPath ??= fs.mkdtempSync(path.join(os.tmpdir(), "brs-desktop-mock-"));
+        return userDataPath;
+    }),
     getLocale: vi.fn(() => "en-US"),
     isPackaged: false,
     quit: vi.fn(),

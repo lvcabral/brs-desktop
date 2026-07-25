@@ -73,7 +73,7 @@ export function convertChar(keyChar) {
  * @returns {boolean} - True when the string is one digit
  */
 export function isNumber(str) {
-    return str.length === 1 && str.match(/[0-9]/i);
+    return str.length === 1 && /\d/.test(str);
 }
 
 /**
@@ -82,5 +82,5 @@ export function isNumber(str) {
  * @returns {boolean} - True when the string is one letter
  */
 export function isLetter(str) {
-    return str.length === 1 && str.match(/[a-z]/i);
+    return str.length === 1 && /[a-z]/i.test(str);
 }

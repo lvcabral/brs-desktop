@@ -87,6 +87,8 @@ describe("telnet server", () => {
         ipcMain.emit("telnet", {}, "broadcast line\r\n");
         await first.waitForText("broadcast line");
         await second.waitForText("broadcast line");
+        expect(first.text()).toContain("broadcast line");
+        expect(second.text()).toContain("broadcast line");
     });
 
     describe("telnet IAC negotiation", () => {
@@ -95,6 +97,7 @@ describe("telnet server", () => {
             client.clear();
             client.write(Buffer.from("fff4fffd06", "hex"));
             await client.waitFor((_text, hex) => hex.includes("fffc06"));
+            expect(client.hex()).toContain("fffc06"); // WONT IP
             const [sent] = await waitForSend(win, "debugCommand");
             expect(sent.args[0]).toBe("break");
         });
@@ -104,6 +107,8 @@ describe("telnet server", () => {
             client.clear();
             client.write(Buffer.from("fffd03fffd01", "hex"));
             await client.waitFor((_text, hex) => hex.includes("fffc03fffc01"));
+            // WONT SGA, WONT ECHO
+            expect(client.hex()).toContain("fffc03fffc01");
         });
 
         it("refuses a logout request", async () => {
@@ -111,6 +116,8 @@ describe("telnet server", () => {
             client.clear();
             client.write(Buffer.from("fffd12", "hex"));
             await client.waitFor((_text, hex) => hex.includes("fffc12"));
+            // WONT LOGOUT
+            expect(client.hex()).toContain("fffc12");
         });
 
         it("stays connected and silent for an unrecognised command", async () => {
@@ -156,6 +163,8 @@ describe("telnet server", () => {
             client.write("close\r\n");
             await client.waitForText("bye!");
             await client.waitForClose();
+            expect(client.text()).toContain("bye!");
+            expect(client.closed).toBe(true);
         });
 
         it("stops the running app on quit", async () => {

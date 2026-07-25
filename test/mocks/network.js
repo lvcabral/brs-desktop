@@ -13,13 +13,15 @@
  */
 import { vi } from "vitest";
 
+// Addresses come from 192.0.2.0/24 (TEST-NET-1), reserved by RFC 5737 for
+// documentation and examples, so they can never resolve to a real host.
 const defaultInterface = {
     name: "en0",
-    ip_address: "192.168.1.50",
+    ip_address: "192.0.2.50",
     mac_address: "aa:bb:cc:dd:ee:ff",
     type: "Wired",
-    netmask: "255.255.255.0",
-    gateway_ip: "192.168.1.1",
+    netmask: "255.255.255.0", // NOSONAR - a subnet mask, not a routable address
+    gateway_ip: "192.0.2.1",
 };
 
 let activeInterface = { ...defaultInterface };

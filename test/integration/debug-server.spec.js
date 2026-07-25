@@ -175,5 +175,7 @@ describe("debug server", () => {
         client.write("quit\r\n");
         await client.waitForText("Quit command received");
         await client.waitForClose();
+        expect(client.text()).toContain("Quit command received, exiting.");
+        expect(client.closed).toBe(true);
     });
 });

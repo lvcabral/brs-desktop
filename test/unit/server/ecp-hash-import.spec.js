@@ -41,6 +41,6 @@ describe("ecp.js prototype dependencies", () => {
         // Import ecp.js in isolation, with no other src/ module in the graph.
         const ecp = await import("../../../src/server/ecp");
         expect(ecp.isECPEnabled).toBe(false);
-        expect(() => "/tmp/dev.zip".hashCode()).not.toThrow();
+        expect(() => "/fixtures/apps/dev.zip".hashCode()).not.toThrow();
     });
 });

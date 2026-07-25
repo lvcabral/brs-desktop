@@ -14,14 +14,23 @@ import crypto from "node:crypto";
 //
 // Keeping them together is what lets a test drive a full challenge/response round trip
 // without a socket, and guarantees the two stay compatible.
+//
+// On MD5: RFC 2617 defines the digest scheme in terms of MD5, and that is what real Roku
+// devices implement. Using a stronger hash would make the simulator unable to authenticate
+// against a peer Roku, and unable to serve the web installer to Roku's own tooling. The
+// algorithm is fixed by the protocol, not chosen here, so every hash goes through the one
+// helper below rather than being spread across the file.
 
 /**
- * MD5-hash a string and return it as lowercase hex
+ * MD5-hash a string and return it as lowercase hex.
+ *
+ * MD5 is mandated by the digest access authentication scheme (RFC 2617) that Roku devices
+ * speak; it is not used for password storage or for any integrity guarantee.
  * @param {string} data - The data to hash
  * @returns {string} - The hex digest
  */
 export function cryptoUsingMD5(data) {
-    return crypto.createHash("md5").update(data).digest("hex");
+    return crypto.createHash("md5").update(data).digest("hex"); // NOSONAR - protocol-mandated, see above
 }
 
 /**
@@ -42,7 +51,7 @@ export function parseAuthenticationInfo(authData) {
         }
         const key = d.slice(0, separator).trim();
         const value = d.slice(separator + 1);
-        authenticationObj[key] = value.replace(/"/g, "");
+        authenticationObj[key] = value.replaceAll('"', "");
     }
     return authenticationObj;
 }
@@ -95,21 +104,16 @@ export function parseDigestChallenge(authHeader) {
  * @returns {object} - The parameters to send back in the Authorization header
  */
 export function generateDigestResponse(username, password, method, path, challenge) {
-    const ha1 = crypto
-        .createHash("md5")
-        .update(`${username}:${challenge.realm}:${password}`)
-        .digest("hex");
-
-    const ha2 = crypto.createHash("md5").update(`${method}:${path}`).digest("hex");
+    const ha1 = cryptoUsingMD5(`${username}:${challenge.realm}:${password}`);
+    const ha2 = cryptoUsingMD5(`${method}:${path}`);
 
     let response;
     if (challenge.qop === "auth" || challenge.qop === "auth-int") {
         const nc = "00000001";
         const cnonce = crypto.randomBytes(8).toString("hex");
-        response = crypto
-            .createHash("md5")
-            .update(`${ha1}:${challenge.nonce}:${nc}:${cnonce}:${challenge.qop}:${ha2}`)
-            .digest("hex");
+        response = cryptoUsingMD5(
+            `${ha1}:${challenge.nonce}:${nc}:${cnonce}:${challenge.qop}:${ha2}`
+        );
 
         return {
             username,
@@ -123,10 +127,7 @@ export function generateDigestResponse(username, password, method, path, challen
             opaque: challenge.opaque,
         };
     } else {
-        response = crypto
-            .createHash("md5")
-            .update(`${ha1}:${challenge.nonce}:${ha2}`)
-            .digest("hex");
+        response = cryptoUsingMD5(`${ha1}:${challenge.nonce}:${ha2}`);
 
         return {
             username,

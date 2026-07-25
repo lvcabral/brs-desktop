@@ -195,9 +195,9 @@ describe("readJsonFile / writeJsonFile", () => {
 
 describe("getGateway", () => {
     it("reports the active interface's gateway", async () => {
-        __setActiveInterface({ name: "en0", gateway_ip: "192.168.1.1", type: "Wired" });
+        __setActiveInterface({ name: "en0", gateway_ip: "192.0.2.1", type: "Wired" });
         await expect(getGateway()).resolves.toEqual({
-            ip: "192.168.1.1",
+            ip: "192.0.2.1",
             name: "en0",
             type: "WiredConnection",
             ssid: "",
@@ -205,9 +205,9 @@ describe("getGateway", () => {
     });
 
     it("maps a wireless interface to WiFiConnection", async () => {
-        __setActiveInterface({ name: "wlan0", gateway_ip: "10.0.0.1", type: "Wireless" });
+        __setActiveInterface({ name: "wlan0", gateway_ip: "192.0.2.2", type: "Wireless" });
         const gateway = await getGateway();
-        expect(gateway.ip).toBe("10.0.0.1");
+        expect(gateway.ip).toBe("192.0.2.2");
         expect(gateway.name).toBe("wlan0");
         expect(gateway.type).toBe("WiFiConnection");
         // The SSID comes from shelling out to a platform-specific command; on a CI runner
