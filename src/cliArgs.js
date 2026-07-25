@@ -9,7 +9,9 @@
 // minimist configuration for the command line documented in docs/how-to-use.md.
 // Extracted from main.js, which has no exports and performs Electron work at module scope.
 export const cliArgumentsConfig = {
-    string: ["o", "p", "m"],
+    // `w` belongs here with the other value-taking options: left undeclared, minimist
+    // infers the type, so a bare `-w` becomes boolean true and `-w 8080` a number.
+    string: ["o", "p", "m", "w"],
     boolean: ["c", "d", "e", "f", "r"],
     alias: {
         c: "console",

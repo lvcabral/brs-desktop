@@ -77,15 +77,12 @@ describe("string options", () => {
         expect(parse("-o", "/tmp/channel.zip").o).toBe("/tmp/channel.zip");
     });
 
-    // Characterization: `w` is aliased but declared in neither `string` nor `boolean`, so
-    // minimist infers the type and a numeric port arrives as a number. processArgv() in
-    // main.js runs it through Number.parseInt anyway, which absorbs either shape.
-    it("infers the type of the web port", () => {
-        expect(parse("-w", "8080").web).toBe(8080);
-        expect(typeof parse("-w", "8080").web).toBe("number");
-        // With no value minimist infers a flag, so a bare -w is boolean true rather than
-        // an empty string. main.js guards this by parsing the value defensively.
-        expect(parse("-w").web).toBe(true);
+    it("keeps the web port a string, like the other value-taking options", () => {
+        // Declared as a string so a bare -w yields "" rather than boolean true, which
+        // would otherwise be persisted to services.webPort as NaN.
+        expect(parse("-w", "8080").web).toBe("8080");
+        expect(typeof parse("-w", "8080").web).toBe("string");
+        expect(parse("-w").web).toBe("");
     });
 });
 
