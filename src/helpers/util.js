@@ -26,8 +26,14 @@ export function isValidIP(ip) {
     return (
         parts.length === 4 &&
         parts.every((part) => {
+            // Match the digits explicitly before the range check. Number() alone accepts
+            // "" as 0, " 1" as 1, "0x10" as 16 and "4e0" as 4, so malformed addresses
+            // passed validation and only failed later as an opaque network error.
+            if (!/^\d{1,3}$/.test(part)) {
+                return false;
+            }
             const num = Number(part);
-            return !Number.isNaN(num) && num >= 0 && num <= 255;
+            return num >= 0 && num <= 255;
         })
     );
 }
