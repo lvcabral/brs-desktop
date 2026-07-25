@@ -42,9 +42,9 @@ This is an Electron-based desktop application that simulates Roku devices for Br
 #### Renderer Process Modules (`src/app/`)
 - **`preload.js`**: Secure contextBridge API for main ↔ renderer communication
 - **`statusbar.js`**: Bottom status bar (file info, services, resolution, audio)
-- **`editor.js`**: CodeMirror-based BrightScript code editor window
-- **`brightscript.js`**: CodeMirror syntax highlighting for BrightScript language
-- **`codemirror.js`**: CodeMirror configuration and theme management
+- **`editor.js`**: Monaco-based BrightScript code editor window, with integrated web terminal
+- **`brightscript.js`**: BrightScript Monaco language definition (Monarch tokens, language config, themes)
+- **`monaco.js`**: `MonacoManager` class wrapping Monaco editor creation, theme and indentation settings
 
 ### Core Components
 
@@ -152,18 +152,19 @@ ipcMain.on("eventName", (event, data) => { /* handler */ });
 - **Clickable Links**: Direct access to ECP endpoints, web installer, console
 
 #### Code Editor (`src/app/editor.js`)
-- **CodeMirror Integration**: BrightScript syntax highlighting, auto-completion
-- **Terminal Emulation**: Integrated console for BRS engine output and commands
+- **Monaco Integration**: Editor instance managed via `MonacoManager` from `src/app/monaco.js`
+- **Terminal Emulation**: Integrated console (`@lvcabral/terminal`) for BRS engine output and Micro Debugger commands
 - **File Operations**: Save/load BRS source files, package creation for execution
 - **Theme Support**: Editor themes synchronized with main application theme
 - **Debug Features**: Breakpoint support, variable inspection, step debugging
 
 #### BrightScript Language Mode (`src/app/brightscript.js`)
+- **`defineBrightScriptLanguage(monaco)`**: Registers the `brightscript` language, Monarch token provider, and language configuration (brackets, comments, folding, auto-indentation)
+- **`defineBrightScriptTheme(monaco, theme)`**: Defines/returns the Monaco theme matching the app theme, using VS Code-compatible colors
 - **Syntax Highlighting**: Keywords, functions, operators, comments, strings
-- **Language Features**: Code folding, bracket matching, auto-indentation
-- **Error Detection**: Syntax error highlighting, keyword validation
-- **Function Recognition**: Method detection, parameter highlighting
 - **Custom Extensions**: Roku-specific language features and built-in functions
+
+Note: Monaco is bundled by `monaco-editor-webpack-plugin` with a trimmed language/feature list configured in `build/webpack.app.config.js` — `brightscript` is registered manually at runtime, not through that plugin.
 
 #### Preload Bridge (`src/app/preload.js`)
 - **Secure API Exposure**: contextBridge for main ↔ renderer communication
@@ -220,7 +221,7 @@ npm run dist-deb64       # Linux x64 Debian
 
 ### File Loading Patterns
 - **ZIP/BPK packages**: Handled by `loadFile()` in `src/helpers/files.js`
-- **Source code**: CodeMirror editor integration via `src/app/editor.js`
+- **Source code**: Monaco editor integration via `src/app/editor.js`
 - **Recent files**: JSON persistence in user data directory
 
 ## Important File Paths
@@ -242,7 +243,7 @@ npm run dist-deb64       # Linux x64 Debian
 ## External Dependencies
 - **Core Engine**: `brs-engine` provides BrightScript simulation
 - **Network**: `restana` for HTTP servers, `ws` for WebSockets, `node-ssdp` for discovery
-- **UI**: `electron-preferences` for settings, `codemirror` for code editing
+- **UI**: `electron-preferences` for settings, `monaco-editor` for code editing, `@lvcabral/terminal` for the console
 - **Build**: `webpack` + `electron-builder` for packaging
 
 ## Debugging
