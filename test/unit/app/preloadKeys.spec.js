@@ -159,6 +159,14 @@ describe("matchesKey", () => {
         }
     );
 
+    it("matches a three-part chord", () => {
+        const held = { shiftKey: true, ctrlKey: true };
+        expect(matchesKey(keyEvent("KeyA", held), "Control+Shift+KeyA")).toBe(true);
+        // ...and still rejects it when one of the named modifiers is missing.
+        expect(matchesKey(keyEvent("KeyA", { shiftKey: true }), "Control+Shift+KeyA")).toBe(false);
+        expect(matchesKey(keyEvent("KeyA", { ...held, altKey: true }), "Control+Shift+KeyA")).toBe(false);
+    });
+
     it("is case insensitive about the modifier name", () => {
         expect(matchesKey(keyEvent("KeyA", { shiftKey: true }), "SHIFT+KeyA")).toBe(true);
     });

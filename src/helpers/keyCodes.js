@@ -20,21 +20,18 @@
  */
 export function convertKey(keyCode) {
     const arrows = new Set(["Left", "Right", "Up", "Down"]);
-    let newCode = keyCode.replaceAll(" ", "");
-    if (keyCode.includes("+")) {
-        const leftKey = keyCode.split("+")[0];
-        const rightKey = keyCode.split("+")[1];
-        if (rightKey.length === 1) {
-            newCode = `${leftKey}+${convertChar(rightKey)}`;
-        } else if (arrows.has(rightKey)) {
-            newCode = `${leftKey}+Arrow${rightKey}`;
-        }
-    } else if (keyCode.length === 1) {
-        newCode = convertChar(keyCode);
-    } else if (arrows.has(keyCode)) {
-        newCode = `Arrow${keyCode}`;
+    // The last segment is the key; everything before it is a modifier. Reading only the
+    // first two segments would leave the key of a three-part chord unconverted, and the
+    // renderer would never match the binding.
+    const parts = keyCode.replaceAll(" ", "").split("+");
+    const key = parts.at(-1);
+    let converted = key;
+    if (key.length === 1) {
+        converted = convertChar(key);
+    } else if (arrows.has(key)) {
+        converted = `Arrow${key}`;
     }
-    return newCode;
+    return [...parts.slice(0, -1), converted].join("+");
 }
 
 /**

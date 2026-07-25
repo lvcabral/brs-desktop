@@ -24,6 +24,7 @@ const SHARED_KEYS = [
     "Left", "Right", "Up", "Down",
     "A", "M", "Z", "0", "5", "9",
     "Shift+A", "Control+Left", "Alt+Down", "Meta+M",
+    "Control+Shift+A", "Control+Alt+Left", "Meta+Shift+Z",
     "Page Up", "Page Down",
     "`", "-", "=", "[", "]", ";", ",", ".", "\\", "/",
 ];

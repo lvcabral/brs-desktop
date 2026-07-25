@@ -85,22 +85,17 @@ function convertSettingsKey(keyCode) {
         return "Home";
     }
     const arrows = new Set(["Left", "Right", "Up", "Down"]);
-    let newCode = keyCode.replaceAll(" ", "");
-    if (keyCode.includes("+")) {
-        const parts = keyCode.split("+");
-        const leftKey = parts[0];
-        const rightKey = parts[1];
-        if (rightKey.length === 1) {
-            newCode = `${leftKey}+${convertSettingsChar(rightKey)}`;
-        } else if (arrows.has(rightKey)) {
-            newCode = `${leftKey}+Arrow${rightKey}`;
-        }
-    } else if (keyCode.length === 1) {
-        newCode = convertSettingsChar(keyCode);
-    } else if (arrows.has(keyCode)) {
-        newCode = `Arrow${keyCode}`;
+    // The last segment is the key; everything before it is a modifier. Mirrors convertKey
+    // in src/helpers/keyCodes.js — see the parity spec.
+    const parts = keyCode.replaceAll(" ", "").split("+");
+    const key = parts.at(-1);
+    let converted = key;
+    if (key.length === 1) {
+        converted = convertSettingsChar(key);
+    } else if (arrows.has(key)) {
+        converted = `Arrow${key}`;
     }
-    return newCode;
+    return [...parts.slice(0, -1), converted].join("+");
 }
 
 /**
@@ -133,13 +128,15 @@ function convertSettingsChar(keyChar) {
 function matchesKey(event, keyCode) {
     if (keyCode.includes("+")) {
         const parts = keyCode.split("+");
-        const modifier = parts[0].toLowerCase();
-        const code = parts[1];
-        const wantsShift = modifier === "shift" || modifier === "shiftleft" || modifier === "shiftright";
-        const wantsControl =
-            modifier === "control" || modifier === "controlleft" || modifier === "controlright";
-        const wantsAlt = modifier === "alt";
-        const wantsMeta = modifier === "meta";
+        // Every segment but the last is a modifier, so three-part chords work too.
+        const code = parts.at(-1);
+        const modifiers = parts.slice(0, -1).map((part) => part.toLowerCase());
+        const wants = (...names) => modifiers.some((modifier) => names.includes(modifier));
+        // A KeyboardEvent only reports the generic flag, so the sided aliases map onto it.
+        const wantsShift = wants("shift", "shiftleft", "shiftright");
+        const wantsControl = wants("control", "controlleft", "controlright");
+        const wantsAlt = wants("alt");
+        const wantsMeta = wants("meta");
         // The binding names the modifiers it wants, so anything else held is a different
         // chord: Ctrl+Shift+A must not satisfy a "Shift+KeyA" binding. The bare-key branch
         // below has always required every modifier to be absent; this keeps the two consistent.
