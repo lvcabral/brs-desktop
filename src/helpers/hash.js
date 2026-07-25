@@ -9,7 +9,8 @@
 // Generate short Hash
 String.prototype.hashCode = function () {
     let hash = 0;
-    if (this.length === 0) return hash;
+    // Falls through to the shared return below rather than yielding a number here: every
+    // caller uses the result to build a filename, so the type has to be consistent.
     for (let i = 0; i < this.length; i++) {
         const chr = this.charCodeAt(i);
         hash = (hash << 5) - hash + chr;
