@@ -14,6 +14,15 @@ import { spawnSync } from "node:child_process";
 const isWindows = process.platform === "win32";
 
 /**
+ * Function to check if a remote address is a loopback address
+ * @param {string} addr - The remote address to check
+ * @returns {boolean} - True if the address is localhost, false otherwise
+ */
+export function isLocalhostAddress(addr) {
+    return addr === "127.0.0.1" || addr === "::1" || addr === "::ffff:127.0.0.1";
+}
+
+/**
  * Function to check if a string is a valid IP address
  * @param {string} ip - The IP address to check
  * @returns {boolean} - True if the IP address is valid, false otherwise

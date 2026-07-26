@@ -85,6 +85,7 @@ export function getSettings(window) {
                 ecp: ["enabled"],
                 telnet: ["enabled"],
                 debug: ["enabled"],
+                remoteAccess: ["enabled"],
             },
             device: {
                 deviceModel: globalThis.sharedObject.deviceInfo.deviceModel,
@@ -407,6 +408,23 @@ export function getSettings(window) {
                                         },
                                     ],
                                     help: "Debug Server can be accessed using an application such as PuTTY or terminal on Mac and Linux",
+                                },
+                                {
+                                    key: "placeholder2",
+                                    type: "message",
+                                    style: { width: "20%" },
+                                },
+                                {
+                                    label: "Allow Remote Access",
+                                    key: "remoteAccess",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Allow connections from other devices on the network",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "When disabled, all services only accept connections from this machine. Disable and re-enable each service for this change to take effect.",
                                 },
                             ],
                         },
@@ -1529,27 +1547,28 @@ function saveServicesSettings(services, window) {
     if (!services) {
         return;
     }
+    const localOnly = !services.remoteAccess?.includes("enabled");
     if (services.installer?.includes("enabled")) {
         setPassword(services.password);
         if (!isInstallerEnabled) {
             setPort(services.webPort);
-            enableInstaller(window);
+            enableInstaller(window, localOnly);
         }
     } else {
         disableInstaller(window);
     }
     if (services.ecp?.includes("enabled")) {
-        enableECP(window);
+        enableECP(window, undefined, localOnly);
     } else {
         disableECP(window);
     }
     if (services.telnet?.includes("enabled")) {
-        enableTelnet(window);
+        enableTelnet(window, undefined, localOnly);
     } else {
         disableTelnet(window);
     }
     if (services.debug?.includes("enabled")) {
-        enableDebugServer(window, settings);
+        enableDebugServer(window, settings, undefined, localOnly);
     } else {
         disableDebugServer();
     }

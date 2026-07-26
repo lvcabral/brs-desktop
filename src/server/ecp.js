@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { isValidIP, getRokuOS } from "../helpers/util";
+import { isValidIP, isLocalhostAddress, getRokuOS } from "../helpers/util";
 import { ECP_PORT, SSDP_PORT } from "../constants";
 import "../helpers/hash"; // installs String.prototype.hashCode, used by genAppRegistry
 import { Server as SSDP } from "@lvcabral/node-ssdp";
@@ -41,7 +41,7 @@ export let isECPEnabled = false;
 export function initECP() {
     device = globalThis.sharedObject.deviceInfo;
 }
-export function enableECP(win, port = ECP_PORT) {
+export function enableECP(win, port = ECP_PORT, localOnly = false) {
     window = win ?? BrowserWindow.fromId(1);
     if (isECPEnabled) {
         return; // already started do nothing
@@ -54,11 +54,11 @@ export function enableECP(win, port = ECP_PORT) {
         window.webContents.send("console", `Failed to start ECP server:${error.message}`, true);
     });
     ecp.use((req, res, next) => {
-        const ip = req.socket.remoteAddress;
-        if (ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1") {
-            return next();
+        if (localOnly && !isLocalhostAddress(req.socket.remoteAddress)) {
+            res.send(403);
+            return;
         }
-        res.send(403);
+        return next();
     });
     ecp.get("/", sendDeviceRoot);
     ecp.get("/device-image.png", sendDeviceImage);
@@ -91,31 +91,37 @@ export function enableECP(win, port = ECP_PORT) {
             window.webContents.send("console", `ECP server error:${error.message}`, true);
         })
         .then((server) => {
-            // Create SSDP Server
-            ssdp = new SSDP({
-                location: {
-                    port: port,
-                    path: "/",
-                },
-                adInterval: 120000,
-                ttl: 3600,
-                udn: `uuid:roku:ecp:${device.serialNumber}`,
-                ssdpSig: "Roku UPnP/1.0 Roku/9.1.0",
-                ssdpPort: SSDP_PORT,
-                suppressRootDeviceAdvertisements: true,
-                headers: { "device-group.roku.com": "46F5CCE2472F2B14D77" },
-            });
-            ssdp.addUSN("roku:ecp");
-            ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
-            // Start server on all interfaces
-            ssdp.start()
-                .catch((e) => {
-                    window.webContents.send("console", `Failed to start SSDP server:${e.message}`, true);
-                })
-                .then(() => {
-                    isECPEnabled = true;
-                    notifyAll("enabled", true);
+            // Skip SSDP advertisement when remote access is disabled — the device
+            // should not appear to LAN scanners if it won't accept their connections.
+            if (!localOnly) {
+                ssdp = new SSDP({
+                    location: {
+                        port: port,
+                        path: "/",
+                    },
+                    adInterval: 120000,
+                    ttl: 3600,
+                    udn: `uuid:roku:ecp:${device.serialNumber}`,
+                    ssdpSig: "Roku UPnP/1.0 Roku/9.1.0",
+                    ssdpPort: SSDP_PORT,
+                    suppressRootDeviceAdvertisements: true,
+                    headers: { "device-group.roku.com": "46F5CCE2472F2B14D77" },
                 });
+                ssdp.addUSN("roku:ecp");
+                ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
+                // Start server on all interfaces
+                ssdp.start()
+                    .catch((e) => {
+                        window.webContents.send("console", `Failed to start SSDP server:${e.message}`, true);
+                    })
+                    .then(() => {
+                        isECPEnabled = true;
+                        notifyAll("enabled", true);
+                    });
+            } else {
+                isECPEnabled = true;
+                notifyAll("enabled", true);
+            }
             // Create ECP-2 WebSocket Server
             const wss = new WebSocket.Server({ noServer: true });
             wss.on("connection", function connection(ws) {
@@ -134,6 +140,10 @@ export function enableECP(win, port = ECP_PORT) {
                 });
             });
             server.on("upgrade", function upgrade(request, socket, head) {
+                if (localOnly && !isLocalhostAddress(request.socket.remoteAddress)) {
+                    socket.destroy();
+                    return;
+                }
                 const pathname = url.parse(request.url).pathname;
                 if (pathname === "/ecp-session") {
                     if (DEBUG) {

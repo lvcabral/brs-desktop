@@ -168,6 +168,7 @@ app.on("ready", () => {
         telnetEnabled: false,
         debugServerEnabled: false,
         installerEnabled: false,
+        localOnly: false,
     };
     loadSettings(mainWindow, startup);
     // Initialize ECP and SSDP servers
@@ -258,6 +259,7 @@ function loadSettings(mainWindow, startup) {
         startup.telnetEnabled = settings.value("services.telnet").includes("enabled");
         startup.debugServerEnabled = settings.value("services.debug").includes("enabled");
         startup.installerEnabled = settings.value("services.installer").includes("enabled");
+        startup.localOnly = !settings.value("services.remoteAccess").includes("enabled");
         setPassword(settings.value("services.password"));
         setPort(settings.value("services.webPort"));
     }
@@ -317,14 +319,15 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
     if (cliArgs?.fullscreen || simulatorOptions?.includes("fullScreen")) {
         mainWindow.setFullScreen(true);
     }
+    const localOnly = applyStartup ? startupOptions.localOnly : false;
     if (cliArgs?.ecp || (applyStartup && startupOptions.ecpEnabled)) {
-        enableECP(mainWindow);
+        enableECP(mainWindow, undefined, localOnly);
     }
     if (cliArgs?.telnet || (applyStartup && startupOptions.telnetEnabled)) {
-        enableTelnet(mainWindow);
+        enableTelnet(mainWindow, undefined, localOnly);
     }
     if (applyStartup && startupOptions.debugServerEnabled) {
-        enableDebugServer(mainWindow, settings);
+        enableDebugServer(mainWindow, settings, undefined, localOnly);
     }
     if (cliArgs?.pwd && cliArgs.pwd.trim() !== "") {
         setPassword(cliArgs.pwd.trim());
@@ -338,9 +341,9 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
         if (!Number.isNaN(webPort)) {
             settings.value("services.webPort", webPort);
         }
-        enableInstaller(mainWindow);
+        enableInstaller(mainWindow, localOnly);
     } else if (applyStartup && startupOptions.installerEnabled) {
-        enableInstaller(mainWindow);
+        enableInstaller(mainWindow, localOnly);
     }
     if (cliArgs?.mode && cliArgs.mode.trim() !== "") {
         let displayMode = "720p";
