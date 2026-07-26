@@ -53,6 +53,13 @@ export function enableECP(win, port = ECP_PORT) {
     ecp.getServer().on("error", (error) => {
         window.webContents.send("console", `Failed to start ECP server:${error.message}`, true);
     });
+    ecp.use((req, res, next) => {
+        const ip = req.socket.remoteAddress;
+        if (ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1") {
+            return next();
+        }
+        res.send(403);
+    });
     ecp.get("/", sendDeviceRoot);
     ecp.get("/device-image.png", sendDeviceImage);
     ecp.get("/ecp_SCPD.xml", sendScpdXML);
@@ -276,12 +283,13 @@ function sendScpdXML(req, res) {
 
 function sendAppIcon(req, res) {
     res.setHeader("content-type", "image/png");
-    res.send(genAppIcon(req.params.appID, false));
+    const appIcon = device.appList.find((a) => a.id === req.params.appID);
+    res.send(genAppIcon(appIcon ? appIcon.id : "", false));
 }
 
 function sendRegistry(req, res) {
     res.setHeader("content-type", "application/xml");
-    res.send(genAppRegistry(req.params.appID, false));
+    res.send(genAppRegistry(req.params.appID.replace(/[^a-zA-Z0-9_\-.]/g, ""), false));
 }
 
 function sendGraphicsFrameRate(req, res) {
@@ -291,7 +299,7 @@ function sendGraphicsFrameRate(req, res) {
 
 function sendAppState(req, res) {
     res.setHeader("content-type", "application/xml");
-    res.send(genAppState(req.params.appID, false));
+    res.send(genAppState(req.params.appID.replace(/[^a-zA-Z0-9_\-.]/g, ""), false));
 }
 
 function sendInput(req, res) {
