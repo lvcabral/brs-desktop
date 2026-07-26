@@ -135,7 +135,10 @@ function main() {
     updateButtons();
     // Initialize the Monaco editor
     const preferences = api.getPreferences();
-    const theme = preferences?.simulator?.theme || "purple";
+    let theme = preferences?.simulator?.theme || "purple";
+    if (theme === "system") {
+        theme = __currentTheme();
+    }
     const editorPrefs = preferences?.editor || {};
     terminal.setColorTheme(theme === "light" ? "light" : "dark");
     editorManager = new MonacoManager(brsCodeField, theme, editorPrefs);
