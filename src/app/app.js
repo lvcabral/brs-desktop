@@ -652,7 +652,7 @@ function startupProcess() {
     const runLastApp = settings?.simulator?.options?.includes("runLastChannel") ?? false;
 
     // Get dialog elements
-    const dontShowWarning = localStorage.getItem("sceneGraphWarningDismissed") === "true";
+    const dontShowWarning = localStorage.getItem("sceneGraphBetaDismissed") === "true";
     const dialog = document.getElementById("scenegraph-warning-dialog");
     const closeButton = document.getElementById("close-scenegraph-warning");
     const dontShowAgainCheckbox = document.getElementById("dont-show-warning-again");
