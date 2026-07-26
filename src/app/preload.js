@@ -21,7 +21,6 @@ const isMacOS = process.platform === "darwin";
 let onPreferencesUpdatedHandler = () => {};
 let titleBar;
 let titleBarConfig;
-let titleColor;
 
 globalThis.addEventListener("DOMContentLoaded", () => {
     // Detect Clipboard Copy to create Screenshot
@@ -111,7 +110,6 @@ contextBridge.exposeInMainWorld("api", {
         ipcRenderer.send("toggleFullScreen");
     },
     createNewTitleBar: (mnColor, bgColor, itColor) => {
-        titleColor = mnColor;
         titleBarConfig = {
             backgroundColor: customTitlebar.TitlebarColor.fromHex(bgColor),
             itemBackgroundColor: customTitlebar.TitlebarColor.fromHex(itColor),
@@ -126,7 +124,6 @@ contextBridge.exposeInMainWorld("api", {
         titleBar.updateTitle(title);
     },
     updateTitlebarColor: (mnColor, bgColor, itColor) => {
-        titleColor = mnColor;
         titleBarConfig.backgroundColor = customTitlebar.TitlebarColor.fromHex(bgColor);
         titleBar.updateBackground(titleBarConfig.backgroundColor);
         titleBar.updateItemBGColor(customTitlebar.TitlebarColor.fromHex(itColor));

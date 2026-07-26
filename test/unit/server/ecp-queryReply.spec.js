@@ -91,11 +91,11 @@ describe("queryReply", () => {
 
 describe("processRequest", () => {
     let ws;
-    let win;
 
     beforeEach(() => {
         globalThis.sharedObject = makeSharedObject(makeEngineDeviceInfo());
-        win = __registerWindow(createFakeWindow(1));
+        // Registered for initECP() to pick up; this suite asserts on the reply, not the window.
+        __registerWindow(createFakeWindow(1));
         initECP();
         ws = { send: vi.fn() };
     });

@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { clipboard, BrowserWindow } from "electron";
+import { clipboard } from "electron";
 import { showSettings } from "../helpers/settings";
 import { copyScreenshot } from "../helpers/window";
 const isMacOS = process.platform === "darwin";

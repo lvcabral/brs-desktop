@@ -28,9 +28,7 @@ export const viewMenuTemplate = {
             label: "Developer Tools",
             accelerator: devToolsAccelerator,
             click: (_, window) => {
-                if (!window) {
-                    window = BrowserWindow.fromId(1);
-                }
+                window ||= BrowserWindow.fromId(1);
                 if (window.webContents.isDevToolsOpened()) {
                     window.webContents.closeDevTools();
                 } else {

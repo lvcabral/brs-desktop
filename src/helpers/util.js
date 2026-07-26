@@ -150,15 +150,7 @@ export async function getGateway() {
  */
 async function getActiveInterface() {
     return new Promise((resolve, reject) => {
-        if (!isWindows) {
-            network.get_active_interface((err, obj) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(obj);
-                }
-            });
-        } else {
+        if (isWindows) {
             network.get_interfaces_list((err, list) => {
                 if (err) {
                     reject(err);
@@ -171,6 +163,14 @@ async function getActiveInterface() {
                     }
                 }
                 reject(new Error("No active interface found"));
+            });
+        } else {
+            network.get_active_interface((err, obj) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(obj);
+                }
             });
         }
     });

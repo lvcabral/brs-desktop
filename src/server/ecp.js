@@ -26,7 +26,7 @@ const WebSocket = require("ws");
 const url = require("node:url");
 const DEBUG = false;
 const MAC = getMacAddress();
-const UDN = "138aedd0-d6ad-11eb-b8bc-" + MAC.replace(/:\s*/g, "");
+const UDN = "138aedd0-d6ad-11eb-b8bc-" + MAC.replaceAll(/:\s*/g, "");
 let window;
 let device;
 let ecp;
@@ -164,7 +164,7 @@ export function unsubscribeECP(observerId) {
     observers.delete(observerId);
 }
 function notifyAll(eventName, eventData) {
-    for (const [_id, callback] of observers) {
+    for (const callback of observers.values()) {
         callback(eventName, eventData);
     }
 }
@@ -184,14 +184,14 @@ export function processRequest(ws, message) {
             return;
         }
         const statusOK = `"response":"${msg["request"]}","response-id":"${msg["request-id"]}","status":"200","status-msg":"OK"`;
-        if (msg["request"] == "authenticate" && msg["param-response"]) {
+        if (msg["request"] === "authenticate" && msg["param-response"]) {
             reply = `{${statusOK}}`;
         } else if (msg["request"]?.startsWith("query")) {
             reply = queryReply(msg, statusOK);
-        } else if (msg["request"] == "launch") {
+        } else if (msg["request"] === "launch") {
             notifyAll("launch", { appID: msg["param-channel-id"] });
             reply = `{${statusOK}}`;
-        } else if (msg["request"] == "key-press") {
+        } else if (msg["request"] === "key-press") {
             window.webContents.send("postKeyPress", msg["param-key"], 300, 50);
             reply = `{${statusOK}}`;
         } else {
@@ -211,24 +211,24 @@ export function queryReply(msg, statusOK) {
     const xml64 = Buffer.from(xml).toString("base64");
     const template = `{"content-data":"$data","content-type":"text/xml; charset='utf-8'",${statusOK}}`;
     let reply = `{${statusOK}}`;
-    if (request == "query-device-info") {
+    if (request === "query-device-info") {
         reply = template.replace("$data", genDeviceInfoXml(true));
-    } else if (request == "query-themes") {
+    } else if (request === "query-themes") {
         reply = template.replace("$data", genThemesXml(true));
-    } else if (request == "query-screensavers") {
+    } else if (request === "query-screensavers") {
         reply = template.replace("$data", genScrsvXml(true));
-    } else if (request == "query-apps") {
+    } else if (request === "query-apps") {
         reply = template.replace("$data", genAppsXml(true));
-    } else if (request == "query-icon") {
+    } else if (request === "query-icon") {
         reply = template.replace("$data", genAppIcon(msg["param-channel-id"], true));
         reply = reply.replace("text/xml", "image/png");
-    } else if (request == "query-tv-active-channel") {
+    } else if (request === "query-tv-active-channel") {
         reply = template.replace("$data", genActiveApp(true));
-    } else if (msg["request"] == "query-media-player") {
+    } else if (msg["request"] === "query-media-player") {
         reply = template.replace("$data", xml64);
-    } else if (msg["request"] == "query-audio-device") {
+    } else if (msg["request"] === "query-audio-device") {
         reply = template.replace("$data", xml64);
-    } else if (msg["request"] == "query-textedit-state") {
+    } else if (msg["request"] === "query-textedit-state") {
         const content = Buffer.from(`{"textedit-state":{"textedit-id":"none"}}`).toString("base64");
         reply = template.replace("$data", content);
         reply = reply.replace("text/xml", "application/json");
@@ -655,5 +655,5 @@ export function getModelName(model) {
     // first moments after startup. The generic fallback below already covers an unknown
     // model; without the optional chaining it is unreachable and the caller 500s instead.
     const modelName = device.models?.get(model);
-    return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
+    return modelName ? modelName[0].replaceAll(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }

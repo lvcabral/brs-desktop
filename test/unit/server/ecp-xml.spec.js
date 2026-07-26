@@ -55,7 +55,7 @@ describe("ECP payload builders", () => {
         });
 
         it("derives the UDN from the MAC address", () => {
-            const mac = getMacAddress().replace(/:\s*/g, "");
+            const mac = getMacAddress().replaceAll(/:\s*/g, "");
             expect(xml()).toContain(`uuid:138aedd0-d6ad-11eb-b8bc-${mac}`);
         });
 

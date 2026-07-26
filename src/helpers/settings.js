@@ -1243,10 +1243,10 @@ export function saveCaptionStyle() {
             const preferenceValue = settings.preferences.captions[mapping.preference];
             if (preferenceValue) {
                 const index = captionStyle.findIndex((style) => style.id === mapping.id);
-                if (index !== -1) {
-                    captionStyle[index].style = preferenceValue;
-                } else {
+                if (index === -1) {
                     captionStyle.push({ id: mapping.id, style: preferenceValue });
+                } else {
+                    captionStyle[index].style = preferenceValue;
                 }
             }
         }
@@ -1496,7 +1496,7 @@ export function getModelName(model) {
     // See the note on the matching helper in src/server/ecp.js: `models` only exists once
     // the renderer has sent deviceData.
     const modelName = globalThis.sharedObject.deviceInfo.models?.get(model);
-    return modelName ? modelName[0].replace(/ *\([^)]*\) */g, "") : `Roku (${model})`;
+    return modelName ? modelName[0].replaceAll(/ *\([^)]*\) */g, "") : `Roku (${model})`;
 }
 
 export function updateServerStatus(service, menuItem, enabled, port) {
@@ -1516,7 +1516,7 @@ function saveSimulatorSettings(options, window) {
         const homeScreenMode = !options.includes("disableHomeScreen");
         checkMenuItem("on-top", onTop);
         window.setAlwaysOnTop(onTop);
-        if (statusBarVisible != statusBar) {
+        if (statusBarVisible !== statusBar) {
             checkMenuItem("status-bar", statusBar);
             setStatusBar(statusBar);
         }

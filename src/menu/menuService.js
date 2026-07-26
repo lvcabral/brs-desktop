@@ -174,7 +174,7 @@ export function restoreRecentFiles() {
     } catch (err) {
         console.error("error reading recent files json");
     }
-    recentFiles = recentFiles || recentFilesDefault;
+    recentFiles ||= recentFilesDefault;
     if (!recentFiles.ids) {
         Object.assign(recentFiles, { ids: new Array(recentFiles.zip.length) });
         for (const [index, value] of recentFiles.zip.entries()) {

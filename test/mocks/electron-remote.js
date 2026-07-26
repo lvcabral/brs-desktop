@@ -15,6 +15,5 @@ export const getGlobal = vi.fn((name) => globalThis[name]);
 export const getCurrentWindow = vi.fn(() => BrowserWindow.fromId(1) ?? createFakeWindow(1));
 export const getCurrentWebContents = vi.fn(() => getCurrentWindow().webContents);
 
-export { app, BrowserWindow };
-
 export default { app, BrowserWindow, getGlobal, getCurrentWindow, getCurrentWebContents };
+export { app, BrowserWindow } from "./electron.js";
