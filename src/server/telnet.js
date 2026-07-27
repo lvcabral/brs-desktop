@@ -14,9 +14,14 @@ let server;
 let clientId = 0;
 let clients = new Map();
 let lines = new Map();
+let localOnly = false;
 
 export let isTelnetEnabled = false;
-export function enableTelnet(win, port = TELNET_PORT, localOnly = false) {
+export function setTelnetLocalOnly(value) {
+    localOnly = value;
+}
+export function enableTelnet(win, port = TELNET_PORT, { localOnly: lo = false } = {}) {
+    localOnly = lo;
     if (isTelnetEnabled) {
         return;
     }

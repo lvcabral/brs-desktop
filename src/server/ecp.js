@@ -32,6 +32,7 @@ let device;
 let ecp;
 let ssdp;
 let currentApp;
+let localOnly = false;
 
 ipcMain.on("currentApp", (_, data) => {
     currentApp = data;
@@ -41,7 +42,11 @@ export let isECPEnabled = false;
 export function initECP() {
     device = globalThis.sharedObject.deviceInfo;
 }
-export function enableECP(win, port = ECP_PORT, localOnly = false) {
+export function setECPLocalOnly(value) {
+    localOnly = value;
+}
+export function enableECP(win, port = ECP_PORT, { localOnly: lo = false } = {}) {
+    localOnly = lo;
     window = win ?? BrowserWindow.fromId(1);
     if (isECPEnabled) {
         return; // already started do nothing
@@ -55,7 +60,7 @@ export function enableECP(win, port = ECP_PORT, localOnly = false) {
     });
     ecp.use((req, res, next) => {
         if (localOnly && !isLocalhostAddress(req.socket.remoteAddress)) {
-            res.send(403);
+            res.send("Forbidden", 403);
             return;
         }
         return next();
@@ -293,8 +298,7 @@ function sendScpdXML(req, res) {
 
 function sendAppIcon(req, res) {
     res.setHeader("content-type", "image/png");
-    const appIcon = device.appList.find((a) => a.id === req.params.appID);
-    res.send(genAppIcon(appIcon ? appIcon.id : "", false));
+    res.send(genAppIcon(req.params.appID, false));
 }
 
 function sendRegistry(req, res) {
@@ -327,12 +331,14 @@ function sendInput(req, res) {
 }
 
 function sendLaunchApp(req, res) {
-    notifyAll("launch", { appID: req.params.appID, query: req.query });
+    const appID = req.params.appID.replace(/[^a-zA-Z0-9_\-.]/g, "");
+    notifyAll("launch", { appID, query: req.query });
     res.end();
 }
 
 function sendExitApp(req, res) {
-    window?.webContents.send("closeChannel", "EXIT_USER_NAV", req.params.appID);
+    const appID = req.params.appID.replace(/[^a-zA-Z0-9_\-.]/g, "");
+    window?.webContents.send("closeChannel", "EXIT_USER_NAV", appID);
     res.end();
 }
 

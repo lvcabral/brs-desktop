@@ -23,6 +23,7 @@ const credentials = {
 let port = WEB_INSTALLER_PORT;
 let server;
 let hash;
+let localOnly = false;
 export let isInstallerEnabled = false;
 export function setPassword(password) {
     if (password && password !== "") {
@@ -36,7 +37,11 @@ export function setPort(customPort) {
         port = Number.parseInt(customPort);
     }
 }
-export function enableInstaller(win, localOnly = false) {
+export function setInstallerLocalOnly(value) {
+    localOnly = value;
+}
+export function enableInstaller(win, { localOnly: lo = false } = {}) {
+    localOnly = lo;
     if (isInstallerEnabled) {
         return; // already started do nothing
     }

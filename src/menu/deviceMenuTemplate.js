@@ -9,7 +9,7 @@ import { isECPEnabled, enableECP, disableECP } from "../server/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../server/telnet";
 import { isDebugEnabled, enableDebugServer, disableDebugServer } from "../server/debug";
 import { isInstallerEnabled, enableInstaller, disableInstaller } from "../server/installer";
-import { setLocaleId, setDisplayOption, setPeerRoku } from "../helpers/settings";
+import { setLocaleId, setDisplayOption, setPeerRoku, getRemoteAccessLocalOnly } from "../helpers/settings";
 import { reloadDevice } from "../helpers/window";
 
 export const deviceMenuTemplate = {
@@ -178,7 +178,7 @@ export const deviceMenuTemplate = {
                 if (isInstallerEnabled) {
                     disableInstaller();
                 } else {
-                    enableInstaller();
+                    enableInstaller(undefined, { localOnly: getRemoteAccessLocalOnly() });
                 }
             },
         },
@@ -191,7 +191,7 @@ export const deviceMenuTemplate = {
                 if (isECPEnabled) {
                     disableECP();
                 } else {
-                    enableECP();
+                    enableECP(undefined, undefined, { localOnly: getRemoteAccessLocalOnly() });
                 }
             },
         },
@@ -204,7 +204,7 @@ export const deviceMenuTemplate = {
                 if (isTelnetEnabled) {
                     disableTelnet();
                 } else {
-                    enableTelnet();
+                    enableTelnet(undefined, undefined, { localOnly: getRemoteAccessLocalOnly() });
                 }
             },
         },
@@ -217,7 +217,7 @@ export const deviceMenuTemplate = {
                 if (isDebugEnabled) {
                     disableDebugServer();
                 } else {
-                    enableDebugServer();
+                    enableDebugServer(undefined, undefined, undefined, { localOnly: getRemoteAccessLocalOnly() });
                 }
             },
         },

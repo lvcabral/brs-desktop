@@ -12,6 +12,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
     isValidIP,
     isValidUrl,
+    isLocalhostAddress,
     formatPath,
     getRokuOS,
     readJsonFile,
@@ -69,6 +70,36 @@ describe("isValidIP", () => {
         // hand-typed addresses and remain acceptable.
         expect(isValidIP("192.168.001.1")).toBe(true);
         expect(isValidIP("010.0.0.1")).toBe(true);
+    });
+});
+
+describe("isLocalhostAddress", () => {
+    it("accepts IPv4 loopback", () => {
+        expect(isLocalhostAddress("127.0.0.1")).toBe(true);
+    });
+
+    it("accepts IPv6 loopback", () => {
+        expect(isLocalhostAddress("::1")).toBe(true);
+    });
+
+    it("accepts IPv4-mapped IPv6 loopback", () => {
+        expect(isLocalhostAddress("::ffff:127.0.0.1")).toBe(true);
+    });
+
+    it("rejects non-loopback addresses", () => {
+        expect(isLocalhostAddress("192.168.1.1")).toBe(false);
+        expect(isLocalhostAddress("::ffff:192.168.1.1")).toBe(false);
+        expect(isLocalhostAddress("0.0.0.0")).toBe(false);
+        expect(isLocalhostAddress("10.0.0.1")).toBe(false);
+    });
+
+    it("rejects the 'localhost' hostname — only numeric IPs are compared", () => {
+        expect(isLocalhostAddress("localhost")).toBe(false);
+    });
+
+    it("rejects undefined and null without throwing", () => {
+        expect(isLocalhostAddress(undefined)).toBe(false);
+        expect(isLocalhostAddress(null)).toBe(false);
     });
 });
 

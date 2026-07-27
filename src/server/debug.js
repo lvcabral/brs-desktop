@@ -23,10 +23,15 @@ let lines = new Map();
 let typeQueue = [];
 let isTyping = false;
 let rendezvousTrackingEnabled = false;
+let localOnly = false;
 
 export let isDebugEnabled = false;
 
-export function enableDebugServer(win, prefs, port = DEBUG_PORT, localOnly = false) {
+export function setDebugLocalOnly(value) {
+    localOnly = value;
+}
+export function enableDebugServer(win, prefs, port = DEBUG_PORT, { localOnly: lo = false } = {}) {
+    localOnly = lo;
     if (isDebugEnabled) {
         return;
     }

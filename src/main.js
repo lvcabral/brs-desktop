@@ -321,13 +321,13 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
     }
     const localOnly = applyStartup ? startupOptions.localOnly : false;
     if (cliArgs?.ecp || (applyStartup && startupOptions.ecpEnabled)) {
-        enableECP(mainWindow, undefined, localOnly);
+        enableECP(mainWindow, ECP_PORT, { localOnly });
     }
     if (cliArgs?.telnet || (applyStartup && startupOptions.telnetEnabled)) {
-        enableTelnet(mainWindow, undefined, localOnly);
+        enableTelnet(mainWindow, TELNET_PORT, { localOnly });
     }
     if (applyStartup && startupOptions.debugServerEnabled) {
-        enableDebugServer(mainWindow, settings, undefined, localOnly);
+        enableDebugServer(mainWindow, settings, DEBUG_PORT, { localOnly });
     }
     if (cliArgs?.pwd && cliArgs.pwd.trim() !== "") {
         setPassword(cliArgs.pwd.trim());
@@ -341,9 +341,9 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
         if (!Number.isNaN(webPort)) {
             settings.value("services.webPort", webPort);
         }
-        enableInstaller(mainWindow, localOnly);
+        enableInstaller(mainWindow, { localOnly });
     } else if (applyStartup && startupOptions.installerEnabled) {
-        enableInstaller(mainWindow, localOnly);
+        enableInstaller(mainWindow, { localOnly });
     }
     if (cliArgs?.mode && cliArgs.mode.trim() !== "") {
         let displayMode = "720p";
