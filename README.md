@@ -2,7 +2,7 @@
 
 [![screenshots](./docs/images/brs-desktop.png)](./docs/images/brs-desktop.png)
 
-[![Version 2.2.0](https://img.shields.io/badge/Version-2.2.0-blue.svg?logo=github)](https://github.com/lvcabral/brs-desktop/releases/)
+[![Version 2.3.0](https://img.shields.io/badge/Version-2.3.0-blue.svg?logo=github)](https://github.com/lvcabral/brs-desktop/releases/)
 [![License](https://img.shields.io/github/license/lvcabral/brs-desktop?logo=github)](https://github.com/lvcabral/brs-desktop/blob/master/LICENSE)
 [![Build](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml/badge.svg)](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
@@ -16,7 +16,7 @@ The objective of this application is to extend the `brs-engine`, making it a ful
 - Application Installer (Web: default port 80), allowing deploy of side-loaded apps and screenshots.
 - ECP Service (default port 8060), that allows automation and data integration with external applications.
 - ECP-2 Service (WebSockets), supporting the Roku mobile application to control the simulator.
-- Remote Console (Telnet: port 8085), enabling remote Debugging.
+- Remote Console (Telnet: ports 8085 and 8080), enabling remote Debugging.
 - Customization of display, audio, device model and information, controls, captioning and localization.
 - Code Editor and Console for BrightScript code development and debugging.
 
@@ -24,14 +24,14 @@ With remote services enabled, the desktop simulator can be detected and [integra
 
 > [!IMPORTANT]
 >
-> Since version 2.x, the simulator can execute code compatible with Roku OS 15 and includes experimental **SceneGraph** support which is currently in **alpha stage**.
+> Since version 2.3.0, the simulator can execute code compatible with Roku OS 15.3 and includes full **SceneGraph** support which is currently in **beta**.
 >
 >**Please be aware of the following:**
 >
 >- SceneGraph components may not render correctly
->- Some SceneGraph features are not yet implemented
 >- Apps may crash or behave unexpectedly
 >- Check all [current limitations](https://github.com/lvcabral/brs-engine/blob/scenegraph/docs/limitations.md) for more details
+>- You can report issues related to the simulation engine on [brs-engine repository](https://github.com/lvcabral/brs-engine/issues).
 
 ## Documentation
 

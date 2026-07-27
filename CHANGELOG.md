@@ -4,17 +4,94 @@ All notable changes to this project will be documented in this file.
 
 <a name="v2.3.0"></a>
 
-## v2.3.0 - Unreleased
+## v2.3.0 - SceneGraph Node Complete and more!
 
+This release brings a large set of new features, bug fixes, and infrastructure improvements to the BrightScript Simulator. Highlights include a Debug Server on telnet port 8080, a console search feature, clipboard paste support, OOM/crash recovery, video auto-play settings, custom device feature flags, auto-save in the editor, JPEG screenshot support, and a comprehensive Vitest test suite. The SceneGraph extension is now in **beta** status, and it's Node complete! See the **BrightScript Simulation Engine** [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v2.3.0) for all the language and framework features and improvements.
+
+### New Features
+
+* Implemented the Debug Server on telnet port 8080 by [@lvcabral](https://github.com/lvcabral) in [#276](https://github.com/lvcabral/brs-desktop/pull/276)
+* Added search feature to the console panel by [@lvcabral](https://github.com/lvcabral) in [#273](https://github.com/lvcabral/brs-desktop/pull/273)
+* Added `keepAppOpen` setting for Peer Roku by [@lvcabral](https://github.com/lvcabral) in [#272](https://github.com/lvcabral/brs-desktop/pull/272)
+* Added clipboard paste support for sending text to the simulator via sequential keypresses by [@lvcabral](https://github.com/lvcabral) in [#280](https://github.com/lvcabral/brs-desktop/pull/280)
+* Added customization settings for managing custom feature flags via `roDeviceInfo` by [@lvcabral](https://github.com/lvcabral) in [#281](https://github.com/lvcabral/brs-desktop/pull/281)
+* Added video auto-play setting to device configuration and UI preferences by [@lvcabral](https://github.com/lvcabral) in [#284](https://github.com/lvcabral/brs-desktop/pull/284)
+* Added custom features icon and updated settings configuration labels by [@lvcabral](https://github.com/lvcabral) in [#283](https://github.com/lvcabral/brs-desktop/pull/283)
+* Installer password now updates immediately; service restart instruction only applies to port changes by [@lvcabral](https://github.com/lvcabral) in [#285](https://github.com/lvcabral/brs-desktop/pull/285)
+* Added JPEG support for screenshot exports and save dialog filters by [@lvcabral](https://github.com/lvcabral) in [#287](https://github.com/lvcabral/brs-desktop/pull/287)
+* Home key now intercepts to exit apps even with the debugger active by [@lvcabral](https://github.com/lvcabral) in [#288](https://github.com/lvcabral/brs-desktop/pull/288)
+* Enhanced toast system with click-to-disable functionality and DevTools performance warning by [@lvcabral](https://github.com/lvcabral) in [#291](https://github.com/lvcabral/brs-desktop/pull/291)
+* Added auto-save functionality when running code in the editor via configurable preference by [@lvcabral](https://github.com/lvcabral) in [#292](https://github.com/lvcabral/brs-desktop/pull/292)
+* Implemented OOM and crash recovery with automatic device reload and user notification by [@lvcabral](https://github.com/lvcabral) in [#279](https://github.com/lvcabral/brs-desktop/pull/279)
+* Adjusted update check intervals and added skip version option by [@lvcabral](https://github.com/lvcabral) in [#277](https://github.com/lvcabral/brs-desktop/pull/277)
+* Resolved system theme setting to current application theme in editor initialization
+* Added support for HEAD HTTP request on the Installer Service by [@lvcabral](https://github.com/lvcabral) in [#266](https://github.com/lvcabral/brs-desktop/pull/266)
+* Updated SceneGraph warning dialog to reflect beta status and changed `localStorage` key by [@lvcabral](https://github.com/lvcabral) in [#315](https://github.com/lvcabral/brs-desktop/pull/315)
+
+### Bug Fixes
+
+* Fixed: respect `disableCheckForUpdates` setting dynamically inside timers by [@lvcabral](https://github.com/lvcabral) in [#278](https://github.com/lvcabral/brs-desktop/pull/278)
+* Fixed: enforce OS-specific search shortcuts in console by [@lvcabral](https://github.com/lvcabral) in [#274](https://github.com/lvcabral/brs-desktop/pull/274)
+* Fixed: auto-update search matches when console output changes by [@lvcabral](https://github.com/lvcabral) in [#275](https://github.com/lvcabral/brs-desktop/pull/275)
+* Fixed: add key-press delay and enable native paste for secondary windows by [@lvcabral](https://github.com/lvcabral) in [#282](https://github.com/lvcabral/brs-desktop/pull/282)
+* Fixed: restrict clipboard copy shortcut to platform-specific key combination by [@lvcabral](https://github.com/lvcabral) in [#290](https://github.com/lvcabral/brs-desktop/pull/290)
+* Fixed: restore terminal input focus after updates to prevent intermittent focus loss by [@lvcabral](https://github.com/lvcabral) in [#289](https://github.com/lvcabral/brs-desktop/pull/289)
+* Fixed: removed calls to a non-existent function
+* Fixed: removed duplicated `autoPlayEnabled` property from main configuration object
+* Fixed: detect a compile failure regardless of whitespace by [@lvcabral](https://github.com/lvcabral) in [#301](https://github.com/lvcabral/brs-desktop/pull/301)
+* Fixed: ECP now resolves bundled assets so routes work outside the bundle too by [@lvcabral](https://github.com/lvcabral) in [#309](https://github.com/lvcabral/brs-desktop/pull/309)
+* Fixed: ECP answers device queries during the pre-`deviceData` startup window by [@lvcabral](https://github.com/lvcabral) in [#297](https://github.com/lvcabral/brs-desktop/pull/297)
+* Fixed: keep the shortened path within its budget in the status bar by [@lvcabral](https://github.com/lvcabral) in [#307](https://github.com/lvcabral/brs-desktop/pull/307)
+* Fixed: return a string from `hashCode` for every input by [@lvcabral](https://github.com/lvcabral) in [#306](https://github.com/lvcabral/brs-desktop/pull/306)
+* Fixed: reject malformed IP addresses instead of coercing them by [@lvcabral](https://github.com/lvcabral) in [#305](https://github.com/lvcabral/brs-desktop/pull/305)
+* Fixed: return nothing for firmware outside the version alphabet by [@lvcabral](https://github.com/lvcabral) in [#304](https://github.com/lvcabral/brs-desktop/pull/304)
+* Fixed: stop a bare `-w` flag persisting `NaN` as the web installer port by [@lvcabral](https://github.com/lvcabral) in [#303](https://github.com/lvcabral/brs-desktop/pull/303)
+* Fixed: read the numeric prefix of a version segment in update checker by [@lvcabral](https://github.com/lvcabral) in [#302](https://github.com/lvcabral/brs-desktop/pull/302)
+* Fixed: support remote shortcuts with more than one modifier by [@lvcabral](https://github.com/lvcabral) in [#299](https://github.com/lvcabral/brs-desktop/pull/299)
+* Fixed: restore the default for a missing remote key instead of throwing by [@lvcabral](https://github.com/lvcabral) in [#300](https://github.com/lvcabral/brs-desktop/pull/300)
+* Fixed: stop custom key bindings firing on unrelated chords by [@lvcabral](https://github.com/lvcabral) in [#298](https://github.com/lvcabral/brs-desktop/pull/298)
+* Resolved `npm audit` vulnerabilities in shipped dependencies by [@lvcabral](https://github.com/lvcabral) in [#295](https://github.com/lvcabral/brs-desktop/pull/295)
+
+### Refactoring & Code Quality
+
+* Dynamically generate recent files submenu and increased recent file limits by [@lvcabral](https://github.com/lvcabral) in [#286](https://github.com/lvcabral/brs-desktop/pull/286)
+* Refactored dev-console commands dispatch from a table by [@lvcabral](https://github.com/lvcabral) in [#310](https://github.com/lvcabral/brs-desktop/pull/310)
+* Resolved recent-file menu items by id instead of position by [@lvcabral](https://github.com/lvcabral) in [#308](https://github.com/lvcabral/brs-desktop/pull/308)
 * Removed the `fs-jetpack` dependency, replacing its five usages with Node's built-in `fs` module and
   two small helpers (`readJsonFile`/`writeJsonFile` in `src/helpers/util.js`) that preserve the previous
   behaviour, including atomic writes of `recent-files.json` and `window-state-*.json`
+* Removed `build/webpack.unit.config.js` and `build/webpack.e2e.config.js`, unused leftovers from the
+  electron-boilerplate template
+* Removed dead CodeMirror leftovers by [@lvcabral](https://github.com/lvcabral) in [#294](https://github.com/lvcabral/brs-desktop/pull/294)
+* Updated simulator info modal with bold text and issue tracker link
+
+### Testing & Tooling
+
+* Added Vitest test suite covering pure logic and network services by [@lvcabral](https://github.com/lvcabral) in [#296](https://github.com/lvcabral/brs-desktop/pull/296)
+* Modeled Electron submenus so the menu suite runs on Windows and Linux by [@lvcabral](https://github.com/lvcabral) in [#311](https://github.com/lvcabral/brs-desktop/pull/311)
+* Added ESLint with the `brs-engine` ruleset ported to JavaScript by [@lvcabral](https://github.com/lvcabral) in [#313](https://github.com/lvcabral/brs-desktop/pull/313)
+* Added Prettier config and formatted the codebase by [@lvcabral](https://github.com/lvcabral) in [#312](https://github.com/lvcabral/brs-desktop/pull/312)
 * Upgraded `monaco-editor` to v0.56.0 and added `overrides` for `dompurify`, `@electron/asar`,
   `@electron/universal` and `filelist` to resolve `npm audit` reports
 * `npm audit` went from 19 vulnerabilities (2 moderate, 17 high) to 10 (all high), and
   `npm audit --omit=dev` now reports **0 vulnerabilities** — nothing vulnerable ships in the application
-* Removed `build/webpack.unit.config.js` and `build/webpack.e2e.config.js`, unused leftovers from the
-  electron-boilerplate template
+
+### Dependency Bumps
+
+* Bump `@xmldom/xmldom` from 0.8.12 to 0.8.13 by [@dependabot](https://github.com/dependabot) in [#259](https://github.com/lvcabral/brs-desktop/pull/259)
+* Bump `ip-address` from 10.1.0 to 10.2.0 by [@dependabot](https://github.com/dependabot) in [#260](https://github.com/lvcabral/brs-desktop/pull/260)
+* Bump `fast-uri` from 3.1.0 to 3.1.2 by [@dependabot](https://github.com/dependabot) in [#261](https://github.com/lvcabral/brs-desktop/pull/261)
+* Bump `@babel/plugin-transform-modules-systemjs` from 7.28.5 to 7.29.4 by [@dependabot](https://github.com/dependabot) in [#262](https://github.com/lvcabral/brs-desktop/pull/262)
+* Bump `serialize-javascript`, `@lvcabral/electron-preferences` and `copy-webpack-plugin` by [@dependabot](https://github.com/dependabot) in [#263](https://github.com/lvcabral/brs-desktop/pull/263)
+* Bump `postcss` from 8.5.6 to 8.5.15 by [@dependabot](https://github.com/dependabot) in [#264](https://github.com/lvcabral/brs-desktop/pull/264)
+* Bump `tmp` from 0.2.5 to 0.2.7 by [@dependabot](https://github.com/dependabot) in [#265](https://github.com/lvcabral/brs-desktop/pull/265)
+* Bump `form-data` by [@dependabot](https://github.com/dependabot) in [#267](https://github.com/lvcabral/brs-desktop/pull/267)
+* Bump `ws` by [@dependabot](https://github.com/dependabot) in [#268](https://github.com/lvcabral/brs-desktop/pull/268)
+* Bump `tar` from 7.5.13 to 7.5.16 by [@dependabot](https://github.com/dependabot) in [#269](https://github.com/lvcabral/brs-desktop/pull/269)
+* Bump `js-yaml` from 4.1.1 to 4.2.0 by [@dependabot](https://github.com/dependabot) in [#270](https://github.com/lvcabral/brs-desktop/pull/270)
+* Bump `@babel/core`, `@babel/preset-env` and `babel-loader` by [@dependabot](https://github.com/dependabot) in [#271](https://github.com/lvcabral/brs-desktop/pull/271)
+
+Full Changelog: [v2.3.0]
 
 <a name="v2.2.0"></a>
 
@@ -680,6 +757,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.3.0]: https://github.com/lvcabral/brs-desktop/compare/v2.2.0...v2.3.0
 [v2.2.0]: https://github.com/lvcabral/brs-desktop/compare/v2.1.3...v2.2.0
 [v2.1.3]: https://github.com/lvcabral/brs-desktop/compare/v2.1.2...v2.1.3
 [v2.1.2]: https://github.com/lvcabral/brs-desktop/compare/v2.1.1...v2.1.2
