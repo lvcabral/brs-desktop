@@ -674,7 +674,7 @@ function startupProcess() {
     // Function to handle dialog dismissal
     const handleDialogClose = () => {
         if (dontShowAgainCheckbox.checked) {
-            localStorage.setItem("sceneGraphWarningDismissed", "true");
+            localStorage.setItem("sceneGraphBetaDismissed", "true");
         }
         dialog.style.display = "none";
         if (runLastApp) {
