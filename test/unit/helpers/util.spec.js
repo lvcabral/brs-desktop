@@ -13,6 +13,7 @@ import {
     isValidIP,
     isValidUrl,
     isLocalhostAddress,
+    destroyRemoteClients,
     formatPath,
     getRokuOS,
     readJsonFile,
@@ -100,6 +101,50 @@ describe("isLocalhostAddress", () => {
     it("rejects undefined and null without throwing", () => {
         expect(isLocalhostAddress(undefined)).toBe(false);
         expect(isLocalhostAddress(null)).toBe(false);
+    });
+});
+
+describe("destroyRemoteClients", () => {
+    const fakeClient = (remoteAddress) => ({ remoteAddress, destroy: vi.fn() });
+
+    it("drops the clients connected from the network and keeps the local ones", () => {
+        const local = fakeClient("127.0.0.1");
+        const localV6 = fakeClient("::1");
+        const mapped = fakeClient("::ffff:127.0.0.1");
+        const remote = fakeClient("192.0.2.10");
+        const remoteV6 = fakeClient("::ffff:192.0.2.10");
+        const clients = new Map([
+            [0, local],
+            [1, remote],
+            [2, localV6],
+            [3, remoteV6],
+            [4, mapped],
+        ]);
+
+        expect(destroyRemoteClients(clients)).toBe(2);
+        expect(remote.destroy).toHaveBeenCalled();
+        expect(remoteV6.destroy).toHaveBeenCalled();
+        expect(local.destroy).not.toHaveBeenCalled();
+        expect(localV6.destroy).not.toHaveBeenCalled();
+        expect(mapped.destroy).not.toHaveBeenCalled();
+        // The dropped ids are removed so a later broadcast does not write to a dead socket.
+        expect([...clients.keys()]).toEqual([0, 2, 4]);
+    });
+
+    it("drops a client whose socket was already torn down", () => {
+        // A destroyed socket reports no remote address, so it cannot be proven local.
+        const stale = fakeClient(undefined);
+        const clients = new Map([[0, stale]]);
+
+        expect(destroyRemoteClients(clients)).toBe(1);
+        expect(stale.destroy).toHaveBeenCalled();
+        expect(clients.size).toBe(0);
+    });
+
+    it("does nothing when there are no clients", () => {
+        const clients = new Map();
+        expect(destroyRemoteClients(clients)).toBe(0);
+        expect(clients.size).toBe(0);
     });
 });
 

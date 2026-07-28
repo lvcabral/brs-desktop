@@ -11,7 +11,13 @@ import { makeSharedObject, makeEngineDeviceInfo } from "../fixtures/sharedObject
 import { getFreePort } from "../helpers/freePort.js";
 import { waitForSend } from "../helpers/fakeWindow.js";
 import { connectSocket } from "../helpers/socketClient.js";
-import { enableTelnet, disableTelnet, subscribeTelnet, unsubscribeTelnet } from "../../src/server/telnet";
+import {
+    enableTelnet,
+    disableTelnet,
+    setTelnetLocalOnly,
+    subscribeTelnet,
+    unsubscribeTelnet,
+} from "../../src/server/telnet";
 
 /**
  * The remote console on a real TCP socket.
@@ -167,6 +173,28 @@ describe("telnet server", () => {
             client.write("quit\r\n");
             const [sent] = await waitForSend(win, "closeChannel");
             expect(sent.args[0]).toBe("EXIT_BRIGHTSCRIPT_STOP");
+        });
+    });
+
+    describe("local-only mode", () => {
+        afterEach(() => {
+            setTelnetLocalOnly(false);
+        });
+
+        // Which clients get dropped is covered by destroyRemoteClients in the util spec; a
+        // real socket here can only ever be loopback, so what this guards is the other half:
+        // turning remote access off must not disconnect the session on this machine.
+        it("keeps a loopback session alive when remote access is turned off", async () => {
+            const client = await connect();
+            client.clear();
+
+            setTelnetLocalOnly(true);
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            expect(client.closed).toBe(false);
+
+            client.write("bt\r\n");
+            const [sent] = await waitForSend(win, "debugCommand");
+            expect(sent.args[0]).toBe("bt");
         });
     });
 });

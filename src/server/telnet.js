@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { consoleBuffer } from "../helpers/console";
-import { isLocalhostAddress } from "../helpers/util";
+import { isLocalhostAddress, destroyRemoteClients } from "../helpers/util";
 import { TELNET_PORT } from "../constants";
 import * as telnet from "net";
 let server;
@@ -19,6 +19,9 @@ let localOnly = false;
 export let isTelnetEnabled = false;
 export function setTelnetLocalOnly(value) {
     localOnly = value;
+    if (localOnly) {
+        destroyRemoteClients(clients);
+    }
 }
 export function enableTelnet(win, port = TELNET_PORT, { localOnly: lo = false } = {}) {
     if (isTelnetEnabled) {

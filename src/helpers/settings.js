@@ -353,6 +353,17 @@ export function getSettings(window) {
                             label: "Remote Access Services",
                             fields: [
                                 {
+                                    key: "remoteAccess",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Allow connections from other devices on the network",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "When disabled, all services only accept connections from this machine",
+                                },
+                                {
                                     label: "Application Installer (Web)",
                                     key: "installer",
                                     type: "checkbox",
@@ -415,23 +426,6 @@ export function getSettings(window) {
                                         },
                                     ],
                                     help: "Debug Server can be accessed using an application such as PuTTY or terminal on Mac and Linux",
-                                },
-                                {
-                                    key: "placeholder2",
-                                    type: "message",
-                                    style: { width: "20%" },
-                                },
-                                {
-                                    label: "Allow Remote Access",
-                                    key: "remoteAccess",
-                                    type: "checkbox",
-                                    options: [
-                                        {
-                                            label: "Allow connections from other devices on the network",
-                                            value: "enabled",
-                                        },
-                                    ],
-                                    help: "When disabled, all services only accept connections from this machine. Changes take effect immediately.",
                                 },
                             ],
                         },
