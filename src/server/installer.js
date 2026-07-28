@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow } from "electron";
 import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
+import { isLocalhostAddress } from "../helpers/util";
 import { cryptoUsingMD5, parseAuthenticationInfo, computeDigestResponse } from "../helpers/digest";
 import Busboy from "busboy";
 import crypto from "node:crypto";
@@ -22,6 +23,7 @@ const credentials = {
 let port = WEB_INSTALLER_PORT;
 let server;
 let hash;
+let localOnly = false;
 export let isInstallerEnabled = false;
 export function setPassword(password) {
     if (password && password !== "") {
@@ -35,14 +37,23 @@ export function setPort(customPort) {
         port = Number.parseInt(customPort);
     }
 }
-export function enableInstaller(win) {
+export function setInstallerLocalOnly(value) {
+    localOnly = value;
+}
+export function enableInstaller(win, { localOnly: lo = false } = {}) {
     if (isInstallerEnabled) {
         return; // already started do nothing
     }
+    localOnly = lo;
     const window = win ?? BrowserWindow.fromId(1);
     hash = cryptoUsingMD5(credentials.realm);
     server = http
         .createServer(function (req, res) {
+            if (localOnly && !isLocalhostAddress(req.socket.remoteAddress)) {
+                res.writeHead(403);
+                res.end("Forbidden");
+                return;
+            }
             // Skip authentication for image endpoints - they're accessed from already authenticated pages
             const urlPath = req.url.split("?")[0];
             if (urlPath === "/pkgs/dev.png" || urlPath === "/pkgs/dev.jpg") {

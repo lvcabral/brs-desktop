@@ -7,21 +7,31 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { consoleBuffer } from "../helpers/console";
+import { isLocalhostAddress } from "../helpers/util";
 import { TELNET_PORT } from "../constants";
 import * as telnet from "net";
 let server;
 let clientId = 0;
 let clients = new Map();
 let lines = new Map();
+let localOnly = false;
 
 export let isTelnetEnabled = false;
-export function enableTelnet(win, port = TELNET_PORT) {
+export function setTelnetLocalOnly(value) {
+    localOnly = value;
+}
+export function enableTelnet(win, port = TELNET_PORT, { localOnly: lo = false } = {}) {
     if (isTelnetEnabled) {
         return;
     }
+    localOnly = lo;
     const window = win ?? BrowserWindow.fromId(1);
     server = telnet.createServer();
     server.on("connection", (client) => {
+        if (localOnly && !isLocalhostAddress(client.remoteAddress)) {
+            client.destroy();
+            return;
+        }
         let id = clientId;
         clientId++;
         // listen for the actual data from the client

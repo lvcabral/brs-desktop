@@ -9,7 +9,7 @@ import { BrowserWindow } from "electron";
 import { DEBUG_PORT } from "../constants";
 import { HELP_COMMANDS, PRESS_HELP, getHelpText } from "./debugHelp";
 import { getPressKey } from "./debugKeys";
-import { getRokuOS } from "../helpers/util";
+import { isLocalhostAddress, getRokuOS } from "../helpers/util";
 import { reloadDevice } from "../helpers/window";
 import * as telnet from "net";
 
@@ -23,13 +23,18 @@ let lines = new Map();
 let typeQueue = [];
 let isTyping = false;
 let rendezvousTrackingEnabled = false;
+let localOnly = false;
 
 export let isDebugEnabled = false;
 
-export function enableDebugServer(win, prefs, port = DEBUG_PORT) {
+export function setDebugLocalOnly(value) {
+    localOnly = value;
+}
+export function enableDebugServer(win, prefs, port = DEBUG_PORT, { localOnly: lo = false } = {}) {
     if (isDebugEnabled) {
         return;
     }
+    localOnly = lo;
     if (!window && win) {
         window = win;
     }
@@ -38,6 +43,10 @@ export function enableDebugServer(win, prefs, port = DEBUG_PORT) {
     }
     server = telnet.createServer();
     server.on("connection", (client) => {
+        if (localOnly && !isLocalhostAddress(client.remoteAddress)) {
+            client.destroy();
+            return;
+        }
         let id = clientId;
         clientId++;
         // listen for the actual data from the client

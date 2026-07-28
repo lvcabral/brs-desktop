@@ -32,12 +32,19 @@ import {
 } from "./settingsOptions";
 import { Client as SSDPClient } from "@lvcabral/node-ssdp";
 import { setAspectRatio } from "./window";
-import { enableECP, disableECP } from "../server/ecp";
-import { enableTelnet, disableTelnet } from "../server/telnet";
-import { enableDebugServer, disableDebugServer } from "../server/debug";
-import { enableInstaller, disableInstaller, setPort, isInstallerEnabled, setPassword } from "../server/installer";
+import { enableECP, disableECP, isECPEnabled, setECPLocalOnly } from "../server/ecp";
+import { enableTelnet, disableTelnet, isTelnetEnabled, setTelnetLocalOnly } from "../server/telnet";
+import { enableDebugServer, disableDebugServer, isDebugEnabled, setDebugLocalOnly } from "../server/debug";
+import {
+    enableInstaller,
+    disableInstaller,
+    setPort,
+    isInstallerEnabled,
+    setInstallerLocalOnly,
+    setPassword,
+} from "../server/installer";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
-import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
+import { WEB_INSTALLER_PORT, DEFAULT_USRPWD, ECP_PORT, TELNET_PORT, DEBUG_PORT } from "../constants";
 import { getLocalIps, formatPath } from "./util";
 
 const isMacOS = process.platform === "darwin";
@@ -85,6 +92,7 @@ export function getSettings(window) {
                 ecp: ["enabled"],
                 telnet: ["enabled"],
                 debug: ["enabled"],
+                remoteAccess: ["enabled"],
             },
             device: {
                 deviceModel: globalThis.sharedObject.deviceInfo.deviceModel,
@@ -407,6 +415,23 @@ export function getSettings(window) {
                                         },
                                     ],
                                     help: "Debug Server can be accessed using an application such as PuTTY or terminal on Mac and Linux",
+                                },
+                                {
+                                    key: "placeholder2",
+                                    type: "message",
+                                    style: { width: "20%" },
+                                },
+                                {
+                                    label: "Allow Remote Access",
+                                    key: "remoteAccess",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Allow connections from other devices on the network",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "When disabled, all services only accept connections from this machine. Changes take effect immediately.",
                                 },
                             ],
                         },
@@ -1529,30 +1554,49 @@ function saveServicesSettings(services, window) {
     if (!services) {
         return;
     }
+    const localOnly = !services.remoteAccess?.includes("enabled");
     if (services.installer?.includes("enabled")) {
         setPassword(services.password);
-        if (!isInstallerEnabled) {
+        if (isInstallerEnabled) {
+            setInstallerLocalOnly(localOnly);
+        } else {
             setPort(services.webPort);
-            enableInstaller(window);
+            enableInstaller(window, { localOnly });
         }
     } else {
         disableInstaller(window);
     }
     if (services.ecp?.includes("enabled")) {
-        enableECP(window);
+        if (isECPEnabled) {
+            setECPLocalOnly(localOnly);
+        } else {
+            enableECP(window, ECP_PORT, { localOnly });
+        }
     } else {
         disableECP(window);
     }
     if (services.telnet?.includes("enabled")) {
-        enableTelnet(window);
+        if (isTelnetEnabled) {
+            setTelnetLocalOnly(localOnly);
+        } else {
+            enableTelnet(window, TELNET_PORT, { localOnly });
+        }
     } else {
         disableTelnet(window);
     }
     if (services.debug?.includes("enabled")) {
-        enableDebugServer(window, settings);
+        if (isDebugEnabled) {
+            setDebugLocalOnly(localOnly);
+        } else {
+            enableDebugServer(window, settings, DEBUG_PORT, { localOnly });
+        }
     } else {
         disableDebugServer();
     }
+}
+
+export function getRemoteAccessLocalOnly() {
+    return !settings.value("services.remoteAccess").includes("enabled");
 }
 
 function saveDisplaySettings(window) {

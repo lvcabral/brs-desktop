@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
-import { isValidIP, getRokuOS } from "../helpers/util";
+import { isValidIP, isLocalhostAddress, getRokuOS } from "../helpers/util";
 import { ECP_PORT, SSDP_PORT } from "../constants";
 import "../helpers/hash"; // installs String.prototype.hashCode, used by genAppRegistry
 import { Server as SSDP } from "@lvcabral/node-ssdp";
@@ -32,6 +32,11 @@ let device;
 let ecp;
 let ssdp;
 let currentApp;
+let localOnly = false;
+let ecpPort = ECP_PORT;
+
+const APP_ID_UNSAFE = /[^a-zA-Z0-9_\-.]/g;
+const sanitizeAppId = (id) => (id ?? "").replaceAll(APP_ID_UNSAFE, "");
 
 ipcMain.on("currentApp", (_, data) => {
     currentApp = data;
@@ -41,17 +46,60 @@ export let isECPEnabled = false;
 export function initECP() {
     device = globalThis.sharedObject.deviceInfo;
 }
-export function enableECP(win, port = ECP_PORT) {
+function startSSDPServer(port) {
+    ssdp = new SSDP({
+        location: { port: port, path: "/" },
+        adInterval: 120000,
+        ttl: 3600,
+        udn: `uuid:roku:ecp:${device.serialNumber}`,
+        ssdpSig: "Roku UPnP/1.0 Roku/9.1.0",
+        ssdpPort: SSDP_PORT,
+        suppressRootDeviceAdvertisements: true,
+        headers: { "device-group.roku.com": "46F5CCE2472F2B14D77" },
+    });
+    ssdp.addUSN("roku:ecp");
+    ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
+    ssdp.start().catch((e) => {
+        window.webContents.send("console", `Failed to start SSDP server:${e.message}`, true);
+    });
+}
+
+function stopSSDPServer() {
+    if (ssdp) {
+        ssdp.stop();
+        ssdp = undefined;
+    }
+}
+
+export function setECPLocalOnly(value) {
+    localOnly = value;
+    if (!isECPEnabled) return;
+    if (localOnly) {
+        stopSSDPServer();
+    } else if (!ssdp) {
+        startSSDPServer(ecpPort);
+    }
+}
+export function enableECP(win, port = ECP_PORT, { localOnly: lo = false } = {}) {
     window = win ?? BrowserWindow.fromId(1);
     if (isECPEnabled) {
         return; // already started do nothing
     }
+    localOnly = lo;
+    ecpPort = port;
     // Create ECP Server
     ecp = require("restana")({
         ignoreTrailingSlash: true,
     });
     ecp.getServer().on("error", (error) => {
         window.webContents.send("console", `Failed to start ECP server:${error.message}`, true);
+    });
+    ecp.use((req, res, next) => {
+        if (localOnly && !isLocalhostAddress(req.socket.remoteAddress)) {
+            res.send("Forbidden", 403);
+            return;
+        }
+        return next();
     });
     ecp.get("/", sendDeviceRoot);
     ecp.get("/device-image.png", sendDeviceImage);
@@ -84,31 +132,15 @@ export function enableECP(win, port = ECP_PORT) {
             window.webContents.send("console", `ECP server error:${error.message}`, true);
         })
         .then((server) => {
-            // Create SSDP Server
-            ssdp = new SSDP({
-                location: {
-                    port: port,
-                    path: "/",
-                },
-                adInterval: 120000,
-                ttl: 3600,
-                udn: `uuid:roku:ecp:${device.serialNumber}`,
-                ssdpSig: "Roku UPnP/1.0 Roku/9.1.0",
-                ssdpPort: SSDP_PORT,
-                suppressRootDeviceAdvertisements: true,
-                headers: { "device-group.roku.com": "46F5CCE2472F2B14D77" },
-            });
-            ssdp.addUSN("roku:ecp");
-            ssdp._usns["roku:ecp"] = `uuid:roku:ecp:${device.serialNumber}`;
-            // Start server on all interfaces
-            ssdp.start()
-                .catch((e) => {
-                    window.webContents.send("console", `Failed to start SSDP server:${e.message}`, true);
-                })
-                .then(() => {
-                    isECPEnabled = true;
-                    notifyAll("enabled", true);
-                });
+            isECPEnabled = true;
+            notifyAll("enabled", true);
+            // Skip SSDP advertisement when remote access is disabled — the device
+            // should not appear to LAN scanners if it won't accept their connections.
+            if (localOnly) {
+                stopSSDPServer();
+            } else {
+                startSSDPServer(port);
+            }
             // Create ECP-2 WebSocket Server
             const wss = new WebSocket.Server({ noServer: true });
             wss.on("connection", function connection(ws) {
@@ -127,6 +159,10 @@ export function enableECP(win, port = ECP_PORT) {
                 });
             });
             server.on("upgrade", function upgrade(request, socket, head) {
+                if (localOnly && !isLocalhostAddress(request.socket.remoteAddress)) {
+                    socket.destroy();
+                    return;
+                }
                 const pathname = url.parse(request.url).pathname;
                 if (pathname === "/ecp-session") {
                     if (DEBUG) {
@@ -147,9 +183,7 @@ export function disableECP() {
         if (ecp) {
             ecp.close();
         }
-        if (ssdp) {
-            ssdp.stop();
-        }
+        stopSSDPServer();
         isECPEnabled = false;
         notifyAll("enabled", false);
     }
@@ -189,7 +223,7 @@ export function processRequest(ws, message) {
         } else if (msg["request"]?.startsWith("query")) {
             reply = queryReply(msg, statusOK);
         } else if (msg["request"] === "launch") {
-            notifyAll("launch", { appID: msg["param-channel-id"] });
+            notifyAll("launch", { appID: sanitizeAppId(msg["param-channel-id"]) });
             reply = `{${statusOK}}`;
         } else if (msg["request"] === "key-press") {
             window.webContents.send("postKeyPress", msg["param-key"], 300, 50);
@@ -276,12 +310,12 @@ function sendScpdXML(req, res) {
 
 function sendAppIcon(req, res) {
     res.setHeader("content-type", "image/png");
-    res.send(genAppIcon(req.params.appID, false));
+    res.send(genAppIcon(sanitizeAppId(req.params.appID), false));
 }
 
 function sendRegistry(req, res) {
     res.setHeader("content-type", "application/xml");
-    res.send(genAppRegistry(req.params.appID, false));
+    res.send(genAppRegistry(sanitizeAppId(req.params.appID), false));
 }
 
 function sendGraphicsFrameRate(req, res) {
@@ -291,7 +325,7 @@ function sendGraphicsFrameRate(req, res) {
 
 function sendAppState(req, res) {
     res.setHeader("content-type", "application/xml");
-    res.send(genAppState(req.params.appID, false));
+    res.send(genAppState(sanitizeAppId(req.params.appID), false));
 }
 
 function sendInput(req, res) {
@@ -309,12 +343,12 @@ function sendInput(req, res) {
 }
 
 function sendLaunchApp(req, res) {
-    notifyAll("launch", { appID: req.params.appID, query: req.query });
+    notifyAll("launch", { appID: sanitizeAppId(req.params.appID), query: req.query });
     res.end();
 }
 
 function sendExitApp(req, res) {
-    window?.webContents.send("closeChannel", "EXIT_USER_NAV", req.params.appID);
+    window?.webContents.send("closeChannel", "EXIT_USER_NAV", sanitizeAppId(req.params.appID));
     res.end();
 }
 
