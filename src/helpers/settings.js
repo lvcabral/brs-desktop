@@ -35,7 +35,14 @@ import { setAspectRatio } from "./window";
 import { enableECP, disableECP, isECPEnabled, setECPLocalOnly } from "../server/ecp";
 import { enableTelnet, disableTelnet, isTelnetEnabled, setTelnetLocalOnly } from "../server/telnet";
 import { enableDebugServer, disableDebugServer, isDebugEnabled, setDebugLocalOnly } from "../server/debug";
-import { enableInstaller, disableInstaller, setPort, isInstallerEnabled, setInstallerLocalOnly, setPassword } from "../server/installer";
+import {
+    enableInstaller,
+    disableInstaller,
+    setPort,
+    isInstallerEnabled,
+    setInstallerLocalOnly,
+    setPassword,
+} from "../server/installer";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
 import { WEB_INSTALLER_PORT, DEFAULT_USRPWD, ECP_PORT, TELNET_PORT, DEBUG_PORT } from "../constants";
 import { getLocalIps, formatPath } from "./util";
