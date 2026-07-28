@@ -23,6 +23,26 @@ export function isLocalhostAddress(addr) {
 }
 
 /**
+ * Function to disconnect every client that is not connected from this machine. Used when
+ * remote access is turned off while a service is running: the connection filters only run
+ * for new connections, so sessions established before the change would otherwise survive it.
+ * @param {Map<number, import("node:net").Socket>} clients - Map of connected client sockets
+ * @returns {number} - How many clients were disconnected
+ */
+export function destroyRemoteClients(clients) {
+    let dropped = 0;
+    for (const [id, client] of clients) {
+        if (isLocalhostAddress(client.remoteAddress)) {
+            continue;
+        }
+        client.destroy();
+        clients.delete(id);
+        dropped++;
+    }
+    return dropped;
+}
+
+/**
  * Function to check if a string is a valid IP address
  * @param {string} ip - The IP address to check
  * @returns {boolean} - True if the IP address is valid, false otherwise

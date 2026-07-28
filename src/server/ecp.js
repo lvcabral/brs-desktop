@@ -34,6 +34,7 @@ let ssdp;
 let currentApp;
 let localOnly = false;
 let ecpPort = ECP_PORT;
+let wss;
 
 const APP_ID_UNSAFE = /[^a-zA-Z0-9_\-.]/g;
 const sanitizeAppId = (id) => (id ?? "").replaceAll(APP_ID_UNSAFE, "");
@@ -71,11 +72,25 @@ function stopSSDPServer() {
     }
 }
 
+/**
+ * Closes the ECP-2 sessions opened from other machines. The upgrade handler only filters new
+ * connections, so a session established while remote access was allowed would otherwise keep
+ * receiving events after the user turned it off.
+ */
+function destroyRemoteSessions() {
+    for (const ws of wss?.clients ?? []) {
+        if (!isLocalhostAddress(ws.remoteAddress)) {
+            ws.terminate();
+        }
+    }
+}
+
 export function setECPLocalOnly(value) {
     localOnly = value;
     if (!isECPEnabled) return;
     if (localOnly) {
         stopSSDPServer();
+        destroyRemoteSessions();
     } else if (!ssdp) {
         startSSDPServer(ecpPort);
     }
@@ -142,8 +157,11 @@ export function enableECP(win, port = ECP_PORT, { localOnly: lo = false } = {}) 
                 startSSDPServer(port);
             }
             // Create ECP-2 WebSocket Server
-            const wss = new WebSocket.Server({ noServer: true });
-            wss.on("connection", function connection(ws) {
+            wss = new WebSocket.Server({ noServer: true });
+            wss.on("connection", function connection(ws, request) {
+                // Kept on the socket so a later switch to local-only can tell which sessions
+                // came from the network without reaching into the ws library internals.
+                ws.remoteAddress = request.socket.remoteAddress;
                 const auth = `{"notify":"authenticate","param-challenge":"jONQirQ3WxSQWdI9Zn0enA==","timestamp":"${process
                     .uptime()
                     .toFixed(3)}"}`;

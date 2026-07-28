@@ -9,7 +9,7 @@ import { BrowserWindow } from "electron";
 import { DEBUG_PORT } from "../constants";
 import { HELP_COMMANDS, PRESS_HELP, getHelpText } from "./debugHelp";
 import { getPressKey } from "./debugKeys";
-import { isLocalhostAddress, getRokuOS } from "../helpers/util";
+import { isLocalhostAddress, destroyRemoteClients, getRokuOS } from "../helpers/util";
 import { reloadDevice } from "../helpers/window";
 import * as telnet from "net";
 
@@ -29,6 +29,9 @@ export let isDebugEnabled = false;
 
 export function setDebugLocalOnly(value) {
     localOnly = value;
+    if (localOnly) {
+        destroyRemoteClients(clients);
+    }
 }
 export function enableDebugServer(win, prefs, port = DEBUG_PORT, { localOnly: lo = false } = {}) {
     if (isDebugEnabled) {
