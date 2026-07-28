@@ -41,10 +41,10 @@ export function setInstallerLocalOnly(value) {
     localOnly = value;
 }
 export function enableInstaller(win, { localOnly: lo = false } = {}) {
-    localOnly = lo;
     if (isInstallerEnabled) {
         return; // already started do nothing
     }
+    localOnly = lo;
     const window = win ?? BrowserWindow.fromId(1);
     hash = cryptoUsingMD5(credentials.realm);
     server = http

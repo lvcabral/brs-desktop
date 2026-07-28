@@ -21,10 +21,10 @@ export function setTelnetLocalOnly(value) {
     localOnly = value;
 }
 export function enableTelnet(win, port = TELNET_PORT, { localOnly: lo = false } = {}) {
-    localOnly = lo;
     if (isTelnetEnabled) {
         return;
     }
+    localOnly = lo;
     const window = win ?? BrowserWindow.fromId(1);
     server = telnet.createServer();
     server.on("connection", (client) => {

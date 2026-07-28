@@ -424,7 +424,7 @@ export function getSettings(window) {
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "When disabled, all services only accept connections from this machine. Disable and re-enable each service for this change to take effect.",
+                                    help: "When disabled, all services only accept connections from this machine. Changes take effect immediately.",
                                 },
                             ],
                         },

@@ -30,6 +30,7 @@ import {
 import { loadFile } from "./helpers/files";
 import {
     getPeerRoku,
+    getRemoteAccessLocalOnly,
     getSettings,
     getSimulatorOption,
     setDeviceInfo,
@@ -319,7 +320,7 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
     if (cliArgs?.fullscreen || simulatorOptions?.includes("fullScreen")) {
         mainWindow.setFullScreen(true);
     }
-    const localOnly = applyStartup ? startupOptions.localOnly : false;
+    const localOnly = applyStartup ? startupOptions.localOnly : getRemoteAccessLocalOnly();
     if (cliArgs?.ecp || (applyStartup && startupOptions.ecpEnabled)) {
         enableECP(mainWindow, ECP_PORT, { localOnly });
     }
