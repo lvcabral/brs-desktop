@@ -2,6 +2,17 @@
 
 The **BrightScript Simulator** desktop app, the same way all Roku devices, implements some remote access services in order to enable automation and monitoring of the apps being executed. It allows among other possibilities, to integrate the simulator to the [VSCode BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=celsoaf.brightscript) (see [how to integrate to VSCode](vscode-integration.md)). Below you will find a quick reference documentation about the services available.
 
+## Restricting Access to This Machine
+
+By default all the services below accept connections from any device on the local network, the same way a Roku device does. If you prefer to keep the simulator reachable only from the computer it is running on, uncheck **Allow connections from other devices on the network** at the top of the **Remote Access Services** section of the [Settings Screen](how-to-use.md#settings-screen).
+
+When that option is disabled:
+
+- The **Application Installer**, **ECP**, **Remote Console** and **Debug Server** only accept connections coming from `localhost` (`127.0.0.1` or `::1`). Requests from any other address are refused.
+- **SSDP** discovery advertisements are suppressed, so the simulator does not show up as a Roku device for the other machines scanning the network.
+
+The change is applied immediately to the services that are already running, and any connection already open from another machine is dropped. Because **SSDP** is turned off, the [VSCode BrightScript Extension](vscode-integration.md) will no longer discover the simulator automatically while this option is disabled — connecting to `127.0.0.1` still works.
+
 ## Application Installer
 
 This service allows you to remotely _side load_ an app in the simulator, it has a web interface that can be accessed using a browser, or any _HTTP_ client application. It also has a `Utilities` option where the user can request a screenshot of the currently running app.
