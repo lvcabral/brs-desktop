@@ -189,7 +189,8 @@ app.on("ready", () => {
         )
         .then(() => {
             firstLoad = false;
-            attachTitlebarToWindow(mainWindow);
+            const [mw, mh] = mainWindow.getMinimumSize();
+            attachTitlebarToWindow(mainWindow, { minWidth: mw, minHeight: mh });
             processArgv(mainWindow, startup);
             mainWindow.show();
             mainWindow.focus({ steal: true });
