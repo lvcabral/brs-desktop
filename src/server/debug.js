@@ -248,6 +248,9 @@ function handleLogRendezvous(arg, client) {
     let state = arg;
     if (state && ["on", "off"].includes(state)) {
         rendezvousTrackingEnabled = state === "on";
+        if (window) {
+            window.webContents.send("setRendezvousLog", rendezvousTrackingEnabled);
+        }
     } else {
         state ||= rendezvousTrackingEnabled ? "on" : "off";
     }

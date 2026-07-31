@@ -137,6 +137,21 @@ describe("debug server", () => {
         expect(await run(client, "logrendezvous")).toMatch(/off/i);
     });
 
+    it("forwards rendezvous logging toggle to the renderer via IPC", async () => {
+        const client = await connect();
+        win.sent.length = 0;
+        await run(client, "logrendezvous on");
+        const onMsg = win.sent.find((m) => m.channel === "setRendezvousLog");
+        expect(onMsg).toBeDefined();
+        expect(onMsg.args[0]).toBe(true);
+
+        win.sent.length = 0;
+        await run(client, "logrendezvous off");
+        const offMsg = win.sent.find((m) => m.channel === "setRendezvousLog");
+        expect(offMsg).toBeDefined();
+        expect(offMsg.args[0]).toBe(false);
+    });
+
     it("sends one key per character of a press argument, in order", async () => {
         const client = await connect();
         client.write("press hus\r\n");

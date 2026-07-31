@@ -375,6 +375,9 @@ api.receive("setAudioMute", function (mute) {
 api.receive("setPerfStats", function (enabled) {
     brs.enableStats(enabled);
 });
+api.receive("setRendezvousLog", function (enabled) {
+    brs.setRendezvousLog(enabled);
+});
 api.receive("mountExternalVolume", function (zipData, label = "External volume") {
     try {
         const zipBuffer = getExternalVolumeArrayBuffer(zipData);

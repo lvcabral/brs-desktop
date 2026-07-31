@@ -73,6 +73,7 @@ const RECEIVE_CHANNELS = [
     "mountExternalVolume",
     "unmountExternalVolume",
     "showToast",
+    "setRendezvousLog",
 ];
 
 /**
