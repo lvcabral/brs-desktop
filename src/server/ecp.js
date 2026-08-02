@@ -34,6 +34,7 @@ let ssdp;
 let currentApp;
 let localOnly = false;
 let ecpPort = ECP_PORT;
+let rendezvousTrackingEnabled = false;
 let wss;
 
 const APP_ID_UNSAFE = /[^a-zA-Z0-9_\-.]/g;
@@ -129,6 +130,10 @@ export function enableECP(win, port = ECP_PORT, { localOnly: lo = false } = {}) 
     ecp.get("/query/registry/:appID", sendRegistry);
     ecp.get("/query/graphics-frame-rate", sendGraphicsFrameRate);
     ecp.get("/query/app-state/:appID", sendAppState);
+    ecp.get("/query/sgrendezvous", sendRendezvousQuery);
+    ecp.post("/sgrendezvous/track", sendRendezvousTrack);
+    ecp.post("/sgrendezvous/track/:channelId", sendRendezvousTrack);
+    ecp.post("/sgrendezvous/untrack", sendRendezvousUntrack);
     ecp.post("/input", sendInput);
     ecp.post("/input/:appID", sendInput);
     ecp.post("/launch/:appID", sendLaunchApp);
@@ -383,6 +388,25 @@ function sendKeyUp(req, res) {
 function sendKeyPress(req, res) {
     window.webContents.send("postKeyPress", req.params.key);
     res.end();
+}
+
+function sendRendezvousTrack(req, res) {
+    rendezvousTrackingEnabled = true;
+    window?.webContents.send("setRendezvousLog", true);
+    res.setHeader("content-type", "application/xml");
+    res.send(genRendezvousXml(true, false));
+}
+
+function sendRendezvousUntrack(req, res) {
+    rendezvousTrackingEnabled = false;
+    window?.webContents.send("setRendezvousLog", false);
+    res.setHeader("content-type", "application/xml");
+    res.send(genRendezvousXml(false, false));
+}
+
+function sendRendezvousQuery(req, res) {
+    res.setHeader("content-type", "application/xml");
+    res.send(genRendezvousXml(rendezvousTrackingEnabled, true));
 }
 
 // Content Generation Functions
@@ -669,6 +693,32 @@ export function genAppState(appID, encrypt) {
         console.error("Error generating app state XML:", error);
         return "";
     }
+}
+
+export function genRendezvousXml(trackingEnabled, isQuery) {
+    const xml = xmlbuilder.create("sgrendezvous");
+    if (isQuery) {
+        const data = xml.ele("data");
+        data.ele("tracking-enabled", {}, trackingEnabled);
+        data.ele("plugin-id", {}, currentApp?.id ?? "dev");
+        data.ele("drop-count", {}, 0);
+        data.ele("count", {}, 0);
+        xml.ele("timestamp", {}, `${Date.now()}`);
+    } else {
+        xml.ele("tracking-enabled", {}, trackingEnabled);
+    }
+    xml.ele("status", {}, "OK");
+    return xml.end({ pretty: true });
+}
+
+/**
+ * Updates the ECP-side rendezvous tracking flag. Called by the debug server
+ * when the user toggles `logrendezvous on/off` from the telnet console, so
+ * that a subsequent `GET /query/sgrendezvous` reflects the current state.
+ * @param {boolean} enabled - Whether rendezvous tracking is on
+ */
+export function setRendezvousTracking(enabled) {
+    rendezvousTrackingEnabled = enabled;
 }
 
 // Helper Functions

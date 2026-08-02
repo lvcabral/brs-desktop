@@ -59,5 +59,6 @@ exports[`IPC channel whitelists > matches their snapshots 2`] = `
   "mountExternalVolume",
   "unmountExternalVolume",
   "showToast",
+  "setRendezvousLog",
 ]
 `;

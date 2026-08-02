@@ -180,6 +180,59 @@ describe("ECP REST API", () => {
             expect(body.subarray(0, 4)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
         });
     });
+
+    describe("sgrendezvous tracking", () => {
+        it("enables tracking via POST /sgrendezvous/track", async () => {
+            win.sent.length = 0;
+            const response = await fetch(`${base}/sgrendezvous/track`, { method: "POST" });
+            expect(response.status).toBe(200);
+            const body = await response.text();
+            expect(body).toContain("<tracking-enabled>true</tracking-enabled>");
+            expect(body).toContain("<status>OK</status>");
+            const ipcMsg = win.sentOn("setRendezvousLog");
+            expect(ipcMsg).toHaveLength(1);
+            expect(ipcMsg[0].args[0]).toBe(true);
+        });
+
+        it("accepts an optional channelId on track", async () => {
+            const response = await fetch(`${base}/sgrendezvous/track/dev`, { method: "POST" });
+            expect(response.status).toBe(200);
+            const body = await response.text();
+            expect(body).toContain("<tracking-enabled>true</tracking-enabled>");
+        });
+
+        it("returns tracking status via GET /query/sgrendezvous", async () => {
+            // First enable tracking
+            await fetch(`${base}/sgrendezvous/track`, { method: "POST" });
+            const response = await fetch(`${base}/query/sgrendezvous`);
+            expect(response.status).toBe(200);
+            const body = await response.text();
+            expect(body).toContain("<tracking-enabled>true</tracking-enabled>");
+            expect(body).toContain("<count>0</count>");
+            expect(body).toContain("<drop-count>0</drop-count>");
+            expect(body).toContain("<timestamp>");
+            expect(body).toContain("<status>OK</status>");
+        });
+
+        it("disables tracking via POST /sgrendezvous/untrack", async () => {
+            win.sent.length = 0;
+            const response = await fetch(`${base}/sgrendezvous/untrack`, { method: "POST" });
+            expect(response.status).toBe(200);
+            const body = await response.text();
+            expect(body).toContain("<tracking-enabled>false</tracking-enabled>");
+            expect(body).toContain("<status>OK</status>");
+            const ipcMsg = win.sentOn("setRendezvousLog");
+            expect(ipcMsg).toHaveLength(1);
+            expect(ipcMsg[0].args[0]).toBe(false);
+        });
+
+        it("query reflects disabled state after untrack", async () => {
+            await fetch(`${base}/sgrendezvous/untrack`, { method: "POST" });
+            const response = await fetch(`${base}/query/sgrendezvous`);
+            const body = await response.text();
+            expect(body).toContain("<tracking-enabled>false</tracking-enabled>");
+        });
+    });
 });
 
 describe("ECP REST API before the renderer reports device data", () => {
