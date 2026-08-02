@@ -392,14 +392,16 @@ function sendKeyPress(req, res) {
 
 function sendRendezvousTrack(req, res) {
     rendezvousTrackingEnabled = true;
-    window?.webContents.send("setRendezvousLog", true);
+    // TODO: Will require a new IPC event to enable tracking for ECP
+    // window?.webContents.send("<< TBD >>", true);
     res.setHeader("content-type", "application/xml");
     res.send(genRendezvousXml(true, false));
 }
 
 function sendRendezvousUntrack(req, res) {
     rendezvousTrackingEnabled = false;
-    window?.webContents.send("setRendezvousLog", false);
+    // TODO: Will require a new IPC event to disable tracking for ECP
+    // window?.webContents.send("<< TBD >>", false);
     res.setHeader("content-type", "application/xml");
     res.send(genRendezvousXml(false, false));
 }
@@ -709,16 +711,6 @@ export function genRendezvousXml(trackingEnabled, isQuery) {
     }
     xml.ele("status", {}, "OK");
     return xml.end({ pretty: true });
-}
-
-/**
- * Updates the ECP-side rendezvous tracking flag. Called by the debug server
- * when the user toggles `logrendezvous on/off` from the telnet console, so
- * that a subsequent `GET /query/sgrendezvous` reflects the current state.
- * @param {boolean} enabled - Whether rendezvous tracking is on
- */
-export function setRendezvousTracking(enabled) {
-    rendezvousTrackingEnabled = enabled;
 }
 
 // Helper Functions

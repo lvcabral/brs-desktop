@@ -11,7 +11,6 @@ import { HELP_COMMANDS, PRESS_HELP, getHelpText } from "./debugHelp";
 import { getPressKey } from "./debugKeys";
 import { isLocalhostAddress, destroyRemoteClients, getRokuOS } from "../helpers/util";
 import { reloadDevice } from "../helpers/window";
-import { setRendezvousTracking } from "./ecp";
 import * as telnet from "net";
 
 let server;
@@ -252,7 +251,6 @@ function handleLogRendezvous(arg, client) {
         if (window) {
             window.webContents.send("setRendezvousLog", rendezvousTrackingEnabled);
         }
-        setRendezvousTracking(rendezvousTrackingEnabled);
     } else {
         state ||= rendezvousTrackingEnabled ? "on" : "off";
     }
