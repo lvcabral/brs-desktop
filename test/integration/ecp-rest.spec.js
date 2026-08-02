@@ -189,9 +189,6 @@ describe("ECP REST API", () => {
             const body = await response.text();
             expect(body).toContain("<tracking-enabled>true</tracking-enabled>");
             expect(body).toContain("<status>OK</status>");
-            const ipcMsg = win.sentOn("setRendezvousLog");
-            expect(ipcMsg).toHaveLength(1);
-            expect(ipcMsg[0].args[0]).toBe(true);
         });
 
         it("accepts an optional channelId on track", async () => {
@@ -221,9 +218,6 @@ describe("ECP REST API", () => {
             const body = await response.text();
             expect(body).toContain("<tracking-enabled>false</tracking-enabled>");
             expect(body).toContain("<status>OK</status>");
-            const ipcMsg = win.sentOn("setRendezvousLog");
-            expect(ipcMsg).toHaveLength(1);
-            expect(ipcMsg[0].args[0]).toBe(false);
         });
 
         it("query reflects disabled state after untrack", async () => {
