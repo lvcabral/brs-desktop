@@ -256,6 +256,10 @@ export function getSettings(window) {
                                             value: "disableHomeScreen",
                                         },
                                         {
+                                            label: "Disable Focus and Restore of the Window on BrightScript App Launch",
+                                            value: "disableFocusOnLaunch",
+                                        },
+                                        {
                                             label: "Disable Warning to use Keyboard or Gamepad on Display Click",
                                             value: "disableClickToast",
                                         },
