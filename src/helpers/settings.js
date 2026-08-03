@@ -67,7 +67,7 @@ const timeZoneLabels = new Map();
 const discoveredDevices = new Map();
 const pendingMetadataRequests = new Set();
 const w = 800;
-const h = 650;
+const h = 700;
 let settings;
 let settingsWindow;
 let statusBarVisible = true;
@@ -413,43 +413,55 @@ export function getSettings(window) {
                                     type: "checkbox",
                                     options: [
                                         {
-                                            label: "Service Enabled",
+                                            label: "Service Enabled (Port 8060)",
                                             value: "enabled",
                                         },
                                     ],
                                     help: "ECP service allows the simulator to be controlled over the network",
                                 },
                                 {
-                                    label: "BrightScript Remote Console (Telnet Port 8085)",
+                                    label: "BrightScript Telnet Services",
                                     key: "telnet",
                                     type: "checkbox",
+                                    style: { width: "45%" },
                                     options: [
                                         {
-                                            label: "Service Enabled",
+                                            label: "Remote Console (Port 8085)",
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "Remote Console can be accessed using an application such as PuTTY or terminal on Mac and Linux",
                                 },
                                 {
-                                    label: "BrightScript Debug Server (Telnet Port 8080)",
+                                    // No label: this shares the title rendered by the "telnet" field above.
+                                    // The keys stay "telnet" and "debug" so existing settings files keep working.
                                     key: "debug",
                                     type: "checkbox",
+                                    style: { width: "45%" },
                                     options: [
                                         {
-                                            label: "Service Enabled",
+                                            label: "Debug Server (Port 8080)",
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "Debug Server can be accessed using an application such as PuTTY or terminal on Mac and Linux",
                                 },
                                 {
-                                    label: "Remote Screen (WebRTC Port 8090)",
+                                    // The two services above share one help line; a full-width message keeps it
+                                    // on a single row instead of wrapping inside a 45% column. The `help` class
+                                    // is the library's own, so it picks up the themed help color with no styling.
+                                    key: "telnetHelp",
+                                    type: "message",
+                                    style: { width: "100%" },
+                                    content:
+                                        '<span class="help">Both services can be accessed using an application ' +
+                                        "such as PuTTY or terminal on Mac and Linux</span>",
+                                },
+                                {
+                                    label: "Remote Screen (WebRTC)",
                                     key: "screen",
                                     type: "checkbox",
                                     options: [
                                         {
-                                            label: "Service Enabled",
+                                            label: "Service Enabled (Port 8090)",
                                             value: "enabled",
                                         },
                                     ],
