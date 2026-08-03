@@ -241,7 +241,7 @@ function rebuildMenu(template = false) {
                 checkMenuItem("ecp-api", isECPEnabled);
                 checkMenuItem("telnet", isTelnetEnabled);
                 checkMenuItem("debug-server", isDebugEnabled);
-                checkMenuItem("remote-screen", isRemoteScreenEnabled);
+                checkMenuItem("remote-screen", isRemoteScreenEnabled());
                 const peerRoku = getPeerRoku();
                 checkMenuItem("peer-roku-deploy", peerRoku.deploy);
                 checkMenuItem("peer-roku-control", peerRoku.syncControl);

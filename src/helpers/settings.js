@@ -1574,57 +1574,83 @@ function saveSimulatorSettings(options, window) {
     }
 }
 
+// One entry per network service, because every one of them is saved the same way: enable it,
+// or -- if it is already running -- just push the new local-only value at it, or disable it. A
+// table rather than five near-identical if/else blocks, so adding a service is one row.
+//
+// `running` is a getter, not a value: the `is*Enabled` exports are live bindings that the
+// service modules reassign, and reading them once at module scope would freeze them at false.
+export const NETWORK_SERVICES = [
+    {
+        key: "installer",
+        get running() {
+            return isInstallerEnabled;
+        },
+        // The installer is the only one with credentials. The password is applied whether or not
+        // it is already listening, since it is checked per request; the port only matters when
+        // the server is about to bind.
+        whenEnabled: (services) => setPassword(services.password),
+        beforeEnable: (services) => setPort(services.webPort),
+        enable: (window, localOnly) => enableInstaller(window, { localOnly }),
+        setLocalOnly: setInstallerLocalOnly,
+        disable: (window) => disableInstaller(window),
+    },
+    {
+        key: "ecp",
+        get running() {
+            return isECPEnabled;
+        },
+        enable: (window, localOnly) => enableECP(window, ECP_PORT, { localOnly }),
+        setLocalOnly: setECPLocalOnly,
+        disable: (window) => disableECP(window),
+    },
+    {
+        key: "telnet",
+        get running() {
+            return isTelnetEnabled;
+        },
+        enable: (window, localOnly) => enableTelnet(window, TELNET_PORT, { localOnly }),
+        setLocalOnly: setTelnetLocalOnly,
+        disable: (window) => disableTelnet(window),
+    },
+    {
+        key: "debug",
+        get running() {
+            return isDebugEnabled;
+        },
+        enable: (window, localOnly) => enableDebugServer(window, settings, DEBUG_PORT, { localOnly }),
+        setLocalOnly: setDebugLocalOnly,
+        disable: () => disableDebugServer(),
+    },
+    {
+        key: "screen",
+        get running() {
+            return isRemoteScreenEnabled();
+        },
+        enable: (window, localOnly) => enableRemoteScreen(window, REMOTE_SCREEN_PORT, { localOnly }),
+        setLocalOnly: setRemoteScreenLocalOnly,
+        disable: () => disableRemoteScreen(),
+    },
+];
+
 function saveServicesSettings(services, window) {
     if (!services) {
         return;
     }
     const localOnly = !services.remoteAccess?.includes("enabled");
-    if (services.installer?.includes("enabled")) {
-        setPassword(services.password);
-        if (isInstallerEnabled) {
-            setInstallerLocalOnly(localOnly);
-        } else {
-            setPort(services.webPort);
-            enableInstaller(window, { localOnly });
+    for (const service of NETWORK_SERVICES) {
+        if (!services[service.key]?.includes("enabled")) {
+            service.disable(window);
+            continue;
         }
-    } else {
-        disableInstaller(window);
-    }
-    if (services.ecp?.includes("enabled")) {
-        if (isECPEnabled) {
-            setECPLocalOnly(localOnly);
+        service.whenEnabled?.(services);
+        if (service.running) {
+            // Already listening, so only the address filter can have changed.
+            service.setLocalOnly(localOnly);
         } else {
-            enableECP(window, ECP_PORT, { localOnly });
+            service.beforeEnable?.(services);
+            service.enable(window, localOnly);
         }
-    } else {
-        disableECP(window);
-    }
-    if (services.telnet?.includes("enabled")) {
-        if (isTelnetEnabled) {
-            setTelnetLocalOnly(localOnly);
-        } else {
-            enableTelnet(window, TELNET_PORT, { localOnly });
-        }
-    } else {
-        disableTelnet(window);
-    }
-    if (services.debug?.includes("enabled")) {
-        if (isDebugEnabled) {
-            setDebugLocalOnly(localOnly);
-        } else {
-            enableDebugServer(window, settings, DEBUG_PORT, { localOnly });
-        }
-    } else {
-        disableDebugServer();
-    }
-    if (services.screen?.includes("enabled")) {
-        if (isRemoteScreenEnabled) {
-            setRemoteScreenLocalOnly(localOnly);
-        } else {
-            enableRemoteScreen(window, REMOTE_SCREEN_PORT, { localOnly });
-        }
-    } else {
-        disableRemoteScreen();
     }
 }
 

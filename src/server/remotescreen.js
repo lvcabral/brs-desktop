@@ -87,7 +87,20 @@ let sessionSeq = 0;
 // that knows how to turn an id back into a socket.
 const sessions = new Map();
 
-export let isRemoteScreenEnabled = false;
+let screenEnabled = false;
+
+/**
+ * Whether the service is listening.
+ *
+ * A function where the other services in this directory export a mutable `let` (`isECPEnabled` and
+ * friends): those are live bindings that only work because every consumer re-reads them, which is
+ * easy to break by destructuring or caching. The siblings are left alone rather than churned for
+ * consistency's sake.
+ * @returns {boolean} - True while the server is bound
+ */
+export function isRemoteScreenEnabled() {
+    return screenEnabled;
+}
 
 /**
  * The port the service actually bound, which differs from the requested one when port 0 was
@@ -198,14 +211,14 @@ export function dropAllSessions() {
 
 export function setRemoteScreenLocalOnly(value) {
     localOnly = value;
-    if (!isRemoteScreenEnabled) return;
+    if (!screenEnabled) return;
     if (localOnly) {
         destroyRemoteSessions();
     }
 }
 
 export function enableRemoteScreen(win, port = REMOTE_SCREEN_PORT, { localOnly: lo = false } = {}) {
-    if (isRemoteScreenEnabled) {
+    if (screenEnabled) {
         return; // already started do nothing
     }
     localOnly = lo;
@@ -224,20 +237,20 @@ export function enableRemoteScreen(win, port = REMOTE_SCREEN_PORT, { localOnly: 
             // Report the port actually bound, which differs from the requested one when
             // port 0 was used to let the OS choose.
             screenPort = server.address().port;
-            isRemoteScreenEnabled = true;
+            screenEnabled = true;
             attachSignaling();
             notifyAll("enabled", { enabled: true, port: screenPort });
         });
     server.on("error", (e) => {
         if (e.code === "EADDRINUSE") {
-            isRemoteScreenEnabled = false;
+            screenEnabled = false;
         }
         window?.webContents.send("console", `Remote Screen server error:${e.message}`, true);
     });
 }
 
 export function disableRemoteScreen() {
-    if (isRemoteScreenEnabled) {
+    if (screenEnabled) {
         dropAllSessions();
         if (wss) {
             wss.close();
@@ -247,7 +260,7 @@ export function disableRemoteScreen() {
             server.close();
             server = undefined;
         }
-        isRemoteScreenEnabled = false;
+        screenEnabled = false;
         notifyAll("enabled", { enabled: false, port: screenPort });
     }
 }

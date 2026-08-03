@@ -205,6 +205,22 @@ body {
     margin-top: 16px;
 }
 
+/* The text field's label. Visually redundant next to the placeholder, but a placeholder is not
+   an accessible name, so a screen reader would otherwise announce an unlabelled field. Clipped
+   rather than display:none, which would take it out of the accessibility tree along with the
+   layout. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* The skin sets .Roku-Form input to a 26px pill, but this input is outside a .Roku-Form and
    has to line up with the square-ish remote buttons beside it. */
 #textInput {

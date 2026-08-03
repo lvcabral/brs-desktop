@@ -68,9 +68,30 @@
     }
 
     function send(message) {
-        if (ws && ws.readyState === WebSocket.OPEN) {
+        if (ws?.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify(message));
         }
+    }
+
+    /**
+     * Applies the ICE candidates that arrived before there was a remote description to apply
+     * them against. Candidates are advisory -- one being rejected does not sink the connection --
+     * so a failure is logged and the rest still go in.
+     */
+    function flushCandidates() {
+        var queued = pendingCandidates;
+        pendingCandidates = [];
+        queued.forEach(function (candidate) {
+            pc.addIceCandidate(candidate).catch(warnCandidateRejected);
+        });
+    }
+
+    /**
+     * Reports a candidate the browser would not accept.
+     * @param {Error} err - The rejection
+     */
+    function warnCandidateRejected(err) {
+        console.warn("buffered candidate rejected:", err.message);
     }
 
     /**
@@ -118,13 +139,7 @@
             .then(function () {
                 send({ type: "answer", sdp: pc.localDescription.toJSON() });
                 // Safe to apply now that there is a remote description.
-                var queued = pendingCandidates;
-                pendingCandidates = [];
-                queued.forEach(function (candidate) {
-                    pc.addIceCandidate(candidate).catch(function (err) {
-                        console.warn("buffered candidate rejected:", err.message);
-                    });
-                });
+                flushCandidates();
             })
             .catch(function (err) {
                 setStatus("Negotiation failed");
@@ -251,7 +266,7 @@
      * @returns {Promise<void>} - Resolves once the text is on the clipboard
      */
     function copyToClipboard(text) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
+        if (navigator.clipboard?.writeText) {
             return navigator.clipboard.writeText(text);
         }
         return new Promise(function (resolve, reject) {
@@ -268,11 +283,13 @@
             scratch.setSelectionRange(0, text.length);
             var copied = false;
             try {
+                // NOSONAR - deprecated, but the only clipboard API available outside a secure
+                // context, which is where this page is served from. See the note above.
                 copied = document.execCommand("copy");
             } catch (err) {
                 copied = false;
             }
-            document.body.removeChild(scratch);
+            scratch.remove();
             if (copied) {
                 resolve();
             } else {
@@ -288,6 +305,11 @@
      * actually reached the page on -- hostname or IP, default port or custom -- is what gets
      * copied and handed to someone else.
      */
+    /** Puts the copy button back to its resting label after its confirmation has been read. */
+    function resetCopyLabel() {
+        copyButton.textContent = "Copy";
+    }
+
     function initStreamUrl() {
         var href = location.origin + "/";
         streamLink.textContent = href;
@@ -302,9 +324,7 @@
                     copyButton.textContent = "Press Ctrl+C";
                 })
                 .finally(function () {
-                    setTimeout(function () {
-                        copyButton.textContent = "Copy";
-                    }, COPY_FEEDBACK_MS);
+                    setTimeout(resetCopyLabel, COPY_FEEDBACK_MS);
                 });
         });
     }
@@ -339,13 +359,12 @@
 
     // Wiring. Buttons use pointerdown so a press registers without waiting for the click that
     // follows a touch, which on mobile is delayed by up to ~300ms.
-    var buttons = document.querySelectorAll("[data-key]");
-    for (var i = 0; i < buttons.length; i++) {
-        buttons[i].addEventListener("pointerdown", function (event) {
+    document.querySelectorAll("[data-key]").forEach(function (button) {
+        button.addEventListener("pointerdown", function (event) {
             event.preventDefault();
-            press(event.currentTarget.getAttribute("data-key"));
+            press(event.currentTarget.dataset.key);
         });
-    }
+    });
     // Driven by the video element rather than by ontrack: ontrack fires as soon as the track is
     // negotiated, which is before any frame has been decoded, so hiding the overlay there would
     // uncover a black rectangle. "playing" is the first point at which there is a picture.

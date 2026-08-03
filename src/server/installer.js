@@ -277,7 +277,7 @@ export function buildRemoteScreenHtml(enabled, port, hostname) {
 function renderUtilitiesPage(html, host) {
     return html.replace(
         REMOTE_SCREEN_PLACEHOLDER,
-        buildRemoteScreenHtml(isRemoteScreenEnabled, getRemoteScreenPort(), safeHostname(host))
+        buildRemoteScreenHtml(isRemoteScreenEnabled(), getRemoteScreenPort(), safeHostname(host))
     );
 }
 

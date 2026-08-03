@@ -228,7 +228,7 @@ export const deviceMenuTemplate = {
             type: "checkbox",
             checked: false,
             click: (item, window) => {
-                if (isRemoteScreenEnabled) {
+                if (isRemoteScreenEnabled()) {
                     disableRemoteScreen();
                 } else {
                     enableRemoteScreen(undefined, undefined, { localOnly: getRemoteAccessLocalOnly() });
