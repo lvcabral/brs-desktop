@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="unreleased"></a>
+
+## Unreleased
+
+### New Features
+
+* Added the **Remote Screen** service: streams the simulator display to a browser on the local network over WebRTC, with an on-screen Roku remote, keyboard mapping, text entry and a screenshot download. Listens on port 8090 and is **disabled by default** because it has no password — see the [documentation](docs/remote-access.md#remote-screen). The stream is driven by the engine's new frame notification, so it keeps up with the simulator on static screens as well as animated ones, and is always at the display mode's full resolution regardless of the window size.
+
 <a name="v2.3.0"></a>
 
 ## v2.3.0 - SceneGraph Node Complete and more!

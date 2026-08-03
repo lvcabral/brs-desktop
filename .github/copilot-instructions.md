@@ -10,7 +10,7 @@ This is an Electron-based desktop application that simulates Roku devices for Br
 #### Main Process (`src/main.js`)
 - **Application Lifecycle**: Electron app initialization, window creation, global state management
 - **Device Information**: Creates unified `deviceInfo` object with Roku device specs, network config, localization
-- **Server Orchestration**: Initializes and manages ECP, Installer, and Telnet servers
+- **Server Orchestration**: Initializes and manages ECP, Installer, Telnet, Debug and Remote Screen servers
 - **Menu System**: Platform-specific menu creation and IPC event routing
 - **Settings Integration**: Loads/applies user preferences from JSON storage
 - **Command Line Processing**: Handles startup arguments (devtools, console, files, etc.)
@@ -45,6 +45,9 @@ This is an Electron-based desktop application that simulates Roku devices for Br
 - **`editor.js`**: Monaco-based BrightScript code editor window, with integrated web terminal
 - **`brightscript.js`**: BrightScript Monaco language definition (Monarch tokens, language config, themes)
 - **`monaco.js`**: `MonacoManager` class wrapping Monaco editor creation, theme and indentation settings
+- **`mirror.js`**: Hidden fixed-size canvas, the frame source for Remote Screen. Driven by the engine's `frame` event (`brs.setFrameNotify`, requires `brs-engine` >= 2.4.0) and copies `brs.getDisplayBuffer()` — native display-mode resolution, unlike the window-sized `#display`. Captured at `captureStream(0)` and pushed with `requestFrame()`, plus a 1s keepalive so an idle app still feeds the encoder. The engine's separate `cleared` event blanks the mirror rather than copying the buffer, which still holds the exited app's last frame
+- **`webrtc.js`**: Remote Screen peer connections (one per viewer session), offer creation and ICE relay
+- **`web/remote.html|remote.css|remote.js`**: The Remote Screen viewer page, copied unbundled to `app/web/`
 
 ### Core Components
 
@@ -71,6 +74,14 @@ This is an Electron-based desktop application that simulates Roku devices for Br
   - Command execution and output streaming
   - Micro debugger integration
   - Multi-client support with observer pattern
+- **Remote Screen Server** (`src/server/remotescreen.js`, port 8090):
+  - WebRTC video feed of the simulator display; no Roku counterpart
+  - Serves the viewer page (`src/app/web/remote.html|css|js`) and a `/config` JSON document
+  - `/rtc-session` WebSocket signaling relayed to the renderer over IPC (`rtcViewerJoined`, `rtcViewerLeft`, `rtcSignal`); the renderer is the offerer because it owns the media track
+  - Offers are only sent on join, so `rtcReady` (renderer announces its handlers are live; main re-announces open sessions) and `rtcSessionFailed` (renderer reports a dead peer; main closes the socket) close the gaps in that one-shot handshake
+  - Cross-origin requests are refused on both `/rtc-session` and `/paste`: WebSockets are exempt from CORS and a body-only POST needs no preflight, so a hostile page on loopback would otherwise pass the local-only address check
+  - `/paste` reuses the renderer's existing `pasteText` queue; remote buttons are posted by the page directly to ECP on 8060, so ECP must also be enabled
+  - Unauthenticated, therefore the only service whose setting defaults to disabled (`services.screen` is `[]`); capped at 4 concurrent viewers
 
 #### Settings Architecture
 - **Storage**: JSON file in `app.getPath("userData")/brs-settings.json`
@@ -94,7 +105,7 @@ This is an Electron-based desktop application that simulates Roku devices for Br
 #### Settings System (`src/helpers/settings.js`)
 - **ElectronPreferences Integration**: Modal settings window with form validation
 - **Device Configuration**: 15+ device models, display modes (480p/720p/1080p), localization
-- **Service Management**: Enable/disable ECP, Installer, Telnet servers with port configuration
+- **Service Management**: Enable/disable ECP, Installer, Telnet, Debug and Remote Screen servers with port configuration
 - **Theme System**: Purple/Light/Dark/System themes with CSS variable management
 - **Remote Control Mapping**: Custom keyboard shortcuts for Roku remote buttons
 - **Caption Styling**: Font, color, opacity, background for closed captioning
@@ -144,7 +155,7 @@ ipcMain.on("eventName", (event, data) => { /* handler */ });
 - **Toast Notifications**: User feedback for operations, errors, and state changes
 
 #### Status Bar (`src/app/statusbar.js`)
-- **Service Status Display**: Real-time indicators for ECP, Telnet, Web Installer services
+- **Service Status Display**: Real-time indicators for ECP, Telnet, Web Installer and Remote Screen services
 - **File Information**: Currently loaded app name, version, resolution display
 - **Error/Warning Counters**: Console message categorization and count display
 - **Audio Status**: Volume level, mute state, audio language indicators
@@ -187,7 +198,7 @@ brs.deviceData.property = value;
 ```
 
 ### Server Observer Pattern
-Each server (`ecp.js`, `installer.js`, `telnet.js`) uses observer pattern:
+Each server (`ecp.js`, `installer.js`, `telnet.js`, `debug.js`, `remotescreen.js`) uses observer pattern:
 ```javascript
 export function subscribeECP(observerId, callback) { /* subscribe */ }
 function notifyAll(eventName, eventData) { /* notify observers */ }
@@ -236,9 +247,9 @@ npm run dist-deb64       # Linux x64 Debian
 - **Linux**: AppImage and Debian package formats
 
 ## Testing & Quality
-- **Test Runner**: Vitest (`npm test`). Specs live in `test/unit/**` (pure logic, mirroring the `src/` tree) and `test/integration/**` (the real ECP, installer, telnet and debug servers on ephemeral ports)
+- **Test Runner**: Vitest (`npm test`). Specs live in `test/unit/**` (pure logic, mirroring the `src/` tree) and `test/integration/**` (the real ECP, installer, telnet, debug and Remote Screen servers on ephemeral ports)
 - **Electron Stubs**: `test/mocks/electron.js` plus the alias list in `vitest.config.mjs`; Electron is never launched. Assert IPC through the fake window's `webContents.send` spy, and drive main-process handlers with `ipcMain.emit(channel, {}, payload)`
-- **No E2E layer**: window, menu and visual changes must still be verified by running the app
+- **No E2E layer**: window, menu and visual changes must still be verified by running the app. Remote Screen's media path is in the same category — there is no DOM canvas, `captureStream()` or `RTCPeerConnection` under Vitest, so only the server, signaling relay and local-only guards are covered
 - **CI/CD**: GitHub Actions in `.github/workflows/build.yml` — the `test` job runs on all three platforms and gates the `release` job
 - **Code Signing**: macOS notarization via Apple Developer credentials
 - **Multi-arch**: Universal macOS builds, x64/x86 Windows, ARM Linux support

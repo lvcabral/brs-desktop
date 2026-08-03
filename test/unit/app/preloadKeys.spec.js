@@ -38,8 +38,8 @@ describe("IPC channel whitelists", () => {
     });
 
     it("holds the expected number of channels", () => {
-        expect(SEND_CHANNELS).toHaveLength(24);
-        expect(RECEIVE_CHANNELS).toHaveLength(29);
+        expect(SEND_CHANNELS).toHaveLength(27);
+        expect(RECEIVE_CHANNELS).toHaveLength(32);
     });
 
     it("has no duplicates in either direction", () => {
@@ -57,6 +57,13 @@ describe("IPC channel whitelists", () => {
         // Mute is the one piece of state either side can originate.
         expect(SEND_CHANNELS).toContain("setAudioMute");
         expect(RECEIVE_CHANNELS).toContain("setAudioMute");
+    });
+
+    it("allows rtcSignal in both directions", () => {
+        // WebRTC signaling is a relay: offers and candidates travel out from the renderer,
+        // answers and candidates come back, so the one channel has to be listed twice.
+        expect(SEND_CHANNELS).toContain("rtcSignal");
+        expect(RECEIVE_CHANNELS).toContain("rtcSignal");
     });
 });
 

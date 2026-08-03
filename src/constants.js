@@ -14,6 +14,9 @@ export const TELNET_PORT = 8085;
 export const DEBUG_PORT = 8080;
 export const WEB_INSTALLER_PORT = 80;
 export const SSDP_PORT = 1900;
+// Remote Screen has no Roku counterpart, so the port is ours to pick: 8090 stays clear of
+// the four above and of the 8080/8085 pair the debug and telnet services already occupy.
+export const REMOTE_SCREEN_PORT = 8090;
 
 // Default Roku authentication credentials
 export const DEFAULT_USRPWD = "rokudev";

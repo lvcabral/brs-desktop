@@ -35,6 +35,7 @@ This section will describe the options available on the application menu, please
 - Web Application Installer - See [documentation](remote-access.md#web-application-installer)
 - External Control Protocol - See [documentation](remote-access.md#brightscript-remote-console)
 - BrightScript Remote Console - See [documentation](remote-access.md#brightscript-remote-console)
+- Remote Screen - Streams the display to a browser on your network. See [documentation](remote-access.md#remote-screen)
 - Reset Device - Resets the simulator releasing any app from the memory, also reloading Developer Tools
 
 ### View Menu

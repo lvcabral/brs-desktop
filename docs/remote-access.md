@@ -8,7 +8,7 @@ By default all the services below accept connections from any device on the loca
 
 When that option is disabled:
 
-- The **Application Installer**, **ECP**, **Remote Console** and **Debug Server** only accept connections coming from `localhost` (`127.0.0.1` or `::1`). Requests from any other address are refused.
+- The **Application Installer**, **ECP**, **Remote Console**, **Debug Server** and **Remote Screen** only accept connections coming from `localhost` (`127.0.0.1` or `::1`). Requests from any other address are refused.
 - **SSDP** discovery advertisements are suppressed, so the simulator does not show up as a Roku device for the other machines scanning the network.
 
 The change is applied immediately to the services that are already running, and any connection already open from another machine is dropped. Because **SSDP** is turned off, the [VSCode BrightScript Extension](vscode-integration.md) will no longer discover the simulator automatically while this option is disabled — connecting to `127.0.0.1` still works.
@@ -86,3 +86,31 @@ The simulator now supports the interactive debugging using the **Remote Console*
 When the debugger is activated (either with `STOP` statement or via `Ctrl+Break`) you can type any expression for a live compile and run, in the context of the current function.
 
 If the **Remote Console** is enabled an icon is shown in the status bar together with the port number 8085.
+
+## Remote Screen
+
+The **Remote Screen** service streams the simulator display to a browser on your network over **WebRTC**, so you can watch and control a running app from a phone, a tablet or another computer. This has no Roku counterpart — a real device has no equivalent feature — so it is specific to the simulator.
+
+It listens to the _TCP_ port 8090 and is **disabled by default**. Enable it from the [Device Menu](how-to-use.md#device-menu) or the **Remote Access Services** section of the [Settings Screen](how-to-use.md#settings-screen), then open `http://<simulator-ip-address>:8090/` in any modern browser. An icon with the port number appears in the status bar while the service is running; clicking it opens the viewer page locally.
+
+The viewer page provides:
+
+- **Live video** of the simulator screen.
+- **An on-screen Roku remote**, plus the equivalent physical keyboard keys (arrows, `Enter`, `Escape`, `Backspace`, `End` and `Home`).
+- **A text field** for typing into on-screen keyboards, which is often easier than pressing letters one at a time.
+- **A screenshot button** that downloads the current frame as a PNG.
+
+> [!WARNING]
+>
+> **This service has no password.** Unlike the **Application Installer**, anyone who can reach port 8090 can watch your simulator screen, and — if **ECP** is also enabled — control it. That is why it is the only service disabled by default. If you enable it, either keep **Allow connections from other devices on the network** unchecked, or only enable it on networks you trust.
+
+A few things worth knowing:
+
+- **The remote buttons need [ECP](#ecp-external-control-protocol) enabled**, because that is what they are sent through. The viewer page detects this and shows a banner if **ECP** is off. Text entry and the screenshot button work either way.
+- **Video only, no audio.** Audio is not part of the stream.
+- **Up to four viewers at a time.** Each one is a separate video encode, so the cap protects the simulator's frame rate. A fifth viewer is told the simulator is busy.
+- **LAN only.** No STUN or TURN server is used, so the browser and the simulator have to be able to reach each other directly. This does not work across the internet.
+- **Only the viewer page itself can use the service.** The video channel and the text field refuse requests that come from a page on any other website, so browsing elsewhere while the service is running cannot expose your screen — but that protection stops at the browser, so the warning above still applies to anything else on the network.
+- **The stream is always at the display mode's full resolution** (720x540 for 480p, 1280x720 for 720p, 1920x1080 for 1080p), regardless of the simulator window size, so shrinking the window or going fullscreen neither disturbs nor degrades it. Changing the display mode briefly interrupts the stream while it renegotiates.
+- **Updates are sent as the app draws them**, so the stream stays in step with the simulator whether the app is animating constantly or sitting on a static menu.
+- While at least one viewer is connected, the simulator window keeps rendering even if it is minimized. Without that, minimizing would freeze the stream on a stale frame.

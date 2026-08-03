@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="HandheldFriendly" content="True">
+    <title>BrightScript Simulator - Remote Screen</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="/remote.css">
+    <link rel="icon" href="data:;base64,iVBORwOKGO=" />
+</head>
+<body>
+    <header class="topbar">
+        <span class="brand">BrightScript Simulator</span>
+        <span id="status" class="status">Connecting...</span>
+    </header>
+
+    <div id="banner" class="banner" hidden></div>
+
+    <main class="stage">
+        <!-- muted is required for autoplay: an unmuted track is blocked until the user gestures,
+             and there is no audio in the stream anyway. -->
+        <video id="video" autoplay playsinline muted></video>
+        <div id="overlay" class="overlay">Waiting for the simulator...</div>
+    </main>
+
+    <section class="remote">
+        <div class="row">
+            <button class="btn wide" data-key="back" title="Back (Escape)">&#8592; Back</button>
+            <button class="btn wide" data-key="info" title="Options (NumpadMultiply)">&#42; Options</button>
+            <button class="btn wide" data-key="home" title="Home">&#8962; Home</button>
+        </div>
+
+        <div class="dpad">
+            <button class="btn up" data-key="up" title="Up (ArrowUp)">&#9650;</button>
+            <button class="btn left" data-key="left" title="Left (ArrowLeft)">&#9664;</button>
+            <button class="btn ok" data-key="select" title="Select (Enter)">OK</button>
+            <button class="btn right" data-key="right" title="Right (ArrowRight)">&#9654;</button>
+            <button class="btn down" data-key="down" title="Down (ArrowDown)">&#9660;</button>
+        </div>
+
+        <div class="row">
+            <button class="btn" data-key="instantreplay" title="Replay (Backspace)">&#8635;</button>
+            <button class="btn" data-key="rev" title="Rewind">&#9194;</button>
+            <button class="btn" data-key="play" title="Play/Pause (End)">&#9199;</button>
+            <button class="btn" data-key="fwd" title="Fast forward">&#9193;</button>
+        </div>
+
+        <form id="textForm" class="row text-row" autocomplete="off">
+            <input id="textInput" type="text" placeholder="Type text into the app..." maxlength="255">
+            <button type="submit" class="btn wide">Send</button>
+        </form>
+
+        <div class="row">
+            <button id="screenshot" class="btn wide" title="Download the current frame">&#128247; Screenshot</button>
+        </div>
+
+        <p class="hint">
+            Physical keyboard works too: arrows, Enter, Escape, Backspace, End and Home.
+        </p>
+    </section>
+
+    <script src="/remote.js"></script>
+</body>
+</html>

@@ -40,6 +40,9 @@ const SEND_CHANNELS = [
     "closeSimulator",
     "externalVolumeReady",
     "setPreference",
+    "rtcSignal",
+    "rtcSessionFailed",
+    "rtcReady",
 ];
 
 // Channels the renderer may listen on. Every entry needs a matching webContents.send()
@@ -74,6 +77,9 @@ const RECEIVE_CHANNELS = [
     "unmountExternalVolume",
     "showToast",
     "setRendezvousLog",
+    "rtcViewerJoined",
+    "rtcViewerLeft",
+    "rtcSignal",
 ];
 
 /**

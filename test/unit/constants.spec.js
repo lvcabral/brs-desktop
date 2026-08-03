@@ -20,6 +20,10 @@ describe("service ports", () => {
         expect(constants.WEB_INSTALLER_PORT).toBe(80);
     });
 
+    it("picks a port for Remote Screen, which has no Roku counterpart", () => {
+        expect(constants.REMOTE_SCREEN_PORT).toBe(8090);
+    });
+
     it("assigns a distinct port to every service", () => {
         const ports = [
             constants.ECP_PORT,
@@ -27,6 +31,7 @@ describe("service ports", () => {
             constants.TELNET_PORT,
             constants.DEBUG_PORT,
             constants.WEB_INSTALLER_PORT,
+            constants.REMOTE_SCREEN_PORT,
         ];
         expect(new Set(ports).size).toBe(ports.length);
     });

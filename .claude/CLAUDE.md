@@ -177,8 +177,8 @@ intentional — see `matchesKey`/`convertSettingsKey`, which mirror the key-name
 ### Network services (`src/server/`, all in the main process)
 
 Each service is a module with an observer registration function (`subscribeECP`, `subscribeInstaller`,
-`subscribeTelnet`, `subscribeDebugServer`); `src/helpers/events.js` is the single subscriber that wires
-service events back into settings/status/file-loading.
+`subscribeTelnet`, `subscribeDebugServer`, `subscribeRemoteScreen`); `src/helpers/events.js` is the single
+subscriber that wires service events back into settings/status/file-loading.
 
 - `ecp.js` — ECP REST API + ECP-2 WebSockets + SSDP discovery (port 8060). This is what makes the VS Code
   BrightScript extension detect the simulator as a real Roku.
@@ -187,15 +187,71 @@ service events back into settings/status/file-loading.
 - `telnet.js` — plain console feed, port 8085.
 - `debug.js` — MicroDebugger command shell (port 8080), implements the Roku debug command set
   (`bt`, `var`, `chanperf`, `sgnodes`, `press`, `type`, …).
+- `remotescreen.js` — WebRTC video feed of the display plus the viewer page (port 8090). Has no Roku
+  counterpart. **Unauthenticated, so it is the one service defaulting to disabled** (`services.screen`
+  is `[]`); `services.remoteAccess` is its only gate. See "Remote Screen" below.
 
 Default ports live in `src/constants.js`, not scattered literals. Each service takes the port as an
 optional trailing parameter defaulting to that constant — `enableECP(win, port)`,
-`enableTelnet(win, port)`, `enableDebugServer(win, prefs, port)`, and `setPort()` for the installer
-(whose default, 80, is privileged). Integration tests rely on this to bind ephemeral ports; don't
-reintroduce a hard-coded `listen(CONSTANT)`.
+`enableTelnet(win, port)`, `enableDebugServer(win, prefs, port)`, `enableRemoteScreen(win, port)`, and
+`setPort()` for the installer (whose default, 80, is privileged). Integration tests rely on this to bind
+ephemeral ports; don't reintroduce a hard-coded `listen(CONSTANT)`.
+
+`updateServerStatus(service, menuItem, enabled, port)` derives the settings key from
+`service.toLowerCase()`, so a service's display name must be a single lowercase-able word matching its
+key — that is why Remote Screen is registered as `"Screen"` against `services.screen`, not
+`"RemoteScreen"`.
 
 The Electron-free halves live alongside: `src/server/debugHelp.js` (help text), `src/server/debugKeys.js`
 (the `press` character map) and `src/helpers/digest.js` (both the server and client sides of digest auth).
+
+### Remote Screen
+
+Split across three processes because of one hard constraint: a TCP listener only exists in main,
+`RTCPeerConnection`/`captureStream()` only in the renderer. So `src/server/remotescreen.js` owns the
+sockets, `src/app/webrtc.js` owns the peer connections, and signaling is relayed over IPC between them.
+**The renderer is the offerer** — it owns the track, so it knows when there is media to negotiate about.
+
+Non-obvious pieces, all of them load-bearing:
+
+- **Offers are only ever sent on join**, so anything that loses a `rtcViewerJoined` strands a viewer on
+  a socket that never streams. Two channels close those gaps: `rtcReady` (renderer → main, sent last in
+  `initRemoteScreen()`, makes main re-announce every open session) and `rtcSessionFailed` (renderer →
+  main, closes the socket of a peer that failed so the page reconnects instead of holding a slot).
+- **`src/app/mirror.js` is event-driven, not sampled — this requires brs-engine ≥ 2.4.0**, whose
+  `setFrameNotify`/`getDisplayBuffer` are unreleased at the time of writing. `package.json` still says
+  `^2.3.0`, because pinning `^2.4.0` before the engine publishes makes `npm ci` unresolvable and turns CI
+  red; the range already admits 2.4.0, so tighten it in the same change that bumps the engine. Until
+  then local work needs the engine's `packages/browser/lib/brs.api.js` + `brs.worker.js` copied over
+  `node_modules/brs-engine/lib/` after every `npm install`. The guard in `initRemoteScreen()` turns a
+  stale engine into one clear console error rather than a silently frozen stream. The engine
+  repaints only when the running app draws, so a settled SceneGraph app posts *zero* frames while a busy
+  one posts at 60fps. Polling was therefore both late on the first and wasteful on the second: a static
+  menu app took seconds to update remotely. `brs.setFrameNotify(true)` (set while a viewer is connected,
+  `false` otherwise, so an unwatched simulator pays nothing) makes the engine emit `frame` from
+  `drawBufferImage()`, *after* the repaint, so the buffer always holds a complete frame.
+- **Going black is a separate `cleared` event, and it must not be served from the buffer.**
+  `clearDisplay()` deliberately never touches `bufferCanvas`, so after an app exits the buffer still
+  holds that app's final image. A mirror that treated `cleared` as just another frame would copy it and
+  leave the viewer on a screenshot of an app that had already quit; `onEngineCleared()` blanks the
+  mirror instead. This asymmetry is why the engine emits two events rather than one.
+- **The mirror copies `brs.getDisplayBuffer()`, not `#display`.** The visible canvas is sized to the
+  window (CSS size × dpr) and `redrawDisplay()` lets it be *smaller* than the frame, so copying it
+  streams a blurry upscale; it can also carry overscan guidelines. The buffer is always at the display
+  mode's native resolution. A canvas of our own is still needed — `OffscreenCanvas` has no
+  `captureStream()` — and keeping it sized from the display mode is what stops window resizes from
+  renegotiating the track. 480p is 720×540 (4:3), not 16:9.
+- **The track is captured at `captureStream(0)` and pushed with `requestFrame()`.** Letting the browser
+  sample on its own clock would re-add a frame interval of latency to every update. The cost is that
+  nothing reaches the encoder unless we push, so `startMirror()` pushes immediately (a viewer joining an
+  idle app would otherwise sit on the overlay forever) and a 1s keepalive pushes while the app is static.
+- **Cross-origin requests are refused on `/rtc-session` and `/paste`.** The local-only toggle filters by
+  address, which is not enough: WebSockets are exempt from CORS and a body-only POST is a safelisted
+  simple request, so a page on any site the user visits can reach loopback and be handed the live screen
+  or type into the running app. A missing `Origin` is deliberately allowed — browsers always send it on
+  these routes, non-browser clients legitimately omit it.
+- The service lifts `backgroundThrottling` only while someone is watching; a minimized window otherwise
+  stops painting and the stream freezes on a stale frame.
 
 ### Settings (`src/helpers/settings.js`, ~2.4k lines)
 

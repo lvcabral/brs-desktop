@@ -1,0 +1,233 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
+ *
+ *  Copyright (c) 2019-2026 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* Standalone stylesheet: the viewer page is opened from phones and other machines, so it
+   deliberately does not reuse ../css/styles.min.css (the Roku-themed installer skin) or any
+   webfont -- every glyph in remote.html is a Unicode character the system font already has. */
+
+:root {
+    --bg: #1a1a1a;
+    --panel: #262626;
+    --panel-hover: #333;
+    --border: #3d3d3d;
+    --text: #e6e6e6;
+    --muted: #9a9a9a;
+    --accent: #6a3ab2;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    /* Stops the double-tap-to-zoom gesture from eating rapid remote presses. */
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+}
+
+.brand {
+    font-weight: 600;
+}
+
+.status {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.banner {
+    margin: 10px 14px 0;
+    padding: 10px 12px;
+    border: 1px solid #7a5c00;
+    border-radius: 6px;
+    background: #3a2e00;
+    color: #ffdf7e;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.stage {
+    position: relative;
+    margin: 14px auto 0;
+    max-width: 960px;
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#video {
+    display: block;
+    width: 100%;
+    /* The mirror canvas is already letterboxed to the display mode's aspect ratio, so contain
+       adds no second set of bars -- it only guarantees no distortion if that ever changes. */
+    object-fit: contain;
+    background: #000;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+/* An author-level "display" wins over the UA stylesheet's [hidden] { display: none }, so
+   without this the overlay's hidden attribute is silently inert and "Waiting for the
+   simulator..." stays on top of a working stream. Applies to every [hidden] element on the
+   page, so the same trap cannot come back through a new component. */
+[hidden] {
+    display: none !important;
+}
+
+.remote {
+    max-width: 360px;
+    margin: 18px auto 32px;
+    padding: 0 14px;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.btn {
+    flex: 1 1 0;
+    min-height: 48px;
+    padding: 10px 12px;
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+    /* Prevents the long-press text selection that fires on held remote buttons. */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover {
+    background: var(--panel-hover);
+}
+
+.btn:active {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.btn.wide {
+    font-size: 14px;
+}
+
+/* The D-pad is a 3x3 grid with the arrows on the cross and OK in the middle. */
+.dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.dpad .up {
+    grid-area: 1 / 2;
+}
+
+.dpad .left {
+    grid-area: 2 / 1;
+}
+
+.dpad .ok {
+    grid-area: 2 / 2;
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+.dpad .right {
+    grid-area: 2 / 3;
+}
+
+.dpad .down {
+    grid-area: 3 / 2;
+}
+
+.text-row {
+    margin-top: 16px;
+}
+
+#textInput {
+    flex: 3 1 0;
+    min-height: 48px;
+    padding: 10px 12px;
+    background: #1f1f1f;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px; /* 16px or larger stops iOS Safari zooming in on focus. */
+    font-family: inherit;
+}
+
+#textInput::placeholder {
+    color: var(--muted);
+}
+
+.hint {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Side by side once there is room for the video and the remote at full size. */
+@media (min-width: 900px) {
+    body {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto 1fr;
+        column-gap: 20px;
+    }
+
+    .topbar {
+        grid-column: 1 / -1;
+    }
+
+    .banner {
+        grid-column: 1 / -1;
+    }
+
+    .stage {
+        margin: 20px 0 20px 20px;
+        align-self: start;
+    }
+
+    .remote {
+        width: 340px;
+        margin: 20px 20px 20px 0;
+        padding: 0;
+    }
+}

@@ -43,8 +43,21 @@ import {
     setInstallerLocalOnly,
     setPassword,
 } from "../server/installer";
+import {
+    enableRemoteScreen,
+    disableRemoteScreen,
+    isRemoteScreenEnabled,
+    setRemoteScreenLocalOnly,
+} from "../server/remotescreen";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
-import { WEB_INSTALLER_PORT, DEFAULT_USRPWD, ECP_PORT, TELNET_PORT, DEBUG_PORT } from "../constants";
+import {
+    WEB_INSTALLER_PORT,
+    DEFAULT_USRPWD,
+    ECP_PORT,
+    TELNET_PORT,
+    DEBUG_PORT,
+    REMOTE_SCREEN_PORT,
+} from "../constants";
 import { getLocalIps, formatPath } from "./util";
 
 const isMacOS = process.platform === "darwin";
@@ -92,6 +105,9 @@ export function getSettings(window) {
                 ecp: ["enabled"],
                 telnet: ["enabled"],
                 debug: ["enabled"],
+                // Off by default, unlike every other service: Remote Screen is unauthenticated,
+                // so anyone who can reach the port sees the screen. Strictly opt-in.
+                screen: [],
                 remoteAccess: ["enabled"],
             },
             device: {
@@ -426,6 +442,18 @@ export function getSettings(window) {
                                         },
                                     ],
                                     help: "Debug Server can be accessed using an application such as PuTTY or terminal on Mac and Linux",
+                                },
+                                {
+                                    label: "Remote Screen (WebRTC Port 8090)",
+                                    key: "screen",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Service Enabled",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "Streams the simulator screen to a browser on your network. This service has no password, so anyone who can reach the port can watch; the remote buttons also require ECP to be enabled",
                                 },
                             ],
                         },
@@ -1203,6 +1231,8 @@ export async function showSettings() {
             checkMenuItem("telnet", telnetEnabled);
             const debugEnabled = settings.value("services.debug")?.includes("enabled") ?? false;
             checkMenuItem("debug-server", debugEnabled);
+            const screenEnabled = settings.value("services.screen")?.includes("enabled") ?? false;
+            checkMenuItem("remote-screen", screenEnabled);
             const options = settings.value("simulator.options");
             if (options) {
                 checkMenuItem("on-top", options.includes("alwaysOnTop"));
@@ -1586,6 +1616,15 @@ function saveServicesSettings(services, window) {
         }
     } else {
         disableDebugServer();
+    }
+    if (services.screen?.includes("enabled")) {
+        if (isRemoteScreenEnabled) {
+            setRemoteScreenLocalOnly(localOnly);
+        } else {
+            enableRemoteScreen(window, REMOTE_SCREEN_PORT, { localOnly });
+        }
+    } else {
+        disableRemoteScreen();
     }
 }
 
