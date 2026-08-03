@@ -93,6 +93,24 @@ describe("Remote Screen local-only mode", () => {
         expect(res.status).toBe(200);
     });
 
+    it("withholds the LAN address from /config while local-only", async () => {
+        // The address exists, but advertising it would be a link to a connection this very
+        // setting refuses, so the page falls back to its own origin instead.
+        const original = globalThis.sharedObject.deviceInfo.localIps;
+        globalThis.sharedObject.deviceInfo.localIps = ["en0,192.0.2.10"]; // TEST-NET-1, RFC 5737
+        try {
+            setRemoteScreenLocalOnly(true);
+            const restricted = await fetch(`http://127.0.0.1:${port}/config`).then((res) => res.json());
+            expect(restricted.lanHost).toBeNull();
+
+            setRemoteScreenLocalOnly(false);
+            const open = await fetch(`http://127.0.0.1:${port}/config`).then((res) => res.json());
+            expect(open.lanHost).toBe("192.0.2.10");
+        } finally {
+            globalThis.sharedObject.deviceInfo.localIps = original;
+        }
+    });
+
     it("still accepts a viewer from this machine while local-only", async () => {
         setRemoteScreenLocalOnly(true);
         const { ws, hello } = await connectViewer();

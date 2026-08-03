@@ -75,6 +75,13 @@ const STATIC_ASSETS = {
     "/css/styles.min.css": { file: ["css", "styles.min.css"], type: "text/css" },
     "/remote.css": { file: ["web", "remote.css"], type: "text/css" },
     "/remote.js": { file: ["web", "remote.js"], type: "text/javascript" },
+    // The WebRTC protocol, shared by the viewer and the embed page so there is one copy of it.
+    "/signaling.js": { file: ["web", "signaling.js"], type: "text/javascript" },
+    // The video on its own, for dropping into an <iframe> in someone else's app. A page rather
+    // than a stream URL because WebRTC has no such thing: the media is SRTP over UDP, set up by
+    // the /rtc-session WebSocket, so there is nothing a <video src> could point at.
+    "/embed": { file: ["web", "embed.html"], type: "text/html" },
+    "/embed.js": { file: ["web", "embed.js"], type: "text/javascript" },
 };
 
 let server;
@@ -368,6 +375,28 @@ function handleRequest(req, res) {
 }
 
 /**
+ * The address another machine on the LAN should use to reach this service.
+ *
+ * The viewer page cannot work this out for itself: opened from the status bar it is on
+ * localhost, so `location.origin` yields an address that is useless to anyone else -- which is
+ * the whole point of showing an address to copy. deviceInfo.localIps holds "<iface>,<address>"
+ * entries, and the first is the one main.js already advertises as the device's connection info,
+ * so using it keeps this link and ECP/SSDP naming the same interface.
+ *
+ * Returns null when the service is restricted to localhost, because then a LAN address is a
+ * link to something that would refuse the connection.
+ * @returns {string|null} - The host to embed in the copyable URL, or null to use the page's own
+ */
+function getLanHost() {
+    if (localOnly) {
+        return null;
+    }
+    const entry = globalThis.sharedObject?.deviceInfo?.localIps?.[0];
+    const address = entry?.split(",")[1];
+    return address && !isLocalhostAddress(address) ? address : null;
+}
+
+/**
  * Serves the settings the viewer page needs to build itself. ECP state is included because
  * the page drives the remote buttons with no-cors requests and therefore cannot see whether
  * they landed -- this is its only way to warn that the remote will do nothing.
@@ -380,6 +409,10 @@ export function serveConfig(req, res) {
         ecpEnabled: isECPEnabled,
         displayMode: globalThis.sharedObject?.deviceInfo?.displayMode ?? "720p",
         maxViewers: MAX_VIEWERS,
+        // Both are needed to build the embed URL: the page may be on localhost, and the bound
+        // port differs from the constant when port 0 was used.
+        lanHost: getLanHost(),
+        port: screenPort,
     });
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(req.method === "HEAD" ? undefined : body);

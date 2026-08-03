@@ -123,6 +123,17 @@ body {
     border-radius: 8px;
 }
 
+/* Says what the address is for. Without it the row reads as "here is where you already are",
+   which is not what this URL is -- it points at the chrome-less /embed page. */
+.stream-url-label {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 .stream-url-link {
     flex: 0 1 auto;
     min-width: 0;
@@ -140,6 +151,22 @@ body {
     flex: 0 0 auto;
     padding: 8px 20px;
     font-size: 14px;
+}
+
+.stream-url-hint {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+.stream-url-hint code {
+    padding: 2px 5px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px;
 }
 
 .remote {

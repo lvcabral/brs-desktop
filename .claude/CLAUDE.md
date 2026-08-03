@@ -250,6 +250,15 @@ Non-obvious pieces, all of them load-bearing:
   simple request, so a page on any site the user visits can reach loopback and be handed the live screen
   or type into the running app. A missing `Origin` is deliberately allowed — browsers always send it on
   these routes, non-browser clients legitimately omit it.
+- **`/embed` is a page, because WebRTC has no stream URL.** The media is SRTP over UDP negotiated by
+  the `/rtc-session` WebSocket, so there is nothing a `<video src>` could point at; embedding means an
+  `<iframe>` around a chrome-less page. `signaling.js` holds the one copy of the protocol and is loaded
+  *before* `remote.js`/`embed.js`, which call `window.brsSignaling` on load. The copy button's URL uses
+  `deviceInfo.localIps[0]` from `/config` rather than `location.origin`, because the viewer is usually
+  opened from the status bar where the origin is `localhost` — useless to whatever machine it is pasted
+  into. `getLanHost()` returns `null` under local-only, since a LAN link would then point at a
+  connection the service itself refuses. The status bar keeps opening `localhost`, which is correct: it
+  is on this machine anyway.
 - **The viewer page wears the web installer's skin, and `remote.css` is an override layer, not a theme.**
   `/css/styles.min.css` is served from `src/app/css/`, the same file port 80 uses, so the two pages read
   as one application; it has no `@font-face` or `url()` references, which is what makes it safe to hand

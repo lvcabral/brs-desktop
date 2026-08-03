@@ -78,8 +78,9 @@ describe("Remote Screen HTTP server", () => {
         expect(css.headers.get("content-type")).toBe("text/css");
         expect(js.status).toBe(200);
         expect(js.headers.get("content-type")).toBe("text/javascript");
-        // A 404 here would leave the page rendering with no behaviour at all.
-        expect(await js.text()).toContain("RTCPeerConnection");
+        // A 404 here would leave the page rendering with no behaviour at all. The negotiation
+        // itself lives in signaling.js now, so this checks for what remote.js still owns.
+        expect(await js.text()).toContain("brsSignaling");
     });
 
     it("serves the shared Roku skin the web installer also uses", async () => {
@@ -99,6 +100,36 @@ describe("Remote Screen HTTP server", () => {
         expect(body.indexOf("/remote.css")).toBeGreaterThan(body.indexOf("/css/styles.min.css"));
     });
 
+    it("serves the embeddable stream page with no chrome around the video", async () => {
+        // The point of /embed is that it carries nothing but the video: an embedder supplies its
+        // own UI, so the remote, the text field and the skin must all be absent.
+        const res = await fetch(`${base}/embed`);
+        const body = await res.text();
+        expect(res.status).toBe(200);
+        expect(res.headers.get("content-type")).toBe("text/html");
+        expect(body).toContain("<video");
+        expect(body).not.toContain("data-key");
+        expect(body).not.toContain("styles.min.css");
+    });
+
+    it("serves the signaling module both pages negotiate through", async () => {
+        const res = await fetch(`${base}/signaling.js`);
+        expect(res.status).toBe(200);
+        expect(res.headers.get("content-type")).toBe("text/javascript");
+        expect(await res.text()).toContain("RTCPeerConnection");
+    });
+
+    it("loads the shared signaling module before the page that uses it", async () => {
+        // signaling.js defines window.brsSignaling, which both pages call on load, so a page
+        // listing it second would throw before ever connecting.
+        for (const page of ["/", "/embed"]) {
+            const body = await fetch(`${base}${page}`).then((res) => res.text());
+            const script = page === "/" ? "/remote.js" : "/embed.js";
+            expect(body.indexOf("/signaling.js"), page).toBeGreaterThan(-1);
+            expect(body.indexOf(script), page).toBeGreaterThan(body.indexOf("/signaling.js"));
+        }
+    });
+
     it("reports the settings the viewer page builds itself from", async () => {
         const res = await fetch(`${base}/config`);
         const config = await res.json();
@@ -109,6 +140,30 @@ describe("Remote Screen HTTP server", () => {
         expect(config.ecpEnabled).toBe(false);
         expect(config.displayMode).toBe(globalThis.sharedObject.deviceInfo.displayMode);
         expect(config.maxViewers).toBeGreaterThan(0);
+        // The page needs the bound port, not the constant, to build an address for another machine.
+        expect(config.port).toBe(port);
+    });
+
+    it("reports the LAN address so the copyable URL is not localhost", async () => {
+        // The viewer is usually opened from the simulator's own status bar, where location.origin
+        // is localhost -- an address that is useless to the other machine it gets pasted into.
+        // Overridden rather than read from the host, so the test does not depend on the network.
+        const original = globalThis.sharedObject.deviceInfo.localIps;
+        globalThis.sharedObject.deviceInfo.localIps = ["en0,192.0.2.10"]; // TEST-NET-1, RFC 5737
+        try {
+            const config = await fetch(`${base}/config`).then((res) => res.json());
+            expect(config.lanHost).toBe("192.0.2.10");
+        } finally {
+            globalThis.sharedObject.deviceInfo.localIps = original;
+        }
+    });
+
+    it("reports no LAN address when the only interface is loopback", async () => {
+        // Then the page's own origin is the honest answer, and a link to 127.0.0.1 handed to
+        // another machine would point at that machine rather than at the simulator.
+        const config = await fetch(`${base}/config`).then((res) => res.json());
+        expect(globalThis.sharedObject.deviceInfo.localIps).toEqual(["eth1,127.0.0.1"]);
+        expect(config.lanHost).toBeNull();
     });
 
     it("replays posted text through the renderer's existing paste queue", async () => {

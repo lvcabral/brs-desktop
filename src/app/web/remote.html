@@ -42,11 +42,18 @@
                                         <div id="overlay" class="overlay">Waiting for the simulator...</div>
                                     </div>
 
+                                    <!-- The embeddable stream, not this page: the address is meant to be
+                                         dropped into another application's <iframe>. -->
                                     <div class="stream-url">
-                                        <a id="streamLink" class="stream-url-link" href="/">&nbsp;</a>
+                                        <span class="stream-url-label">Stream URL</span>
+                                        <a id="streamLink" class="stream-url-link" href="/embed" target="_blank" rel="noopener">&nbsp;</a>
                                         <button type="button" id="copyUrl" class="roku-button stream-url-copy"
-                                                title="Copy this address to the clipboard">Copy</button>
+                                                title="Copy the stream address, for embedding it in another app">Copy</button>
                                     </div>
+                                    <p class="stream-url-hint">
+                                        Embed the video on its own with
+                                        <code>&lt;iframe src="&hellip;/embed"&gt;&lt;/iframe&gt;</code>.
+                                    </p>
                                 </div>
 
                                 <section class="remote">
@@ -96,6 +103,8 @@
         </div>
     </div>
 
+    <!-- signaling.js first: it defines window.brsSignaling, which remote.js uses on load. -->
+    <script src="/signaling.js"></script>
     <script src="/remote.js"></script>
 </body>
 </html>

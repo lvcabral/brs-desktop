@@ -48,6 +48,8 @@ This is an Electron-based desktop application that simulates Roku devices for Br
 - **`mirror.js`**: Hidden fixed-size canvas, the frame source for Remote Screen. Driven by the engine's `frame` event (`brs.setFrameNotify`, requires `brs-engine` >= 2.4.0) and copies `brs.getDisplayBuffer()` — native display-mode resolution, unlike the window-sized `#display`. Captured at `captureStream(0)` and pushed with `requestFrame()`, plus a 1s keepalive so an idle app still feeds the encoder. The engine's separate `cleared` event blanks the mirror rather than copying the buffer, which still holds the exited app's last frame
 - **`webrtc.js`**: Remote Screen peer connections (one per viewer session), offer creation and ICE relay
 - **`web/remote.html|remote.css|remote.js`**: The Remote Screen viewer page, copied unbundled to `app/web/`. Wears the same Roku skin (`css/styles.min.css`) as the web installer; `remote.css` is an override layer on top of it, not a standalone theme
+- **`web/signaling.js`**: The WebRTC answer/candidate protocol, shared by the viewer and the embed page as `window.brsSignaling`; must be loaded before either
+- **`web/embed.html|embed.js`**: Chrome-less video-only page served at `/embed`, for `<iframe>` embedding in another app
 
 ### Core Components
 

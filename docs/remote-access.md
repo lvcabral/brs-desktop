@@ -99,7 +99,7 @@ The viewer page provides:
 - **An on-screen Roku remote**, plus the equivalent physical keyboard keys (arrows, `Enter`, `Escape`, `Backspace`, `End` and `Home`).
 - **A text field** for typing into on-screen keyboards, which is often easier than pressing letters one at a time.
 - **A screenshot button** that downloads the current frame as a PNG.
-- **The page's own address**, shown under the video with a button that copies it, so it is easy to pass to another device.
+- **The stream address**, shown under the video with a button that copies it — see [Embedding the stream](#embedding-the-stream) below.
 
 > [!WARNING]
 >
@@ -115,3 +115,47 @@ A few things worth knowing:
 - **The stream is always at the display mode's full resolution** (720x540 for 480p, 1280x720 for 720p, 1920x1080 for 1080p), regardless of the simulator window size, so shrinking the window or going fullscreen neither disturbs nor degrades it. Changing the display mode briefly interrupts the stream while it renegotiates.
 - **Updates are sent as the app draws them**, so the stream stays in step with the simulator whether the app is animating constantly or sitting on a static menu.
 - While at least one viewer is connected, the simulator window keeps rendering even if it is minimized. Without that, minimizing would freeze the stream on a stale frame.
+
+### Embedding the stream
+
+The address under the video points at `/embed`, not at the viewer page: the same live video with no
+header, no remote and no footer, sized to fill whatever frame you put it in. Drop it into a page of
+your own with an `iframe`:
+
+```html
+<iframe src="http://192.0.2.10:8090/embed"
+        width="1280" height="720" frameborder="0" allow="autoplay"></iframe>
+```
+
+The copy button gives you that URL with the simulator's own network address already filled in, which
+is why the address is worth copying rather than typing: opened from the status bar the viewer is on
+`localhost`, and `http://localhost:8090/embed` means "this machine" to whichever machine you paste it
+into. While **Allow connections from other devices on the network** is off, the page shows its own
+`localhost` address instead, because a network address would be a link to a connection the simulator
+would refuse.
+
+The scheme is `http` because what you are embedding is a *page*. There is no URL for the video
+itself — WebRTC media is SRTP over UDP, set up by a WebSocket handshake, so there is nothing for a
+`<video src>` or a media player to point at. The `/embed` page is what performs that handshake.
+
+To drive the stream yourself instead — your own `RTCPeerConnection`, your own `video` element —
+connect a WebSocket to `ws://<simulator-ip>:8090/rtc-session` and answer what it sends. The
+simulator is always the offerer, because it owns the media track; a client only ever answers, and
+never initiates negotiation. Messages are JSON:
+
+| Direction | Message | Meaning |
+| --- | --- | --- |
+| server → client | `{"type":"hello","sessionId":"s1"}` | Sent on connect. Informational; nothing to reply. |
+| server → client | `{"type":"offer","sdp":{…}}` | Answer it with `setRemoteDescription` → `createAnswer`. |
+| server → client | `{"type":"candidate","candidate":{…}}` | Add it, or buffer it until a remote description exists. |
+| server → client | `{"type":"busy","maxViewers":4}` | The viewer cap is full; the socket then closes with code 4000. Do not reconnect. |
+| client → server | `{"type":"answer","sdp":{…}}` | Your answer. |
+| client → server | `{"type":"candidate","candidate":{…}}` | Your ICE candidates. |
+
+Use `{ iceServers: [] }` — the service is LAN-only, so host candidates are all that is needed and
+STUN would only add delay. Candidates can arrive before the offer has been applied, so buffer any
+that turn up early. An offer is only ever sent when a viewer *joins*, so if you lose the connection,
+open a new WebSocket rather than waiting for a fresh offer on the old one.
+
+The reference implementation is `src/app/web/signaling.js`, which is what both the viewer and the
+embed page use; it is served at `http://<simulator-ip>:8090/signaling.js` and is about 200 lines.

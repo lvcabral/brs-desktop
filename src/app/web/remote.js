@@ -16,9 +16,6 @@
 (function () {
     "use strict";
 
-    var SIGNALING_PATH = "/rtc-session";
-    var RECONNECT_MS = 2000;
-    var CLOSE_CODE_BUSY = 4000;
     // How long the copy button stays on its confirmation before reverting to "Copy".
     var COPY_FEEDBACK_MS = 1500;
 
@@ -32,14 +29,6 @@
     var copyButton = document.getElementById("copyUrl");
 
     var config = { ecpPort: 8060, ecpEnabled: false, displayMode: "720p", maxViewers: 4 };
-    var ws;
-    var pc;
-    var reconnectTimer;
-    var busy = false;
-    // Candidates that arrive before setRemoteDescription has resolved. addIceCandidate rejects
-    // without a remote description, and with trickle ICE the simulator's candidates routinely
-    // arrive during the answer chain below, so buffering here is what keeps them from being lost.
-    var pendingCandidates = [];
 
     function setStatus(text) {
         statusEl.textContent = text;
@@ -51,147 +40,22 @@
     }
 
     /**
-     * Tears down the peer connection. Called before every new negotiation and on socket close,
-     * so a stale connection never lingers holding a frozen frame.
+     * Opens the signaling session. The protocol itself lives in signaling.js, shared with the
+     * embed page; this only maps its callbacks onto this page's UI.
      */
-    function closePeer() {
-        pendingCandidates = [];
-        if (pc) {
-            pc.onicecandidate = null;
-            pc.ontrack = null;
-            pc.onconnectionstatechange = null;
-            pc.close();
-            pc = null;
-        }
-        video.srcObject = null;
-        overlay.hidden = false;
-    }
-
-    function send(message) {
-        if (ws?.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify(message));
-        }
-    }
-
-    /**
-     * Applies the ICE candidates that arrived before there was a remote description to apply
-     * them against. Candidates are advisory -- one being rejected does not sink the connection --
-     * so a failure is logged and the rest still go in.
-     */
-    function flushCandidates() {
-        var queued = pendingCandidates;
-        pendingCandidates = [];
-        queued.forEach(function (candidate) {
-            pc.addIceCandidate(candidate).catch(warnCandidateRejected);
-        });
-    }
-
-    /**
-     * Reports a candidate the browser would not accept.
-     * @param {Error} err - The rejection
-     */
-    function warnCandidateRejected(err) {
-        console.warn("buffered candidate rejected:", err.message);
-    }
-
-    /**
-     * Answers the simulator's offer.
-     * @param {object} sdp - The remote offer
-     */
-    function handleOffer(sdp) {
-        closePeer();
-        // No ICE servers: this service is LAN-only by design, so host candidates suffice.
-        pc = new RTCPeerConnection({ iceServers: [] });
-        pc.ontrack = function (event) {
-            video.srcObject = event.streams[0];
-        };
-        pc.onicecandidate = function (event) {
-            if (event.candidate) {
-                send({ type: "candidate", candidate: event.candidate.toJSON() });
-            }
-        };
-        pc.onconnectionstatechange = function () {
-            if (!pc) {
-                return;
-            }
-            if (pc.connectionState === "disconnected") {
-                // Often transient, so this only reports; ICE may still recover on its own.
-                setStatus("Connection lost");
-                overlay.hidden = false;
-            } else if (pc.connectionState === "failed") {
-                // Terminal. Dropping the socket sends this page through the reconnect path,
-                // which is the only thing that produces a fresh offer -- the simulator offers
-                // on join and never spontaneously renegotiates.
-                setStatus("Connection failed - retrying...");
-                overlay.hidden = false;
-                if (ws) {
-                    ws.close();
-                }
-            }
-        };
-        pc.setRemoteDescription(sdp)
-            .then(function () {
-                return pc.createAnswer();
-            })
-            .then(function (answer) {
-                return pc.setLocalDescription(answer);
-            })
-            .then(function () {
-                send({ type: "answer", sdp: pc.localDescription.toJSON() });
-                // Safe to apply now that there is a remote description.
-                flushCandidates();
-            })
-            .catch(function (err) {
-                setStatus("Negotiation failed");
-                console.error("answer failed:", err);
-            });
-    }
-
-    function handleMessage(event) {
-        var msg;
-        try {
-            msg = JSON.parse(event.data);
-        } catch (err) {
-            return;
-        }
-        if (msg.type === "offer") {
-            handleOffer(msg.sdp);
-        } else if (msg.type === "candidate" && pc) {
-            if (pc.remoteDescription) {
-                pc.addIceCandidate(msg.candidate).catch(function (err) {
-                    console.warn("candidate rejected:", err.message);
-                });
-            } else {
-                pendingCandidates.push(msg.candidate);
-            }
-        } else if (msg.type === "busy") {
-            // Latched so the close handler below does not schedule a reconnect that would
-            // just be refused again, hammering the simulator.
-            busy = true;
-            showBanner("The simulator is already streaming to " + msg.maxViewers + " viewers. Try again later.");
-            setStatus("Too many viewers");
-        }
-    }
-
     function connect() {
-        var scheme = location.protocol === "https:" ? "wss:" : "ws:";
-        ws = new WebSocket(scheme + "//" + location.host + SIGNALING_PATH);
-        ws.onopen = function () {
-            setStatus("Waiting for video...");
-        };
-        ws.onmessage = handleMessage;
-        ws.onclose = function (event) {
-            closePeer();
-            if (busy || event.code === CLOSE_CODE_BUSY) {
-                return;
-            }
-            setStatus("Disconnected - retrying...");
-            clearTimeout(reconnectTimer);
-            reconnectTimer = setTimeout(connect, RECONNECT_MS);
-        };
-        ws.onerror = function () {
-            setStatus("Signaling error");
-        };
+        window.brsSignaling.connect({
+            onTrack: function (stream) {
+                video.srcObject = stream;
+                if (!stream) {
+                    overlay.hidden = false;
+                }
+            },
+            onStatus: setStatus,
+            onBusy: function (maxViewers) {
+                showBanner("The simulator is already streaming to " + maxViewers + " viewers. Try again later.");
+            },
+        });
     }
 
     /**
@@ -298,20 +162,36 @@
         });
     }
 
-    /**
-     * Shows the address of this page and wires the copy button.
-     *
-     * location.href is used rather than a URL rebuilt from the config, so whatever the viewer
-     * actually reached the page on -- hostname or IP, default port or custom -- is what gets
-     * copied and handed to someone else.
-     */
     /** Puts the copy button back to its resting label after its confirmation has been read. */
     function resetCopyLabel() {
         copyButton.textContent = "Copy";
     }
 
+    /**
+     * Builds the address to show and copy: the embed page, on an address another machine can use.
+     *
+     * Two things make this more than location.origin. The URL points at /embed rather than at
+     * this page, because the point of copying it is to put the *stream* in another application --
+     * pasting this page's URL would embed the whole viewer, remote and all. And the host comes
+     * from /config when the service is reachable over the network, because the viewer is often
+     * opened from the simulator's own status bar, where location.hostname is localhost and would
+     * be useless to anyone else. When the service is restricted to this machine, /config reports
+     * no LAN host and the page's own origin is the honest answer.
+     * @returns {string} - The absolute URL of the embeddable stream
+     */
+    function embedUrl() {
+        if (config.lanHost) {
+            return "http://" + config.lanHost + ":" + (config.port || location.port) + "/embed";
+        }
+        return location.origin + "/embed";
+    }
+
+    /**
+     * Shows the embed address and wires the copy button. Called after /config resolves, since
+     * the address depends on what it reports.
+     */
     function initStreamUrl() {
-        var href = location.origin + "/";
+        var href = embedUrl();
         streamLink.textContent = href;
         streamLink.href = href;
         copyButton.addEventListener("click", function () {
@@ -385,8 +265,10 @@
         }
     });
     document.getElementById("screenshot").addEventListener("click", screenshot);
-    initStreamUrl();
 
+    // The copy button's URL depends on what /config reports, so it is wired in both the success
+    // and the failure path below rather than here -- on failure it falls back to this page's
+    // own origin, which is still better than a dead button.
     fetch("/config")
         .then(function (res) {
             return res.json();
@@ -403,5 +285,8 @@
         .catch(function () {
             showBanner("Could not read the simulator configuration; the remote buttons may not work.");
         })
-        .finally(connect);
+        .finally(function () {
+            initStreamUrl();
+            connect();
+        });
 })();
