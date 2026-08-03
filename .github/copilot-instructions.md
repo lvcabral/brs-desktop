@@ -47,7 +47,7 @@ This is an Electron-based desktop application that simulates Roku devices for Br
 - **`monaco.js`**: `MonacoManager` class wrapping Monaco editor creation, theme and indentation settings
 - **`mirror.js`**: Hidden fixed-size canvas, the frame source for Remote Screen. Driven by the engine's `frame` event (`brs.setFrameNotify`, requires `brs-engine` >= 2.4.0) and copies `brs.getDisplayBuffer()` — native display-mode resolution, unlike the window-sized `#display`. Captured at `captureStream(0)` and pushed with `requestFrame()`, plus a 1s keepalive so an idle app still feeds the encoder. The engine's separate `cleared` event blanks the mirror rather than copying the buffer, which still holds the exited app's last frame
 - **`webrtc.js`**: Remote Screen peer connections (one per viewer session), offer creation and ICE relay
-- **`web/remote.html|remote.css|remote.js`**: The Remote Screen viewer page, copied unbundled to `app/web/`
+- **`web/remote.html|remote.css|remote.js`**: The Remote Screen viewer page, copied unbundled to `app/web/`. Wears the same Roku skin (`css/styles.min.css`) as the web installer; `remote.css` is an override layer on top of it, not a standalone theme
 
 ### Core Components
 
@@ -76,7 +76,7 @@ This is an Electron-based desktop application that simulates Roku devices for Br
   - Multi-client support with observer pattern
 - **Remote Screen Server** (`src/server/remotescreen.js`, port 8090):
   - WebRTC video feed of the simulator display; no Roku counterpart
-  - Serves the viewer page (`src/app/web/remote.html|css|js`) and a `/config` JSON document
+  - Serves the viewer page (`src/app/web/remote.html|css|js`), the shared Roku skin at `/css/styles.min.css`, and a `/config` JSON document
   - `/rtc-session` WebSocket signaling relayed to the renderer over IPC (`rtcViewerJoined`, `rtcViewerLeft`, `rtcSignal`); the renderer is the offerer because it owns the media track
   - Offers are only sent on join, so `rtcReady` (renderer announces its handlers are live; main re-announces open sessions) and `rtcSessionFailed` (renderer reports a dead peer; main closes the socket) close the gaps in that one-shot handshake
   - Cross-origin requests are refused on both `/rtc-session` and `/paste`: WebSockets are exempt from CORS and a body-only POST needs no preflight, so a hostile page on loopback would otherwise pass the local-only address check

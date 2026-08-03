@@ -91,7 +91,7 @@ If the **Remote Console** is enabled an icon is shown in the status bar together
 
 The **Remote Screen** service streams the simulator display to a browser on your network over **WebRTC**, so you can watch and control a running app from a phone, a tablet or another computer. This has no Roku counterpart — a real device has no equivalent feature — so it is specific to the simulator.
 
-It listens to the _TCP_ port 8090 and is **disabled by default**. Enable it from the [Device Menu](how-to-use.md#device-menu) or the **Remote Access Services** section of the [Settings Screen](how-to-use.md#settings-screen), then open `http://<simulator-ip-address>:8090/` in any modern browser. An icon with the port number appears in the status bar while the service is running; clicking it opens the viewer page locally.
+It listens to the _TCP_ port 8090 and is **disabled by default**. Enable it from the [Device Menu](how-to-use.md#device-menu) or the **Remote Access Services** section of the [Settings Screen](how-to-use.md#settings-screen), then open `http://<simulator-ip-address>:8090/` in any modern browser. An icon with the port number appears in the status bar while the service is running; clicking it opens the viewer page locally. If the [Application Installer](#application-installer) is also enabled, its **Utilities** tab shows a **Video Stream** button that opens the viewer — useful when you already have the installer open on another device.
 
 The viewer page provides:
 
@@ -99,6 +99,7 @@ The viewer page provides:
 - **An on-screen Roku remote**, plus the equivalent physical keyboard keys (arrows, `Enter`, `Escape`, `Backspace`, `End` and `Home`).
 - **A text field** for typing into on-screen keyboards, which is often easier than pressing letters one at a time.
 - **A screenshot button** that downloads the current frame as a PNG.
+- **The page's own address**, shown under the video with a button that copies it, so it is easy to pass to another device.
 
 > [!WARNING]
 >

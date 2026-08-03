@@ -66,9 +66,13 @@ function isSameOrigin(req) {
 }
 
 // A lookup table rather than an if/else chain, so adding an asset is one line.
+// styles.min.css is the same Roku-themed skin the web installer serves on port 80, so the two
+// pages look like one application; remote.css only adds what that skin has no equivalent for.
+// It sits in css/ rather than web/, next to it under both the bundled and the source layout.
 const STATIC_ASSETS = {
     "/": { file: ["web", "remote.html"], type: "text/html" },
     "/index.html": { file: ["web", "remote.html"], type: "text/html" },
+    "/css/styles.min.css": { file: ["css", "styles.min.css"], type: "text/css" },
     "/remote.css": { file: ["web", "remote.css"], type: "text/css" },
     "/remote.js": { file: ["web", "remote.js"], type: "text/javascript" },
 };
@@ -84,6 +88,15 @@ let sessionSeq = 0;
 const sessions = new Map();
 
 export let isRemoteScreenEnabled = false;
+
+/**
+ * The port the service actually bound, which differs from the requested one when port 0 was
+ * used. Read by the web installer, whose Utilities page links here.
+ * @returns {number} - The listening port
+ */
+export function getRemoteScreenPort() {
+    return screenPort;
+}
 
 /**
  * Relays a signaling message from the renderer to the viewer it is addressed to. Registered

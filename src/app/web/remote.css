@@ -6,68 +6,83 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-/* Standalone stylesheet: the viewer page is opened from phones and other machines, so it
-   deliberately does not reuse ../css/styles.min.css (the Roku-themed installer skin) or any
-   webfont -- every glyph in remote.html is a Unicode character the system font already has. */
+/* Loaded on top of css/styles.min.css, the same Roku-themed skin the web installer on port 80
+   uses, so the two pages look like one application. This file only adds what that skin has no
+   equivalent for: the video stage, the D-pad grid and the stream address row.
+
+   Everything here is scoped under a page-specific class or id. The skin styles bare `button`
+   globally, so an unscoped rule would be fighting it rather than extending it -- the buttons
+   carry .roku-button and take their colour, radius and hover from the skin, and .btn only
+   overrides the geometry a remote needs.
+
+   No webfont is pulled in: every glyph in remote.html is a Unicode character the system font
+   already has, which matters on a page opened from arbitrary phones on the LAN. */
 
 :root {
-    --bg: #1a1a1a;
-    --panel: #262626;
-    --panel-hover: #333;
-    --border: #3d3d3d;
-    --text: #e6e6e6;
-    --muted: #9a9a9a;
-    --accent: #6a3ab2;
-}
-
-* {
-    box-sizing: border-box;
+    /* Sampled from styles.min.css so the additions match the skin rather than approximating it. */
+    --roku-purple: #662d91;
+    --roku-purple-dark: #552a7b;
+    --panel: #f3f3f3;
+    --border: #d5d5d5;
+    --muted: #666;
 }
 
 body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     /* Stops the double-tap-to-zoom gesture from eating rapid remote presses. */
     touch-action: manipulation;
     -webkit-text-size-adjust: 100%;
 }
 
-.topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 10px 14px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
+/* An author-level "display" wins over the UA stylesheet's [hidden] { display: none }, so
+   without this the overlay's hidden attribute is silently inert and "Waiting for the
+   simulator..." stays on top of a working stream. Applies to every [hidden] element on the
+   page, so the same trap cannot come back through a new component. */
+[hidden] {
+    display: none !important;
 }
 
-.brand {
-    font-weight: 600;
-}
-
-.status {
-    color: var(--muted);
-    font-size: 13px;
+/* Connection state, in the purple headline band under the title. The skin's own header bar is
+   slid off-canvas below 768px, which is where this page is most often opened. */
+.nav-page-status {
+    margin: 0 0 22px;
+    padding: 0 15px;
+    color: #e2d3ee;
+    font-size: 14px;
+    text-align: center;
 }
 
 .banner {
-    margin: 10px 14px 0;
+    max-width: 960px;
+    margin: 0 auto 18px;
     padding: 10px 12px;
-    border: 1px solid #7a5c00;
+    border: 1px solid #e0c069;
     border-radius: 6px;
-    background: #3a2e00;
-    color: #ffdf7e;
-    font-size: 13px;
+    background: #fdf6e3;
+    color: #7a5c00;
+    font-size: 14px;
     line-height: 1.4;
+    text-align: center;
+}
+
+/* Two columns once there is room for the video and the remote at full size, one centred column
+   below that. The video column is capped so the remote is not pushed off a laptop screen. */
+.viewer-layout {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 22px;
+}
+
+.viewer {
+    flex: 1 1 480px;
+    max-width: 960px;
+    min-width: 0; /* lets the flex item shrink below the video's intrinsic width */
 }
 
 .stage {
     position: relative;
-    margin: 14px auto 0;
-    max-width: 960px;
     background: #000;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -89,23 +104,49 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--muted);
+    color: #999;
     font-size: 14px;
     pointer-events: none;
 }
 
-/* An author-level "display" wins over the UA stylesheet's [hidden] { display: none }, so
-   without this the overlay's hidden attribute is silently inert and "Waiting for the
-   simulator..." stays on top of a working stream. Applies to every [hidden] element on the
-   page, so the same trap cannot come back through a new component. */
-[hidden] {
-    display: none !important;
+/* The address of this page, so it can be read off a phone or handed to someone else. Sits
+   directly under the video, per the layout. */
+.stream-url {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.stream-url-link {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--roku-purple);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 15px;
+}
+
+/* The skin's .roku-button is 14px/36px with a 30px radius, which is far larger than this row
+   needs; only the metrics are overridden, so the colour and hover still come from the skin. */
+.stream-url-copy {
+    flex: 0 0 auto;
+    padding: 8px 20px;
+    font-size: 14px;
 }
 
 .remote {
-    max-width: 360px;
-    margin: 18px auto 32px;
-    padding: 0 14px;
+    flex: 0 0 340px;
+    max-width: 340px;
+    /* Centres the remote when it wraps under the video on a narrow screen. */
+    margin: 0 auto;
 }
 
 .row {
@@ -115,30 +156,16 @@ body {
     margin-bottom: 10px;
 }
 
+/* Geometry only. Colour, radius, cursor and hover come from .roku-button in the skin. */
 .btn {
     flex: 1 1 0;
     min-height: 48px;
+    min-width: 0; /* a flex item with white-space:nowrap will not shrink without this */
     padding: 10px 12px;
-    background: var(--panel);
-    color: var(--text);
-    border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 15px;
-    font-family: inherit;
-    cursor: pointer;
     /* Prevents the long-press text selection that fires on held remote buttons. */
-    user-select: none;
-    -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
-}
-
-.btn:hover {
-    background: var(--panel-hover);
-}
-
-.btn:active {
-    background: var(--accent);
-    border-color: var(--accent);
 }
 
 .btn.wide {
@@ -163,8 +190,6 @@ body {
 
 .dpad .ok {
     grid-area: 2 / 2;
-    background: var(--accent);
-    border-color: var(--accent);
     font-weight: 600;
 }
 
@@ -180,12 +205,15 @@ body {
     margin-top: 16px;
 }
 
+/* The skin sets .Roku-Form input to a 26px pill, but this input is outside a .Roku-Form and
+   has to line up with the square-ish remote buttons beside it. */
 #textInput {
     flex: 3 1 0;
+    min-width: 0;
     min-height: 48px;
     padding: 10px 12px;
-    background: #1f1f1f;
-    color: var(--text);
+    color: #333;
+    background: #fff;
     border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 16px; /* 16px or larger stops iOS Safari zooming in on focus. */
@@ -193,7 +221,7 @@ body {
 }
 
 #textInput::placeholder {
-    color: var(--muted);
+    color: #999;
 }
 
 .hint {
@@ -201,33 +229,4 @@ body {
     font-size: 12px;
     line-height: 1.5;
     text-align: center;
-}
-
-/* Side by side once there is room for the video and the remote at full size. */
-@media (min-width: 900px) {
-    body {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto auto 1fr;
-        column-gap: 20px;
-    }
-
-    .topbar {
-        grid-column: 1 / -1;
-    }
-
-    .banner {
-        grid-column: 1 / -1;
-    }
-
-    .stage {
-        margin: 20px 0 20px 20px;
-        align-self: start;
-    }
-
-    .remote {
-        width: 340px;
-        margin: 20px 20px 20px 0;
-        padding: 0;
-    }
 }

@@ -250,6 +250,21 @@ Non-obvious pieces, all of them load-bearing:
   simple request, so a page on any site the user visits can reach loopback and be handed the live screen
   or type into the running app. A missing `Origin` is deliberately allowed — browsers always send it on
   these routes, non-browser clients legitimately omit it.
+- **The viewer page wears the web installer's skin, and `remote.css` is an override layer, not a theme.**
+  `/css/styles.min.css` is served from `src/app/css/`, the same file port 80 uses, so the two pages read
+  as one application; it has no `@font-face` or `url()` references, which is what makes it safe to hand
+  to a phone with nothing else. It must be linked *first*: the skin styles bare `button` globally, so
+  `remote.css` loaded before it would lose. That is also why `.btn` sets geometry only and takes colour
+  from `.roku-button`. The copy-URL button's primary path is `document.execCommand("copy")`, not
+  `navigator.clipboard` — the latter needs a secure context, and `http://<lan-ip>:8090` is exactly the
+  case the button exists for.
+- **The Utilities tab's link to the stream is rendered per request.** `installer.js` reads
+  `utilities.html` and substitutes `<!--REMOTE_SCREEN_BUTTON-->`, because the button has to reflect
+  whether the service is running *now* and the port it actually bound (which differs from the constant
+  when port 0 was used). The URL is built from the request's `Host` header rather than localhost, so a
+  phone browsing the installer is sent back to the simulator — and since that header is client-supplied
+  and lands inside an `href`, `safeHostname()` validates it against an allow-list and returns `null` to
+  suppress the link rather than trying to escape it.
 - The service lifts `backgroundThrottling` only while someone is watching; a minimized window otherwise
   stops painting and the stream freezes on a stale frame.
 

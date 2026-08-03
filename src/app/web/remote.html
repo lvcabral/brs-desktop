@@ -5,59 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="HandheldFriendly" content="True">
     <title>BrightScript Simulator - Remote Screen</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/styles.min.css">
     <link rel="stylesheet" type="text/css" media="screen" href="/remote.css">
     <link rel="icon" href="data:;base64,iVBORwOKGO=" />
 </head>
 <body>
-    <header class="topbar">
-        <span class="brand">BrightScript Simulator</span>
-        <span id="status" class="status">Connecting...</span>
-    </header>
+    <div id="root" style="background: #fff">
+        <div id="Shell-2" class="Roku-Nav">
+            <div class="nav hero-nav-main-enabled standalone-mode">
+                <header class="nav-header">
+                    <div class="nav-header-content">
+                        <div class="nav-header-logo-text"><span>BrightScript Simulator</span></div>
+                    </div>
+                </header>
+                <main class="nav-main">
+                    <div id="Shell-3" class="Roku-Nav-Page-Standard">
+                        <div class="nav-page-headline">
+                            <h1 class="nav-page-headline-h1">Remote Screen</h1>
+                            <!-- In the headline band rather than the header bar: the Roku skin slides
+                                 .nav-header-bar off-canvas below 768px, and this page is opened from
+                                 phones more than anything else. -->
+                            <p id="status" class="nav-page-status">Connecting...</p>
+                        </div>
+                        <div class="roku-page-content">
+                            <div id="banner" class="banner" hidden></div>
 
-    <div id="banner" class="banner" hidden></div>
+                            <!-- Centred, and side by side once the viewport is wide enough for both
+                                 columns; it wraps back to one centred column below that. -->
+                            <div class="viewer-layout">
+                                <div class="viewer">
+                                    <div class="stage">
+                                        <!-- muted is required for autoplay: an unmuted track is blocked
+                                             until the user gestures, and there is no audio in the
+                                             stream anyway. -->
+                                        <video id="video" autoplay playsinline muted></video>
+                                        <div id="overlay" class="overlay">Waiting for the simulator...</div>
+                                    </div>
 
-    <main class="stage">
-        <!-- muted is required for autoplay: an unmuted track is blocked until the user gestures,
-             and there is no audio in the stream anyway. -->
-        <video id="video" autoplay playsinline muted></video>
-        <div id="overlay" class="overlay">Waiting for the simulator...</div>
-    </main>
+                                    <div class="stream-url">
+                                        <a id="streamLink" class="stream-url-link" href="/">&nbsp;</a>
+                                        <button type="button" id="copyUrl" class="roku-button stream-url-copy"
+                                                title="Copy this address to the clipboard">Copy</button>
+                                    </div>
+                                </div>
 
-    <section class="remote">
-        <div class="row">
-            <button class="btn wide" data-key="back" title="Back (Escape)">&#8592; Back</button>
-            <button class="btn wide" data-key="info" title="Options (NumpadMultiply)">&#42; Options</button>
-            <button class="btn wide" data-key="home" title="Home">&#8962; Home</button>
+                                <section class="remote">
+                                    <div class="row">
+                                        <button type="button" class="roku-button btn wide" data-key="back" title="Back (Escape)">&#8592; Back</button>
+                                        <button type="button" class="roku-button btn wide" data-key="info" title="Options (NumpadMultiply)">&#42; Options</button>
+                                        <button type="button" class="roku-button btn wide" data-key="home" title="Home">&#8962; Home</button>
+                                    </div>
+
+                                    <div class="dpad">
+                                        <button type="button" class="roku-button btn up" data-key="up" title="Up (ArrowUp)">&#9650;</button>
+                                        <button type="button" class="roku-button btn left" data-key="left" title="Left (ArrowLeft)">&#9664;</button>
+                                        <button type="button" class="roku-button btn ok" data-key="select" title="Select (Enter)">OK</button>
+                                        <button type="button" class="roku-button btn right" data-key="right" title="Right (ArrowRight)">&#9654;</button>
+                                        <button type="button" class="roku-button btn down" data-key="down" title="Down (ArrowDown)">&#9660;</button>
+                                    </div>
+
+                                    <div class="row">
+                                        <button type="button" class="roku-button btn" data-key="instantreplay" title="Replay (Backspace)">&#8635;</button>
+                                        <button type="button" class="roku-button btn" data-key="rev" title="Rewind">&#9194;</button>
+                                        <button type="button" class="roku-button btn" data-key="play" title="Play/Pause (End)">&#9199;</button>
+                                        <button type="button" class="roku-button btn" data-key="fwd" title="Fast forward">&#9193;</button>
+                                    </div>
+
+                                    <form id="textForm" class="row text-row" autocomplete="off">
+                                        <input id="textInput" type="text" placeholder="Type text into the app..." maxlength="255">
+                                        <button type="submit" class="roku-button btn wide">Send</button>
+                                    </form>
+
+                                    <div class="row">
+                                        <button type="button" id="screenshot" class="roku-button btn wide" title="Download the current frame">&#128247; Screenshot</button>
+                                    </div>
+
+                                    <p class="hint">
+                                        Physical keyboard works too: arrows, Enter, Escape, Backspace, End and Home.
+                                    </p>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <footer class="nav-footer">
+                    <div class="nav-footer-content">Copyright (C) 2019-2026 Marcelo Lv Cabral</div>
+                </footer>
+            </div>
         </div>
-
-        <div class="dpad">
-            <button class="btn up" data-key="up" title="Up (ArrowUp)">&#9650;</button>
-            <button class="btn left" data-key="left" title="Left (ArrowLeft)">&#9664;</button>
-            <button class="btn ok" data-key="select" title="Select (Enter)">OK</button>
-            <button class="btn right" data-key="right" title="Right (ArrowRight)">&#9654;</button>
-            <button class="btn down" data-key="down" title="Down (ArrowDown)">&#9660;</button>
-        </div>
-
-        <div class="row">
-            <button class="btn" data-key="instantreplay" title="Replay (Backspace)">&#8635;</button>
-            <button class="btn" data-key="rev" title="Rewind">&#9194;</button>
-            <button class="btn" data-key="play" title="Play/Pause (End)">&#9199;</button>
-            <button class="btn" data-key="fwd" title="Fast forward">&#9193;</button>
-        </div>
-
-        <form id="textForm" class="row text-row" autocomplete="off">
-            <input id="textInput" type="text" placeholder="Type text into the app..." maxlength="255">
-            <button type="submit" class="btn wide">Send</button>
-        </form>
-
-        <div class="row">
-            <button id="screenshot" class="btn wide" title="Download the current frame">&#128247; Screenshot</button>
-        </div>
-
-        <p class="hint">
-            Physical keyboard works too: arrows, Enter, Escape, Backspace, End and Home.
-        </p>
-    </section>
+    </div>
 
     <script src="/remote.js"></script>
 </body>

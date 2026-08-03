@@ -9,6 +9,7 @@ import { app, BrowserWindow } from "electron";
 import { WEB_INSTALLER_PORT, DEFAULT_USRPWD } from "../constants";
 import { isLocalhostAddress } from "../helpers/util";
 import { cryptoUsingMD5, parseAuthenticationInfo, computeDigestResponse } from "../helpers/digest";
+import { isRemoteScreenEnabled, getRemoteScreenPort } from "./remotescreen";
 import Busboy from "busboy";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -79,8 +80,10 @@ export function enableInstaller(win, { localOnly: lo = false } = {}) {
                     filePath = path.join(__dirname, "web", "installer.html");
                     contentType = "text/html";
                 } else if (urlPath === "/plugin_inspect") {
-                    filePath = path.join(__dirname, "web", "utilities.html");
-                    contentType = "text/html";
+                    // Built rather than served verbatim: the Remote Screen button depends on
+                    // whether that service is running right now, and on the port it bound.
+                    serveUtilitiesPage(req, res);
+                    return;
                 }
                 // Note: /pkgs/dev.png is handled at the top without authentication
                 if (filePath === "") {
@@ -141,7 +144,7 @@ function handlePostRequest(req, res, window) {
     });
 
     busboy.on("close", () => {
-        handlePostResponse(res, done, fileSize, fileError);
+        handlePostResponse(res, done, fileSize, fileError, req.headers.host);
     });
 
     req.pipe(busboy);
@@ -204,9 +207,9 @@ function handleFormField(fieldname, value, window) {
     return value;
 }
 
-export function handlePostResponse(res, done, fileSize, fileError) {
+export function handlePostResponse(res, done, fileSize, fileError, host) {
     if (done === "screenshot") {
-        handleScreenshotResponse(res);
+        handleScreenshotResponse(res, host);
     } else if (done === "file") {
         handleFileInstallResponse(res, fileSize, fileError);
     } else if (done === "delete") {
@@ -219,7 +222,84 @@ export function handlePostResponse(res, done, fileSize, fileError) {
     }
 }
 
-function handleScreenshotResponse(res) {
+const REMOTE_SCREEN_PLACEHOLDER = "<!--REMOTE_SCREEN_BUTTON-->";
+
+/**
+ * Validates a Host header for use as a hostname inside an href.
+ *
+ * The header is supplied by the client and the value it yields is interpolated into an attribute,
+ * so it is checked against an allow-list rather than escaped: anything that could close the
+ * attribute, start another one, or graft a path onto the URL is rejected outright. Returning null
+ * suppresses the link, which is the safe direction to fail in -- the page is still valid without it.
+ * @param {string|undefined} host - The raw Host header
+ * @returns {string|null} - The hostname, or null when it cannot be trusted
+ */
+export function safeHostname(host) {
+    if (!host) {
+        return null;
+    }
+    // IPv6 literals are bracketed and contain the colons the port split would otherwise trip on.
+    const bracketed = /^\[[0-9A-Fa-f:.]+\]/.exec(host);
+    if (bracketed) {
+        return bracketed[0];
+    }
+    const hostname = host.split(":")[0];
+    return /^[A-Za-z0-9.-]+$/.test(hostname) ? hostname : null;
+}
+
+/**
+ * Builds the Utilities tab's link to the Remote Screen viewer.
+ *
+ * Absolute rather than relative because the viewer is on another port, and built from the host the
+ * client used rather than from localhost so that someone browsing the installer from a phone is
+ * sent back to the simulator instead of to their own loopback.
+ * @param {boolean} enabled - Whether the Remote Screen service is running
+ * @param {number} port - The port it bound
+ * @param {string|null} hostname - The validated hostname the client reached this server on
+ * @returns {string} - The HTML fragment, empty when there is nothing to link to
+ */
+export function buildRemoteScreenHtml(enabled, port, hostname) {
+    if (!enabled || !hostname) {
+        return "";
+    }
+    return `
+                            <div class="Roku-Form" style="margin-top: 20px;">
+                                <a class="roku-button" href="http://${hostname}:${port}/" target="_blank" rel="noopener" style="max-width: 240px;">Video Stream</a>
+                            </div>`;
+}
+
+/**
+ * Substitutes the request-time parts of the Utilities page into its template.
+ * @param {string} html - The page as read from disk
+ * @param {string|undefined} host - The request's Host header
+ * @returns {string} - The rendered page
+ */
+function renderUtilitiesPage(html, host) {
+    return html.replace(
+        REMOTE_SCREEN_PLACEHOLDER,
+        buildRemoteScreenHtml(isRemoteScreenEnabled, getRemoteScreenPort(), safeHostname(host))
+    );
+}
+
+/**
+ * Serves the Utilities page.
+ * @param {import("node:http").IncomingMessage} req - The request
+ * @param {import("node:http").ServerResponse} res - The response
+ */
+function serveUtilitiesPage(req, res) {
+    const utilitiesPath = path.join(__dirname, "web", "utilities.html");
+    fs.readFile(utilitiesPath, "utf8", (error, html) => {
+        if (error) {
+            res.writeHead(500);
+            res.end("Error 500: Internal Server Error\nCould not read utilities page!");
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(req.method === "HEAD" ? undefined : renderUtilitiesPage(html, req.headers.host));
+    });
+}
+
+function handleScreenshotResponse(res, host) {
     setTimeout(() => {
         const utilitiesPath = path.join(__dirname, "web", "utilities.html");
         fs.readFile(utilitiesPath, "utf8", (error, html) => {
@@ -232,7 +312,7 @@ function handleScreenshotResponse(res) {
             const screenshotPath = path.join(app.getPath("userData"), "dev.png");
             const screenshotExists = fs.existsSync(screenshotPath);
             const contentDiv = buildScreenshotHtml(screenshotExists);
-            const modifiedHtml = html.replace(
+            const modifiedHtml = renderUtilitiesPage(html, host).replace(
                 "</div>\n                    </div>\n                </main>",
                 `${contentDiv}\n                    </div>\n                </main>`
             );

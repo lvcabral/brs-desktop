@@ -82,6 +82,23 @@ describe("Remote Screen HTTP server", () => {
         expect(await js.text()).toContain("RTCPeerConnection");
     });
 
+    it("serves the shared Roku skin the web installer also uses", async () => {
+        // remote.css only adds the video stage and the D-pad; without this the page loses its
+        // whole visual identity and renders as unstyled HTML.
+        const res = await fetch(`${base}/css/styles.min.css`);
+        expect(res.status).toBe(200);
+        expect(res.headers.get("content-type")).toBe("text/css");
+        expect(await res.text()).toContain(".roku-button");
+    });
+
+    it("links the page to both stylesheets in skin-then-override order", async () => {
+        // The skin styles bare `button` globally, so remote.css has to come second or the
+        // remote's own geometry loses to it.
+        const body = await fetch(`${base}/`).then((res) => res.text());
+        expect(body.indexOf("/css/styles.min.css")).toBeGreaterThan(-1);
+        expect(body.indexOf("/remote.css")).toBeGreaterThan(body.indexOf("/css/styles.min.css"));
+    });
+
     it("reports the settings the viewer page builds itself from", async () => {
         const res = await fetch(`${base}/config`);
         const config = await res.json();

@@ -19,6 +19,8 @@
     var SIGNALING_PATH = "/rtc-session";
     var RECONNECT_MS = 2000;
     var CLOSE_CODE_BUSY = 4000;
+    // How long the copy button stays on its confirmation before reverting to "Copy".
+    var COPY_FEEDBACK_MS = 1500;
 
     var video = document.getElementById("video");
     var statusEl = document.getElementById("status");
@@ -26,6 +28,8 @@
     var overlay = document.getElementById("overlay");
     var textForm = document.getElementById("textForm");
     var textInput = document.getElementById("textInput");
+    var streamLink = document.getElementById("streamLink");
+    var copyButton = document.getElementById("copyUrl");
 
     var config = { ecpPort: 8060, ecpEnabled: false, displayMode: "720p", maxViewers: 4 };
     var ws;
@@ -236,6 +240,76 @@
     }
 
     /**
+     * Copies text to the clipboard, falling back to a hidden textarea and execCommand.
+     *
+     * The fallback is the path that actually runs most of the time here, not a legacy branch:
+     * navigator.clipboard is only exposed in a secure context, and while http://localhost counts
+     * as one, http://192.168.x.x does not -- which is exactly how this page is reached from
+     * another machine, the case the button exists for. execCommand("copy") is deprecated but has
+     * no secure-context requirement and is the only thing available there.
+     * @param {string} text - The text to place on the clipboard
+     * @returns {Promise<void>} - Resolves once the text is on the clipboard
+     */
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text);
+        }
+        return new Promise(function (resolve, reject) {
+            var scratch = document.createElement("textarea");
+            scratch.value = text;
+            // Off-screen rather than hidden: execCommand("copy") copies the *selection*, and
+            // neither display:none nor a hidden attribute can hold one.
+            scratch.setAttribute("readonly", "");
+            scratch.style.position = "fixed";
+            scratch.style.top = "-1000px";
+            document.body.appendChild(scratch);
+            scratch.select();
+            // iOS Safari ignores select() on a readonly field and needs an explicit range.
+            scratch.setSelectionRange(0, text.length);
+            var copied = false;
+            try {
+                copied = document.execCommand("copy");
+            } catch (err) {
+                copied = false;
+            }
+            document.body.removeChild(scratch);
+            if (copied) {
+                resolve();
+            } else {
+                reject(new Error("copy rejected"));
+            }
+        });
+    }
+
+    /**
+     * Shows the address of this page and wires the copy button.
+     *
+     * location.href is used rather than a URL rebuilt from the config, so whatever the viewer
+     * actually reached the page on -- hostname or IP, default port or custom -- is what gets
+     * copied and handed to someone else.
+     */
+    function initStreamUrl() {
+        var href = location.origin + "/";
+        streamLink.textContent = href;
+        streamLink.href = href;
+        copyButton.addEventListener("click", function () {
+            copyToClipboard(href)
+                .then(function () {
+                    copyButton.textContent = "Copied";
+                })
+                .catch(function () {
+                    // Nothing the page can do about it, but silence would look like success.
+                    copyButton.textContent = "Press Ctrl+C";
+                })
+                .finally(function () {
+                    setTimeout(function () {
+                        copyButton.textContent = "Copy";
+                    }, COPY_FEEDBACK_MS);
+                });
+        });
+    }
+
+    /**
      * Downloads the current frame. Done entirely in the page: it captures at the streamed
      * resolution rather than the simulator's native one, which is the tradeoff for adding no
      * server route and no IPC.
@@ -292,6 +366,7 @@
         }
     });
     document.getElementById("screenshot").addEventListener("click", screenshot);
+    initStreamUrl();
 
     fetch("/config")
         .then(function (res) {
