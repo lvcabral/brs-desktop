@@ -7,7 +7,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 // Viewer page for the Remote Screen service. Served as a plain script -- it is copied, not
-// bundled, so no imports, no build step and nothing newer than the browsers on the LAN.
+// bundled, so no imports and no build step: what is written here is what the browser gets.
+// Anything WebRTC can negotiate at all is new enough for block scoping and optional chaining.
 //
 // Roles: the simulator is the offerer (it owns the media track), so this page only ever
 // answers. Video arrives over WebRTC; remote buttons go to ECP on its own port; text goes to
@@ -17,18 +18,18 @@
     "use strict";
 
     // How long the copy button stays on its confirmation before reverting to "Copy".
-    var COPY_FEEDBACK_MS = 1500;
+    const COPY_FEEDBACK_MS = 1500;
 
-    var video = document.getElementById("video");
-    var statusEl = document.getElementById("status");
-    var bannerEl = document.getElementById("banner");
-    var overlay = document.getElementById("overlay");
-    var textForm = document.getElementById("textForm");
-    var textInput = document.getElementById("textInput");
-    var streamLink = document.getElementById("streamLink");
-    var copyButton = document.getElementById("copyUrl");
+    const video = document.getElementById("video");
+    const statusEl = document.getElementById("status");
+    const bannerEl = document.getElementById("banner");
+    const overlay = document.getElementById("overlay");
+    const textForm = document.getElementById("textForm");
+    const textInput = document.getElementById("textInput");
+    const streamLink = document.getElementById("streamLink");
+    const copyButton = document.getElementById("copyUrl");
 
-    var config = { ecpPort: 8060, ecpEnabled: false, displayMode: "720p", maxViewers: 4 };
+    let config = { ecpPort: 8060, ecpEnabled: false, displayMode: "720p", maxViewers: 4 };
 
     function setStatus(text) {
         statusEl.textContent = text;
@@ -72,7 +73,7 @@
         if (!config.ecpEnabled) {
             return;
         }
-        var url = location.protocol + "//" + location.hostname + ":" + config.ecpPort + "/keypress/" + key;
+        const url = location.protocol + "//" + location.hostname + ":" + config.ecpPort + "/keypress/" + key;
         fetch(url, { method: "POST", mode: "no-cors" }).catch(function () {
             /* opaque by design: nothing to report */
         });
@@ -80,7 +81,7 @@
 
     // Physical keyboard, mapped to match the simulator's own bindings (keysMap in brs.api.js)
     // so muscle memory carries over from the desktop window.
-    var KEY_MAP = {
+    const KEY_MAP = {
         ArrowUp: "up",
         ArrowDown: "down",
         ArrowLeft: "left",
@@ -97,7 +98,7 @@
         if (event.target === textInput) {
             return;
         }
-        var key = KEY_MAP[event.key];
+        const key = KEY_MAP[event.key];
         if (key) {
             event.preventDefault();
             press(key);
@@ -134,7 +135,7 @@
             return navigator.clipboard.writeText(text);
         }
         return new Promise(function (resolve, reject) {
-            var scratch = document.createElement("textarea");
+            const scratch = document.createElement("textarea");
             scratch.value = text;
             // Off-screen rather than hidden: execCommand("copy") copies the *selection*, and
             // neither display:none nor a hidden attribute can hold one.
@@ -145,11 +146,11 @@
             scratch.select();
             // iOS Safari ignores select() on a readonly field and needs an explicit range.
             scratch.setSelectionRange(0, text.length);
-            var copied = false;
+            let copied = false;
             try {
-                // NOSONAR - deprecated, but the only clipboard API available outside a secure
-                // context, which is where this page is served from. See the note above.
-                copied = document.execCommand("copy");
+                // Deprecated, but the only clipboard API available outside a secure context,
+                // which is where this page is served from. See the note above.
+                copied = document.execCommand("copy"); // NOSONAR
             } catch (err) {
                 copied = false;
             }
@@ -181,7 +182,10 @@
      */
     function embedUrl() {
         if (config.lanHost) {
-            return "http://" + config.lanHost + ":" + (config.port || location.port) + "/embed";
+            // Scheme taken from the page rather than written out, the same way press() builds its
+            // ECP URL: this service speaks plain HTTP, but if it is ever reached through a proxy
+            // that terminates TLS, the copied address should match how the viewer itself arrived.
+            return location.protocol + "//" + config.lanHost + ":" + (config.port || location.port) + "/embed";
         }
         return location.origin + "/embed";
     }
@@ -191,7 +195,7 @@
      * the address depends on what it reports.
      */
     function initStreamUrl() {
-        var href = embedUrl();
+        const href = embedUrl();
         streamLink.textContent = href;
         streamLink.href = href;
         copyButton.addEventListener("click", function () {
@@ -219,13 +223,13 @@
             setStatus("No video to capture");
             return;
         }
-        var canvas = document.createElement("canvas");
+        const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext("2d").drawImage(video, 0, 0);
         canvas.toBlob(function (blob) {
-            var url = URL.createObjectURL(blob);
-            var link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
             link.href = url;
             link.download = "screenshot.png";
             link.click();
@@ -258,7 +262,7 @@
     document.addEventListener("keydown", onKeyDown);
     textForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        var text = textInput.value;
+        const text = textInput.value;
         if (text.length > 0) {
             sendText(text);
             textInput.value = "";

@@ -24,11 +24,20 @@
 (function () {
     "use strict";
 
-    var SIGNALING_PATH = "/rtc-session";
-    var RECONNECT_MS = 2000;
+    const SIGNALING_PATH = "/rtc-session";
+    const RECONNECT_MS = 2000;
     // Matches CLOSE_CODE_BUSY in src/server/remotescreen.js. 4000-4999 is the range reserved
     // for applications.
-    var CLOSE_CODE_BUSY = 4000;
+    const CLOSE_CODE_BUSY = 4000;
+
+    /**
+     * Reports a candidate the browser would not accept. Candidates are advisory -- one being
+     * rejected does not sink the connection.
+     * @param {Error} err - The rejection
+     */
+    function warnCandidateRejected(err) {
+        console.warn("candidate rejected:", err.message);
+    }
 
     /**
      * Opens a signaling session and keeps it open, reconnecting on drop.
@@ -36,20 +45,20 @@
      * @returns {object} - The session, with a close() that stops reconnecting
      */
     function connect(handlers) {
-        var onTrack = handlers.onTrack || function () {};
-        var onStatus = handlers.onStatus || function () {};
-        var onBusy = handlers.onBusy || function () {};
+        const onTrack = handlers.onTrack || function () {};
+        const onStatus = handlers.onStatus || function () {};
+        const onBusy = handlers.onBusy || function () {};
 
-        var ws;
-        var pc;
-        var reconnectTimer;
-        var busy = false;
-        var closed = false;
+        let ws;
+        let pc;
+        let reconnectTimer;
+        let busy = false;
+        let closed = false;
         // Candidates that arrive before setRemoteDescription has resolved. addIceCandidate
         // rejects without a remote description, and with trickle ICE the simulator's candidates
         // routinely arrive during the answer chain, so buffering is what keeps them from
         // being lost.
-        var pendingCandidates = [];
+        let pendingCandidates = [];
 
         function send(message) {
             if (ws?.readyState === WebSocket.OPEN) {
@@ -73,18 +82,9 @@
             onTrack(null);
         }
 
-        /**
-         * Reports a candidate the browser would not accept. Candidates are advisory -- one being
-         * rejected does not sink the connection.
-         * @param {Error} err - The rejection
-         */
-        function warnCandidateRejected(err) {
-            console.warn("candidate rejected:", err.message);
-        }
-
         /** Applies the candidates that arrived before there was a remote description. */
         function flushCandidates() {
-            var queued = pendingCandidates;
+            const queued = pendingCandidates;
             pendingCandidates = [];
             queued.forEach(function (candidate) {
                 pc.addIceCandidate(candidate).catch(warnCandidateRejected);
@@ -155,7 +155,7 @@
         }
 
         function handleMessage(event) {
-            var msg;
+            let msg;
             try {
                 msg = JSON.parse(event.data);
             } catch (err) {
@@ -175,7 +175,7 @@
         }
 
         function open() {
-            var scheme = location.protocol === "https:" ? "wss:" : "ws:";
+            const scheme = location.protocol === "https:" ? "wss:" : "ws:";
             ws = new WebSocket(scheme + "//" + location.host + SIGNALING_PATH);
             ws.onopen = function () {
                 onStatus("Waiting for video...");

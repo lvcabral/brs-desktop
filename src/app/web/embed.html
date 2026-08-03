@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BrightScript Simulator - Stream</title>
     <!--
-        The video and nothing else, for embedding in another application:
+        The video and nothing else, meant to be framed inside another application: point an
+        iframe at /embed on this service, allowing autoplay, and size it to taste. See
+        docs/remote-access.md for the markup, and use / instead for the full viewer with the
+        on-screen remote.
 
-            <iframe src="http://<simulator-ip>:8090/embed"
-                    width="1280" height="720" frameborder="0" allow="autoplay"></iframe>
-
-        Deliberately without the Roku skin, the on-screen remote or any chrome -- an embedder
-        supplies its own. Styles are inline because there is barely any and it saves the embedder
-        a second request. Use / instead for the full viewer with the remote control.
+        Deliberately without the Roku skin, the remote or any other chrome -- an embedder
+        supplies its own. Styles are inline because there is barely any and it saves the
+        embedder a second request.
     -->
     <style>
         html, body {

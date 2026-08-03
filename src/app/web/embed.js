@@ -12,8 +12,8 @@
 (function () {
     "use strict";
 
-    var video = document.getElementById("video");
-    var statusEl = document.getElementById("status");
+    const video = document.getElementById("video");
+    const statusEl = document.getElementById("status");
 
     window.brsSignaling.connect({
         onTrack: function (stream) {
