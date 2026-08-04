@@ -9,7 +9,7 @@
 // A fixed-size mirror of the simulator display, used as the frame source for the Remote
 // Screen WebRTC stream.
 //
-// Driven by the engine's "frame" event (brs.setFrameNotify) rather than sampled on a timer. The
+// Driven by the engine's "framePainted" event (brs.setFrameNotify) rather than sampled on a timer. The
 // engine repaints only when the running app draws something, so a settled app can post nothing for
 // seconds while a busy one posts at 60fps; polling was both late on the first and wasteful on the
 // second. The event fires after the repaint, so whatever is copied here is a complete frame.
@@ -97,7 +97,7 @@ export function getMirrorStream() {
 
 /**
  * Copies the engine's display buffer into the mirror and pushes it to the stream.
- * Called on every engine "frame" event while at least one viewer is connected.
+ * Called on every engine "framePainted" event while at least one viewer is connected.
  */
 export function onEngineFrame() {
     if (!running) {
@@ -123,7 +123,7 @@ export function onEngineFrame() {
 }
 
 /**
- * Blanks the mirror and pushes the result. Called on the engine's "cleared" event, which is raised
+ * Blanks the mirror and pushes the result. Called on the engine's "frameCleared" event, which is raised
  * when the display goes black, most visibly when an app exits.
  *
  * Deliberately not served from the buffer: the engine never clears bufferCanvas, so it still holds

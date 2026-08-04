@@ -57,9 +57,9 @@ export function initRemoteScreen() {
     // the mirror canvas exists. A display-mode change is rare and user-driven, so paying a
     // renegotiation for it is acceptable.
     brs.subscribe("webrtc", (event, data) => {
-        if (event === "frame") {
+        if (event === "framePainted") {
             onEngineFrame();
-        } else if (event === "cleared") {
+        } else if (event === "frameCleared") {
             onEngineCleared();
         } else if (event === "display" && peers.size > 0) {
             resizeMirror(data);
