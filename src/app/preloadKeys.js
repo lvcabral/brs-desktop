@@ -40,6 +40,7 @@ const SEND_CHANNELS = [
     "closeSimulator",
     "externalVolumeReady",
     "setPreference",
+    "rendezvousEvents",
 ];
 
 // Channels the renderer may listen on. Every entry needs a matching webContents.send()
@@ -74,6 +75,8 @@ const RECEIVE_CHANNELS = [
     "unmountExternalVolume",
     "showToast",
     "setRendezvousLog",
+    "setRendezvousTracking",
+    "requestRendezvousEvents",
 ];
 
 /**

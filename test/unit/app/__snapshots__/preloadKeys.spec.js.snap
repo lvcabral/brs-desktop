@@ -26,6 +26,7 @@ exports[`IPC channel whitelists > matches their snapshots 1`] = `
   "closeSimulator",
   "externalVolumeReady",
   "setPreference",
+  "rendezvousEvents",
 ]
 `;
 
@@ -60,5 +61,7 @@ exports[`IPC channel whitelists > matches their snapshots 2`] = `
   "unmountExternalVolume",
   "showToast",
   "setRendezvousLog",
+  "setRendezvousTracking",
+  "requestRendezvousEvents",
 ]
 `;
