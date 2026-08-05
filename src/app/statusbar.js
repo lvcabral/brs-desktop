@@ -59,6 +59,13 @@ statusAudio.onclick = function () {
     setAudioStatus(muted);
     showToast(`Audio is ${muted ? "off" : "on"}`);
 };
+statusFile.onclick = function () {
+    if (filePath) {
+        navigator.clipboard.writeText(filePath).then(() => {
+            showToast("Path copied to clipboard");
+        });
+    }
+};
 
 const deviceInfo = api.getDeviceInfo();
 let displayMode = deviceInfo.displayMode;
@@ -229,6 +236,8 @@ export function updateStatus(data, homeMode = false) {
         if (homeMode) {
             statusIconFile.innerHTML = "<i class='fa fa-home'></i>";
             statusFile.innerText = "Home";
+            statusFile.classList.remove("statusClickable");
+            statusFile.title = "";
             filePath = "";
         } else {
             statusIconFile.innerHTML = data.path.toLowerCase().endsWith(".brs")
@@ -238,6 +247,8 @@ export function updateStatus(data, homeMode = false) {
                 data.path,
                 Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
             );
+            statusFile.classList.add("statusClickable");
+            statusFile.title = data.path;
             filePath = data.path;
         }
         if (data.version !== "") {
@@ -250,6 +261,8 @@ export function updateStatus(data, homeMode = false) {
     } else {
         statusIconFile.innerText = "";
         statusFile.innerText = "";
+        statusFile.classList.remove("statusClickable");
+        statusFile.title = "";
         filePath = "";
         statusVersion.innerText = "";
         statusIconVersion.style.display = "none";
