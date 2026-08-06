@@ -78,8 +78,12 @@ const terminal = new WebTerminal({
     autoFocus: false,
 });
 if (consoleBuffer?.length) {
-    for (const value of consoleBuffer) {
-        updateTerminal(value);
+    for (const entry of consoleBuffer) {
+        if (typeof entry === "object" && entry !== null) {
+            updateTerminal(entry.text, entry.level);
+        } else {
+            updateTerminal(entry);
+        }
     }
 }
 terminal.idle();

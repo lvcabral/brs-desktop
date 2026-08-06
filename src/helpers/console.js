@@ -10,12 +10,12 @@ import { ipcMain } from "electron";
 const BUFFER_SIZE = 700;
 export const consoleBuffer = [];
 
-ipcMain.on("telnet", (event, text) => {
+ipcMain.on("telnet", (event, text, level) => {
     if (text !== undefined) {
         if (consoleBuffer.length >= BUFFER_SIZE) {
             consoleBuffer.shift();
         }
-        consoleBuffer.push(text);
+        consoleBuffer.push({ text, level: level || "print" });
     }
 });
 
