@@ -154,6 +154,30 @@ a {
     background-color: var(--status-warning-hover-color);
 }
 
+.statusClickable {
+    cursor: pointer;
+}
+
+.statusClickable:hover {
+    background-color: var(--status-hover-color);
+}
+
+.statusClickableError {
+    cursor: pointer;
+}
+
+.statusClickableError:hover {
+    background-color: var(--status-error-hover-color);
+}
+
+.statusClickableWarn {
+    cursor: pointer;
+}
+
+.statusClickableWarn:hover {
+    background-color: var(--status-warning-hover-color);
+}
+
 #display {
     position: absolute;
     top: 0;

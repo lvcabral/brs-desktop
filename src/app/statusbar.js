@@ -59,6 +59,13 @@ statusAudio.onclick = function () {
     setAudioStatus(muted);
     showToast(`Audio is ${muted ? "off" : "on"}`);
 };
+statusFile.onclick = function () {
+    if (filePath) {
+        navigator.clipboard.writeText(filePath).then(() => {
+            showToast("Path copied to clipboard");
+        });
+    }
+};
 
 const deviceInfo = api.getDeviceInfo();
 let displayMode = deviceInfo.displayMode;
@@ -103,18 +110,27 @@ export function setStatusColor(level = "") {
         statusWeb.className = "statusIconsError";
         statusECP.className = "statusIconsError";
         statusDevTools.className = "statusIconsError";
+        if (filePath) {
+            statusFile.className = "statusClickableError";
+        }
     } else if (warnCount > 0) {
         statusBar.className = "statusbarWarn";
         statusAudio.className = "statusIconsWarn";
         statusWeb.className = "statusIconsWarn";
         statusECP.className = "statusIconsWarn";
         statusDevTools.className = "statusIconsWarn";
+        if (filePath) {
+            statusFile.className = "statusClickableWarn";
+        }
     } else {
         statusBar.className = "statusbar";
         statusAudio.className = "statusIcons";
         statusWeb.className = "statusIcons";
         statusECP.className = "statusIcons";
         statusDevTools.className = "statusIcons";
+        if (filePath) {
+            statusFile.className = "statusClickable";
+        }
     }
 }
 
@@ -229,6 +245,8 @@ export function updateStatus(data, homeMode = false) {
         if (homeMode) {
             statusIconFile.innerHTML = "<i class='fa fa-home'></i>";
             statusFile.innerText = "Home";
+            statusFile.className = "";
+            statusFile.title = "";
             filePath = "";
         } else {
             statusIconFile.innerHTML = data.path.toLowerCase().endsWith(".brs")
@@ -238,6 +256,8 @@ export function updateStatus(data, homeMode = false) {
                 data.path,
                 Math.max(MIN_PATH_SIZE, globalThis.innerWidth * PATH_SIZE_FACTOR)
             );
+            statusFile.className = "statusClickable";
+            statusFile.title = data.path;
             filePath = data.path;
         }
         if (data.version !== "") {
@@ -250,6 +270,8 @@ export function updateStatus(data, homeMode = false) {
     } else {
         statusIconFile.innerText = "";
         statusFile.innerText = "";
+        statusFile.className = "";
+        statusFile.title = "";
         filePath = "";
         statusVersion.innerText = "";
         statusIconVersion.style.display = "none";
