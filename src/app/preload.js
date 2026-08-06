@@ -137,9 +137,9 @@ contextBridge.exposeInMainWorld("api", {
     processPlatform: () => {
         return process.platform;
     },
-    send: (channel, data) => {
+    send: (channel, ...args) => {
         if (SEND_CHANNELS.includes(channel)) {
-            ipcRenderer.send(channel, data);
+            ipcRenderer.send(channel, ...args);
         } else {
             console.warn(`api.send() - invalid channel: ${channel}`);
         }

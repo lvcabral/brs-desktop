@@ -131,7 +131,7 @@ async function main() {
                 api.send("debugStarted");
                 showToast(`App stopped and Micro Debugger is active!`);
             } else if (typeof data.content === "string") {
-                api.send("telnet", data.content);
+                api.send("telnet", data.content, data.level);
             }
             if (["stop", "pause", "continue"].includes(data.level)) {
                 debugMode = data.level;
