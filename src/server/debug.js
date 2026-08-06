@@ -180,6 +180,7 @@ const commandHandlers = {
     plugins: handlePlugins,
     remove_plugin: handleRemovePlugin,
     press: handlePress,
+    target: handleTarget,
     type: handleType,
 };
 
@@ -285,6 +286,16 @@ function handleRemovePlugin(arg, client) {
                 `Failed to remove plugin id: ${arg}, name: unknown. Plugin is NOT installed on the device\r\n`
             );
         }
+    }
+}
+
+function handleTarget(arg, client) {
+    if (!arg) {
+        client.write("Usage: target list | <n> | <name> | -p <pid>\r\n");
+    } else if (arg === "list" || arg === "0") {
+        client.write("* [0] main\r\n");
+    } else {
+        client.write(`No such target ${arg}\r\n`);
     }
 }
 
