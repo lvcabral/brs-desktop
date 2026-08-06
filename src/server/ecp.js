@@ -35,6 +35,11 @@ let currentApp;
 let localOnly = false;
 let ecpPort = ECP_PORT;
 let rendezvousTrackingEnabled = false;
+/** Maximum rendezvous events queued between two query/sgrendezvous calls (matches Roku's spec). */
+const MAX_RENDEZVOUS_QUEUE = 1000;
+const rendezvousQueue = [];
+let rendezvousDropCount = 0;
+let pendingRendezvousResolve = null;
 let wss;
 
 const APP_ID_UNSAFE = /[^a-zA-Z0-9_\-.]/g;
@@ -392,24 +397,53 @@ function sendKeyPress(req, res) {
 
 function sendRendezvousTrack(req, res) {
     rendezvousTrackingEnabled = true;
-    // TODO: Will require a new IPC event to enable tracking for ECP
-    // window?.webContents.send("<< TBD >>", true);
+    rendezvousQueue.length = 0;
+    rendezvousDropCount = 0;
+    window?.webContents.send("setRendezvousTracking", true);
     res.setHeader("content-type", "application/xml");
-    res.send(genRendezvousXml(true, false));
+    res.send(genSgRendezvousStatusXml(true));
 }
 
 function sendRendezvousUntrack(req, res) {
     rendezvousTrackingEnabled = false;
-    // TODO: Will require a new IPC event to disable tracking for ECP
-    // window?.webContents.send("<< TBD >>", false);
+    window?.webContents.send("setRendezvousTracking", false);
     res.setHeader("content-type", "application/xml");
-    res.send(genRendezvousXml(false, false));
+    res.send(genSgRendezvousStatusXml(false));
 }
 
 function sendRendezvousQuery(req, res) {
-    res.setHeader("content-type", "application/xml");
-    res.send(genRendezvousXml(rendezvousTrackingEnabled, true));
+    if (!rendezvousTrackingEnabled) {
+        // Not tracking — return immediately with no events
+        res.setHeader("content-type", "application/xml");
+        res.send(genSgRendezvousQueryXml([], 0, false));
+        return;
+    }
+    // Request queued events from the renderer/engine
+    window?.webContents.send("requestRendezvousEvents");
+    const timeout = setTimeout(() => {
+        pendingRendezvousResolve = null;
+        res.setHeader("content-type", "application/xml");
+        // Fallback: return whatever is in the local queue
+        const events = rendezvousQueue.splice(0);
+        const dropCount = rendezvousDropCount;
+        rendezvousDropCount = 0;
+        res.send(genSgRendezvousQueryXml(events, dropCount, rendezvousTrackingEnabled));
+    }, 2000);
+    pendingRendezvousResolve = (data) => {
+        clearTimeout(timeout);
+        pendingRendezvousResolve = null;
+        const events = data?.events ?? [];
+        const dropCount = data?.dropCount ?? 0;
+        res.setHeader("content-type", "application/xml");
+        res.send(genSgRendezvousQueryXml(events, dropCount, rendezvousTrackingEnabled));
+    };
 }
+
+ipcMain.on("rendezvousEvents", (_, data) => {
+    if (pendingRendezvousResolve) {
+        pendingRendezvousResolve(data);
+    }
+});
 
 // Content Generation Functions
 export function genDeviceRootXml() {
@@ -697,18 +731,42 @@ export function genAppState(appID, encrypt) {
     }
 }
 
-export function genRendezvousXml(trackingEnabled, isQuery) {
+/**
+ * Generates the `<sgrendezvous>` status response for `sgrendezvous/track` and `sgrendezvous/untrack`.
+ * @param {boolean} enabled - Whether tracking is now enabled
+ * @returns {string} The status XML string
+ */
+export function genSgRendezvousStatusXml(enabled) {
     const xml = xmlbuilder.create("sgrendezvous");
-    if (isQuery) {
-        const data = xml.ele("data");
-        data.ele("tracking-enabled", {}, trackingEnabled);
-        data.ele("plugin-id", {}, currentApp?.id ?? "dev");
-        data.ele("drop-count", {}, 0);
-        data.ele("count", {}, 0);
-        xml.ele("timestamp", {}, `${Date.now()}`);
-    } else {
-        xml.ele("tracking-enabled", {}, trackingEnabled);
+    xml.ele("tracking-enabled", {}, enabled);
+    xml.ele("status", {}, "OK");
+    return xml.end({ pretty: true });
+}
+
+/**
+ * Generates the `<sgrendezvous>` events response for `query/sgrendezvous`.
+ * @param {Array} events - Rendezvous events queued since tracking started or the previous query
+ * @param {number} dropCount - Number of events dropped because the queue exceeded its cap
+ * @param {boolean} tracking - Whether tracking is currently enabled
+ * @returns {string} The events XML string
+ */
+export function genSgRendezvousQueryXml(events, dropCount, tracking) {
+    const xml = xmlbuilder.create("sgrendezvous");
+    const data = xml.ele("data");
+    data.ele("tracking-enabled", {}, tracking);
+    data.ele("plugin-id", {}, currentApp?.id ?? "dev");
+    data.ele("plugin-title", {}, currentApp?.title ?? "dev");
+    data.ele("drop-count", {}, dropCount);
+    data.ele("count", {}, events.length);
+    for (const event of events) {
+        const item = data.ele("item");
+        item.ele("id", {}, event.id);
+        item.ele("start-tm", {}, event.startTm);
+        item.ele("end-tm", {}, event.endTm);
+        item.ele("line-number", {}, event.line);
+        item.ele("file", {}, event.file);
     }
+    xml.ele("timestamp", {}, `${Date.now()}`);
     xml.ele("status", {}, "OK");
     return xml.end({ pretty: true });
 }

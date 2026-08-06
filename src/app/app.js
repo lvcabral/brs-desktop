@@ -378,6 +378,13 @@ api.receive("setPerfStats", function (enabled) {
 api.receive("setRendezvousLog", function (enabled) {
     brs.setRendezvousLog(enabled);
 });
+api.receive("setRendezvousTracking", function (enabled) {
+    brs.setRendezvousTracking(enabled);
+});
+api.receive("requestRendezvousEvents", function () {
+    const result = brs.requestRendezvousEvents();
+    api.send("rendezvousEvents", result);
+});
 api.receive("mountExternalVolume", function (zipData, label = "External volume") {
     try {
         const zipBuffer = getExternalVolumeArrayBuffer(zipData);
