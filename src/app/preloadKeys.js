@@ -43,6 +43,7 @@ const SEND_CHANNELS = [
     "rtcSignal",
     "rtcSessionFailed",
     "rtcReady",
+    "rendezvousEvents",
 ];
 
 // Channels the renderer may listen on. Every entry needs a matching webContents.send()
@@ -80,6 +81,8 @@ const RECEIVE_CHANNELS = [
     "rtcViewerJoined",
     "rtcViewerLeft",
     "rtcSignal",
+    "setRendezvousTracking",
+    "requestRendezvousEvents",
 ];
 
 /**

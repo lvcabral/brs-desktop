@@ -38,8 +38,8 @@ describe("IPC channel whitelists", () => {
     });
 
     it("holds the expected number of channels", () => {
-        expect(SEND_CHANNELS).toHaveLength(27);
-        expect(RECEIVE_CHANNELS).toHaveLength(32);
+        expect(SEND_CHANNELS).toHaveLength(28);
+        expect(RECEIVE_CHANNELS).toHaveLength(34);
     });
 
     it("has no duplicates in either direction", () => {

@@ -20,6 +20,8 @@ import {
     genAppState,
     genAppRegistry,
     genGraphicsFrameRate,
+    genSgRendezvousStatusXml,
+    genSgRendezvousQueryXml,
     getMacAddress,
     getModelName,
 } from "../../../src/server/ecp";
@@ -229,6 +231,73 @@ describe("ECP payload builders", () => {
             // Regression guard: ecp.js imports helpers/hash itself rather than relying on
             // another module in the graph having loaded it.
             expect(() => genAppRegistry("dev", false)).not.toThrow();
+        });
+    });
+
+    describe("genSgRendezvousStatusXml", () => {
+        it("reports tracking-enabled true when tracking is on", () => {
+            const xml = genSgRendezvousStatusXml(true);
+            expect(xml).toContain("<tracking-enabled>true</tracking-enabled>");
+            expect(xml).toContain("<status>OK</status>");
+        });
+
+        it("reports tracking-enabled false when tracking is off", () => {
+            const xml = genSgRendezvousStatusXml(false);
+            expect(xml).toContain("<tracking-enabled>false</tracking-enabled>");
+            expect(xml).toContain("<status>OK</status>");
+        });
+
+        it("does not contain event data elements", () => {
+            const xml = genSgRendezvousStatusXml(true);
+            expect(xml).not.toContain("<data>");
+            expect(xml).not.toContain("<count>");
+            expect(xml).not.toContain("<timestamp>");
+        });
+    });
+
+    describe("genSgRendezvousQueryXml", () => {
+        it("reports tracking status and counts with no events", () => {
+            vi.useFakeTimers();
+            vi.setSystemTime(new Date("2026-08-04T12:00:00Z"));
+            try {
+                const xml = genSgRendezvousQueryXml([], 0, true);
+                expect(xml).toContain("<tracking-enabled>true</tracking-enabled>");
+                expect(xml).toContain("<count>0</count>");
+                expect(xml).toContain("<drop-count>0</drop-count>");
+                expect(xml).toContain("<plugin-id>");
+                expect(xml).toContain("<plugin-title>");
+                expect(xml).toContain("<timestamp>");
+                expect(xml).toContain("<status>OK</status>");
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("includes event items with the correct fields", () => {
+            const events = [
+                { id: 1, startTm: 100.5, endTm: 105.3, line: 42, file: "pkg:/components/Task.brs" },
+                { id: 2, startTm: 200.0, endTm: 210.7, line: 99, file: "pkg:/source/main.brs" },
+            ];
+            const xml = genSgRendezvousQueryXml(events, 3, true);
+            expect(xml).toContain("<count>2</count>");
+            expect(xml).toContain("<drop-count>3</drop-count>");
+            // First event
+            expect(xml).toContain("<id>1</id>");
+            expect(xml).toContain("<start-tm>100.5</start-tm>");
+            expect(xml).toContain("<end-tm>105.3</end-tm>");
+            expect(xml).toContain("<line-number>42</line-number>");
+            expect(xml).toContain("<file>pkg:/components/Task.brs</file>");
+            // Second event
+            expect(xml).toContain("<id>2</id>");
+            expect(xml).toContain("<start-tm>200</start-tm>");
+            expect(xml).toContain("<end-tm>210.7</end-tm>");
+            expect(xml).toContain("<line-number>99</line-number>");
+            expect(xml).toContain("<file>pkg:/source/main.brs</file>");
+        });
+
+        it("reports tracking-enabled false when tracking is off", () => {
+            const xml = genSgRendezvousQueryXml([], 0, false);
+            expect(xml).toContain("<tracking-enabled>false</tracking-enabled>");
         });
     });
 

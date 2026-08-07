@@ -51,8 +51,8 @@ export function enableTelnet(win, port = TELNET_PORT, { localOnly: lo = false } 
             lines.delete(id);
         });
         client.write(`Connected to ${app.getName()}\r\n`);
-        consoleBuffer.forEach((value) => {
-            client.write(value);
+        consoleBuffer.forEach((entry) => {
+            client.write(entry.text ?? entry);
         });
         clients.set(id, client);
         lines.set(id, "");

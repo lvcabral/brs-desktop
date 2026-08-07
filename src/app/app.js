@@ -132,7 +132,7 @@ async function main() {
                 api.send("debugStarted");
                 showToast(`App stopped and Micro Debugger is active!`);
             } else if (typeof data.content === "string") {
-                api.send("telnet", data.content);
+                api.send("telnet", data.content, data.level);
             }
             if (["stop", "pause", "continue"].includes(data.level)) {
                 debugMode = data.level;
@@ -381,6 +381,13 @@ api.receive("setPerfStats", function (enabled) {
 });
 api.receive("setRendezvousLog", function (enabled) {
     brs.setRendezvousLog(enabled);
+});
+api.receive("setRendezvousTracking", function (enabled) {
+    brs.setRendezvousTracking(enabled);
+});
+api.receive("requestRendezvousEvents", function () {
+    const result = brs.requestRendezvousEvents();
+    api.send("rendezvousEvents", result);
 });
 api.receive("mountExternalVolume", function (zipData, label = "External volume") {
     try {

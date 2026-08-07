@@ -29,6 +29,7 @@ exports[`IPC channel whitelists > matches their snapshots 1`] = `
   "rtcSignal",
   "rtcSessionFailed",
   "rtcReady",
+  "rendezvousEvents",
 ]
 `;
 
@@ -66,5 +67,7 @@ exports[`IPC channel whitelists > matches their snapshots 2`] = `
   "rtcViewerJoined",
   "rtcViewerLeft",
   "rtcSignal",
+  "setRendezvousTracking",
+  "requestRendezvousEvents",
 ]
 `;
