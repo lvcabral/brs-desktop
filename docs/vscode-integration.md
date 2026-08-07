@@ -12,7 +12,7 @@ The **BrightScript VS Code Extension** can deploy apps directly to the **BrightS
 
 1. Launch the **BrightScript Simulator** desktop application.
 2. Open the [Settings Screen](docs/how-to-use.md#settings-screen).
-3. In the **Services** section, confirm the services are enabled (all checkboxes marked) for App Installer (Web), ECP, and Remote Console (Telnet).
+3. In the **Services** section, confirm the services are enabled (all checkboxes marked) for **Application Installer (Web)**, **External Control Protocol (ECP)**, and **Remote Console (Port 8085)** under **BrightScript Telnet Services**.
 4. If you change the **Application Installer** port or the password, make sure you restart the service (unmark and remark the checkbox) and take note the new values—you will use them in the `launch.json` configuration (section below).
 5. Keep the simulator running; the VS Code debugger connects to it over the configured ports.
 

@@ -50,6 +50,15 @@ export default class ElectronPreferences extends EventEmitter {
     }
 
     /**
+     * The shipped defaults, cloned so a caller cannot mutate the schema. The save handler in
+     * src/helpers/settings.js reads this to fall back on a default remote key mapping.
+     * @returns {object} - The defaults passed to the constructor
+     */
+    get defaults() {
+        return structuredClone(this.options.defaults ?? {});
+    }
+
+    /**
      * Get or set a preference by dot-notation key
      * @param {string} keyPath - Dot-separated path, e.g. "services.ecp"
      * @param {*} [value] - When provided, the value to store

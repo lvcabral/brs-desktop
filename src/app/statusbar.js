@@ -5,7 +5,7 @@
  *
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { ECP_PORT, WEB_INSTALLER_PORT } from "../constants";
+import { ECP_PORT, WEB_INSTALLER_PORT, REMOTE_SCREEN_PORT } from "../constants";
 import { shortenPath, getUIType } from "./statusbarUtils";
 
 // Status Bar Objects
@@ -32,6 +32,8 @@ const statusDebug = document.getElementById("statusDebug");
 const statusDebugText = document.getElementById("statusDebugText");
 const statusWeb = document.getElementById("statusWeb");
 const statusWebText = document.getElementById("statusWebText");
+const statusScreen = document.getElementById("statusScreen");
+const statusScreenText = document.getElementById("statusScreenText");
 const colorValues = getComputedStyle(document.documentElement);
 
 statusResolution.style.display = "none";
@@ -48,6 +50,10 @@ statusECP.onclick = function () {
 let installerPort = WEB_INSTALLER_PORT;
 statusWeb.onclick = function () {
     api.openExternal(`http://localhost:${installerPort}/`);
+};
+let screenPort = REMOTE_SCREEN_PORT;
+statusScreen.onclick = function () {
+    api.openExternal(`http://localhost:${screenPort}/`);
 };
 statusDevTools.onclick = function () {
     api.send("openConsole");
@@ -109,6 +115,7 @@ export function setStatusColor(level = "") {
         statusAudio.className = "statusIconsError";
         statusWeb.className = "statusIconsError";
         statusECP.className = "statusIconsError";
+        statusScreen.className = "statusIconsError";
         statusDevTools.className = "statusIconsError";
         if (filePath) {
             statusFile.className = "statusClickableError";
@@ -118,6 +125,7 @@ export function setStatusColor(level = "") {
         statusAudio.className = "statusIconsWarn";
         statusWeb.className = "statusIconsWarn";
         statusECP.className = "statusIconsWarn";
+        statusScreen.className = "statusIconsWarn";
         statusDevTools.className = "statusIconsWarn";
         if (filePath) {
             statusFile.className = "statusClickableWarn";
@@ -127,6 +135,7 @@ export function setStatusColor(level = "") {
         statusAudio.className = "statusIcons";
         statusWeb.className = "statusIcons";
         statusECP.className = "statusIcons";
+        statusScreen.className = "statusIcons";
         statusDevTools.className = "statusIcons";
         if (filePath) {
             statusFile.className = "statusClickable";
@@ -187,6 +196,14 @@ export function setServerStatus(server, enabled, port) {
             statusDebug.style.display = "";
         } else {
             statusDebug.style.display = "none";
+        }
+    } else if (server === "Screen") {
+        if (enabled) {
+            screenPort = port;
+            statusScreenText.innerText = port.toString();
+            statusScreen.style.display = "";
+        } else {
+            statusScreen.style.display = "none";
         }
     }
 }

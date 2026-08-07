@@ -16,6 +16,7 @@ import {
     updateStatus,
     setLocaleStatus,
 } from "./statusbar";
+import { initRemoteScreen } from "./webrtc";
 import { BRS_HOME_APP_PATH } from "../constants";
 
 const isMacOS = api.processPlatform() === "darwin";
@@ -176,6 +177,9 @@ async function main() {
     }
     api.send("serialNumber", brs.getSerialNumber());
     api.send("engineVersion", brs.getVersion());
+    // Registered after initialize() so brs.getDisplayMode() and the display canvas are ready
+    // by the time the first viewer arrives.
+    initRemoteScreen();
     brs.redraw(api.isFullScreen());
 }
 

@@ -163,6 +163,12 @@ function executeFile(window, fileData, filePath, input) {
 }
 
 function focusWindow(window) {
+    // Opt-out for users who deliberately keep the simulator minimized or in the background while
+    // working elsewhere: a remote launch (VS Code deploy, web installer upload, ECP) would otherwise
+    // yank the window in front of whatever they were doing.
+    if (getSimulatorOption("disableFocusOnLaunch")) {
+        return;
+    }
     if (window.isMinimized()) {
         window.restore();
     } else if (!window.isVisible()) {

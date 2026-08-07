@@ -8,7 +8,7 @@ By default all the services below accept connections from any device on the loca
 
 When that option is disabled:
 
-- The **Application Installer**, **ECP**, **Remote Console** and **Debug Server** only accept connections coming from `localhost` (`127.0.0.1` or `::1`). Requests from any other address are refused.
+- The **Application Installer**, **ECP**, **Remote Console**, **Debug Server** and **Remote Screen** only accept connections coming from `localhost` (`127.0.0.1` or `::1`). Requests from any other address are refused.
 - **SSDP** discovery advertisements are suppressed, so the simulator does not show up as a Roku device for the other machines scanning the network.
 
 The change is applied immediately to the services that are already running, and any connection already open from another machine is dropped. Because **SSDP** is turned off, the [VSCode BrightScript Extension](vscode-integration.md) will no longer discover the simulator automatically while this option is disabled — connecting to `127.0.0.1` still works.
@@ -86,3 +86,76 @@ The simulator now supports the interactive debugging using the **Remote Console*
 When the debugger is activated (either with `STOP` statement or via `Ctrl+Break`) you can type any expression for a live compile and run, in the context of the current function.
 
 If the **Remote Console** is enabled an icon is shown in the status bar together with the port number 8085.
+
+## Remote Screen
+
+The **Remote Screen** service streams the simulator display to a browser on your network over **WebRTC**, so you can watch and control a running app from a phone, a tablet or another computer. This has no Roku counterpart — a real device has no equivalent feature — so it is specific to the simulator.
+
+It listens to the _TCP_ port 8090 and is **disabled by default**. Enable it from the [Device Menu](how-to-use.md#device-menu) or the **Remote Access Services** section of the [Settings Screen](how-to-use.md#settings-screen), then open `http://<simulator-ip-address>:8090/` in any modern browser. An icon with the port number appears in the status bar while the service is running; clicking it opens the viewer page locally. If the [Application Installer](#application-installer) is also enabled, its **Utilities** tab shows a **Video Stream** button that opens the viewer — useful when you already have the installer open on another device.
+
+The viewer page provides:
+
+- **Live video** of the simulator screen.
+- **An on-screen Roku remote**, plus the equivalent physical keyboard keys (arrows, `Enter`, `Escape`, `Backspace`, `End` and `Home`).
+- **A text field** for typing into on-screen keyboards, which is often easier than pressing letters one at a time.
+- **A screenshot button** that downloads the current frame as a PNG.
+- **The stream address**, shown under the video with a button that copies it — see [Embedding the stream](#embedding-the-stream) below.
+
+> [!WARNING]
+>
+> **This service has no password.** Unlike the **Application Installer**, anyone who can reach port 8090 can watch your simulator screen, and — if **ECP** is also enabled — control it. That is why it is the only service disabled by default. If you enable it, either keep **Allow connections from other devices on the network** unchecked, or only enable it on networks you trust.
+
+A few things worth knowing:
+
+- **The remote buttons need [ECP](#ecp-external-control-protocol) enabled**, because that is what they are sent through. The viewer page detects this and shows a banner if **ECP** is off. Text entry and the screenshot button work either way.
+- **Video only, no audio.** Audio is not part of the stream.
+- **Up to four viewers at a time.** Each one is a separate video encode, so the cap protects the simulator's frame rate. A fifth viewer is told the simulator is busy.
+- **LAN only.** No STUN or TURN server is used, so the browser and the simulator have to be able to reach each other directly. This does not work across the internet.
+- **Only the viewer page itself can use the service.** The video channel and the text field refuse requests that come from a page on any other website, so browsing elsewhere while the service is running cannot expose your screen — but that protection stops at the browser, so the warning above still applies to anything else on the network.
+- **The stream is always at the display mode's full resolution** (720x540 for 480p, 1280x720 for 720p, 1920x1080 for 1080p), regardless of the simulator window size, so shrinking the window or going fullscreen neither disturbs nor degrades it. Changing the display mode briefly interrupts the stream while it renegotiates.
+- **Updates are sent as the app draws them**, so the stream stays in step with the simulator whether the app is animating constantly or sitting on a static menu.
+- While at least one viewer is connected, the simulator window keeps rendering even if it is minimized. Without that, minimizing would freeze the stream on a stale frame.
+
+### Embedding the stream
+
+The address under the video points at `/embed`, not at the viewer page: the same live video with no
+header, no remote and no footer, sized to fill whatever frame you put it in. Drop it into a page of
+your own with an `iframe`:
+
+```html
+<iframe src="http://192.0.2.10:8090/embed"
+        width="1280" height="720" frameborder="0" allow="autoplay"></iframe>
+```
+
+The copy button gives you that URL with the simulator's own network address already filled in, which
+is why the address is worth copying rather than typing: opened from the status bar the viewer is on
+`localhost`, and `http://localhost:8090/embed` means "this machine" to whichever machine you paste it
+into. While **Allow connections from other devices on the network** is off, the page shows its own
+`localhost` address instead, because a network address would be a link to a connection the simulator
+would refuse.
+
+The scheme is `http` because what you are embedding is a *page*. There is no URL for the video
+itself — WebRTC media is SRTP over UDP, set up by a WebSocket handshake, so there is nothing for a
+`<video src>` or a media player to point at. The `/embed` page is what performs that handshake.
+
+To drive the stream yourself instead — your own `RTCPeerConnection`, your own `video` element —
+connect a WebSocket to `ws://<simulator-ip>:8090/rtc-session` and answer what it sends. The
+simulator is always the offerer, because it owns the media track; a client only ever answers, and
+never initiates negotiation. Messages are JSON:
+
+| Direction | Message | Meaning |
+| --- | --- | --- |
+| server → client | `{"type":"hello","sessionId":"s1"}` | Sent on connect. Informational; nothing to reply. |
+| server → client | `{"type":"offer","sdp":{…}}` | Answer it with `setRemoteDescription` → `createAnswer`. |
+| server → client | `{"type":"candidate","candidate":{…}}` | Add it, or buffer it until a remote description exists. |
+| server → client | `{"type":"busy","maxViewers":4}` | The viewer cap is full; the socket then closes with code 4000. Do not reconnect. |
+| client → server | `{"type":"answer","sdp":{…}}` | Your answer. |
+| client → server | `{"type":"candidate","candidate":{…}}` | Your ICE candidates. |
+
+Use `{ iceServers: [] }` — the service is LAN-only, so host candidates are all that is needed and
+STUN would only add delay. Candidates can arrive before the offer has been applied, so buffer any
+that turn up early. An offer is only ever sent when a viewer *joins*, so if you lose the connection,
+open a new WebSocket rather than waiting for a fresh offer on the old one.
+
+The reference implementation is `src/app/web/signaling.js`, which is what both the viewer and the
+embed page use; it is served at `http://<simulator-ip>:8090/signaling.js` and is about 200 lines.

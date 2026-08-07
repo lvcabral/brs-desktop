@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BrightScript Simulator - Stream</title>
+    <!--
+        The video and nothing else, meant to be framed inside another application: point an
+        iframe at /embed on this service, allowing autoplay, and size it to taste. See
+        docs/remote-access.md for the markup, and use / instead for the full viewer with the
+        on-screen remote.
+
+        Deliberately without the Roku skin, the remote or any other chrome -- an embedder
+        supplies its own. Styles are inline because there is barely any and it saves the
+        embedder a second request.
+    -->
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+        }
+
+        /* Fills the iframe whatever its aspect ratio, letterboxing rather than cropping, so an
+           embedder that sizes the frame differently from the display mode still sees a whole
+           frame. */
+        #video {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        /* Only shown before the first frame or after a drop; an embedder should not have to look
+           at a permanent overlay. */
+        #status {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            transform: translateY(-50%);
+            color: #999;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        /* An author-level "display" wins over the UA stylesheet's [hidden] { display: none },
+           so without this the hidden attribute would be silently inert. */
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- muted is required for autoplay: an unmuted track is blocked until the user gestures, and
+         there is no audio in the stream anyway. An embedded frame may never get a gesture. -->
+    <video id="video" autoplay playsinline muted></video>
+    <div id="status">Connecting...</div>
+
+    <script src="/signaling.js"></script>
+    <script src="/embed.js"></script>
+</body>
+</html>

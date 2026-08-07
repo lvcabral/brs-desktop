@@ -6,7 +6,13 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { buildScreenshotHtml, buildInstallHtml, handlePostResponse } from "../../../src/server/installer";
+import {
+    buildScreenshotHtml,
+    buildInstallHtml,
+    handlePostResponse,
+    buildRemoteScreenHtml,
+    safeHostname,
+} from "../../../src/server/installer";
 
 /**
  * Build a stand-in for a Node ServerResponse
@@ -57,6 +63,58 @@ describe("buildInstallHtml", () => {
     it("matches its snapshot in both states", () => {
         expect(buildInstallHtml(2048, null)).toMatchSnapshot();
         expect(buildInstallHtml(0, "EACCES")).toMatchSnapshot();
+    });
+});
+
+describe("safeHostname", () => {
+    it("takes the hostname off a Host header and drops the port", () => {
+        expect(safeHostname("192.0.2.10:8080")).toBe("192.0.2.10");
+        expect(safeHostname("simulator.local")).toBe("simulator.local");
+    });
+
+    it("keeps an IPv6 literal bracketed", () => {
+        // The brackets are what stop the port split from cutting the address at its first colon.
+        expect(safeHostname("[::1]:8080")).toBe("[::1]");
+    });
+
+    it("refuses a Host header that could break out of the href", () => {
+        // The header is client-supplied and lands inside an attribute, so anything that could
+        // close it or start a new one has to be rejected rather than escaped.
+        expect(safeHostname('example.com" onmouseover="alert(1)')).toBeNull();
+        expect(safeHostname("evil.com/../../path")).toBeNull();
+        expect(safeHostname("host<script>")).toBeNull();
+        expect(safeHostname("")).toBeNull();
+        expect(safeHostname(undefined)).toBeNull();
+    });
+});
+
+describe("buildRemoteScreenHtml", () => {
+    it("links to the Remote Screen viewer on the host the client used", () => {
+        // Not localhost: someone browsing the installer from another machine has to be sent back
+        // to the simulator, not to their own loopback.
+        const html = buildRemoteScreenHtml(true, 8090, "192.0.2.10");
+        expect(html).toContain('href="http://192.0.2.10:8090/"');
+        expect(html).toContain("Video Stream");
+    });
+
+    it("opens the viewer in a new tab", () => {
+        // The viewer holds a WebSocket and a peer connection; navigating away kills both.
+        const html = buildRemoteScreenHtml(true, 8090, "192.0.2.10");
+        expect(html).toContain('target="_blank"');
+        expect(html).toContain('rel="noopener"');
+    });
+
+    it("offers nothing when the service is not running", () => {
+        // A button that leads to a refused connection is worse than no button.
+        expect(buildRemoteScreenHtml(false, 8090, "192.0.2.10")).toBe("");
+    });
+
+    it("offers nothing when the host could not be trusted", () => {
+        expect(buildRemoteScreenHtml(true, 8090, null)).toBe("");
+    });
+
+    it("reports the port actually bound", () => {
+        expect(buildRemoteScreenHtml(true, 9999, "192.0.2.10")).toContain(":9999/");
     });
 });
 

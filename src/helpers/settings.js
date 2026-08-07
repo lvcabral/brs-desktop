@@ -43,8 +43,21 @@ import {
     setInstallerLocalOnly,
     setPassword,
 } from "../server/installer";
+import {
+    enableRemoteScreen,
+    disableRemoteScreen,
+    isRemoteScreenEnabled,
+    setRemoteScreenLocalOnly,
+} from "../server/remotescreen";
 import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
-import { WEB_INSTALLER_PORT, DEFAULT_USRPWD, ECP_PORT, TELNET_PORT, DEBUG_PORT } from "../constants";
+import {
+    WEB_INSTALLER_PORT,
+    DEFAULT_USRPWD,
+    ECP_PORT,
+    TELNET_PORT,
+    DEBUG_PORT,
+    REMOTE_SCREEN_PORT,
+} from "../constants";
 import { getLocalIps, formatPath } from "./util";
 
 const isMacOS = process.platform === "darwin";
@@ -54,7 +67,7 @@ const timeZoneLabels = new Map();
 const discoveredDevices = new Map();
 const pendingMetadataRequests = new Set();
 const w = 800;
-const h = 650;
+const h = 700;
 let settings;
 let settingsWindow;
 let statusBarVisible = true;
@@ -92,6 +105,9 @@ export function getSettings(window) {
                 ecp: ["enabled"],
                 telnet: ["enabled"],
                 debug: ["enabled"],
+                // Off by default, unlike every other service: Remote Screen is unauthenticated,
+                // so anyone who can reach the port sees the screen. Strictly opt-in.
+                screen: [],
                 remoteAccess: ["enabled"],
             },
             device: {
@@ -238,6 +254,10 @@ export function getSettings(window) {
                                         {
                                             label: "Disable Home Screen mode",
                                             value: "disableHomeScreen",
+                                        },
+                                        {
+                                            label: "Disable Focus and Restore of the Window on BrightScript App Launch",
+                                            value: "disableFocusOnLaunch",
                                         },
                                         {
                                             label: "Disable Warning to use Keyboard or Gamepad on Display Click",
@@ -397,35 +417,59 @@ export function getSettings(window) {
                                     type: "checkbox",
                                     options: [
                                         {
-                                            label: "Service Enabled",
+                                            label: "Service Enabled (Port 8060)",
                                             value: "enabled",
                                         },
                                     ],
                                     help: "ECP service allows the simulator to be controlled over the network",
                                 },
                                 {
-                                    label: "BrightScript Remote Console (Telnet Port 8085)",
+                                    label: "BrightScript Telnet Services",
                                     key: "telnet",
                                     type: "checkbox",
+                                    style: { width: "45%" },
                                     options: [
                                         {
-                                            label: "Service Enabled",
+                                            label: "Remote Console (Port 8085)",
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "Remote Console can be accessed using an application such as PuTTY or terminal on Mac and Linux",
                                 },
                                 {
-                                    label: "BrightScript Debug Server (Telnet Port 8080)",
+                                    // No label: this shares the title rendered by the "telnet" field above.
+                                    // The keys stay "telnet" and "debug" so existing settings files keep working.
                                     key: "debug",
+                                    type: "checkbox",
+                                    style: { width: "45%" },
+                                    options: [
+                                        {
+                                            label: "Debug Server (Port 8080)",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                },
+                                {
+                                    // The two services above share one help line; a full-width message keeps it
+                                    // on a single row instead of wrapping inside a 45% column. The `help` class
+                                    // is the library's own, so it picks up the themed help color with no styling.
+                                    key: "telnetHelp",
+                                    type: "message",
+                                    style: { width: "100%" },
+                                    content:
+                                        '<span class="help">Both services can be accessed using an application ' +
+                                        "such as PuTTY or terminal on Mac and Linux</span>",
+                                },
+                                {
+                                    label: "Remote Screen (WebRTC)",
+                                    key: "screen",
                                     type: "checkbox",
                                     options: [
                                         {
-                                            label: "Service Enabled",
+                                            label: "Service Enabled (Port 8090)",
                                             value: "enabled",
                                         },
                                     ],
-                                    help: "Debug Server can be accessed using an application such as PuTTY or terminal on Mac and Linux",
+                                    help: "Streams the simulator screen to a browser on your network. This service has no password, so anyone who can reach the port can watch; the remote buttons also require ECP to be enabled",
                                 },
                             ],
                         },
@@ -1203,6 +1247,8 @@ export async function showSettings() {
             checkMenuItem("telnet", telnetEnabled);
             const debugEnabled = settings.value("services.debug")?.includes("enabled") ?? false;
             checkMenuItem("debug-server", debugEnabled);
+            const screenEnabled = settings.value("services.screen")?.includes("enabled") ?? false;
+            checkMenuItem("remote-screen", screenEnabled);
             const options = settings.value("simulator.options");
             if (options) {
                 checkMenuItem("on-top", options.includes("alwaysOnTop"));
@@ -1544,48 +1590,83 @@ function saveSimulatorSettings(options, window) {
     }
 }
 
+// One entry per network service, because every one of them is saved the same way: enable it,
+// or -- if it is already running -- just push the new local-only value at it, or disable it. A
+// table rather than five near-identical if/else blocks, so adding a service is one row.
+//
+// `running` is a getter, not a value: the `is*Enabled` exports are live bindings that the
+// service modules reassign, and reading them once at module scope would freeze them at false.
+export const NETWORK_SERVICES = [
+    {
+        key: "installer",
+        get running() {
+            return isInstallerEnabled;
+        },
+        // The installer is the only one with credentials. The password is applied whether or not
+        // it is already listening, since it is checked per request; the port only matters when
+        // the server is about to bind.
+        whenEnabled: (services) => setPassword(services.password),
+        beforeEnable: (services) => setPort(services.webPort),
+        enable: (window, localOnly) => enableInstaller(window, { localOnly }),
+        setLocalOnly: setInstallerLocalOnly,
+        disable: (window) => disableInstaller(window),
+    },
+    {
+        key: "ecp",
+        get running() {
+            return isECPEnabled;
+        },
+        enable: (window, localOnly) => enableECP(window, ECP_PORT, { localOnly }),
+        setLocalOnly: setECPLocalOnly,
+        disable: (window) => disableECP(window),
+    },
+    {
+        key: "telnet",
+        get running() {
+            return isTelnetEnabled;
+        },
+        enable: (window, localOnly) => enableTelnet(window, TELNET_PORT, { localOnly }),
+        setLocalOnly: setTelnetLocalOnly,
+        disable: (window) => disableTelnet(window),
+    },
+    {
+        key: "debug",
+        get running() {
+            return isDebugEnabled;
+        },
+        enable: (window, localOnly) => enableDebugServer(window, settings, DEBUG_PORT, { localOnly }),
+        setLocalOnly: setDebugLocalOnly,
+        disable: () => disableDebugServer(),
+    },
+    {
+        key: "screen",
+        get running() {
+            return isRemoteScreenEnabled();
+        },
+        enable: (window, localOnly) => enableRemoteScreen(window, REMOTE_SCREEN_PORT, { localOnly }),
+        setLocalOnly: setRemoteScreenLocalOnly,
+        disable: () => disableRemoteScreen(),
+    },
+];
+
 function saveServicesSettings(services, window) {
     if (!services) {
         return;
     }
     const localOnly = !services.remoteAccess?.includes("enabled");
-    if (services.installer?.includes("enabled")) {
-        setPassword(services.password);
-        if (isInstallerEnabled) {
-            setInstallerLocalOnly(localOnly);
-        } else {
-            setPort(services.webPort);
-            enableInstaller(window, { localOnly });
+    for (const service of NETWORK_SERVICES) {
+        if (!services[service.key]?.includes("enabled")) {
+            service.disable(window);
+            continue;
         }
-    } else {
-        disableInstaller(window);
-    }
-    if (services.ecp?.includes("enabled")) {
-        if (isECPEnabled) {
-            setECPLocalOnly(localOnly);
+        service.whenEnabled?.(services);
+        if (service.running) {
+            // Already listening, so only the address filter can have changed.
+            service.setLocalOnly(localOnly);
         } else {
-            enableECP(window, ECP_PORT, { localOnly });
+            service.beforeEnable?.(services);
+            service.enable(window, localOnly);
         }
-    } else {
-        disableECP(window);
-    }
-    if (services.telnet?.includes("enabled")) {
-        if (isTelnetEnabled) {
-            setTelnetLocalOnly(localOnly);
-        } else {
-            enableTelnet(window, TELNET_PORT, { localOnly });
-        }
-    } else {
-        disableTelnet(window);
-    }
-    if (services.debug?.includes("enabled")) {
-        if (isDebugEnabled) {
-            setDebugLocalOnly(localOnly);
-        } else {
-            enableDebugServer(window, settings, DEBUG_PORT, { localOnly });
-        }
-    } else {
-        disableDebugServer();
     }
 }
 

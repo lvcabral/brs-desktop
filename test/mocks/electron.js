@@ -43,6 +43,7 @@ export function createFakeWindow(id = 1) {
             isDevToolsOpened: vi.fn(() => false),
             getURL: vi.fn(() => "file:///index.html"),
             setWindowOpenHandler: vi.fn(),
+            setBackgroundThrottling: vi.fn(),
             capturePage: vi.fn(() => Promise.resolve({ toPNG: () => Buffer.alloc(0) })),
         },
         getBounds: vi.fn(() => ({ x: 0, y: 0, width: 1280, height: 770 })),
