@@ -276,7 +276,7 @@ describe("ECP payload builders", () => {
         it("includes event items with the correct fields", () => {
             const events = [
                 { id: 1, startTm: 100.5, endTm: 105.3, line: 42, file: "pkg:/components/Task.brs" },
-                { id: 2, startTm: 200.0, endTm: 210.7, line: 99, file: "pkg:/source/main.brs" },
+                { id: 2, startTm: 200, endTm: 210.7, line: 99, file: "pkg:/source/main.brs" },
             ];
             const xml = genSgRendezvousQueryXml(events, 3, true);
             expect(xml).toContain("<count>2</count>");

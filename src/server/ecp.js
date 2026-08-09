@@ -35,8 +35,6 @@ let currentApp;
 let localOnly = false;
 let ecpPort = ECP_PORT;
 let rendezvousTrackingEnabled = false;
-/** Maximum rendezvous events queued between two query/sgrendezvous calls (matches Roku's spec). */
-const MAX_RENDEZVOUS_QUEUE = 1000;
 const rendezvousQueue = [];
 let rendezvousDropCount = 0;
 let pendingRendezvousResolve = null;
