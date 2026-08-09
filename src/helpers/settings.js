@@ -236,6 +236,10 @@ export function getSettings(window) {
                                             value: "consoleOnDebug",
                                         },
                                         {
+                                            label: "Clear the Console when BrightScript App starts",
+                                            value: "clearConsoleOnStartup",
+                                        },
+                                        {
                                             label: "Pause App when the Simulator loses the Focus",
                                             value: "pauseOnBlur",
                                         },

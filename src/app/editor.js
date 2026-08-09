@@ -367,7 +367,16 @@ function updateButtons() {
 }
 
 function handleEngineEvents(event, data) {
-    if (event === "loaded") {
+    if (event === "loading") {
+        if (data === BRS_HOME_APP_PATH) {
+            return;
+        }
+        const preferences = api.getPreferences();
+        const simOptions = preferences?.simulator?.options || [];
+        if (simOptions.includes("clearConsoleOnStartup")) {
+            clearTerminal();
+        }
+    } else if (event === "loaded") {
         if (data.path === BRS_HOME_APP_PATH) {
             return;
         }
