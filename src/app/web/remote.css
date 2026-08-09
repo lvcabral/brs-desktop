@@ -1,0 +1,275 @@
+/*---------------------------------------------------------------------------------------------
+ *  BrightScript Simulation Desktop Application (https://github.com/lvcabral/brs-desktop)
+ *
+ *  Copyright (c) 2019-2026 Marcelo Lv Cabral. All Rights Reserved.
+ *
+ *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* Loaded on top of css/styles.min.css, the same Roku-themed skin the web installer on port 80
+   uses, so the two pages look like one application. This file only adds what that skin has no
+   equivalent for: the video stage, the D-pad grid and the stream address row.
+
+   Everything here is scoped under a page-specific class or id. The skin styles bare `button`
+   globally, so an unscoped rule would be fighting it rather than extending it -- the buttons
+   carry .roku-button and take their colour, radius and hover from the skin, and .btn only
+   overrides the geometry a remote needs.
+
+   No webfont is pulled in: every glyph in remote.html is a Unicode character the system font
+   already has, which matters on a page opened from arbitrary phones on the LAN. */
+
+:root {
+    /* Sampled from styles.min.css so the additions match the skin rather than approximating it. */
+    --roku-purple: #662d91;
+    --roku-purple-dark: #552a7b;
+    --panel: #f3f3f3;
+    --border: #d5d5d5;
+    --muted: #666;
+}
+
+body {
+    /* Stops the double-tap-to-zoom gesture from eating rapid remote presses. */
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* An author-level "display" wins over the UA stylesheet's [hidden] { display: none }, so
+   without this the overlay's hidden attribute is silently inert and "Waiting for the
+   simulator..." stays on top of a working stream. Applies to every [hidden] element on the
+   page, so the same trap cannot come back through a new component. */
+[hidden] {
+    display: none !important;
+}
+
+/* Connection state, in the purple headline band under the title. The skin's own header bar is
+   slid off-canvas below 768px, which is where this page is most often opened. */
+.nav-page-status {
+    margin: 0 0 22px;
+    padding: 0 15px;
+    color: #e2d3ee;
+    font-size: 14px;
+    text-align: center;
+}
+
+.banner {
+    max-width: 960px;
+    margin: 0 auto 18px;
+    padding: 10px 12px;
+    border: 1px solid #e0c069;
+    border-radius: 6px;
+    background: #fdf6e3;
+    color: #7a5c00;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+}
+
+/* Two columns once there is room for the video and the remote at full size, one centred column
+   below that. The video column is capped so the remote is not pushed off a laptop screen. */
+.viewer-layout {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 22px;
+}
+
+.viewer {
+    flex: 1 1 480px;
+    max-width: 960px;
+    min-width: 0; /* lets the flex item shrink below the video's intrinsic width */
+}
+
+.stage {
+    position: relative;
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#video {
+    display: block;
+    width: 100%;
+    /* The mirror canvas is already letterboxed to the display mode's aspect ratio, so contain
+       adds no second set of bars -- it only guarantees no distortion if that ever changes. */
+    object-fit: contain;
+    background: #000;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+/* The address of this page, so it can be read off a phone or handed to someone else. Sits
+   directly under the video, per the layout. */
+.stream-url {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+/* Says what the address is for. Without it the row reads as "here is where you already are",
+   which is not what this URL is -- it points at the chrome-less /embed page. */
+.stream-url-label {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.stream-url-link {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--roku-purple);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 15px;
+}
+
+/* The skin's .roku-button is 14px/36px with a 30px radius, which is far larger than this row
+   needs; only the metrics are overridden, so the colour and hover still come from the skin. */
+.stream-url-copy {
+    flex: 0 0 auto;
+    padding: 8px 20px;
+    font-size: 14px;
+}
+
+.stream-url-hint {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+.stream-url-hint code {
+    padding: 2px 5px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px;
+}
+
+.remote {
+    flex: 0 0 340px;
+    max-width: 340px;
+    /* Centres the remote when it wraps under the video on a narrow screen. */
+    margin: 0 auto;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+/* Geometry only. Colour, radius, cursor and hover come from .roku-button in the skin. */
+.btn {
+    flex: 1 1 0;
+    min-height: 48px;
+    min-width: 0; /* a flex item with white-space:nowrap will not shrink without this */
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    /* Prevents the long-press text selection that fires on held remote buttons. */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn.wide {
+    font-size: 14px;
+}
+
+/* The D-pad is a 3x3 grid with the arrows on the cross and OK in the middle. */
+.dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.dpad .up {
+    grid-area: 1 / 2;
+}
+
+.dpad .left {
+    grid-area: 2 / 1;
+}
+
+.dpad .ok {
+    grid-area: 2 / 2;
+    font-weight: 600;
+}
+
+.dpad .right {
+    grid-area: 2 / 3;
+}
+
+.dpad .down {
+    grid-area: 3 / 2;
+}
+
+.text-row {
+    margin-top: 16px;
+}
+
+/* The text field's label. Visually redundant next to the placeholder, but a placeholder is not
+   an accessible name, so a screen reader would otherwise announce an unlabelled field. Clipped
+   rather than display:none, which would take it out of the accessibility tree along with the
+   layout. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* The skin sets .Roku-Form input to a 26px pill, but this input is outside a .Roku-Form and
+   has to line up with the square-ish remote buttons beside it. */
+#textInput {
+    flex: 3 1 0;
+    min-width: 0;
+    min-height: 48px;
+    padding: 10px 12px;
+    color: #333;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px; /* 16px or larger stops iOS Safari zooming in on focus. */
+    font-family: inherit;
+}
+
+#textInput::placeholder {
+    color: #999;
+}
+
+.hint {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+}

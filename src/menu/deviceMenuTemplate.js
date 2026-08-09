@@ -9,6 +9,7 @@ import { isECPEnabled, enableECP, disableECP } from "../server/ecp";
 import { isTelnetEnabled, enableTelnet, disableTelnet } from "../server/telnet";
 import { isDebugEnabled, enableDebugServer, disableDebugServer } from "../server/debug";
 import { isInstallerEnabled, enableInstaller, disableInstaller } from "../server/installer";
+import { isRemoteScreenEnabled, enableRemoteScreen, disableRemoteScreen } from "../server/remotescreen";
 import { setLocaleId, setDisplayOption, setPeerRoku, getRemoteAccessLocalOnly } from "../helpers/settings";
 import { reloadDevice } from "../helpers/window";
 
@@ -218,6 +219,19 @@ export const deviceMenuTemplate = {
                     disableDebugServer();
                 } else {
                     enableDebugServer(undefined, undefined, undefined, { localOnly: getRemoteAccessLocalOnly() });
+                }
+            },
+        },
+        {
+            id: "remote-screen",
+            label: "Remote Screen",
+            type: "checkbox",
+            checked: false,
+            click: (item, window) => {
+                if (isRemoteScreenEnabled()) {
+                    disableRemoteScreen();
+                } else {
+                    enableRemoteScreen(undefined, undefined, { localOnly: getRemoteAccessLocalOnly() });
                 }
             },
         },

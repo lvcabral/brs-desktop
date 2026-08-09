@@ -10,6 +10,7 @@ import { subscribeInstaller } from "../server/installer";
 import { subscribeECP } from "../server/ecp";
 import { subscribeTelnet } from "../server/telnet";
 import { subscribeDebugServer } from "../server/debug";
+import { subscribeRemoteScreen } from "../server/remotescreen";
 import { ECP_PORT, TELNET_PORT, DEBUG_PORT } from "../constants";
 import { getRecentPackage, getAppList } from "../menu/menuService";
 import { updateServerStatus } from "./settings";
@@ -24,6 +25,7 @@ export function subscribeServerEvents() {
     subscribeInstaller("events", installerEvents);
     subscribeTelnet("events", telnetEvents);
     subscribeDebugServer("events", debugServerEvents);
+    subscribeRemoteScreen("events", remoteScreenEvents);
 }
 
 function ecpEvents(event, data) {
@@ -79,5 +81,15 @@ function telnetEvents(event, enabled) {
 function debugServerEvents(event, enabled) {
     if (event === "enabled") {
         updateServerStatus("Debug", "debug-server", enabled, DEBUG_PORT);
+    }
+}
+
+function remoteScreenEvents(event, data) {
+    if (event === "enabled") {
+        // "Screen" rather than "RemoteScreen": updateServerStatus lowercases the service name
+        // to build the settings key, so a two-word name would write to "remotescreen" while
+        // the schema reads "screen". Like the installer, the port comes from the event because
+        // the bound port can differ from the requested one.
+        updateServerStatus("Screen", "remote-screen", data.enabled, data.port);
     }
 }

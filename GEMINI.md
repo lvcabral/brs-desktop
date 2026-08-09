@@ -26,6 +26,7 @@ graph TD
         ECP["ecp.js (SSDP & REST API - Port 8060)"]
         Installer["installer.js (HTTP sideload - Port 80/custom)"]
         Telnet["telnet.js (Telnet Console - Port 8085)"]
+        Screen["remotescreen.js (WebRTC Screen - Port 8090)"]
     end
 
     subgraph Electron Renderer Process (Chrome / Web Workers)
@@ -41,6 +42,7 @@ graph TD
     VSCode -.->|Telnet console debugging| Telnet
     TelnetCli -.->|Interactive MicroDebugger commands| Telnet
     Browser -.->|Sideload zip/bpk & Take Screenshots| Installer
+    Browser -.->|WebRTC video feed & signaling| Screen
 
     %% Internal Electron communications
     Main <-->|IPC IPC-Channels| Preload
@@ -53,6 +55,9 @@ graph TD
     Main --> ECP
     Main --> Installer
     Main --> Telnet
+    Main --> Screen
+    Screen <-->|Signaling relayed over IPC| Preload
+    Canvas -->|captureStream mirror| App
 ```
 
 ---
@@ -99,7 +104,7 @@ The IDE is implemented inside the **Editor Window** (`src/app/editor.html`), giv
 ---
 
 ## Background Emulator Services
-To make the simulator behave like a real Roku device on the local network, the Main Process spins up three Node.js background services:
+To make the simulator behave like a real Roku device on the local network, the Main Process spins up four Node.js background services:
 
 ### A. ECP Server (`src/server/ecp.js`)
 Emulates Roku's **External Control Protocol** (REST API) and **SSDP** (Simple Service Discovery Protocol).
@@ -127,6 +132,17 @@ Emulates the Roku **MicroDebugger** command shell on port `8085`.
     *   `cont` or `c` (continue running)
     *   `step` or `s` (step instruction)
 
+### D. Remote Screen Server (`src/server/remotescreen.js`)
+Streams the simulator display to a browser over **WebRTC** on port `8090`. This one has **no Roku counterpart** — a physical device offers nothing equivalent.
+*   **Single-Port HTTP + WebSocket**: A plain `node:http` server serves the viewer page (`src/app/web/remote.html`, `remote.css`, `remote.js`) and a `/config` JSON document, while a `ws` server attached with `{ noServer: true }` handles the `/rtc-session` signaling channel through a manual `upgrade` handler.
+*   **Embeddable Stream (`/embed`)**: WebRTC has no URL for the media itself -- it is SRTP over UDP set up by the `/rtc-session` WebSocket -- so "embed the stream" means an `<iframe>` around a page that performs the handshake. `web/embed.html` is that page: the `<video>` and nothing else, no skin and no remote. The protocol both pages share lives in `web/signaling.js` (exposed as `window.brsSignaling`, loaded *before* its callers, which use it on load). The copy button on the viewer builds its URL from `/config`'s `lanHost` -- `deviceInfo.localIps[0]` -- rather than `location.origin`, because the viewer is typically opened from the status bar where the origin is `localhost` and would be meaningless on the machine it gets pasted into; `getLanHost()` returns `null` while local-only is on, since advertising a LAN address for a connection the service refuses would be a dead link. The status bar deliberately still opens `localhost`.
+*   **Shared Skin**: the viewer serves `src/app/css/styles.min.css` — the same Roku-themed stylesheet the web installer uses on port 80 — so the two pages read as one application, and `remote.css` is loaded *after* it as an override layer adding only what the skin has no equivalent for (the video stage, the D-pad grid, the stream-address row). Order matters: the skin styles bare `button` globally, so an override loaded first would lose to it. The skin has no `@font-face` or `url()` references, which is what makes it safe to serve to an arbitrary phone with no other assets. The web installer's **Utilities** tab links here, but only when the service is running: `installer.js` renders `utilities.html` at request time, substituting a `<!--REMOTE_SCREEN_BUTTON-->` placeholder with a link built from the *bound* port and from the `Host` header the client used (so a phone is sent back to the simulator, not to its own loopback). That header is client-supplied and lands inside an `href`, so `safeHostname()` validates it against an allow-list and returns `null` — suppressing the link — rather than escaping it.
+*   **Signaling Relay**: A TCP listener can only exist in the Main Process; `RTCPeerConnection` and `captureStream()` only in the Renderer. So the Main Process merely relays: `rtcViewerJoined` / `rtcViewerLeft` / `rtcSignal` over IPC, with the **Renderer as the offerer** because it owns the media track (`src/app/webrtc.js` manages the peer connections, `src/app/mirror.js` the frame source). Because offers are only ever sent on join, two channels close the gaps in that one-shot handshake: `rtcReady` (Renderer -> Main) re-announces sessions that connected before the Renderer's handlers existed, and `rtcSessionFailed` (Renderer -> Main) drops the socket of a peer connection that died, so the viewer reconnects instead of holding a slot.
+*   **Fixed-Size Mirror Canvas**: `#display`'s backing store is resized on every `brs.redraw()`, so capturing it directly would renegotiate the stream on every window resize. `mirror.js` keeps a hidden canvas sized from the display mode (720x540 / 1280x720 / 1920x1080).
+*   **Event-Driven Frames (requires `brs-engine` >= 2.4.0)**: the engine repaints only when the running app draws something, so a settled SceneGraph app posts no frames at all while a busy one posts at 60fps — sampling on a timer was therefore both late and wasteful, and a static menu app took seconds to update remotely. `mirror.js` instead enables the engine's `frame` event (`brs.setFrameNotify(true)`, only while a viewer is connected) and copies `brs.getDisplayBuffer()` on each one. That buffer is the canvas the visible display is drawn *from*: always at the display mode's native resolution and free of overscan guidelines, where `#display` may be scaled down to the window and would stream blurry. The captured track is taken at `captureStream(0)` and pushed explicitly with `requestFrame()`, so no browser sampling clock sits between a repaint and the wire; a 1s keepalive plus a push on viewer join keeps the encoder fed while an app is idle. Blanking the display is reported as a separate `cleared` event and handled by blanking the mirror, *not* by copying the buffer: the engine leaves the buffer holding the last drawn image, so treating it as a frame would leave the viewer looking at an app that had already exited.
+*   **Input**: Remote buttons are `POST`ed by the page straight to **ECP on port 8060** with `mode: "no-cors"`, so the service is only fully useful with ECP also enabled; text entry `POST`s to this service's own `/paste`, which reuses the Renderer's existing `pasteText` queue.
+*   **Unauthenticated, therefore opt-in**: the only gate is the `services.remoteAccess` local-only toggle, enforced per HTTP request, at WS upgrade, and by dropping already-open remote sessions when the setting flips. It is the **one service whose default is disabled** (`services.screen` is `[]`), and it caps concurrent viewers at four.
+
 ---
 
 ## Secure Bridge Configuration (IPC)
@@ -141,6 +157,10 @@ To keep the execution environment safe, code running in the Chromium Renderer ca
 | `executeFile` | Main -> Renderer | Instructs `brs-engine` to load and run a channel package. |
 | `postKeyPress` | Main -> Renderer | Relays keydown/keyup events received from the ECP API server. |
 | `mountExternalVolume` | Main -> Renderer | Requests virtual attachment of a mock external drive file buffer. |
+| `rtcSignal` | Both directions | Relays WebRTC offers, answers and ICE candidates between the Renderer's peer connections and a Remote Screen viewer socket. |
+| `rtcViewerJoined` / `rtcViewerLeft` | Main -> Renderer | Announces a Remote Screen viewer arriving or leaving, so the Renderer creates or tears down its peer connection. |
+| `rtcReady` | Renderer -> Main | Announced once the Renderer's signaling handlers are live, prompting the Main Process to re-announce every already-open session. `rtcViewerJoined` is fire-and-forget, so a viewer that connected before that point would otherwise wait forever for an offer. |
+| `rtcSessionFailed` | Renderer -> Main | Reports a peer connection the Renderer could not build or that ICE gave up on, so the Main Process closes the socket instead of letting a dead peer hold one of the four viewer slots. |
 
 ---
 
@@ -155,10 +175,10 @@ To keep the execution environment safe, code running in the Chromium Renderer ca
 The project is covered by a [Vitest](https://vitest.dev) suite, run with `npm test` (`npm run test:watch` while developing, `npm run test:coverage` for a report). It is organised in two layers:
 
 *   **Unit specs** (`test/unit/**`) mirror the `src/` tree and exercise pure logic: the Roku firmware-version decoder, digest-authentication arithmetic, key-code conversion, ECP payload builders, the debug shell's help and key tables, and the recent-files store.
-*   **Integration specs** (`test/integration/**`) start the real network services in-process — ECP REST and its ECP-2 WebSocket, the web installer, the telnet console and the debug command shell — and drive them over genuine sockets. Each binds an ephemeral port supplied by `getFreePort()`, so the suites can run concurrently and never collide with a running simulator.
+*   **Integration specs** (`test/integration/**`) start the real network services in-process — ECP REST and its ECP-2 WebSocket, the web installer, the telnet console, the debug command shell and the Remote Screen HTTP/signaling server — and drive them over genuine sockets. Each binds an ephemeral port supplied by `getFreePort()`, so the suites can run concurrently and never collide with a running simulator.
 
 **Electron is never launched.** `vitest.config.mjs` aliases the `electron` module, `@electron/remote`, `@lvcabral/electron-preferences`, `@lvcabral/node-ssdp`, `network`, `electron-prompt` and `electron-about-window` to hand-written stubs in `test/mocks/`. Stubbing SSDP in particular removes UDP multicast from the test run, which would otherwise be both a permissions hazard and a source of flakiness on CI. Assertions about main-to-renderer traffic go through the fake window's `webContents.send` spy; renderer-to-main handlers are driven with `ipcMain.emit(channel, {}, payload)`.
 
 Two characteristics of this codebase shape how tests must be written. First, several modules register their `ipcMain` handlers at module-evaluation time and cannot re-register them, so a blanket `ipcMain.removeAllListeners()` in a shared hook will quietly disable the code under test. Second, handlers that read bundled assets through `path.join(__dirname, …)` resolve against `src/` under the test runner rather than the webpack bundle's `app/`, so those specific routes fail only in tests; the affected cases are marked as such.
 
-There is deliberately **no end-to-end layer**. Window management, menus, and anything visual are not covered, and still require running the application to verify.
+There is deliberately **no end-to-end layer**. Window management, menus, and anything visual are not covered, and still require running the application to verify. The same is true of Remote Screen's media path: with Electron aliased away there is no DOM canvas, no `captureStream()` and no `RTCPeerConnection`, so the suite covers the server, the signaling relay and the local-only guards, but the video itself can only be checked by running the app and opening the viewer page.

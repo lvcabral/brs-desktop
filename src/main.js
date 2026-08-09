@@ -16,9 +16,17 @@ import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
 import { enableDebugServer } from "./server/debug";
+import { enableRemoteScreen, dropAllSessions } from "./server/remotescreen";
 import { randomUUID } from "node:crypto";
 import { cliArgumentsConfig } from "./cliArgs";
-import { ECP_PORT, TELNET_PORT, DEBUG_PORT, UPDATE_CHECK_STARTUP, UPDATE_CHECK_INTERVAL } from "./constants";
+import {
+    ECP_PORT,
+    TELNET_PORT,
+    DEBUG_PORT,
+    REMOTE_SCREEN_PORT,
+    UPDATE_CHECK_STARTUP,
+    UPDATE_CHECK_INTERVAL,
+} from "./constants";
 import {
     createMenu,
     enableMenuItem,
@@ -169,6 +177,7 @@ app.on("ready", () => {
         telnetEnabled: false,
         debugServerEnabled: false,
         installerEnabled: false,
+        remoteScreenEnabled: false,
         localOnly: false,
     };
     loadSettings(mainWindow, startup);
@@ -208,6 +217,16 @@ app.on("ready", () => {
                 settings.value("services.installer").includes(status),
                 settings.value("services.webPort")
             );
+            updateServerStatus(
+                "Screen",
+                "remote-screen",
+                settings.value("services.screen")?.includes(status) ?? false,
+                REMOTE_SCREEN_PORT
+            );
+            // The peer connections lived in the page that just went away, so every viewer is
+            // now holding a socket onto a dead stream. Closing them makes the viewer pages
+            // reconnect and renegotiate against the fresh renderer.
+            dropAllSessions();
         }
         if (settings.preferences.remote) {
             setRemoteKeys(settings.defaults.remote, settings.preferences.remote);
@@ -261,6 +280,9 @@ function loadSettings(mainWindow, startup) {
         startup.telnetEnabled = settings.value("services.telnet").includes("enabled");
         startup.debugServerEnabled = settings.value("services.debug").includes("enabled");
         startup.installerEnabled = settings.value("services.installer").includes("enabled");
+        // Defaults to [] rather than ["enabled"], so guard the read: a settings file written
+        // before this service existed has no "screen" key at all.
+        startup.remoteScreenEnabled = settings.value("services.screen")?.includes("enabled") ?? false;
         startup.localOnly = !settings.value("services.remoteAccess").includes("enabled");
         setPassword(settings.value("services.password"));
         setPort(settings.value("services.webPort"));
@@ -330,6 +352,9 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
     }
     if (applyStartup && startupOptions.debugServerEnabled) {
         enableDebugServer(mainWindow, settings, DEBUG_PORT, { localOnly });
+    }
+    if (applyStartup && startupOptions.remoteScreenEnabled) {
+        enableRemoteScreen(mainWindow, REMOTE_SCREEN_PORT, { localOnly });
     }
     if (cliArgs?.pwd && cliArgs.pwd.trim() !== "") {
         setPassword(cliArgs.pwd.trim());

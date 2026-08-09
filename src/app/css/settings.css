@@ -236,6 +236,23 @@ body {
     border-color: var(--icon-hover-color);
 }
 
+/* The Debug Server checkbox shares the "BrightScript Telnet Services" title rendered by the
+   telnet field, so it has no label of its own. The library still emits an empty .field-label;
+   giving it a non-breaking space makes it occupy the same height as the real label, which is
+   what keeps the two checkboxes on the same baseline. The group cannot be part of this selector:
+   electron-preferences overwrites group.id with `group-<section>-<index>`, and the field key is
+   unique across the schema anyway. */
+.field-checkbox.key-debug .field-label::before {
+    content: "\00a0";
+}
+
+/* The shared help line for those two services is its own field, so .fields-container's 20px flex
+   gap lands above it and it sits lower than every other help text. Cancelling that gap puts it
+   the same 12px below its checkboxes as the help text the library renders inside a field. */
+.field-message.key-telnetHelp {
+    margin-top: -20px;
+}
+
 .field-radio .radio-option:hover input ~ .check-circle {
     background-color: var(--sidebar-hover-color);
 }

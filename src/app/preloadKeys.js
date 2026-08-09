@@ -40,6 +40,9 @@ const SEND_CHANNELS = [
     "closeSimulator",
     "externalVolumeReady",
     "setPreference",
+    "rtcSignal",
+    "rtcSessionFailed",
+    "rtcReady",
     "rendezvousEvents",
 ];
 
@@ -75,6 +78,9 @@ const RECEIVE_CHANNELS = [
     "unmountExternalVolume",
     "showToast",
     "setRendezvousLog",
+    "rtcViewerJoined",
+    "rtcViewerLeft",
+    "rtcSignal",
     "setRendezvousTracking",
     "requestRendezvousEvents",
 ];
