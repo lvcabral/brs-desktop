@@ -13,6 +13,29 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check Prettier formatting
+        run: npm run prettier
+
   test:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
@@ -44,7 +67,7 @@ jobs:
         run: npm test
 
   release:
-    needs: test
+    needs: [lint, test]
     # Push events only. Pull requests run the test job for feedback; building installers
     # on three platforms for every push to a PR branch would cost minutes and publish
     # nothing, since the release step is gated on a tag anyway.
