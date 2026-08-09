@@ -20,6 +20,7 @@ function parse(...args) {
 
 describe("CLI aliases", () => {
     it.each([
+        ["b", "debug"],
         ["c", "console"],
         ["d", "devtools"],
         ["e", "ecp"],
@@ -28,6 +29,7 @@ describe("CLI aliases", () => {
         ["p", "pwd"],
         ["m", "mode"],
         ["r", "rc"],
+        ["s", "screen"],
     ])("aliases -%s to --%s", (short, long) => {
         expect(cliArgumentsConfig.alias[short]).toBe(long);
     });
@@ -41,13 +43,16 @@ describe("CLI aliases", () => {
 });
 
 describe("boolean flags", () => {
-    it.each(["console", "devtools", "ecp", "fullscreen", "rc"])("parses --%s as a boolean", (flag) => {
-        expect(parse(`--${flag}`)[flag]).toBe(true);
-    });
+    it.each(["console", "debug", "devtools", "ecp", "fullscreen", "rc", "screen"])(
+        "parses --%s as a boolean",
+        (flag) => {
+            expect(parse(`--${flag}`)[flag]).toBe(true);
+        }
+    );
 
     it("defaults every boolean flag to false", () => {
         const parsed = parse();
-        for (const flag of ["console", "devtools", "ecp", "fullscreen", "rc"]) {
+        for (const flag of ["console", "debug", "devtools", "ecp", "fullscreen", "rc", "screen"]) {
             expect(parsed[flag]).toBe(false);
         }
     });

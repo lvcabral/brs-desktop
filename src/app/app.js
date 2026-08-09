@@ -63,6 +63,9 @@ let debugMode = "continue";
 let editor = null;
 let externalVolumeMountedLabel = "";
 let externalVolumeReadySent = false;
+let isAppStarting = false;
+let isEngineReady = false;
+let pendingExecute = null;
 
 // Initialize BrightScript Engine when window loads
 globalThis.addEventListener("load", main, false);
@@ -145,6 +148,16 @@ async function main() {
             api.send("reset");
         } else if (event === "version") {
             // brs-engine requests the version from the worker as the last step on initialize
+            isEngineReady = true;
+            if (pendingExecute) {
+                brs.execute(
+                    pendingExecute.filePath,
+                    pendingExecute.data,
+                    pendingExecute.options,
+                    pendingExecute.input
+                );
+                pendingExecute = null;
+            }
             startupProcess();
             if (!externalVolumeReadySent) {
                 externalVolumeReadySent = true;
@@ -240,6 +253,7 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
     }
 
     try {
+        isAppStarting = true;
         const fileExt = filePath.split(".").pop()?.toLowerCase().split("?")[0];
         let password = "";
         let debugState = !filePath.includes(BRS_HOME_APP_PATH);
@@ -255,18 +269,19 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
         if (brsHomeMode) {
             launchAppId = BRS_HOME_APP_PATH;
         }
-        brs.execute(
-            filePath.split("?")[0],
-            data,
-            {
-                clearDisplayOnExit: clear,
-                muteSound: mute,
-                debugOnCrash: debug,
-                password: password,
-            },
-            input
-        );
+        const options = {
+            clearDisplayOnExit: clear,
+            muteSound: mute,
+            debugOnCrash: debug,
+            password: password,
+        };
+        if (!isEngineReady) {
+            pendingExecute = { filePath: filePath.split("?")[0], data, options, input };
+            return;
+        }
+        brs.execute(filePath.split("?")[0], data, options, input);
     } catch (error) {
+        isAppStarting = false;
         const errorMsg = `Error opening ${filePath}:${error.message}`;
         console.error(errorMsg);
         showToast(errorMsg, 5000, true);
@@ -632,6 +647,7 @@ function appLoaded(appData) {
 }
 
 function appTerminated() {
+    isAppStarting = false;
     currentApp = structuredClone(defaultAppInfo);
     stats.style.visibility = "hidden";
     api.updateTitle(defaultTitle);
@@ -671,7 +687,8 @@ function startupProcess() {
     const closeButton = document.getElementById("close-scenegraph-warning");
     const dontShowAgainCheckbox = document.getElementById("dont-show-warning-again");
 
-    if (dontShowWarning || !dialog || !closeButton || !dontShowAgainCheckbox) {
+    const runStartupChoice = () => {
+        if (isAppStarting || currentApp.running) return;
         if (runLastApp) {
             setTimeout(() => startLastApp(), 300);
         } else if (splashVideoEnabled) {
@@ -679,6 +696,10 @@ function startupProcess() {
         } else if (brsHomeMode) {
             setTimeout(() => startHomeApp(), 300);
         }
+    };
+
+    if (dontShowWarning || !dialog || !closeButton || !dontShowAgainCheckbox) {
+        runStartupChoice();
         return;
     }
     // Show the dialog after a short delay to ensure UI is ready
@@ -691,13 +712,7 @@ function startupProcess() {
             localStorage.setItem("sceneGraphBetaDismissed", "true");
         }
         dialog.style.display = "none";
-        if (runLastApp) {
-            setTimeout(() => startLastApp(), 300);
-        } else if (splashVideoEnabled) {
-            setTimeout(() => startSplashVideo(), 300);
-        } else if (brsHomeMode) {
-            setTimeout(() => startHomeApp(), 300);
-        }
+        runStartupChoice();
     };
     closeButton.addEventListener("click", handleDialogClose);
     document.addEventListener("keydown", (event) => {
@@ -717,6 +732,7 @@ function startupProcess() {
 }
 
 function startSplashVideo() {
+    if (isAppStarting) return;
     const player = document.getElementById("player");
     if (!player) {
         return;
@@ -765,12 +781,13 @@ function startSplashVideo() {
 }
 
 function startHomeApp() {
-    if (brsHomeMode && !currentApp.running) {
+    if (brsHomeMode && !currentApp.running && !isAppStarting) {
         api.send("runFile", BRS_HOME_APP_PATH);
     }
 }
 
 function startLastApp() {
+    if (isAppStarting) return;
     if (appList.length > 0) {
         const lastApp = appList[0];
         if (lastApp.path.startsWith("http") || lastApp.path.startsWith("file:")) {
