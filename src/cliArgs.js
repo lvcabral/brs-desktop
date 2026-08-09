@@ -12,7 +12,7 @@ export const cliArgumentsConfig = {
     // `w` belongs here with the other value-taking options: left undeclared, minimist
     // infers the type, so a bare `-w` becomes boolean true and `-w 8080` a number.
     string: ["o", "p", "m", "w"],
-    boolean: ["b", "c", "d", "e", "f", "r"],
+    boolean: ["b", "c", "d", "e", "f", "r", "s"],
     alias: {
         b: "debug",
         c: "console",
@@ -23,5 +23,6 @@ export const cliArgumentsConfig = {
         p: "pwd",
         m: "mode",
         r: "rc",
+        s: "screen",
     },
 };

@@ -76,9 +76,9 @@ This screen can be used to write (or import) BrightScript code and run it direct
 Here are **optional** arguments you can use when starting the simulator at the command line:
 
 ```shell
-"BrightScript Simulator" [-o <path>] [-f] [-m <dm>] [-e] [-r] [-b] [-w [<port>]] [-p <newpwd>] [-c] [-d]
+"BrightScript Simulator" [-o <path>] [-f] [-m <dm>] [-e] [-r] [-b] [-s] [-w [<port>]] [-p <newpwd>] [-c] [-d]
 
-"BrightScript Simulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--rc] [--debug]
+"BrightScript Simulator" [<path>] [--fullscreen] [--mode=<dm>] [--ecp] [--rc] [--debug] [--screen]
                         [--web[=<port>]] [--pwd=<newpwd>] [--console] [--devtools]
 ```
 
@@ -90,6 +90,7 @@ Here are **optional** arguments you can use when starting the simulator at the c
 |**-e** or **--ecp**                     | Enables [ECP and SSDP servers](https://developer.roku.com/en-ca/docs/developer-program/debugging/external-control-api.md) to allow remote control and detection.|
 |**-r** or **--rc**                      | Enables a telnet server on port 8085 to allow **Remote Console** monitoring. |
 |**-b** or **--debug**                   | Enables the **Debug Server** on port 8080 for remote debugging commands.     |
+|**-s** or **--screen**                  | Enables **Remote Screen**, a WebRTC video feed of the display, on port 8090. |
 |**-w** `[<port>]` or **--web**`[=<port>]`| Enables **Web Installer** on port 80 optionally set and save a custom `<port>`.|
 |**-p** `<newpwd>` or **--pwd=**`<newpwd>`| Changes the **Web Installer** password and saves it on local storage.       |
 |**-c** or **--console**                 | Opens the **BrightScript console** when starting the simulator.              |
