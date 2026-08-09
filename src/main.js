@@ -347,10 +347,10 @@ function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
     if (cliArgs?.ecp || (applyStartup && startupOptions.ecpEnabled)) {
         enableECP(mainWindow, ECP_PORT, { localOnly });
     }
-    if (cliArgs?.telnet || (applyStartup && startupOptions.telnetEnabled)) {
+    if (cliArgs?.rc || (applyStartup && startupOptions.telnetEnabled)) {
         enableTelnet(mainWindow, TELNET_PORT, { localOnly });
     }
-    if (applyStartup && startupOptions.debugServerEnabled) {
+    if (cliArgs?.debug || (applyStartup && startupOptions.debugServerEnabled)) {
         enableDebugServer(mainWindow, settings, DEBUG_PORT, { localOnly });
     }
     if (applyStartup && startupOptions.remoteScreenEnabled) {
