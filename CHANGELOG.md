@@ -2,13 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
-<a name="unreleased"></a>
+<a name="v2.4.0"></a>
 
-## Unreleased
+## v2.4.0 - Remote Screen and Rendezvous Tracking
+
+This release brings several new features and bug fixes to the BrightScript Simulator. Highlights include the new **Remote Screen** service for WebRTC video streaming, ECP rendezvous tracking for debugging, an 'Allow Remote Access' setting to restrict network services, and a new `target` command in the debug server. It also includes various bug fixes for the console, startup logic, and window sizing. 
+
+See the **BrightScript Simulation Engine** v2.4.0 [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v2.4.0) for all the language and framework features and improvements.
 
 ### New Features
 
-* Added the **Remote Screen** service: streams the simulator display to a browser on the local network over WebRTC, with an on-screen Roku remote, keyboard mapping, text entry and a screenshot download. Listens on port 8090 and is **disabled by default** because it has no password — see the [documentation](docs/remote-access.md#remote-screen). The stream is driven by the engine's new frame notification, so it keeps up with the simulator on static screens as well as animated ones, and is always at the display mode's full resolution regardless of the window size. The viewer page shares the web installer's look, and the installer's **Utilities** tab links to it whenever the service is enabled. A chrome-less `/embed` page serves the video on its own, so the stream can be dropped into another app with an `<iframe>`; the viewer shows that address, already carrying the machine's network IP, with a button to copy it.
+* Added the **Remote Screen** service: streams the simulator display to a browser on the local network over WebRTC, with an on-screen Roku remote, keyboard mapping, text entry and a screenshot download — see the [documentation](docs/remote-access.md#remote-screen). by [@lvcabral](https://github.com/lvcabral) in [#322](https://github.com/lvcabral/brs-desktop/pull/322)
+* Added 'Allow Remote Access' setting to restrict network services to localhost by [@anupamme](https://github.com/anupamme) in [#314](https://github.com/lvcabral/brs-desktop/pull/314)
+* Implemented Live rendezvous logging via brs-engine API & ECP endpoints by [@lvcabral](https://github.com/lvcabral) in [#320](https://github.com/lvcabral/brs-desktop/pull/320)
+* Implemented ECP rendezvous tracking by [@lvcabral](https://github.com/lvcabral) in [#323](https://github.com/lvcabral/brs-desktop/pull/323)
+* Added `target` command handler to debug server by [@lvcabral](https://github.com/lvcabral) in [#325](https://github.com/lvcabral/brs-desktop/pull/325)
+* Added ability to copy file path to clipboard by clicking status bar text by [@lvcabral](https://github.com/lvcabral) in [#326](https://github.com/lvcabral/brs-desktop/pull/326)
+* Added option to clear console on startup and implement trigger in engine events by [@lvcabral](https://github.com/lvcabral) in [#331](https://github.com/lvcabral/brs-desktop/pull/331)
+
+### Bug Fixes
+
+* Fixed: align localStorage key so 'don't show again' checkbox persists by [@lvcabral](https://github.com/lvcabral) in [#317](https://github.com/lvcabral/brs-desktop/pull/317)
+* Fixed: drop remote connections on local-only toggle and document the setting by [@lvcabral](https://github.com/lvcabral) in [#318](https://github.com/lvcabral/brs-desktop/pull/318)
+* Fixed: restore minimum window size overridden by custom-electron-titlebar by [@lvcabral](https://github.com/lvcabral) in [#319](https://github.com/lvcabral/brs-desktop/pull/319)
+* Fixed: reverted ECP rendezvous tracking IPC calls linked with the Debug service by [@lvcabral](https://github.com/lvcabral) in [#321](https://github.com/lvcabral/brs-desktop/pull/321)
+* Fixed: console buffer losing warning/error coloring when editor opens late by [@lvcabral](https://github.com/lvcabral) in [#327](https://github.com/lvcabral/brs-desktop/pull/327)
+* Fixed: startup race between queued app launch and auto-start logic by [@lvcabral](https://github.com/lvcabral) in [#328](https://github.com/lvcabral/brs-desktop/pull/328)
+* Resolved `npm audit` findings without breaking minimatch@3 chain by [@lvcabral](https://github.com/lvcabral)
+
+### Testing & Tooling
+
+* Run ESLint and Prettier as a CI job, fix pending lint errors by [@lvcabral](https://github.com/lvcabral) in [#329](https://github.com/lvcabral/brs-desktop/pull/329)
+
+### Dependency Bumps
+
+* Bump `fast-uri` from 3.1.4 to 3.1.5 by [@dependabot](https://github.com/dependabot) in [#324](https://github.com/lvcabral/brs-desktop/pull/324)
+* Bump `js-yaml` from 4.3.0 to 4.3.1 by [@dependabot](https://github.com/dependabot) in [#330](https://github.com/lvcabral/brs-desktop/pull/330)
+
+Full Changelog: [v2.4.0]
 
 <a name="v2.3.0"></a>
 
@@ -765,6 +796,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.4.0]: https://github.com/lvcabral/brs-desktop/compare/v2.3.0...v2.4.0
 [v2.3.0]: https://github.com/lvcabral/brs-desktop/compare/v2.2.0...v2.3.0
 [v2.2.0]: https://github.com/lvcabral/brs-desktop/compare/v2.1.3...v2.2.0
 [v2.1.3]: https://github.com/lvcabral/brs-desktop/compare/v2.1.2...v2.1.3
