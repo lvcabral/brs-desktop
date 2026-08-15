@@ -47,7 +47,6 @@ The **BrightScript VS Code Extension** can deploy apps directly to the **BrightS
                 "images/**/*.*"
             ],
             "enableDebugProtocol": false,
-            "rendezvousTracking": false
         }
     ]
 }
@@ -58,7 +57,7 @@ The **BrightScript VS Code Extension** can deploy apps directly to the **BrightS
 - `password` should match the developer password set in the simulator (default `rokudev`).
 - `rootDir` should point to your project's root folder containing the `manifest` file.
 - `files` should include all source files and assets needed for your app.
-- `enableDebugProtocol` and `rendezvousTracking` must be set to `false` for compatibility with the simulator.
+- `enableDebugProtocol` must be set to `false` for compatibility with the simulator.
 
 ## Run and Debug
 
@@ -69,4 +68,4 @@ The **BrightScript VS Code Extension** can deploy apps directly to the **BrightS
 
 - **Connection refused**: Verify the simulator is running and that the installer port in `launch.json` match the simulator settings.
 - **Upload failures**: Confirm the **Application Installer** service is enabled and the password matches the simulator configuration (default `rokudev`).
-- **Debugger stops immediately**: Ensure you disabled `enableDebugProtocol` and `rendezvousTracking`; the simulator does not support those options being `true`.
+- **Debugger stops immediately**: Ensure you disabled `enableDebugProtocol`; the simulator does not support this protocol.

@@ -87,6 +87,31 @@ When the debugger is activated (either with `STOP` statement or via `Ctrl+Break`
 
 If the **Remote Console** is enabled an icon is shown in the status bar together with the port number 8085.
 
+## Debug Server
+
+The **Debug Server** can be accessed using telnet through a shell application such as [PuTTY](http://www.putty.org/) for Windows or terminal on Mac and Linux:
+
+```console
+telnet <simulator-ip-address> 8080
+```
+
+This service emulates the device management and debug console available on port 8080 of a physical Roku device. It allows querying device state, managing installed channels, and simulating input. The list below shows the commands currently implemented:
+
+- `genkey` - Reminds to setup Developer Id in Settings
+- `showkey` - Displays the current Developer Id (Dev ID)
+- `fps_display` - Toggles the performance statistics overlay (e.g., `fps_display 1` or `fps_display 0`)
+- `clear_launch_caches` - Acknowledges cache clearance
+- `logrendezvous` - Toggles rendezvous logging (`logrendezvous on` or `logrendezvous off`)
+- `plugins` - Lists all currently installed/sideloaded applications
+- `remove_plugin` - Removes a channel by its ID (`remove_plugin <channel id>`)
+- `press` - Simulates pressing a sequence of remote buttons (e.g. `press up down`)
+- `type` - Types a string of literal characters as if entered on a keyboard
+- `target` - Lists targets or sets active target
+- `exit` or `quit` - Disconnect from the debug server
+- `help` - Show a list of supported commands
+
+If the **Debug Server** is enabled an icon is shown in the status bar together with the port number 8080.
+
 ## Remote Screen
 
 The **Remote Screen** service streams the simulator display to a browser on your network over **WebRTC**, so you can watch and control a running app from a phone, a tablet or another computer. This has no Roku counterpart — a real device has no equivalent feature — so it is specific to the simulator.
