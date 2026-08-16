@@ -166,6 +166,7 @@ export function getSettings(window) {
                 indentationType: "spaces",
                 indentationSize: 4,
                 fontSize: 14,
+                logLevel: 1,
                 options: [],
             },
             externalVolume: {
@@ -347,6 +348,32 @@ export function getSettings(window) {
                                 },
                                 {
                                     key: "placeholder2",
+                                    type: "message",
+                                    style: { width: "40%" },
+                                },
+                                {
+                                    label: "Console Log Level",
+                                    key: "logLevel",
+                                    type: "dropdown",
+                                    style: { width: "50%" },
+                                    options: [
+                                        {
+                                            label: "Debug",
+                                            value: 0,
+                                        },
+                                        {
+                                            label: "Warning (default)",
+                                            value: 1,
+                                        },
+                                        {
+                                            label: "Error",
+                                            value: 2,
+                                        },
+                                    ],
+                                    help: "Set the minimum log level for the console output",
+                                },
+                                {
+                                    key: "placeholder3",
                                     type: "message",
                                     style: { width: "40%" },
                                 },
@@ -1137,6 +1164,9 @@ export function getSettings(window) {
         }
         if (preferences.externalVolume) {
             handleExternalVolumeSettings(window, preferences.externalVolume);
+        }
+        if (preferences.editor) {
+            setDeviceInfo("editor", "logLevel", true);
         }
         if (preferences.customization) {
             setDeviceInfo("customization", "customFeatures", true);
