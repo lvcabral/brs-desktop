@@ -98,6 +98,7 @@ const deviceInfo = {
     cacheFSVolSize: 100 * 1024 * 1024, // 100 MB
     appList: getAppList(),
     customFeatures: [],
+    logLevel: 1, // Options are: Debug = 0, Warning = 1, Error = 2
 };
 
 // Get Network Gateway
@@ -328,6 +329,9 @@ function loadSettings(mainWindow, startup) {
         const peerRoku = getPeerRoku();
         checkMenuItem("peer-roku-deploy", peerRoku.deploy);
         checkMenuItem("peer-roku-control", peerRoku.syncControl);
+    }
+    if (settings.preferences.editor) {
+        setDeviceInfo("editor", "logLevel");
     }
     if (settings.preferences.customization) {
         setDeviceInfo("customization", "customFeatures");
