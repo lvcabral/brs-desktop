@@ -49,7 +49,7 @@ import {
     isRemoteScreenEnabled,
     setRemoteScreenLocalOnly,
 } from "../server/remotescreen";
-import { createMenu, createShortMenu, checkMenuItem } from "../menu/menuService";
+import { createMenu, createShortMenu, checkMenuItem, updatePeerRokuMenuLabels } from "../menu/menuService";
 import {
     WEB_INSTALLER_PORT,
     DEFAULT_USRPWD,
@@ -58,7 +58,7 @@ import {
     DEBUG_PORT,
     REMOTE_SCREEN_PORT,
 } from "../constants";
-import { getLocalIps, formatPath } from "./util";
+import { getLocalIps, formatPath, readJsonFile, writeJsonFile } from "./util";
 
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
@@ -66,6 +66,7 @@ const isLinux = process.platform === "linux";
 const timeZoneLabels = new Map();
 const discoveredDevices = new Map();
 const pendingMetadataRequests = new Set();
+const deviceCacheFile = path.resolve(app.getPath("userData"), "roku-devices.json");
 const w = 800;
 const h = 700;
 let settings;
@@ -1171,6 +1172,7 @@ export function getSettings(window) {
         if (preferences.customization) {
             setDeviceInfo("customization", "customFeatures", true);
         }
+        updatePeerRokuMenuLabels();
     });
     nativeTheme.on("updated", () => {
         if (settings.value("simulator.theme") === "system") {
@@ -2165,6 +2167,7 @@ async function discoverRokuDevices() {
                     console.warn("No Roku devices found on the local network.");
                 }
                 resolve(discoveredDevices.size);
+                saveDeviceCache();
             };
             if (metadataFetches.length > 0) {
                 Promise.allSettled(metadataFetches).then(finalize).catch(finalize);
@@ -2181,6 +2184,30 @@ export async function initRokuDeviceDiscovery() {
     } catch (error) {
         console.error(`Failed to discover Roku devices: ${error.message}`);
         return 0;
+    }
+}
+
+export function loadDeviceCache() {
+    try {
+        const cached = readJsonFile(deviceCacheFile);
+        if (Array.isArray(cached)) {
+            for (const entry of cached) {
+                if (entry.ip) {
+                    discoveredDevices.set(entry.ip, entry);
+                }
+            }
+        }
+    } catch (error) {
+        // Cache missing or corrupt — not a problem, discovery will populate it.
+    }
+}
+
+function saveDeviceCache() {
+    try {
+        const entries = Array.from(discoveredDevices.values());
+        writeJsonFile(deviceCacheFile, entries);
+    } catch (error) {
+        console.warn(`Unable to save Roku device cache: ${error.message}`);
     }
 }
 

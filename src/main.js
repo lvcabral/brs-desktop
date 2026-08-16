@@ -34,6 +34,7 @@ import {
     isMenuItemEnabled,
     getAppList,
     updateAppList,
+    updatePeerRokuMenuLabels,
 } from "./menu/menuService";
 import { loadFile } from "./helpers/files";
 import {
@@ -50,6 +51,7 @@ import {
     updateServerStatus,
     closeSettings,
     initRokuDeviceDiscovery,
+    loadDeviceCache,
 } from "./helpers/settings";
 import { createWindow, openCodeEditor, openDevTools, setAspectRatio, saveWindowState } from "./helpers/window";
 import { subscribeServerEvents } from "./helpers/events";
@@ -143,6 +145,7 @@ app.on("ready", () => {
     }
     // setup the titlebar main process
     setupTitlebar();
+    loadDeviceCache();
     createMenu();
     // Shared Object with Front End
     globalThis.sharedObject = {
@@ -186,7 +189,12 @@ app.on("ready", () => {
     initECP();
     // Initialize Roku device discovery
     setTimeout(() => {
-        initRokuDeviceDiscovery();
+        initRokuDeviceDiscovery().then(() => {
+            updatePeerRokuMenuLabels();
+            if (process.platform === "darwin") {
+                createMenu();
+            }
+        });
     }, 2000); // Delay to allow network services to start
     // Load Renderer
     mainWindow
@@ -329,6 +337,10 @@ function loadSettings(mainWindow, startup) {
         const peerRoku = getPeerRoku();
         checkMenuItem("peer-roku-deploy", peerRoku.deploy);
         checkMenuItem("peer-roku-control", peerRoku.syncControl);
+        updatePeerRokuMenuLabels();
+        if (process.platform === "darwin") {
+            createMenu();
+        }
     }
     if (settings.preferences.editor) {
         setDeviceInfo("editor", "logLevel");

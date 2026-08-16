@@ -115,6 +115,27 @@ export function checkMenuItem(id, checked) {
     }
 }
 
+export function updatePeerRokuMenuLabels() {
+    let peerRoku;
+    try {
+        peerRoku = getPeerRoku();
+    } catch {
+        return; // Settings not initialised yet — nothing to label.
+    }
+    const suffix = peerRoku.friendlyName || peerRoku.ip;
+    const deployLabel = suffix ? `Deploy to Peer Roku (${suffix})` : "Deploy to Peer Roku";
+    // Update the template so the next buildFromTemplate picks it up
+    const deviceSub = deviceMenuTemplate.submenu;
+    const deployTpl = deviceSub.find((item) => item.id === "peer-roku-deploy");
+    if (deployTpl) deployTpl.label = deployLabel;
+    // Also update the live menu item (non-template rebuilds)
+    const appMenu = app.applicationMenu;
+    if (appMenu) {
+        const deployItem = appMenu.getMenuItemById("peer-roku-deploy");
+        if (deployItem) deployItem.label = deployLabel;
+    }
+}
+
 export function enableMenuItem(id, enabled) {
     const item = app.applicationMenu.getMenuItemById(id);
     if (item) {
@@ -221,6 +242,7 @@ function rebuildMenu(template = false) {
         }
         findItem("zip-empty").visible = recentFiles.zip.length === 0;
         findItem("file-clear").enabled = recentFiles.zip.length > 0;
+        updatePeerRokuMenuLabels();
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
         if (isMacOS && window) {
             if (appMenu.getMenuItemById("view-menu")) {
@@ -245,6 +267,7 @@ function rebuildMenu(template = false) {
                 const peerRoku = getPeerRoku();
                 checkMenuItem("peer-roku-deploy", peerRoku.deploy);
                 checkMenuItem("peer-roku-control", peerRoku.syncControl);
+                updatePeerRokuMenuLabels();
             }
         }
     } else {
