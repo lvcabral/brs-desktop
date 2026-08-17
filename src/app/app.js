@@ -105,6 +105,20 @@ async function main() {
                 } else if (data.app === "add-apps") {
                     api.send("openAppPackage");
                     return;
+                } else if (data.app.startsWith("settings_")) {
+                    const settingsMap = {
+                        settings_display: "display",
+                        settings_audio: "audio",
+                        settings_captioning: "captions",
+                        settings_system:"device",
+                    };
+                    api.send("openSettings", settingsMap[data.app]);
+                    return; 
+                }
+                if (data.params instanceof Map && data.params.get("remove") === "1") {
+                    appList = appList.filter((a) => a.id !== data.app);
+                    api.send("removeRecentPackage", data.app);
+                    return;
                 }
                 launchAppId = data.app;
             }
