@@ -18,6 +18,7 @@
 const SEND_CHANNELS = [
     "telnet",
     "addRecentPackage",
+    "removeRecentPackage",
     "openConsole",
     "debugStarted",
     "setAudioMute",
@@ -37,6 +38,7 @@ const SEND_CHANNELS = [
     "currentApp",
     "reset",
     "openAppPackage",
+    "openSettings",
     "closeSimulator",
     "externalVolumeReady",
     "setPreference",

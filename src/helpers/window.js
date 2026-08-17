@@ -6,7 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain, screen } from "electron";
-import { getSimulatorOption, getTitleOverlayTheme } from "./settings";
+import { getSimulatorOption, getTitleOverlayTheme, showSettings } from "./settings";
 import * as dialog from "../helpers/dialog";
 import { readJsonFile, writeJsonFile } from "./util";
 import path from "node:path";
@@ -148,6 +148,10 @@ export function createWindow(name, options) {
 
     ipcMain.on("openAppPackage", () => {
         dialog.openChannelPackage();
+    });
+
+    ipcMain.on("openSettings", (event, section) => {
+        showSettings(section);
     });
 
     if (isMacOS) {

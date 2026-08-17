@@ -1237,7 +1237,7 @@ export function setRemoteKeys(defaults, remote) {
     }
 }
 
-export async function showSettings() {
+export async function showSettings(section) {
     const window = BrowserWindow.fromId(1);
     if (window.isFullScreen()) {
         window.setFullScreen(false);
@@ -1260,7 +1260,7 @@ export async function showSettings() {
     }
 
     updatePeerRokuFieldOptions();
-    settingsWindow = settings.show();
+    settingsWindow = settings.show(section);
     if (window.isAlwaysOnTop()) {
         settingsWindow.setAlwaysOnTop(true);
     }

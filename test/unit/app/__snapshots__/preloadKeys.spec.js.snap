@@ -4,6 +4,7 @@ exports[`IPC channel whitelists > matches their snapshots 1`] = `
 [
   "telnet",
   "addRecentPackage",
+  "removeRecentPackage",
   "openConsole",
   "debugStarted",
   "setAudioMute",
@@ -23,6 +24,7 @@ exports[`IPC channel whitelists > matches their snapshots 1`] = `
   "currentApp",
   "reset",
   "openAppPackage",
+  "openSettings",
   "closeSimulator",
   "externalVolumeReady",
   "setPreference",

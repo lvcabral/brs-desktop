@@ -178,6 +178,19 @@ ipcMain.on("addRecentPackage", (event, currentApp) => {
     rebuildMenu();
 });
 
+ipcMain.on("removeRecentPackage", (event, appId) => {
+    const idx = recentFiles.ids.indexOf(appId);
+    if (idx >= 0) {
+        recentFiles.ids.splice(idx, 1);
+        recentFiles.zip.splice(idx, 1);
+        recentFiles.names.splice(idx, 1);
+        recentFiles.versions.splice(idx, 1);
+        saveRecentFiles();
+        updateAppList();
+        rebuildMenu();
+    }
+});
+
 ipcMain.on("enableMenuItem", (event, id, enable) => {
     enableMenuItem(id, enable);
 });
