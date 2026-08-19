@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ## v2.5.0 - SG Home App and Peer Roku Discovery Persistence
 
-This release replaces the **Home app** by a new SceneGraph-based one, with support for removing sideloaded packages and jumping straight to a settings section. Roku peer device discovery results are now cached to disk so the peer menu is populated immediately on startup instead of waiting for a fresh network scan, and the **Deploy to Peer Roku** menu label now shows the discovered device's friendly name. The editor also gains a configurable console log level. Bumped `brs-engine` to v2.5.1 and `brs-scenegraph` to v0.5.0, bringing MPEG-DASH streaming support, an `hls.js` upgrade, and spec-compliant `AnimatedImage`/`roAnimatedImage`. Electron is also upgraded from v39 to v43, closing a security-patch gap.
+This release replaces the **Home app** by a new SceneGraph-based one, with support for removing sideloaded packages and jumping straight to a settings section. Roku peer device discovery results are now cached to disk so the peer menu is populated immediately on startup instead of waiting for a fresh network scan, and the **Deploy to Peer Roku** menu label now shows the discovered device's friendly name. The editor also gains a configurable console log level. Bumped `brs-engine` to v2.5.1 and `brs-scenegraph` to v0.5.1, bringing MPEG-DASH streaming support, an `hls.js` upgrade, and spec-compliant `AnimatedImage`/`roAnimatedImage`. Electron is also upgraded from v39 to v43, closing a security-patch gap.
 
 See the **BrightScript Simulation Engine** v2.5.1 [full changelog](https://github.com/lvcabral/brs-engine/releases/) for all the language and framework features and improvements.
 

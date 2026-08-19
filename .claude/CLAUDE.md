@@ -103,24 +103,31 @@ PR description — the next person to meet it will be reading the file, not the 
 
 ### `npm audit`
 
-`npm audit` reports ~10 high findings; `npm audit --omit=dev` reports **0** — nothing vulnerable ships.
-All residual findings are one dev-only chain: `electron-builder` → `app-builder-lib` →
-`electron-builder-squirrel-windows` → `electron-winstaller` → `temp` → `rimraf@2` → `glob@7` →
-`minimatch@3` → `brace-expansion@1`. There is **no upstream fix**: `temp@0.9.4` is current and still
-pins `rimraf ~2.6.2`, and `electron-builder-squirrel-windows` is a non-optional peer dep of
-`app-builder-lib` (npm installs it; this project builds NSIS, never Squirrel). Don't try to "fix" these:
+Both `npm audit` and `npm audit --omit=dev` report **0** — nothing vulnerable ships, dev or prod.
+The `overrides` block in `package.json` is what keeps it that way; verify empirically (clean
+`package-lock-only` install with an override stripped, then `npm audit`) before touching it rather
+than assuming from the package name alone:
 
-- Never override `brace-expansion` to 5.x or `minimatch` to 10.x globally — their CJS entries export
-  objects, while `minimatch@3/5` and `glob@7` call them as functions. It resolves the audit and breaks
-  the build at runtime.
-- The `overrides` block in `package.json` is deliberate; `@electron/asar@4` + `@electron/universal@3`
-  mirror what `electron-builder@27-alpha` uses upstream and require Node >=22.12.
+- `dompurify: ^3.4.12` is load-bearing — `monaco-editor@0.56.0` pins `dompurify@3.4.8`, which trips two
+  DOMPurify advisories (1 moderate, 1 low). Removing it reintroduces both.
+- `@electron/asar: ^4.2.1`, `@electron/universal: ^3.0.6`, `filelist: ^2.0.2` mirror what
+  `electron-builder@27-alpha` uses upstream and require Node >=22.12 — forward-compat, not a current
+  audit fix. `electron-builder@26.15.3` (currently pinned) naturally resolves older versions of these
+  three with no audit findings either way; keep them for the eventual `27` upgrade, or drop them,
+  without affecting the audit result today.
+- Never override `brace-expansion` to 5.x or `minimatch` to 10.x **globally** — their CJS entries
+  export objects, while `minimatch@3/5` and `glob@7` call them as functions. That breaks the build at
+  runtime even though it resolves the audit. A version-scoped override (`"minimatch@10.2.5": {...}`)
+  avoids that trap, but goes stale fast: minimatch@10's own `package.json` has required
+  `brace-expansion ^5.x` natively since at least 10.2.6, so npm already keeps the minimatch@10 and
+  minimatch@3/glob@7 subtrees on the correct, non-vulnerable `brace-expansion` line without any
+  override — a removed scoped override on 2026-08-19 confirmed this (see history for
+  `fix(deps): resolve npm audit findings without breaking minimatch@3 chain`, 2026-08-09).
 - `npm audit fix --force` wants to *downgrade* dependencies. Don't run it.
 
-Revisit when `electron-builder@27` ships stable.
-
-Vitest and `@vitest/coverage-v8` (Vite + esbuild + rollup) add nothing to that chain — the finding
-count is unchanged and `npm audit --omit=dev` is still 0. Re-check after bumping them.
+Re-verify after bumping `electron-builder`, `monaco-editor`, `vitest`, or `@vitest/coverage-v8` —
+any of them can shift what a transitive dep naturally resolves to and make an override redundant or
+newly necessary.
 
 Releases: bump `package.json` version, update `CHANGELOG.md`, then `git tag -a vX.Y.Z && git push --follow-tags`.
 The GitHub Actions workflow builds a draft release. Local notarized builds need the `.env` Apple

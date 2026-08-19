@@ -117,7 +117,7 @@
         "@vitest/coverage-v8": "^4.1.10",
         "babel-loader": "^10.1.1",
         "brs-engine": "^2.5.1",
-        "brs-scenegraph": "^0.5.0",
+        "brs-scenegraph": "^0.5.1",
         "copy-webpack-plugin": "^14.0.0",
         "css-loader": "^6.7.3",
         "dotenv": "^16.4.7",
@@ -145,10 +145,7 @@
         "dompurify": "^3.4.12",
         "@electron/asar": "^4.2.1",
         "@electron/universal": "^3.0.6",
-        "filelist": "^2.0.2",
-        "minimatch@10.2.5": {
-            "brace-expansion": "^5.0.9"
-        }
+        "filelist": "^2.0.2"
     },
     "prettier": {
         "trailingComma": "es5",
