@@ -150,7 +150,38 @@ into `app/lib/` by CopyWebpackPlugin — bumping those packages changes what shi
   changes to device config generally mean: update `sharedObject`, persist via settings, *and* push an
   IPC event to the renderer.
 - Registers COOP/COEP/CORP response headers so the engine can use `SharedArrayBuffer` in its worker.
-  Removing those headers breaks multithreaded execution.
+  Since Electron 43, `file://` documents no longer get `crossOriginIsolated` even with those headers
+  set ([electron/electron#50789](https://github.com/electron/electron/pull/50789)), so the app windows
+  load from a privileged `app://` scheme instead (`src/helpers/protocol.js`; `registerAppScheme()`
+  before `ready`, `enableAppProtocol(__dirname, path.join(app.getPath("userData"), ICONS_DIR))`
+  after). The handler serves `app/` plus, via the `/userdata/` prefix, only the `icons/`
+  subdirectory of `userData` — deliberately not all of `userData`, since `brs-settings.json` there
+  stores the installer/peerRoku passwords in plaintext. `toastify-js` is copied into
+  `app/lib`/`app/css` rather than referenced via `../node_modules/...` for the same reason (nothing
+  outside those two roots is reachable). **The handler must stay synchronous** (`fs.readFileSync`):
+  an async handler resolves a synchronous `XMLHttpRequest` (`open(..., false)`, which `brs-engine`'s
+  `RoURLTransfer` uses) with `status === 200` but an empty body — `fetch()` is unaffected. That same
+  scheme change is why the Home app's per-app icons need a companion fix in the separate
+  `brs-home-sg` project's `components/ContentTask.brs`: it only routed `file:`-scheme icon URLs
+  through `roUrlTransfer`→`tmp:` caching (`PosterGrid`'s `HDPosterUrl` only loads `pkg:`/`http(s):`
+  natively), so it now allowlists the natively-loadable schemes instead of blocklisting `file:`.
+  Icon filenames (`helpers/hash.js`'s `iconFileName()`) are `<zip path hash>.png`, saved by
+  `helpers/files.js`'s `"saveIcon"` handler; `helpers/files.js`'s `migrateIconCache()` runs once on
+  every startup to move any icon a pre-2.5.0 install cached at the `userData` root (rather than
+  `icons/`) into the new location, and is a cheap no-op once nothing is left to move. The origin
+  change orphans `localStorage` the same way — Chromium keeps every origin's `localStorage` in one
+  shared LevelDB database, so the data isn't gone, just unreachable under the new origin.
+  `helpers/files.js`'s `migrateLocalStorage()` handles this the expensive way `migrateIconCache()`
+  doesn't need to: it opens a hidden `BrowserWindow` at the old `file://index.html` URL (which
+  shares one `file://` origin with `editor.html`, confirmed empirically — loading either one
+  exposes the same entries), reads `Object.entries(localStorage)` out of it, and replays whatever
+  isn't already present into the real window's `localStorage`, gated by a `LOCAL_STORAGE_MIGRATED_MARKER`
+  file in `userData` so it doesn't pay for a hidden window on every future launch.
+- The same `onHeadersReceived` handler injects permissive CORS headers on every response — `file://`
+  got that behavior for free (Electron's universal file-URL access), `app://` doesn't, and real
+  channels routinely fetch cross-origin CDN content with no CORS headers of their own. Any
+  `Access-Control-Allow-*` header the origin server already sent must be cleared first — a duplicate
+  `Access-Control-Allow-Origin` is itself a CORS violation.
 - **The main simulator window is always `BrowserWindow.fromId(1)`.** Roughly 35 call sites rely on this;
   it is created first in `createWindow()`. The editor window is opened as a child via
   `setWindowOpenHandler` intercepting `editor.html`, not via a separate `createWindow` call.
@@ -219,12 +250,9 @@ Non-obvious pieces, all of them load-bearing:
   `initRemoteScreen()`, makes main re-announce every open session) and `rtcSessionFailed` (renderer →
   main, closes the socket of a peer that failed so the page reconnects instead of holding a slot).
 - **`src/app/mirror.js` is event-driven, not sampled — this requires brs-engine ≥ 2.4.0**, whose
-  `setFrameNotify`/`getDisplayBuffer` are unreleased at the time of writing. `package.json` still says
-  `^2.3.0`, because pinning `^2.4.0` before the engine publishes makes `npm ci` unresolvable and turns CI
-  red; the range already admits 2.4.0, so tighten it in the same change that bumps the engine. Until
-  then local work needs the engine's `packages/browser/lib/brs.api.js` + `brs.worker.js` copied over
-  `node_modules/brs-engine/lib/` after every `npm install`. The guard in `initRemoteScreen()` turns a
-  stale engine into one clear console error rather than a silently frozen stream. The engine
+  `setFrameNotify`/`getDisplayBuffer` shipped in that release; `package.json` pins `^2.5.0`. The guard in
+  `initRemoteScreen()` turns a stale engine into one clear console error rather than a silently frozen
+  stream. The engine
   repaints only when the running app draws, so a settled SceneGraph app posts *zero* frames while a busy
   one posts at 60fps. Polling was therefore both late on the first and wasteful on the second: a static
   menu app took seconds to update remotely. `brs.setFrameNotify(true)` (set while a viewer is connected,

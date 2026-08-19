@@ -2,11 +2,47 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.5.0"></a>
+
+## v2.5.0 - SG Home App and Peer Roku Discovery Persistence
+
+This release replaces the **Home app** by a new SceneGraph-based one, with support for removing sideloaded packages and jumping straight to a settings section. Roku peer device discovery results are now cached to disk so the peer menu is populated immediately on startup instead of waiting for a fresh network scan, and the **Deploy to Peer Roku** menu label now shows the discovered device's friendly name. The editor also gains a configurable console log level. Bumped `brs-engine` to v2.5.1 and `brs-scenegraph` to v0.5.0, bringing MPEG-DASH streaming support, an `hls.js` upgrade, and spec-compliant `AnimatedImage`/`roAnimatedImage`. Electron is also upgraded from v39 to v43, closing a security-patch gap.
+
+See the **BrightScript Simulation Engine** v2.5.1 [full changelog](https://github.com/lvcabral/brs-engine/releases/) for all the language and framework features and improvements.
+
+### New Features
+
+* Replaced the Home app by a new SceneGraph based, with new features for removing recent/sideloaded apps from the grid and opening a specific settings sections by [@lvcabral](https://github.com/lvcabral) in [#336](https://github.com/lvcabral/brs-desktop/pull/336)
+* Added persistence for Roku device discovery results and a dynamic peer Roku menu label showing the discovered device's name by [@lvcabral](https://github.com/lvcabral) in [#335](https://github.com/lvcabral/brs-desktop/pull/335)
+* Added a configurable console log level to the editor settings by [@lvcabral](https://github.com/lvcabral) in [#334](https://github.com/lvcabral/brs-desktop/pull/334)
+
+### Maintenance
+
+* Upgraded Electron from v39 to v43 by [@lvcabral](https://github.com/lvcabral)
+  * App windows now load from a privileged `app://` scheme instead of `file://` (`src/helpers/protocol.js`), since Electron 43 stopped granting `crossOriginIsolated` to `file://` documents ([electron/electron#50789](https://github.com/electron/electron/pull/50789)), which `brs-engine`'s worker needs for `SharedArrayBuffer`
+  * Restored CORS-free cross-origin fetches for channel content, which `file://` provided for free but a real origin like `app://` does not
+  * Home app recent-apps icons now serve from `app://` too, cached under a dedicated `icons/` subdirectory of `userData` rather than its root (so the rest of `userData`, including `brs-settings.json`, isn't reachable from the app windows), with a matching fix in the `brs-home.zip` app so its icon loading recognizes the new scheme. Icons cached by earlier versions are moved into the new location automatically on first launch
+  * `toastify-js` is now copied into the build output instead of referenced via `../node_modules/...`, which only worked under `file://`
+  * The `file://` → `app://` change also moves `localStorage` to a new origin, which would otherwise orphan the editor's saved code snippets and `brs-engine`'s per-channel registry values from before the upgrade. These are now migrated automatically on first launch of the new version
+  * Preserved the app's square frameless window look on Linux, where v43 defaults frameless windows to rounded corners
+
+### Documentation
+
+* Documented the Debug Server command set and updated the VS Code integration guide to drop the retired `rendezvousTracking` launch config option by [@lvcabral](https://github.com/lvcabral) in [#333](https://github.com/lvcabral/brs-desktop/pull/333)
+
+### Dependency Bumps
+
+* Bump `brs-engine` from 2.4.0 to 2.5.1 by [@lvcabral](https://github.com/lvcabral)
+* Bump `brs-scenegraph` from 0.4.0 to 0.5.0 by [@lvcabral](https://github.com/lvcabral)
+* Bump `electron` from 39.2.7 to 43.4.0 by [@lvcabral](https://github.com/lvcabral)
+
+Full Changelog: [v2.5.0]
+
 <a name="v2.4.0"></a>
 
 ## v2.4.0 - Remote Screen and Rendezvous Tracking
 
-This release brings several new features and bug fixes to the BrightScript Simulator. Highlights include the new **Remote Screen** service for WebRTC video streaming, ECP rendezvous tracking for debugging, an 'Allow Remote Access' setting to restrict network services, and a new `target` command in the debug server. It also includes various bug fixes for the console, startup logic, and window sizing. 
+This release brings several new features and bug fixes to the BrightScript Simulator. Highlights include the new **Remote Screen** service for WebRTC video streaming, ECP rendezvous tracking for debugging, an 'Allow Remote Access' setting to restrict network services, and a new `target` command in the debug server. It also includes various bug fixes for the console, startup logic, and window sizing.
 
 See the **BrightScript Simulation Engine** v2.4.0 [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v2.4.0) for all the language and framework features and improvements.
 
@@ -796,6 +832,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.5.0]: https://github.com/lvcabral/brs-desktop/compare/v2.4.0...v2.5.0
 [v2.4.0]: https://github.com/lvcabral/brs-desktop/compare/v2.3.0...v2.4.0
 [v2.3.0]: https://github.com/lvcabral/brs-desktop/compare/v2.2.0...v2.3.0
 [v2.2.0]: https://github.com/lvcabral/brs-desktop/compare/v2.1.3...v2.2.0

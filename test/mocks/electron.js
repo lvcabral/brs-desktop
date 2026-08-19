@@ -45,6 +45,7 @@ export function createFakeWindow(id = 1) {
             setWindowOpenHandler: vi.fn(),
             setBackgroundThrottling: vi.fn(),
             capturePage: vi.fn(() => Promise.resolve({ toPNG: () => Buffer.alloc(0) })),
+            executeJavaScript: vi.fn(() => Promise.resolve()),
         },
         getBounds: vi.fn(() => ({ x: 0, y: 0, width: 1280, height: 770 })),
         setBounds: vi.fn(),
@@ -307,6 +308,11 @@ export const session = {
     },
 };
 
+export const protocol = {
+    registerSchemesAsPrivileged: vi.fn(),
+    handle: vi.fn(),
+};
+
 export const contextBridge = { exposeInMainWorld: vi.fn() };
 
 export const ipcRenderer = new EventEmitter();
@@ -329,6 +335,7 @@ export default {
     Menu,
     nativeImage,
     nativeTheme,
+    protocol,
     screen,
     session,
     shell,

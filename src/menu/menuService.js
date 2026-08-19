@@ -20,9 +20,10 @@ import { isDebugEnabled } from "../server/debug";
 import { isRemoteScreenEnabled } from "../server/remotescreen";
 import { getPeerRoku, getSimulatorOption, setDisplayOption } from "../helpers/settings";
 import { loadFile, loadUrl } from "../helpers/files";
+import { userDataUrl } from "../helpers/protocol";
 import { readJsonFile, writeJsonFile } from "../helpers/util";
+import { iconFileName } from "../helpers/hash";
 import path from "node:path";
-import "../helpers/hash";
 
 const isMacOS = process.platform === "darwin";
 const maxFiles = 30;
@@ -76,13 +77,12 @@ export function getAppList() {
     const appList = [];
     for (const [index, id] of recentFiles.ids.entries()) {
         const zipPath = recentFiles.zip[index];
-        const iconUrl = path.join(app.getPath("userData"), zipPath.hashCode() + ".png");
         appList.push({
             id: id,
             title: recentFiles.names[index],
             version: recentFiles.versions[index],
             path: zipPath,
-            icon: `file://${iconUrl}`,
+            icon: userDataUrl(iconFileName(zipPath)),
         });
     }
     return appList;

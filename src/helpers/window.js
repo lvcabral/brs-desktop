@@ -42,6 +42,9 @@ export function createWindow(name, options) {
             icon: __dirname + "/images/icon.ico",
             frame: false,
             show: false,
+            // Electron 43 defaults frameless windows to rounded corners on Linux; keep the square
+            // look (same fix in helpers/settings.js's Settings window).
+            ...(!isMacOS && !isWindows && { roundedCorners: false }),
         })
     );
     require("@electron/remote/main").enable(win.webContents);

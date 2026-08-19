@@ -48,6 +48,10 @@ module.exports = (env) => {
             { context: "node_modules/brs-engine/lib", from: fileWrk, to: "lib" },
             { context: "node_modules/brs-scenegraph/lib", from: fileExt, to: "lib" },
             { context: "node_modules/brs-scenegraph/", from: "assets/**", to: "../app" },
+            // index.ejs loads these as a plain <script>/<link> (not bundled); copy into app/ so
+            // the "app" protocol can serve them.
+            { context: "node_modules/toastify-js/src", from: "toastify.js", to: "lib" },
+            { context: "node_modules/toastify-js/src", from: "toastify.css", to: "css" },
           ],
         }),
       ],

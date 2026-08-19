@@ -10,10 +10,18 @@ import { getAudioMuted, getSimulatorOption, getDisplayOption, getDeepLink } from
 import { runOnPeerRoku, resetPeerRoku } from "./roku";
 import { appFocused } from "./window";
 import { isValidUrl } from "./util";
-import { BRS_HOME_APP_PATH, EDITOR_CODE_BRS, MAX_PACKAGE_SIZE_MB } from "../constants";
+import {
+    BRS_HOME_APP_PATH,
+    EDITOR_CODE_BRS,
+    ICONS_DIR,
+    LOCAL_STORAGE_MIGRATED_MARKER,
+    MAX_PACKAGE_SIZE_MB,
+} from "../constants";
+import { iconFileName } from "./hash";
 import { zipSync, strToU8 } from "fflate";
 import path from "node:path";
 import fs from "node:fs";
+import { pathToFileURL } from "node:url";
 
 export function loadFile(file, input) {
     resetPeerRoku();
@@ -88,13 +96,90 @@ export function saveFile(file, data) {
     fs.writeFileSync(file, new Buffer.from(data, "base64"));
 }
 
+function getIconsDir() {
+    return path.join(app.getPath("userData"), ICONS_DIR);
+}
+
+// Icons used to be saved flat in userData (v2.4.0 and earlier); they now live under ICONS_DIR,
+// the only part of userData exposed to the app windows (see helpers/protocol.js). Moves any
+// leftover <hash>.png from an existing install into the new location so upgraded users don't
+// lose their cached icons and see every recent app fall back to a generic one until relaunched.
+// Safe to call on every startup: once nothing matches, it's a single readdir and an early return.
+export function migrateIconCache() {
+    const userDataDir = app.getPath("userData");
+    let entries;
+    try {
+        entries = fs.readdirSync(userDataDir);
+    } catch {
+        return;
+    }
+    const legacyIcons = entries.filter((name) => /^\d+\.png$/.test(name));
+    if (legacyIcons.length === 0) {
+        return;
+    }
+    const iconsDir = getIconsDir();
+    fs.mkdirSync(iconsDir, { recursive: true });
+    for (const name of legacyIcons) {
+        const oldPath = path.join(userDataDir, name);
+        const newPath = path.join(iconsDir, name);
+        try {
+            if (fs.existsSync(newPath)) {
+                fs.rmSync(oldPath);
+            } else {
+                fs.renameSync(oldPath, newPath);
+            }
+        } catch {
+            // Best-effort: worst case this one icon re-caches on next launch instead of moving.
+        }
+    }
+}
+
+// localStorage is origin-scoped, and the app windows moved from file:// to app:// (see
+// helpers/protocol.js) -- a different origin -- so a pre-2.5.0 install's localStorage (the
+// editor's saved code snippets, brs-engine's per-channel roRegistry values, and a couple of UI
+// flags) is invisible under the new one. The data isn't gone: Chromium keeps every origin's
+// localStorage in one shared LevelDB database, and index.html/editor.html share a single file://
+// origin, so a hidden window loaded at the old index.html URL can still read it back out; this
+// replays it into the already-loaded main window's localStorage. Runs once, gated by a marker
+// file -- unlike migrateIconCache(), a no-op run here still costs a whole extra hidden window.
+export async function migrateLocalStorage(mainWindow, appDir) {
+    const markerFile = path.join(app.getPath("userData"), LOCAL_STORAGE_MIGRATED_MARKER);
+    if (fs.existsSync(markerFile)) {
+        return;
+    }
+    const legacyWindow = new BrowserWindow({ show: false });
+    try {
+        await legacyWindow.loadURL(pathToFileURL(path.join(appDir, "index.html")).href);
+        const dumped = await legacyWindow.webContents.executeJavaScript("JSON.stringify(Object.entries(localStorage))");
+        const entries = JSON.parse(dumped);
+        if (entries.length > 0) {
+            // Only fills in keys the new origin doesn't already have, so a retry after a partial
+            // failure (or a second profile that already ran this) can't clobber newer data.
+            await mainWindow.webContents.executeJavaScript(`(() => {
+                for (const [key, value] of ${JSON.stringify(entries)}) {
+                    if (localStorage.getItem(key) === null) {
+                        localStorage.setItem(key, value);
+                    }
+                }
+            })();`);
+        }
+        fs.writeFileSync(markerFile, new Date().toISOString());
+    } catch {
+        // Leave the marker unwritten so a genuine failure (as opposed to "nothing to migrate",
+        // which still resolves normally with an empty entries array) retries on the next launch.
+    } finally {
+        legacyWindow.destroy();
+    }
+}
+
 // App Renderer Events
 ipcMain.on("saveFile", (_, data) => {
     saveFile(data[0], data[1]);
 });
 ipcMain.on("saveIcon", (_, data) => {
-    const iconPath = path.join(app.getPath("userData"), data.iconId + ".png");
-    saveFile(iconPath, data.iconData);
+    const iconsDir = getIconsDir();
+    fs.mkdirSync(iconsDir, { recursive: true });
+    saveFile(path.join(iconsDir, iconFileName(data.path)), data.iconData);
 });
 ipcMain.on("runCode", (_, code) => {
     const editorCodeFile = path.join(app.getPath("userData"), EDITOR_CODE_BRS);
