@@ -22,3 +22,10 @@ String.prototype.hashCode = function () {
     }
     return Math.abs(hash).toString();
 };
+
+// The on-disk/URL filename for a sideloaded app's icon, shared by every place that saves,
+// serves, or links to one (helpers/files.js, menu/menuService.js, server/ecp.js, app/app.js) so
+// the naming scheme can't drift between them.
+export function iconFileName(zipPath) {
+    return `${zipPath.hashCode()}.png`;
+}

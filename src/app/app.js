@@ -7,7 +7,6 @@
  *--------------------------------------------------------------------------------------------*/
 import "./styles/main.css";
 import "./styles/fontawesome.min.css";
-import "../helpers/hash";
 import {
     setStatusColor,
     setAudioStatus,
@@ -155,7 +154,7 @@ async function main() {
                 debugMode = data.level;
             }
         } else if (event === "icon") {
-            api.send("saveIcon", { iconId: currentApp.path.hashCode(), iconData: data });
+            api.send("saveIcon", { path: currentApp.path, iconData: data });
         } else if (event === "registry") {
             api.send("updateRegistry", data);
         } else if (event === "reset") {

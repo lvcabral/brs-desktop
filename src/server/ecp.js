@@ -7,8 +7,8 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { isValidIP, isLocalhostAddress, getRokuOS } from "../helpers/util";
-import { ECP_PORT, SSDP_PORT } from "../constants";
-import "../helpers/hash"; // installs String.prototype.hashCode, used by genAppRegistry
+import { ECP_PORT, ICONS_DIR, SSDP_PORT } from "../constants";
+import { iconFileName } from "../helpers/hash"; // also installs String.prototype.hashCode, used by genAppRegistry
 import { Server as SSDP } from "@lvcabral/node-ssdp";
 import xmlbuilder from "xmlbuilder";
 import fs from "node:fs";
@@ -796,7 +796,10 @@ export function getMacAddress() {
 
 function getAppIconPath(appID) {
     const fallbackIcon = path.join(ASSET_BASE, "images", "channel-icon.png");
-    const iconPath = device.appList.find((app) => app.id === appID)?.icon.replaceAll("file://", "");
+    // Recompute the on-disk path (helpers/hash.js's iconFileName) rather than parsing it back
+    // out of the icon URL.
+    const zipPath = device.appList.find((app) => app.id === appID)?.path;
+    const iconPath = zipPath ? path.join(app.getPath("userData"), ICONS_DIR, iconFileName(zipPath)) : null;
     return iconPath && fs.existsSync(iconPath) ? iconPath : fallbackIcon;
 }
 

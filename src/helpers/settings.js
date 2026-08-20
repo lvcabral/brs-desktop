@@ -187,6 +187,10 @@ export function getSettings(window) {
             titleBarStyle: isWindows || isMacOS ? "hidden" : null,
             titleBarOverlay: getTitleOverlayTheme("purple"),
             frame: false,
+            // Electron 43 defaults frameless windows to rounded corners on Linux; keep the square
+            // look (see the same fix in helpers/window.js's createWindow). Omitted rather than set
+            // to undefined on macOS/Windows, since those already round natively.
+            ...(!isMacOS && !isWindows && { roundedCorners: false }),
             parent: window,
             modal: !isMacOS,
             icon: __dirname + "/images/icon.ico",

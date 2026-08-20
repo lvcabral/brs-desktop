@@ -95,8 +95,7 @@ describe("getAppList", () => {
     it("builds an icon URL from the hashed package path", () => {
         seedRecentFiles({ ids: ["abc"], zip: ["/tmp/one.zip"], names: ["A"], versions: ["1.0.0"] });
         const [entry] = getAppList();
-        const expected = path.join(app.getPath("userData"), `${"/tmp/one.zip".hashCode()}.png`);
-        expect(entry.icon).toBe(`file://${expected}`);
+        expect(entry.icon).toBe(`app://simulator/userdata/${"/tmp/one.zip".hashCode()}.png`);
     });
 });
 

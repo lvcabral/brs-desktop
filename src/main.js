@@ -6,12 +6,12 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import path from "node:path";
-import url from "node:url";
 import dns from "node:dns";
 import minimist from "minimist";
 import fs from "node:fs";
 import { app, screen, BrowserWindow, session } from "electron";
 import { DateTime } from "luxon";
+import { registerAppScheme, enableAppProtocol, appUrl } from "./helpers/protocol";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
@@ -24,6 +24,7 @@ import {
     TELNET_PORT,
     DEBUG_PORT,
     REMOTE_SCREEN_PORT,
+    ICONS_DIR,
     UPDATE_CHECK_STARTUP,
     UPDATE_CHECK_INTERVAL,
 } from "./constants";
@@ -36,7 +37,7 @@ import {
     updateAppList,
     updatePeerRokuMenuLabels,
 } from "./menu/menuService";
-import { loadFile } from "./helpers/files";
+import { loadFile, migrateIconCache, migrateLocalStorage } from "./helpers/files";
 import {
     getPeerRoku,
     getRemoteAccessLocalOnly,
@@ -139,10 +140,15 @@ if (hasSingleInstanceLock) {
     app.quit();
 }
 
+// Must be registered before the app is ready.
+registerAppScheme();
+
 app.on("ready", () => {
     if (!hasSingleInstanceLock) {
         return;
     }
+    // Move any icons cached at the pre-2.5.0 userData location before anything reads appList.
+    migrateIconCache();
     // setup the titlebar main process
     setupTitlebar();
     loadDeviceCache();
@@ -159,8 +165,23 @@ app.on("ready", () => {
         details.responseHeaders["Cross-Origin-Opener-Policy"] = ["same-origin"];
         details.responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
         details.responseHeaders["Cross-Origin-Resource-Policy"] = ["cross-origin"];
+        // Real Roku hardware has no CORS concept; app:// is a real origin (unlike file://), so
+        // this restores that behavior. Clear any existing Access-Control-Allow-* first — a server
+        // that sends its own gets a duplicated header (e.g. "*, *"), which is a CORS error itself.
+        for (const key of Object.keys(details.responseHeaders)) {
+            if (key.toLowerCase().startsWith("access-control-allow-")) {
+                delete details.responseHeaders[key];
+            }
+        }
+        details.responseHeaders["Access-Control-Allow-Origin"] = ["*"];
+        details.responseHeaders["Access-Control-Allow-Methods"] = ["GET, POST, PUT, DELETE, HEAD, OPTIONS"];
+        details.responseHeaders["Access-Control-Allow-Headers"] = ["*"];
         callback({ responseHeaders: details.responseHeaders });
     });
+    // Serve the app windows from the "app" scheme instead of file:// (see helpers/protocol.js).
+    // Only the icons subdirectory of userData is exposed this way, not all of it — settings.json
+    // and friends live in userData too and must stay unreachable from the renderer.
+    enableAppProtocol(__dirname, path.join(app.getPath("userData"), ICONS_DIR));
     // Create Main Window
     let mainWindow = createWindow("main", {
         width: 1280,
@@ -197,22 +218,15 @@ app.on("ready", () => {
         });
     }, 2000); // Delay to allow network services to start
     // Load Renderer
-    mainWindow
-        .loadURL(
-            url.format({
-                pathname: path.join(__dirname, "index.html"),
-                protocol: "file:",
-                slashes: true,
-            })
-        )
-        .then(() => {
-            firstLoad = false;
-            const [mw, mh] = mainWindow.getMinimumSize();
-            attachTitlebarToWindow(mainWindow, { minWidth: mw, minHeight: mh });
-            processArgv(mainWindow, startup);
-            mainWindow.show();
-            mainWindow.focus({ steal: true });
-        });
+    mainWindow.loadURL(appUrl("index.html")).then(() => {
+        firstLoad = false;
+        const [mw, mh] = mainWindow.getMinimumSize();
+        attachTitlebarToWindow(mainWindow, { minWidth: mw, minHeight: mh });
+        processArgv(mainWindow, startup);
+        mainWindow.show();
+        mainWindow.focus({ steal: true });
+        migrateLocalStorage(mainWindow, __dirname);
+    });
     mainWindow.webContents.on("dom-ready", () => {
         let settings = getSettings(mainWindow);
         const status = "enabled";
