@@ -176,7 +176,18 @@ app.on("ready", () => {
         details.responseHeaders["Access-Control-Allow-Origin"] = ["*"];
         details.responseHeaders["Access-Control-Allow-Methods"] = ["GET, POST, PUT, DELETE, HEAD, OPTIONS"];
         details.responseHeaders["Access-Control-Allow-Headers"] = ["*"];
-        callback({ responseHeaders: details.responseHeaders });
+        const response = { responseHeaders: details.responseHeaders };
+        // A cross-origin request with a non-simple header (e.g. roUrlTransfer's custom headers)
+        // makes Chromium send its own CORS preflight (an OPTIONS request) ahead of the real one.
+        // Real Roku hardware never does this, and most third-party servers were never built to
+        // answer it either — they reply with whatever they'd give any other unrecognized route
+        // (403/404/...), which fails the preflight on status alone before our injected
+        // Access-Control-Allow-* headers above are even considered. Force it to 200 so those
+        // headers can do their job.
+        if (details.method === "OPTIONS") {
+            response.statusLine = "HTTP/1.1 200 OK";
+        }
+        callback(response);
     });
     // Serve the app windows from the "app" scheme instead of file:// (see helpers/protocol.js).
     // Only the icons subdirectory of userData is exposed this way, not all of it — settings.json
