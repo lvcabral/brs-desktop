@@ -2,7 +2,7 @@
     "name": "brs-desktop",
     "productName": "BrightScript Simulator",
     "description": "Roku Device Simulation Tool",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "license": "MIT",
     "author": {
         "name": "Marcelo Lv Cabral",

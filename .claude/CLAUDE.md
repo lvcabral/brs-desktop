@@ -328,6 +328,22 @@ completions, and formatting in `src/app/brightscript.js`. Monaco is bundled by
 `monaco-editor-webpack-plugin` with a deliberately trimmed feature list — enabling a Monaco feature
 means editing that plugin config in `build/webpack.app.config.js`.
 
+The console panel's syntax coloring is BrightScript-aware, not the `@lvcabral/terminal` package's
+generic Unix-console default: `src/app/consoleColors.js` exports `getBrsConsolePatterns(theme,
+COLOR_THEMES)`, a set of `{regex, color, type, priority}` rules passed to the terminal as
+`customPatterns`/`useDefaultPatterns: false`. `updateTerminal()` in `editor.js` HTML-escapes each
+line (`<`/`>` → entities, every space → `&nbsp;`) *before* the patterns run, so every pattern in
+`consoleColors.js` matches those literal entity strings, not raw `<`/`>`/space — and must stay
+narrowly scoped (no unbounded greedy/lazy quantifiers adjacent to each other), since the terminal
+resolves overlapping matches by start index first and priority only as a tie-breaker, so a wide
+pattern starting earlier always wins over a more specific one nested inside it regardless of
+priority. `updateTerminal()` calls `terminal.outputHTML()`, not `terminal.output()` — the latter's
+"colors disabled" path re-escapes its input as untrusted text, which double-escapes the entities
+already produced above. The `editor.options` checkbox is `disableConsoleColors` (disable-by-presence,
+not enable-by-presence) specifically so coloring defaults to on without needing a settings migration
+— `@lvcabral/electron-preferences` shallow-merges each settings group's persisted value over its
+default, so an enable-flag default could never turn itself on for an existing installation.
+
 ## Conventions
 
 - All `src/` files start with the standard copyright header block; match it in new files.

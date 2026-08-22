@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.5.1"></a>
+
+## v2.5.1 - BrightScript-Aware Console Coloring
+
+This release gives the Editor console panel BrightScript-aware syntax coloring — strings, numbers, booleans, `invalid`, `<Component: ...>`/`<Function: ...>` references, `pkg:/`/`tmp:/` device URIs, GUIDs, XML tags, timestamps, backtrace structure, source comments, and `ERROR:`/`WARNING:`/`DEBUG:` labels are now colored distinctly instead of the generic Unix-console highlighting the terminal component shipped with by default. A new "Disable Console Log Coloring" option under Editor settings lets users opt back into plain text. Also fixes cross-origin channel content (e.g. S3-hosted posters/icons) failing to load after the Electron 43 upgrade.
+
+### New Features
+
+* Added BrightScript-aware syntax coloring to the Editor console panel, with a setting to disable it, by [@lvcabral](https://github.com/lvcabral) in [#339](https://github.com/lvcabral/brs-desktop/pull/339)
+
+### Bug Fixes
+
+* Forced 200 status on CORS preflight responses so cross-origin channel content loads correctly after the Electron 43 `app://` origin change by [@lvcabral](https://github.com/lvcabral) in [#338](https://github.com/lvcabral/brs-desktop/pull/338)
+
+### Dependency Bumps
+
+* Bump `@lvcabral/terminal` from 1.1.0 to 1.3.0 by [@lvcabral](https://github.com/lvcabral)
+
+Full Changelog: [v2.5.1]
+
 <a name="v2.5.0"></a>
 
 ## v2.5.0 - SG Home App and Peer Roku Discovery Persistence
@@ -832,6 +852,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.5.1]: https://github.com/lvcabral/brs-desktop/compare/v2.5.0...v2.5.1
 [v2.5.0]: https://github.com/lvcabral/brs-desktop/compare/v2.4.0...v2.5.0
 [v2.4.0]: https://github.com/lvcabral/brs-desktop/compare/v2.3.0...v2.4.0
 [v2.3.0]: https://github.com/lvcabral/brs-desktop/compare/v2.2.0...v2.3.0
