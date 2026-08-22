@@ -391,8 +391,11 @@ export function getSettings(window) {
                                             label: "Save Code Snippet on Run",
                                             value: "saveOnRun",
                                         },
+                                        {
+                                            label: "Disable Console Log Coloring",
+                                            value: "disableConsoleColors",
+                                        },
                                     ],
-                                    help: "Automatically save the current code snippet when running it (only applies to already saved snippets)",
                                 },
                             ],
                         },
