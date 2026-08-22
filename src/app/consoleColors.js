@@ -26,7 +26,7 @@ export function getBrsConsolePatterns(theme, colorThemes) {
         // text, e.g. "pkg:/source/editor_code.brs(3)"); the suffix is just as often absent for a
         // plain resource path (e.g. "pkg:/images/logo.png").
         {
-            regex: /\b(?:pkg|tmp|cachefs|ext1|common|widget|complib):\/[\w./-]+(?:\(\d+(?:,\d+(?:-\d+)?)?\))?/g,
+            regex: /\b(?:pkg|tmp|cachefs|ext1|common|widget|complib):\/[\w./-]+(?:\(\d[\d,-]*\))?/g,
             color: c.path,
             type: "location",
             priority: 90,
@@ -46,8 +46,11 @@ export function getBrsConsolePatterns(theme, colorThemes) {
         // case an app logs raw XML. Lazily matches through the nearest "&gt;", so the whole tag
         // (including any attributes) is one span — same treatment as, and same color as, the
         // Component:/Function: rules above (whose tie at the same start index this rule's lower
-        // priority keeps losing).
-        { regex: /&lt;\/?[A-Za-z][\w:.-]*.*?&gt;/g, color: c.component, type: "structure", priority: 80 },
+        // priority keeps losing). No character class between the tag-name letter and the lazy
+        // `.*?` (SonarCloud S8786): two adjacent unbounded quantifiers matching overlapping content
+        // is what causes super-linear backtracking, and the lazy `.*?` alone already finds the
+        // right end.
+        { regex: /&lt;\/?[A-Za-z].*?&gt;/g, color: c.component, type: "structure", priority: 80 },
         // A backtrace comment line, e.g. "005:&nbsp;&nbsp;&nbsp;&nbsp;'&nbsp;a&nbsp;comment" (the leading
         // "NNN:" prefix, when present, is optional here so the match can also cover any indentation
         // before the apostrophe). Higher priority than the plain "NNN:" structure rule below so a
@@ -80,7 +83,7 @@ export function getBrsConsolePatterns(theme, colorThemes) {
         { regex: /^\d{2}-\d{2}&nbsp;\d{2}:\d{2}:\d{2}\.\d{3}/, color: c.timestamp, type: "structure", priority: 65 },
         // ISO 8601 dates, with or without milliseconds, "T" or space (already &nbsp;) separated.
         {
-            regex: /\b\d{4}-\d{2}-\d{2}(?:T|&nbsp;)\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:?\d{2})?\b/g,
+            regex: /\b\d{4}-\d{2}-\d{2}(?:T|&nbsp;)\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-][\d:]{4,5})?\b/g,
             color: c.timestamp,
             type: "structure",
             priority: 65,
