@@ -7,9 +7,10 @@
  *--------------------------------------------------------------------------------------------*/
 import Codec from "json-url";
 import Mark from "mark.js";
-import WebTerminal from "@lvcabral/terminal";
+import WebTerminal, { COLOR_THEMES } from "@lvcabral/terminal";
 import { nanoid } from "nanoid";
 import { MonacoManager } from "./monaco";
+import { getBrsConsolePatterns } from "./consoleColors";
 import { EDITOR_CODE_BRS, BRS_HOME_APP_PATH } from "../constants";
 import Toastify from "toastify-js";
 import packageInfo from "../../package.json";
@@ -67,6 +68,18 @@ const commands = {
         terminal.output(`<br />BrightScript Simulation Engine v${brs.getVersion()}<br />`);
     },
 };
+
+// Initial theme/coloring state, read synchronously so the terminal construction and the
+// consoleBuffer replay below (both of which run before main()/DOMContentLoaded) use sensible
+// values instead of defaults. Kept in sync afterward by __setTheme() (see below).
+const initialPrefs = api.getPreferences();
+let initialTheme = initialPrefs?.simulator?.theme || "purple";
+if (initialTheme === "system") {
+    initialTheme = globalThis.matchMedia("(prefers-color-scheme:dark)")?.matches ? "dark" : "light";
+}
+let activeTheme = initialTheme === "light" ? "light" : "dark";
+let colorizeConsoleLogs = !initialPrefs?.editor?.options?.includes("disableConsoleColors");
+
 const terminal = new WebTerminal({
     welcome: `<span style='color: #2e71ff'>BrightScript Console - ${packageInfo.name} v${
         packageInfo.version
@@ -76,6 +89,14 @@ const terminal = new WebTerminal({
     prompt: prompt,
     ignoreBadCommand: true,
     autoFocus: false,
+    // contextualColors intentionally stays at its default (true) regardless of
+    // colorizeConsoleLogs: it also gates every other terminal.output() call in this file (the
+    // welcome banner above, the `<br />` messages elsewhere), which pass real HTML and need the
+    // "already has a tag, leave alone" path rather than the "no colors, escape everything" path.
+    // updateTerminal() below does its own explicit colorizeConsoleLogs gating instead.
+    colorTheme: activeTheme,
+    customPatterns: getBrsConsolePatterns(activeTheme, COLOR_THEMES),
+    useDefaultPatterns: false,
 });
 if (consoleBuffer?.length) {
     for (const entry of consoleBuffer) {
@@ -144,7 +165,10 @@ function main() {
         theme = __currentTheme();
     }
     const editorPrefs = preferences?.editor || {};
-    terminal.setColorTheme(theme === "light" ? "light" : "dark");
+    activeTheme = theme === "light" ? "light" : "dark";
+    colorizeConsoleLogs = !editorPrefs?.options?.includes("disableConsoleColors");
+    terminal.setColorTheme(activeTheme);
+    terminal.setCustomPatterns(getBrsConsolePatterns(activeTheme, COLOR_THEMES), false);
     editorManager = new MonacoManager(brsCodeField, theme, editorPrefs);
 
     // Force initial layout after a short delay to ensure container has dimensions
@@ -443,17 +467,33 @@ function updateTerminal(text, level = "print") {
         if (output.endsWith(`${prompt}&gt; `)) {
             output = output.slice(0, output.length - promptLen);
         }
-        output = output.replaceAll(" ", "&nbsp;");
-    } else if (level === "warning") {
-        output = terminal.colorize(output.replaceAll(" ", "&nbsp;"), "#d7ba7d");
-    } else if (level === "error") {
-        output = terminal.colors.brightRed(output.replaceAll(" ", "&nbsp;"));
     }
+    output = output.replaceAll(" ", "&nbsp;");
     const lines = output.trim().split(/\r?\n/);
-    for (const line of lines) {
-        terminal.output(line || "&zwnj;");
+    for (const rawLine of lines) {
+        let line = rawLine || "&zwnj;";
+        if (colorizeConsoleLogs) {
+            if (level === "print" || level === "beacon") {
+                line = terminal.highlight(line);
+            } else if (level === "debug") {
+                line = `<span style="color: ${COLOR_THEMES[activeTheme].debug}">${terminal.highlight(line)}</span>`;
+            } else if (level === "warning") {
+                line = terminal.colorize(line, COLOR_THEMES[activeTheme].warning);
+            } else if (level === "error") {
+                line = terminal.colorize(line, COLOR_THEMES[activeTheme].error);
+            }
+        }
+        // outputHTML(), not output(): `line` is already-escaped HTML/entities (built above and,
+        // when colorizeConsoleLogs is on, by highlight()/colorize()) either way. output()'s
+        // "colors disabled" path treats its input as raw untrusted text and HTML-escapes it,
+        // which would double-escape the &nbsp;/&lt;/&gt; entities already in `line` (e.g. &nbsp;
+        // -> &amp;nbsp;, rendering literally). outputHTML() never reprocesses its input, so it's
+        // correct for both the colorized and plain-text cases. resetCommand() replicates the one
+        // side effect output() also had (clearing/refocusing the command input line).
+        terminal.outputHTML(line);
+        terminal.resetCommand();
     }
-    
+
     if (!searchContainer.classList.contains("hidden") && searchInput.value.length > 0) {
         performSearch();
     }
@@ -1142,7 +1182,10 @@ globalThis.__setTheme = () => {
         const editorPrefs = preferences?.editor || {};
         editorManager.setIndentation(editorPrefs);
     }
-    terminal.setColorTheme(theme === "light" ? "light" : "dark");
+    activeTheme = theme === "light" ? "light" : "dark";
+    colorizeConsoleLogs = !preferences?.editor?.options?.includes("disableConsoleColors");
+    terminal.setColorTheme(activeTheme);
+    terminal.setCustomPatterns(getBrsConsolePatterns(activeTheme, COLOR_THEMES), false);
 };
 globalThis.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", __setTheme);
 api.onPreferencesUpdated(__setTheme);

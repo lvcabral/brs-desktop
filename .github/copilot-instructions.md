@@ -167,6 +167,7 @@ ipcMain.on("eventName", (event, data) => { /* handler */ });
 #### Code Editor (`src/app/editor.js`)
 - **Monaco Integration**: Editor instance managed via `MonacoManager` from `src/app/monaco.js`
 - **Terminal Emulation**: Integrated console (`@lvcabral/terminal`) for BRS engine output and Micro Debugger commands
+- **Console Syntax Coloring (`src/app/consoleColors.js`)**: BrightScript-aware regex patterns (strings, numbers, booleans, `invalid`, component/function refs, device URIs, GUIDs, XML tags, timestamps, backtrace structure) passed to the terminal via `customPatterns`/`useDefaultPatterns: false`, replacing its generic Unix-console defaults; disabled per-user via the "Disable Console Log Coloring" Editor setting
 - **File Operations**: Save/load BRS source files, package creation for execution
 - **Theme Support**: Editor themes synchronized with main application theme
 - **Debug Features**: Breakpoint support, variable inspection, step debugging

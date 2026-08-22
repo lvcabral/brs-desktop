@@ -100,6 +100,7 @@ The IDE is implemented inside the **Editor Window** (`src/app/editor.html`), giv
 *   **Editor Controller (`src/app/editor.js`)**: Orchestrates file loading/saving and links the console to the simulation engine.
 *   **Monaco Engine Integration (`src/app/monaco.js`)**: Loads and configures Microsoft Monaco Editor.
 *   **BrightScript Language Support (`src/app/brightscript.js`)**: Defines custom syntax highlighting tokens (Monarch grammar rules), autocomplete tags for `roXXX` built-in components, and formatting/indentation configurations specifically tailored for BrightScript.
+*   **Console Syntax Coloring (`src/app/consoleColors.js`)**: BrightScript-aware regex pattern set (strings, numbers, booleans, component/function references, device URIs, GUIDs, timestamps, backtrace structure) fed to the `@lvcabral/terminal` package's `customPatterns` option, replacing its generic Unix-console defaults. Toggleable via a "Disable Console Log Coloring" Editor setting.
 
 ---
 
