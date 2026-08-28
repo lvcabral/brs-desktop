@@ -12,6 +12,7 @@ import fs from "node:fs";
 import { app, screen, BrowserWindow, session } from "electron";
 import { DateTime } from "luxon";
 import { registerAppScheme, enableAppProtocol, appUrl } from "./helpers/protocol";
+import { enableCorsHeaders } from "./helpers/cors";
 import { setPassword, setPort, enableInstaller } from "./server/installer";
 import { initECP, enableECP } from "./server/ecp";
 import { enableTelnet } from "./server/telnet";
@@ -160,35 +161,9 @@ app.on("ready", () => {
         deviceInfo: deviceInfo,
     };
     updateAppList();
-    // Add CORS headers to enable SharedArrayBuffer and cross-origin requests
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-        details.responseHeaders["Cross-Origin-Opener-Policy"] = ["same-origin"];
-        details.responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
-        details.responseHeaders["Cross-Origin-Resource-Policy"] = ["cross-origin"];
-        // Real Roku hardware has no CORS concept; app:// is a real origin (unlike file://), so
-        // this restores that behavior. Clear any existing Access-Control-Allow-* first — a server
-        // that sends its own gets a duplicated header (e.g. "*, *"), which is a CORS error itself.
-        for (const key of Object.keys(details.responseHeaders)) {
-            if (key.toLowerCase().startsWith("access-control-allow-")) {
-                delete details.responseHeaders[key];
-            }
-        }
-        details.responseHeaders["Access-Control-Allow-Origin"] = ["*"];
-        details.responseHeaders["Access-Control-Allow-Methods"] = ["GET, POST, PUT, DELETE, HEAD, OPTIONS"];
-        details.responseHeaders["Access-Control-Allow-Headers"] = ["*"];
-        const response = { responseHeaders: details.responseHeaders };
-        // A cross-origin request with a non-simple header (e.g. roUrlTransfer's custom headers)
-        // makes Chromium send its own CORS preflight (an OPTIONS request) ahead of the real one.
-        // Real Roku hardware never does this, and most third-party servers were never built to
-        // answer it either — they reply with whatever they'd give any other unrecognized route
-        // (403/404/...), which fails the preflight on status alone before our injected
-        // Access-Control-Allow-* headers above are even considered. Force it to 200 so those
-        // headers can do their job.
-        if (details.method === "OPTIONS") {
-            response.statusLine = "HTTP/1.1 200 OK";
-        }
-        callback(response);
-    });
+    // Add CORS headers to enable SharedArrayBuffer and cross-origin (including credentialed)
+    // requests — see helpers/cors.js for the full rationale.
+    enableCorsHeaders(session.defaultSession);
     // Serve the app windows from the "app" scheme instead of file:// (see helpers/protocol.js).
     // Only the icons subdirectory of userData is exposed this way, not all of it — settings.json
     // and friends live in userData too and must stay unreachable from the renderer.

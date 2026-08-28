@@ -68,14 +68,25 @@ graph TD
 The **Main Process** (`src/main.js`) handles application lifecycle, creates browser windows, reads/writes preferences, and launches background servers mimicking Roku hardware services.
 
 *   **Window Management (`src/helpers/window.js`)**: Creates the primary simulator window (`index.html`) and auxiliary windows like the **Code Editor & Console** (`editor.html`). Saves window dimensions and states across restarts.
-*   **Security & SharedArrayBuffer Support**: By default, Electron disables certain cross-origin features. To allow `brs-engine` to run in multithreaded environments with `SharedArrayBuffer`, the Main Process registers response headers to implement **Cross-Origin Opener Policy (COOP)** and **Cross-Origin Embedder Policy (COEP)**:
+*   **Security & SharedArrayBuffer Support**: By default, Electron disables certain cross-origin features. To allow `brs-engine` to run in multithreaded environments with `SharedArrayBuffer`, `src/helpers/cors.js`'s `enableCorsHeaders()` (registered on `session.defaultSession` from `main.js`) sets **Cross-Origin Opener Policy (COOP)** and **Cross-Origin Embedder Policy (COEP)** response headers, and also stamps permissive `Access-Control-Allow-*` headers on every response so real channels can fetch cross-origin CDN content the way they would with no CORS at all on physical Roku hardware. A credentialed request (`RoURLTransfer`'s `xhr.withCredentials`, set when a channel calls `roUrlTransfer.EnableCookies()`) makes the Fetch spec reject a literal wildcard for `Access-Control-Allow-Origin`/`-Headers`, so those are reflected back from the real request's `Origin` / `Access-Control-Request-Headers` instead — captured in an `onBeforeSendHeaders` listener (per request id, since `onHeadersReceived`'s details carry no request headers) and cleaned up on `onCompleted`/`onErrorOccurred`. An `OPTIONS` preflight's status line is also forced to `200 OK`, since third-party servers were never built to answer Chromium's synthetic preflight and would otherwise fail it on status alone before the injected headers are considered:
     ```javascript
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-        details.responseHeaders["Cross-Origin-Opener-Policy"] = ["same-origin"];
-        details.responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
-        details.responseHeaders["Cross-Origin-Resource-Policy"] = ["cross-origin"];
-        callback({ responseHeaders: details.responseHeaders });
-    });
+    // src/helpers/cors.js
+    export function buildCorsHeaders(details, pending = {}) {
+        const responseHeaders = details.responseHeaders;
+        responseHeaders["Cross-Origin-Opener-Policy"] = ["same-origin"];
+        responseHeaders["Cross-Origin-Embedder-Policy"] = ["require-corp"];
+        responseHeaders["Cross-Origin-Resource-Policy"] = ["cross-origin"];
+        // ...strip any Access-Control-Allow-* the origin server already sent...
+        responseHeaders["Access-Control-Allow-Origin"] = [pending.origin || "*"];
+        responseHeaders["Access-Control-Allow-Credentials"] = ["true"];
+        responseHeaders["Access-Control-Allow-Methods"] = ["GET, POST, PUT, DELETE, HEAD, OPTIONS"];
+        responseHeaders["Access-Control-Allow-Headers"] = [pending.requestedHeaders || "*"];
+        const response = { responseHeaders };
+        if (details.method === "OPTIONS") {
+            response.statusLine = "HTTP/1.1 200 OK";
+        }
+        return response;
+    }
     ```
 *   **Settings Persistence (`src/helpers/settings.js`)**: Uses `@lvcabral/electron-preferences` to handle user-customizable settings (display resolution, overscan mode, audio mute, localization, remote controller key assignments, and remote services ports).
 
