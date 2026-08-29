@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.5.2"></a>
+
+## v2.5.2 - Bug Fixes and Engine Upgrade
+
+This release fixes file dialogs forgetting their last-used folder, the Copy Screenshot menu option sometimes becoming disabled while an app is running, and cross-origin credentialed requests failing after the Electron 43 CORS changes.
+
+### Bug Fixes
+
+* Preserved dynamically-enabled menu item states (Copy Screenshot, Save Screenshot, Close App) across macOS menu rebuilds by [@lvcabral](https://github.com/lvcabral) in [#342](https://github.com/lvcabral/brs-desktop/pull/342)
+* Persisted last-used folder for file dialogs so Open/Save dialogs remember the previous directory by [@lvcabral](https://github.com/lvcabral) in [#341](https://github.com/lvcabral/brs-desktop/pull/341)
+* Reflected request Origin and credentials in CORS headers instead of hardcoding wildcards, fixing credentialed cross-origin fetches by [@lvcabral](https://github.com/lvcabral) in [#340](https://github.com/lvcabral/brs-desktop/pull/340)
+
+### Dependency Bumps
+
+* Bump `brs-engine` from 2.5.1 to 2.5.2 by [@lvcabral](https://github.com/lvcabral)
+* Bump `brs-scenegraph` from 0.5.1 to 0.5.2 by [@lvcabral](https://github.com/lvcabral)
+
+Full Changelog: [v2.5.2]
+
 <a name="v2.5.1"></a>
 
 ## v2.5.1 - BrightScript-Aware Console Coloring
