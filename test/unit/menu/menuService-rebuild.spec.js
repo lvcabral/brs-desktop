@@ -121,12 +121,16 @@ describe("rebuildMenu preserves enabled states on macOS", () => {
             expect(electron.app.applicationMenu.getMenuItemById(id).enabled).toBe(true);
 
             // Trigger a rebuild the way addRecentPackage does.
-            electron.ipcMain.emit("addRecentPackage", {}, {
-                id: "test",
-                path: "/tmp/test.zip",
-                title: "Test",
-                version: "1.0.0",
-            });
+            electron.ipcMain.emit(
+                "addRecentPackage",
+                {},
+                {
+                    id: "test",
+                    path: "/tmp/test.zip",
+                    title: "Test",
+                    version: "1.0.0",
+                }
+            );
 
             // The item must still be enabled after the rebuild.
             expect(electron.app.applicationMenu.getMenuItemById(id).enabled).toBe(true);
@@ -140,12 +144,16 @@ describe("rebuildMenu preserves enabled states on macOS", () => {
         }
 
         // Trigger a rebuild.
-        electron.ipcMain.emit("addRecentPackage", {}, {
-            id: "test",
-            path: "/tmp/test.zip",
-            title: "Test",
-            version: "1.0.0",
-        });
+        electron.ipcMain.emit(
+            "addRecentPackage",
+            {},
+            {
+                id: "test",
+                path: "/tmp/test.zip",
+                title: "Test",
+                version: "1.0.0",
+            }
+        );
 
         // Items must still be disabled.
         for (const id of ["copy-screen", "save-screen", "close-channel"]) {
