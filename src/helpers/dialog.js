@@ -107,4 +107,3 @@ function getFileFilter(description, extensions) {
         { name: "All Files", extensions: ["*"] },
     ];
 }
-
