@@ -80,3 +80,76 @@ describe("rebuildMenu with the system theme on macOS", () => {
         expect(win.sentOn("refreshMenu")).toHaveLength(1);
     });
 });
+
+/**
+ * Regression guard: rebuildMenu() reconstructs the entire application menu from templates,
+ * which resets dynamically-enabled items (copy-screen, save-screen, close-channel) to their
+ * template default of false. When a non-.brs app loads, the Renderer sends addRecentPackage
+ * (triggering a rebuild) followed by enableMenuItem calls. On macOS all three messages
+ * arrive in order, but the rebuild was clobbering states that had been set before it.
+ */
+describe("rebuildMenu preserves enabled states on macOS", () => {
+    let platform;
+    let menuService;
+    let settings;
+    let electron;
+
+    beforeEach(async () => {
+        platform = Object.getOwnPropertyDescriptor(process, "platform");
+        Object.defineProperty(process, "platform", { value: "darwin", configurable: true });
+
+        vi.resetModules();
+        electron = await import("../../mocks/electron.js");
+        settings = await import("../../../src/helpers/settings");
+        menuService = await import("../../../src/menu/menuService");
+
+        const win = electron.__registerWindow(electron.createFakeWindow(1));
+        settings.getSettings(win);
+        menuService.createMenu();
+    });
+
+    afterEach(() => {
+        Object.defineProperty(process, "platform", platform);
+        vi.resetModules();
+    });
+
+    it.each(["copy-screen", "save-screen", "close-channel"])(
+        "preserves the enabled state of %s across a rebuild",
+        (id) => {
+            // Simulate the Renderer enabling the item (app is running).
+            menuService.enableMenuItem(id, true);
+            expect(electron.app.applicationMenu.getMenuItemById(id).enabled).toBe(true);
+
+            // Trigger a rebuild the way addRecentPackage does.
+            electron.ipcMain.emit("addRecentPackage", {}, {
+                id: "test",
+                path: "/tmp/test.zip",
+                title: "Test",
+                version: "1.0.0",
+            });
+
+            // The item must still be enabled after the rebuild.
+            expect(electron.app.applicationMenu.getMenuItemById(id).enabled).toBe(true);
+        }
+    );
+
+    it("does not enable items that were disabled before the rebuild", () => {
+        // Ensure all three are disabled (the template default).
+        for (const id of ["copy-screen", "save-screen", "close-channel"]) {
+            expect(electron.app.applicationMenu.getMenuItemById(id).enabled).toBe(false);
+        }
+
+        // Trigger a rebuild.
+        electron.ipcMain.emit("addRecentPackage", {}, {
+            id: "test",
+            path: "/tmp/test.zip",
+            title: "Test",
+            version: "1.0.0",
+        });
+
+        // Items must still be disabled.
+        for (const id of ["copy-screen", "save-screen", "close-channel"]) {
+            expect(electron.app.applicationMenu.getMenuItemById(id).enabled).toBe(false);
+        }
+    });
+});

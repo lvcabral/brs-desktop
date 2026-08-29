@@ -256,7 +256,25 @@ function rebuildMenu(template = false) {
         findItem("zip-empty").visible = recentFiles.zip.length === 0;
         findItem("file-clear").enabled = recentFiles.zip.length > 0;
         updatePeerRokuMenuLabels();
+        // Capture enabled states that the Renderer controls dynamically before the
+        // template rebuild resets them to their default (false).
+        const enabledIds = ["copy-screen", "save-screen", "close-channel"];
+        const savedEnabled = {};
+        if (appMenu) {
+            for (const id of enabledIds) {
+                const item = appMenu.getMenuItemById(id);
+                if (item) {
+                    savedEnabled[id] = item.enabled;
+                }
+            }
+        }
         Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+        // Restore the enabled states on the freshly built menu.
+        for (const id of enabledIds) {
+            if (id in savedEnabled) {
+                enableMenuItem(id, savedEnabled[id]);
+            }
+        }
         if (isMacOS && window) {
             if (appMenu.getMenuItemById("view-menu")) {
                 let userTheme = globalThis.sharedObject.theme;
