@@ -37,6 +37,11 @@ export const EDITOR_CODE_BRS = "editor_code.brs";
 // migrate from the pre-2.5.0 file:// origin.
 export const LOCAL_STORAGE_MIGRATED_MARKER = "local-storage-migrated";
 
+// JSON file in userData that remembers the last folder each file dialog navigated to,
+// so reopening a dialog starts where the user left off (Electron 43+ stopped doing this
+// automatically).
+export const DIALOG_STATE_FILE = "dialog-state.json";
+
 // Maximum package size in MB
 export const MAX_PACKAGE_SIZE_MB = 7;
 
