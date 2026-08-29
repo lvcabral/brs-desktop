@@ -184,11 +184,21 @@ into `app/lib/` by CopyWebpackPlugin — bumping those packages changes what shi
   exposes the same entries), reads `Object.entries(localStorage)` out of it, and replays whatever
   isn't already present into the real window's `localStorage`, gated by a `LOCAL_STORAGE_MIGRATED_MARKER`
   file in `userData` so it doesn't pay for a hidden window on every future launch.
-- The same `onHeadersReceived` handler injects permissive CORS headers on every response — `file://`
-  got that behavior for free (Electron's universal file-URL access), `app://` doesn't, and real
-  channels routinely fetch cross-origin CDN content with no CORS headers of their own. Any
-  `Access-Control-Allow-*` header the origin server already sent must be cleared first — a duplicate
-  `Access-Control-Allow-Origin` is itself a CORS violation.
+- `src/helpers/cors.js`'s `enableCorsHeaders()` (registered on `session.defaultSession` from
+  `main.js`) injects permissive CORS headers on every response — `file://` got that behavior for
+  free (Electron's universal file-URL access), `app://` doesn't, and real channels routinely fetch
+  cross-origin CDN content with no CORS headers of their own. Any `Access-Control-Allow-*` header
+  the origin server already sent must be cleared first — a duplicate `Access-Control-Allow-Origin`
+  is itself a CORS violation. A request whose credentials mode is `"include"` (`RoURLTransfer` sets
+  `xhr.withCredentials` when a channel calls `roUrlTransfer.EnableCookies()`) makes the Fetch spec
+  reject the naive wildcard values: `Access-Control-Allow-Origin: "*"` is forbidden outright for a
+  credentialed response, and `Access-Control-Allow-Headers: "*"` stops meaning "anything" and is
+  read as the literal header name `"*"`. Both are handled the same way — reflect the real request's
+  `Origin` and `Access-Control-Request-Headers` back verbatim instead of hardcoding a wildcard,
+  which is valid for credentialed and non-credentialed requests alike and exactly as permissive.
+  `onHeadersReceived`'s details carry no request headers, so an `onBeforeSendHeaders` listener
+  captures `Origin`/`Access-Control-Request-Headers` per request id for `onHeadersReceived` to read
+  back, and `onCompleted`/`onErrorOccurred` (each fires exactly once per id) clean the map up.
 - **The main simulator window is always `BrowserWindow.fromId(1)`.** Roughly 35 call sites rely on this;
   it is created first in `createWindow()`. The editor window is opened as a child via
   `setWindowOpenHandler` intercepting `editor.html`, not via a separate `createWindow` call.

@@ -303,7 +303,12 @@ export const shell = {
 
 export const session = {
     defaultSession: {
-        webRequest: { onHeadersReceived: vi.fn() },
+        webRequest: {
+            onBeforeSendHeaders: vi.fn(),
+            onHeadersReceived: vi.fn(),
+            onCompleted: vi.fn(),
+            onErrorOccurred: vi.fn(),
+        },
         clearCache: vi.fn(() => Promise.resolve()),
     },
 };
