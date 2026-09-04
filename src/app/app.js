@@ -112,7 +112,7 @@ async function main() {
                         settings_system:"device",
                     };
                     api.send("openSettings", settingsMap[data.app]);
-                    return; 
+                    return;
                 }
                 if (data.params instanceof Map && data.params.get("remove") === "1") {
                     appList = appList.filter((a) => a.id !== data.app);
@@ -641,7 +641,7 @@ function appLoaded(appData) {
     if (settings?.display?.options) {
         brs.enableStats(settings.display.options.includes("perfStats"));
     }
-    if (appData.title === defaultTitle) {
+    if (appData.title.startsWith(defaultTitle)) {
         api.updateTitle(defaultTitle);
     } else {
         api.updateTitle(`${appData.title} - ${defaultTitle}`);
