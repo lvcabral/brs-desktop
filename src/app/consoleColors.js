@@ -89,7 +89,7 @@ export function getBrsConsolePatterns(theme, colorThemes) {
             priority: 65,
         },
         // Bracketed log tags, e.g. "[scrpt.ctx.run.enter]", "[beacon.report]".
-        { regex: /\[[\w.]+\]/g, color: c.tag, type: "structure", priority: 60 },
+        { regex: /\[[^\]]+\]/g, color: c.tag, type: "structure", priority: 60 },
         { regex: /\binvalid\b/g, color: c.invalid, type: "null", priority: 55 },
         { regex: /\btrue\b/g, color: c.boolTrue, type: "boolean", priority: 55 },
         { regex: /\bfalse\b/g, color: c.boolean, type: "boolean", priority: 55 },
