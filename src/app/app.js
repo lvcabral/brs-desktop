@@ -344,9 +344,6 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
             password = settings?.device?.developerPwd ?? "";
             debugState = false;
         }
-        if (fileExt !== "brs") {
-            data = data.buffer;
-        }
         brs.setDebugState(debugState);
         if (brsHomeMode) {
             launchAppId = BRS_HOME_APP_PATH;
