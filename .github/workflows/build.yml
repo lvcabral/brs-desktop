@@ -87,6 +87,37 @@ jobs:
         with:
           node-version: 22
 
+      # electron-builder's own keychain handling (triggered by passing mac_certs/mac_certs_password
+      # below as CSC_LINK/CSC_KEY_PASSWORD) unlocks its temp keychain's ACL with the *certificate's*
+      # password instead of the keychain's own randomly-generated one (app-builder-lib's
+      # codeSign/macCodeSign.ts createKeychain()/importCerts() — `-k` on `set-key-partition-list`
+      # gets `cscKeyPassword`, not the `keychainPassword` used to create/unlock it). Older macOS
+      # tolerated that mismatch when the keychain was already unlocked in-session; a macOS point
+      # release on the macos-latest runner image stopped doing so (SecKeychainUnlock: "not
+      # correct"), so we set up the keychain ourselves — with one password used consistently for
+      # unlock and partition-list — and hand electron-builder the finished keychain via
+      # CSC_KEYCHAIN instead of letting it manage one.
+      - name: Import macOS code-signing certificate
+        if: matrix.os == 'macos-latest'
+        env:
+          MAC_CERTS: ${{ secrets.mac_certs }}
+          MAC_CERTS_PASSWORD: ${{ secrets.mac_certs_password }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
+          CERT_PATH="$RUNNER_TEMP/certificate.p12"
+          echo "$MAC_CERTS" | base64 --decode > "$CERT_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$MAC_CERTS_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          EXISTING_KEYCHAINS=$(security list-keychains -d user | sed 's/[ "]//g')
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING_KEYCHAINS
+          rm -f "$CERT_PATH"
+          echo "CSC_KEYCHAIN=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+
       - name: Build/release Electron app for macOS
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -96,8 +127,6 @@ jobs:
         uses: johannesjo/action-electron-builder@v1
         with:
           github_token: ${{ secrets.github_token }}
-          mac_certs: ${{ secrets.mac_certs }}
-          mac_certs_password: ${{ secrets.mac_certs_password }}
           build_script_name: "release"
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
           args: "--universal"
@@ -109,3 +138,7 @@ jobs:
           github_token: ${{ secrets.github_token }}
           build_script_name: "release"
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      - name: Remove macOS signing keychain
+        if: matrix.os == 'macos-latest' && always()
+        run: security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
