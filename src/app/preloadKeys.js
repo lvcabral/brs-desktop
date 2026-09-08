@@ -67,6 +67,7 @@ const RECEIVE_CHANNELS = [
     "setAudioMute",
     "setPerfStats",
     "setHomeScreenMode",
+    "setRegistryByApp",
     "toggleStatusBar",
     "serverStatus",
     "copyScreenshot",

@@ -117,6 +117,7 @@ export function getSettings(window) {
                 RIDA: globalThis.sharedObject.deviceInfo.RIDA,
                 developerId: globalThis.sharedObject.deviceInfo.developerId,
                 developerPwd: "",
+                registryByApp: [],
                 autoPlayEnabled: globalThis.sharedObject.deviceInfo.autoPlayEnabled ? ["enabled"] : [],
             },
             display: {
@@ -548,7 +549,7 @@ export function getSettings(window) {
                                     key: "developerId",
                                     type: "text",
                                     style: { width: "45%" },
-                                    help: "Unique id to segregate registry data, the registry only changes after a reset or app restart",
+                                    help: "Unique id to segregate registry data. Takes effect for the next app that starts — never mid-run.",
                                 },
                                 {
                                     label: "Developer Password",
@@ -558,12 +559,22 @@ export function getSettings(window) {
                                     help: "Password used to encrypt and decrypt the app package source code, needs to be 32 bytes long",
                                 },
                                 {
-                                    label: "Video Auto-Play",
+                                    key: "registryByApp",
+                                    type: "checkbox",
+                                    options: [
+                                        {
+                                            label: "Registry by App",
+                                            value: "enabled",
+                                        },
+                                    ],
+                                    help: "Appends the running app's id to the Developer Id used to segregate registry data. Toggling this changes which registry entries an app sees, nothing already stored is deleted.",
+                                },
+                                {
                                     key: "autoPlayEnabled",
                                     type: "checkbox",
                                     options: [
                                         {
-                                            label: "Enabled",
+                                            label: "Video Auto-Play",
                                             value: "enabled",
                                         },
                                     ],
@@ -1139,12 +1150,18 @@ export function getSettings(window) {
         setDeviceInfo("device", "deviceModel", true);
         setDeviceInfo("device", "clientId", true);
         setDeviceInfo("device", "RIDA", true);
-        setDeviceInfo("device", "developerId"); // Do not notify app to avoid change registry without reset
+        // Safe to notify live: prepareAppRegistry() in app.js only applies developerId when the
+        // next app starts, never to one already running, so this can't corrupt a live registry.
+        setDeviceInfo("device", "developerId", true);
         const autoPlay = preferences.device.autoPlayEnabled.includes("enabled");
         if (globalThis.sharedObject.deviceInfo.autoPlayEnabled !== autoPlay) {
             globalThis.sharedObject.deviceInfo.autoPlayEnabled = autoPlay;
             window.webContents.send("setDeviceInfo", "autoPlayEnabled", autoPlay);
         }
+        // Not deviceInfo (see the default above) and safe to push unconditionally, like
+        // saveSimulatorSettings' setHomeScreenMode above: the renderer only reads this flag
+        // when starting the next app, never while one is running.
+        window.webContents.send("setRegistryByApp", preferences.device.registryByApp.includes("enabled"));
         saveDisplaySettings(window);
         setRemoteKeys(settings.defaults.remote, preferences.remote);
         if (preferences.audio) {
