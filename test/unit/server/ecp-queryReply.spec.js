@@ -61,12 +61,16 @@ describe("queryReply", () => {
 
     it("returns the WebSocket flavour of the device info", () => {
         // The ECP-2 payload is the encrypted form, which carries virtual-device-id on top
-        // of everything the REST response has.
+        // of everything the REST response has. genDeviceInfoXml() embeds Math.round(process.uptime()),
+        // which is called once inside queryReply() and once again below — pin it so a whole-second
+        // rollover between those two calls can't make the comparison flaky.
+        const uptime = vi.spyOn(process, "uptime").mockReturnValue(123.456);
         const reply = JSON.parse(queryReply({ request: "query-device-info" }, STATUS_OK));
         const xml = decode(reply["content-data"]);
         expect(xml).toBe(decode(genDeviceInfoXml(true)));
         expect(xml).toContain("virtual-device-id");
         expect(xml).toContain("<serial-number>BRSDESKTOP070</serial-number>");
+        uptime.mockRestore();
     });
 
     // query-icon reads the app icon from path.join(__dirname, "images", ...). Under
