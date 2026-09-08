@@ -52,6 +52,21 @@ if ("assets" in customDeviceInfo) {
 // Read settings for home screen mode
 const initialSettings = api.getPreferences();
 let brsHomeMode = !initialSettings?.simulator?.options?.includes("disableHomeScreen");
+// "Registry by App" is a simulator-only concern, not part of brs-engine's deviceInfo, so it is
+// read from preferences and updated live the same way brsHomeMode/setHomeScreenMode is, rather
+// than being added to customDeviceInfo/brs.deviceData.
+let registryByApp = initialSettings?.device?.registryByApp?.includes("enabled") ?? false;
+
+// The un-suffixed Developer Id, kept in sync with the setting (see the "developerId" case in
+// the setDeviceInfo receiver below) and used as the base for every app-scoped id computed by
+// `prepareAppRegistry()`. Never applied to `brs.deviceData.developerId` outside of
+// `prepareAppRegistry()` itself, so a change here only takes effect the next time an app starts.
+let baseDeveloperId = customDeviceInfo.developerId;
+// Fixed reference to what brs-engine's own boot-time loadRegistry() (run once, inside
+// initialize()) built its live, self-updating registry for — used only by prepareAppRegistry()
+// to detect whether its very first call can leave that state untouched. Deliberately not kept
+// in sync with baseDeveloperId above.
+const bootDeveloperId = baseDeveloperId;
 
 // Initialize variables
 const defaultAppInfo = { id: "", path: "", icon: "", running: false };
@@ -163,6 +178,7 @@ async function main() {
             // brs-engine requests the version from the worker as the last step on initialize
             isEngineReady = true;
             if (pendingExecute) {
+                prepareAppRegistry(pendingExecute.filePath);
                 brs.execute(
                     pendingExecute.filePath,
                     pendingExecute.data,
@@ -209,6 +225,55 @@ async function main() {
     brs.redraw(api.isFullScreen());
 }
 
+// True once prepareAppRegistry() has ever rebuilt the registry from localStorage itself. Until
+// then, it can leave brs-engine's own boot-time registry state (SharedArrayBuffer-backed, and
+// kept live by a running app's Flush() calls) untouched — the common case (Registry by App off,
+// Developer Id never changed at runtime) then costs nothing beyond that one-time boot-time load.
+// This must be a one-way switch, never reset back to false: unlike that SharedArrayBuffer, a
+// plain Map (what a rebuild switches to) isn't kept live-updated by a running app's Flush()
+// calls, so once we've rebuilt at all, every later app-start must rebuild again from localStorage
+// even if it lands back on a previously-seen id — reusing an old Map verbatim would serve that
+// app's now-stale prior state instead of what it (or another app under the same id) wrote since.
+let registryEverRebuilt = false;
+
+// Sets the effective Developer Id for the app about to start, and — except for the fast path
+// above — rebuilds the registry the engine hands to that app's worker from whatever is currently
+// in localStorage under that id. Must only be called right before `brs.execute()` (never while
+// an app is running): `deviceData` is captured into a fresh payload on every execute(), so this
+// is what lets both a Developer Id change and "Registry by App" take effect per app-start without
+// a full engine re-initialize — but flipping the id mid-run would make a running app's Read/Write
+// calls land in a different registry namespace than its Flush() expects.
+// `registryBuffer` (the SharedArrayBuffer brs-engine's own boot-time load produces) always wins
+// over `registry` in the worker's setup, so it must be cleared here for a plain Map to be used
+// instead — the worker's registry loader accepts either.
+function prepareAppRegistry(filePath) {
+    let developerId = baseDeveloperId;
+    if (registryByApp) {
+        const app = appList.find((a) => a.path === filePath);
+        const appId = app ? app.id : filePath.hashCode();
+        developerId = `${baseDeveloperId}-${appId}`;
+    }
+    // Mirrors brs-engine's own developerId normalization (BrsDevice.normalizeDeviceInfoValue in
+    // brs.worker.js), applied by the worker before ever using the id as a registry-key prefix —
+    // matching it here keeps this localStorage scan aligned with what a Flush() actually writes.
+    developerId = developerId.replace(".", ":");
+    if (!registryEverRebuilt && developerId === bootDeveloperId) {
+        return;
+    }
+    registryEverRebuilt = true;
+    brs.deviceData.developerId = developerId;
+    const storage = globalThis.localStorage;
+    const registry = new Map();
+    for (let index = 0; index < storage.length; index++) {
+        const key = storage.key(index);
+        if (key?.split(".")[0] === developerId) {
+            registry.set(key, storage.getItem(key) ?? "");
+        }
+    }
+    brs.deviceData.registryBuffer = undefined;
+    brs.deviceData.registry = registry;
+}
+
 // Helper function to get the path of the extension script
 function getExtensionPath(lib) {
     const scripts = document.getElementsByTagName("script");
@@ -252,6 +317,10 @@ api.receive("setDeviceInfo", function (key, value) {
             }
         } else if (key === "locale") {
             setLocaleStatus(value);
+        } else if (key === "developerId") {
+            // Mirrors baseDeveloperId, the source prepareAppRegistry() reads: this only takes
+            // effect the next time an app starts (never mid-run), same as registryByApp.
+            baseDeveloperId = value;
         }
     }
 });
@@ -292,6 +361,7 @@ api.receive("executeFile", function (filePath, data, clear, mute, debug, input) 
             pendingExecute = { filePath: filePath.split("?")[0], data, options, input };
             return;
         }
+        prepareAppRegistry(filePath.split("?")[0]);
         brs.execute(filePath.split("?")[0], data, options, input);
     } catch (error) {
         isAppStarting = false;
@@ -456,6 +526,9 @@ api.receive("setHomeScreenMode", function (enabled) {
             brs.terminate("EXIT_USER_NAV");
         }
     }
+});
+api.receive("setRegistryByApp", function (enabled) {
+    registryByApp = enabled;
 });
 
 // Window Resize Event

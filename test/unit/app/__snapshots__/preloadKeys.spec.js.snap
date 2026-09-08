@@ -53,6 +53,7 @@ exports[`IPC channel whitelists > matches their snapshots 2`] = `
   "setAudioMute",
   "setPerfStats",
   "setHomeScreenMode",
+  "setRegistryByApp",
   "toggleStatusBar",
   "serverStatus",
   "copyScreenshot",
