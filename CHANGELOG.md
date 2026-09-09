@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.6.0"></a>
+
+## v2.6.0 - Registry by App Setting and Engine Rendezvous Fixes
+
+This release adds a **Registry by App** device setting that segregates `roRegistrySection` data per running sideloaded app, and fixes a bug where some zip/bpk packages had their bytes corrupted while loading over the `executeFile` IPC path, throwing `unknown compression type` on otherwise-valid packages. The Home app also gets a couple of focus/title polish fixes, and console log tag coloring now covers a bracketed tag's full content instead of stopping at the first non-word character. Bumped `brs-engine` to v2.5.4 and `brs-scenegraph` to v0.5.4, fixing a `callFunc` issued onto a SceneGraph `Task` (or a Task-owned `Node`) silently running locally instead of rendezvousing to the owning thread — the root cause of a reported New Relic SDK crash — along with a container-copy fix for an `assocarray`/`array` holding a SceneGraph node, and a `PeekMessage()`/`GetMessage()` fix that stopped a duplicate HTTP request and `roUrlEvent` delivery loop.
+
+See the **BrightScript Simulation Engine** v2.5.4 [full changelog](https://github.com/lvcabral/brs-engine/releases/) for all the language and framework features and improvements.
+
+### New Features
+
+* Added a "Registry by App" device setting that segregates registry data per running sideloaded app, taking effect for the next app started with no device reset or simulator restart needed by [@lvcabral](https://github.com/lvcabral) in [#347](https://github.com/lvcabral/brs-desktop/pull/347)
+
+### Bug Fixes
+
+* Stopped corrupting zip/bpk package bytes on the `executeFile` IPC path, fixing `unknown compression type` errors sideloading some otherwise-valid packages by [@lvcabral](https://github.com/lvcabral) in [#348](https://github.com/lvcabral/brs-desktop/pull/348)
+* Fixed the Home app refreshing when focus returns to its left menu, "Options" showing in the Overhang menu outside the apps grid, and the main window title showing a duplicated "BrightScript Simulator" by [@lvcabral](https://github.com/lvcabral) in [#345](https://github.com/lvcabral/brs-desktop/pull/345)
+* Fixed bracketed console log tags only coloring up to the first non-word character instead of their full content by [@lvcabral](https://github.com/lvcabral) in [#346](https://github.com/lvcabral/brs-desktop/pull/346)
+
+### Maintenance
+
+* Set up the macOS signing keychain explicitly in CI instead of letting electron-builder manage it, working around an upstream `set-key-partition-list` unlock bug exposed by a macOS runner point release by [@lvcabral](https://github.com/lvcabral)
+* Stubbed `process.uptime()` in the ECP-2 device-info test to remove a rounding-boundary flake by [@lvcabral](https://github.com/lvcabral)
+
+### Dependency Bumps
+
+* Bump `brs-engine` from 2.5.2 to 2.5.4 by [@lvcabral](https://github.com/lvcabral)
+* Bump `brs-scenegraph` from 0.5.2 to 0.5.4 by [@lvcabral](https://github.com/lvcabral)
+* Bump `@xmldom/xmldom` from 0.8.13 to 0.8.15 by [@lvcabral](https://github.com/lvcabral) in [#344](https://github.com/lvcabral/brs-desktop/pull/344)
+* Bump `fast-uri` from 3.1.5 to 3.1.7 by [@lvcabral](https://github.com/lvcabral) in [#343](https://github.com/lvcabral/brs-desktop/pull/343)
+
+Full Changelog: [v2.6.0]
+
 <a name="v2.5.2"></a>
 
 ## v2.5.2 - Bug Fixes and Engine Upgrade
@@ -871,6 +903,8 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.6.0]: https://github.com/lvcabral/brs-desktop/compare/v2.5.2...v2.6.0
+[v2.5.2]: https://github.com/lvcabral/brs-desktop/compare/v2.5.1...v2.5.2
 [v2.5.1]: https://github.com/lvcabral/brs-desktop/compare/v2.5.0...v2.5.1
 [v2.5.0]: https://github.com/lvcabral/brs-desktop/compare/v2.4.0...v2.5.0
 [v2.4.0]: https://github.com/lvcabral/brs-desktop/compare/v2.3.0...v2.4.0
