@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.6.1"></a>
+
+## v2.6.1 - Engine Upgrade: Effect Node, roWebSocket and Draw2D Updates
+
+This release bumps `brs-engine` to v2.6.0 and `brs-scenegraph` to v0.6.0, bringing substantial **Roku OS 16.0**
+feature coverage. The new **`Effect`** node adds rounded corners, borders, and linear/radial gradients to
+`Rectangle` and `Poster`, paired with a new **`FloatArrayFieldInterpolator`** node for animating its array-valued
+fields and a public `ArrayGrid.focusFeedbackPoster` field for customizing a grid's focus indicator. The core
+engine gains a new **`roWebSocket`** component with full Node.js and browser support, `ifDraw2D.Clear()` now
+returns a `Boolean` like `DrawLine()`/`DrawPoint()`/`DrawRect()` already did, and a new
+`roTextureRequest.SetDrawable()` controls whether a texture-manager bitmap can be drawn onto directly. An
+undefined conditional-compilation name in `#if`/`#elseif` now evaluates to `false` instead of raising a compile
+error, matching Roku OS 16.0's relaxed rule. The remote-control simulation also gains **experimental**
+multi-controller support (`multi_controllers=1`), an expanded game pad button map, and an analog `GetValue()`
+extension on `roUniversalControlEvent`. Also fixed: `DrawScaledObject()` not mirroring the image for a negative
+`scaleX`/`scaleY`, a SceneGraph focus re-grab being dropped when the competing focus lived in a still-detached
+subtree, and `DynamicKeyGrid` not rendering a Key Definition File's own `icon`/`focusIcon` bitmaps.
+
+See the **BrightScript Simulation Engine** v2.6.0 [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v2.6.0) for all the language and framework features and improvements.
+
+### Dependency Bumps
+
+* Bump `brs-engine` from 2.5.4 to 2.6.0 by [@lvcabral](https://github.com/lvcabral)
+* Bump `brs-scenegraph` from 0.5.4 to 0.6.0 by [@lvcabral](https://github.com/lvcabral)
+
+Full Changelog: [v2.6.1]
+
 <a name="v2.6.0"></a>
 
 ## v2.6.0 - Registry by App Setting and Engine Rendezvous Fixes
@@ -903,6 +930,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.6.1]: https://github.com/lvcabral/brs-desktop/compare/v2.6.0...v2.6.1
 [v2.6.0]: https://github.com/lvcabral/brs-desktop/compare/v2.5.2...v2.6.0
 [v2.5.2]: https://github.com/lvcabral/brs-desktop/compare/v2.5.1...v2.5.2
 [v2.5.1]: https://github.com/lvcabral/brs-desktop/compare/v2.5.0...v2.5.1
