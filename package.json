@@ -121,7 +121,7 @@
         "copy-webpack-plugin": "^14.0.0",
         "css-loader": "^6.7.3",
         "dotenv": "^16.4.7",
-        "electron": "^43.4.0",
+        "electron": "^43.7.6",
         "electron-builder": "^26.4.0",
         "eslint": "^9.39.5",
         "eslint-config-prettier": "^10.1.8",
