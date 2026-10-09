@@ -22,7 +22,8 @@ module.exports = (env) => {
         env: path.resolve(__dirname, `../config/env_${translateEnvToMode(env)}.json`),
       },
     },
-    devtool: "source-map",
+    // Source maps only help while debugging; in production they would just ship ~40 MB of them in the asar.
+    devtool: env.production ? false : "source-map",
     module: {
       rules: [
         {

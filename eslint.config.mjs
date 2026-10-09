@@ -82,6 +82,13 @@ export default [
         rules: { "import/no-extraneous-dependencies": "off" },
     },
     {
+        // The editor entry is bundled with no externals (target "web"), so its packages are
+        // build-time only and live in devDependencies to keep them out of the packaged asar.
+        // Only files reached exclusively from editor.js belong here.
+        files: ["src/app/editor.js", "src/app/monaco.js"],
+        rules: { "import/no-extraneous-dependencies": ["error", { devDependencies: true }] },
+    },
+    {
         files: ["src/app/*.js"],
         languageOptions: {
             globals: {
