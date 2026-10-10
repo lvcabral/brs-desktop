@@ -106,16 +106,18 @@ const deviceInfo = {
 };
 
 // Get Network Gateway
-getGateway().then((gateway) => {
-    if (gateway.ip !== "") {
-        deviceInfo.connectionInfo.gateway = gateway.ip;
-        deviceInfo.connectionInfo.name = gateway.name;
-        deviceInfo.connectionInfo.type = gateway.type;
-        deviceInfo.connectionInfo.ssid = gateway.ssid;
-        const window = BrowserWindow.fromId(1);
-        window?.webContents.send("setDeviceInfo", "connectionInfo", deviceInfo.connectionInfo);
-    }
-});
+getGateway()
+    .then((gateway) => {
+        if (gateway.ip !== "") {
+            deviceInfo.connectionInfo.gateway = gateway.ip;
+            deviceInfo.connectionInfo.name = gateway.name;
+            deviceInfo.connectionInfo.type = gateway.type;
+            deviceInfo.connectionInfo.ssid = gateway.ssid;
+            const window = BrowserWindow.fromId(1);
+            window?.webContents.send("setDeviceInfo", "connectionInfo", deviceInfo.connectionInfo);
+        }
+    })
+    .catch(console.error);
 
 const argv = minimist(process.argv.slice(1), cliArgumentsConfig);
 
@@ -196,12 +198,14 @@ app.on("ready", () => {
     initECP();
     // Initialize Roku device discovery
     setTimeout(() => {
-        initRokuDeviceDiscovery().then(() => {
-            updatePeerRokuMenuLabels();
-            if (process.platform === "darwin") {
-                createMenu();
-            }
-        });
+        initRokuDeviceDiscovery()
+            .then(() => {
+                updatePeerRokuMenuLabels();
+                if (process.platform === "darwin") {
+                    createMenu();
+                }
+            })
+            .catch(console.error);
     }, 2000); // Delay to allow network services to start
     // Load Renderer
     mainWindow.loadURL(appUrl("index.html")).then(() => {
@@ -211,7 +215,7 @@ app.on("ready", () => {
         processArgv(mainWindow, startup);
         mainWindow.show();
         mainWindow.focus({ steal: true });
-        migrateLocalStorage(mainWindow, __dirname);
+        void migrateLocalStorage(mainWindow, __dirname);
     });
     mainWindow.webContents.on("dom-ready", () => {
         let settings = getSettings(mainWindow);
@@ -351,6 +355,7 @@ function loadSettings(mainWindow, startup) {
 }
 
 // Process Command Line switches
+// eslint-disable-next-line sonarjs/cognitive-complexity -- pre-existing; split up when next reworked
 function processArgv(mainWindow, startup = {}, cliArgs = argv, options = {}) {
     const { applyStartup = true } = options;
     const startupOptions = startup || {};

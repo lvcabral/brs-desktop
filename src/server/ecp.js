@@ -47,7 +47,11 @@ ipcMain.on("currentApp", (_, data) => {
     currentApp = data;
 });
 
-export let isECPEnabled = false;
+let ecpEnabled = false;
+/** @returns {boolean} - True while the server is bound */
+export function isECPEnabled() {
+    return ecpEnabled;
+}
 export function initECP() {
     device = globalThis.sharedObject.deviceInfo;
 }
@@ -91,7 +95,7 @@ function destroyRemoteSessions() {
 
 export function setECPLocalOnly(value) {
     localOnly = value;
-    if (!isECPEnabled) return;
+    if (!ecpEnabled) return;
     if (localOnly) {
         stopSSDPServer();
         destroyRemoteSessions();
@@ -101,7 +105,7 @@ export function setECPLocalOnly(value) {
 }
 export function enableECP(win, port = ECP_PORT, { localOnly: lo = false } = {}) {
     window = win ?? BrowserWindow.fromId(1);
-    if (isECPEnabled) {
+    if (ecpEnabled) {
         return; // already started do nothing
     }
     localOnly = lo;
@@ -155,7 +159,7 @@ export function enableECP(win, port = ECP_PORT, { localOnly: lo = false } = {}) 
             window.webContents.send("console", `ECP server error:${error.message}`, true);
         })
         .then((server) => {
-            isECPEnabled = true;
+            ecpEnabled = true;
             notifyAll("enabled", true);
             // Skip SSDP advertisement when remote access is disabled — the device
             // should not appear to LAN scanners if it won't accept their connections.
@@ -205,12 +209,12 @@ export function enableECP(win, port = ECP_PORT, { localOnly: lo = false } = {}) 
 }
 
 export function disableECP() {
-    if (isECPEnabled) {
+    if (ecpEnabled) {
         if (ecp) {
             ecp.close();
         }
         stopSSDPServer();
-        isECPEnabled = false;
+        ecpEnabled = false;
         notifyAll("enabled", false);
     }
 }
@@ -633,6 +637,9 @@ export function genMediaPlayer(encrypt) {
     }
 }
 
+// Code-unit order, as a bare sort() uses: locale-independent, so the XML is the same on every machine.
+const compareCodeUnits = (a, b) => (a < b ? -1 : Number(a > b));
+
 export function genAppRegistry(plugin, encrypt) {
     const xml = xmlbuilder.create("plugin-registry");
     const plugins = Array.from(device.appList.values()).map((value) => {
@@ -644,7 +651,7 @@ export function genAppRegistry(plugin, encrypt) {
         const devIdx = plugins.indexOf(devId);
         if (devIdx >= 0) {
             plugins[devIdx] = "dev";
-            plugins.sort();
+            plugins.sort(compareCodeUnits);
         }
         const regXml = xml.ele("registry");
         regXml.ele("dev-id", {}, device.developerId);
@@ -657,14 +664,7 @@ export function genAppRegistry(plugin, encrypt) {
         // Sorted explicitly by key: a bare .sort() compares the "key,value" string each
         // entry coerces to, which happens to order by key but only by accident. Registry
         // keys are unique, so comparing them alone is equivalent and says what it means.
-        const registry = new Map(
-            [...(device.registry ?? [])].sort(([keyA], [keyB]) => {
-                if (keyA === keyB) {
-                    return 0;
-                }
-                return keyA < keyB ? -1 : 1;
-            })
-        );
+        const registry = new Map([...(device.registry ?? [])].sort(([keyA], [keyB]) => compareCodeUnits(keyA, keyB)));
         for (const [key, value] of registry) {
             const sections = key.split(".");
             if (sections.length > 2 && sections[0] === device.developerId) {
@@ -808,5 +808,5 @@ export function getModelName(model) {
     // first moments after startup. The generic fallback below already covers an unknown
     // model; without the optional chaining it is unreachable and the caller 500s instead.
     const modelName = device.models?.get(model);
-    return modelName ? modelName[0].replaceAll(/ *\([^)]*\) */g, "") : `Roku (${model})`;
+    return modelName ? modelName[0].split("(")[0].trim() : `Roku (${model})`;
 }

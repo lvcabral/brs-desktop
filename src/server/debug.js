@@ -9,7 +9,7 @@ import { BrowserWindow } from "electron";
 import { DEBUG_PORT } from "../constants";
 import { HELP_COMMANDS, PRESS_HELP, getHelpText } from "./debugHelp";
 import { getPressKey } from "./debugKeys";
-import { isLocalhostAddress, destroyRemoteClients, getRokuOS } from "../helpers/util";
+import { isLocalhostAddress, destroyRemoteClients, getRokuOS, splitCommand } from "../helpers/util";
 import { reloadDevice } from "../helpers/window";
 import * as telnet from "net";
 
@@ -25,7 +25,11 @@ let isTyping = false;
 let rendezvousTrackingEnabled = false;
 let localOnly = false;
 
-export let isDebugEnabled = false;
+let debugEnabled = false;
+/** @returns {boolean} - True while the server is bound */
+export function isDebugEnabled() {
+    return debugEnabled;
+}
 
 export function setDebugLocalOnly(value) {
     localOnly = value;
@@ -34,7 +38,7 @@ export function setDebugLocalOnly(value) {
     }
 }
 export function enableDebugServer(win, prefs, port = DEBUG_PORT, { localOnly: lo = false } = {}) {
-    if (isDebugEnabled) {
+    if (debugEnabled) {
         return;
     }
     localOnly = lo;
@@ -72,7 +76,7 @@ export function enableDebugServer(win, prefs, port = DEBUG_PORT, { localOnly: lo
         lines.set(id, "");
     });
     server.on("listening", () => {
-        isDebugEnabled = true;
+        debugEnabled = true;
         notifyAll("enabled", true);
     });
     server.on("error", (error) => {
@@ -82,7 +86,7 @@ export function enableDebugServer(win, prefs, port = DEBUG_PORT, { localOnly: lo
 }
 
 export function disableDebugServer() {
-    if (isDebugEnabled) {
+    if (debugEnabled) {
         if (server) {
             server.close();
             clients.forEach((client, id) => {
@@ -91,7 +95,7 @@ export function disableDebugServer() {
             clientId = 0;
             clients = new Map();
         }
-        isDebugEnabled = false;
+        debugEnabled = false;
         notifyAll("enabled", false);
     }
 }
@@ -185,7 +189,7 @@ const commandHandlers = {
 };
 
 export function sendDebugCommand(line, client) {
-    const expr = line.trim().split(/(?<=^\S+)\s/);
+    const expr = splitCommand(line);
     const cmd = expr[0];
     const raw = expr[1] ?? "";
     const arg = raw.trim();

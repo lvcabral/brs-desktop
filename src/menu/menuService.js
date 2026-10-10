@@ -45,7 +45,7 @@ export function createMenu() {
             fileMenuIndex = 1;
             // Only need to do it once
             const fileMenu = menuTemplate[fileMenuIndex].submenu;
-            fileMenu.splice(fileMenu.length - 2, 2);
+            fileMenu.splice(-2, 2);
         }
     }
     restoreRecentFiles();
@@ -99,7 +99,7 @@ export function loadPackage(id) {
     let pkg = getRecentPackage(id);
     if (typeof pkg === "string") {
         if (pkg.startsWith("http")) {
-            loadUrl(pkg);
+            void loadUrl(pkg);
         } else {
             loadFile([pkg]);
         }
@@ -234,6 +234,7 @@ function saveRecentFiles() {
     }
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity -- pre-existing; split up when next reworked
 function rebuildMenu(template = false) {
     const window = BrowserWindow.fromId(1);
     const appMenu = app.applicationMenu;
@@ -290,10 +291,10 @@ function rebuildMenu(template = false) {
             if (appMenu.getMenuItemById("device-menu")) {
                 setDisplayOption("displayMode");
                 setDisplayOption("overscanMode");
-                checkMenuItem("web-installer", isInstallerEnabled);
-                checkMenuItem("ecp-api", isECPEnabled);
-                checkMenuItem("telnet", isTelnetEnabled);
-                checkMenuItem("debug-server", isDebugEnabled);
+                checkMenuItem("web-installer", isInstallerEnabled());
+                checkMenuItem("ecp-api", isECPEnabled());
+                checkMenuItem("telnet", isTelnetEnabled());
+                checkMenuItem("debug-server", isDebugEnabled());
                 checkMenuItem("remote-screen", isRemoteScreenEnabled());
                 const peerRoku = getPeerRoku();
                 checkMenuItem("peer-roku-deploy", peerRoku.deploy);

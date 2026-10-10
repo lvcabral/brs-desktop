@@ -202,9 +202,9 @@ describe("getBrsConsolePatterns", () => {
     it("colors an XML open tag with an attribute (blue, like a component), and its matching close tag", () => {
         const line = '&lt;Config&nbsp;version="2"&gt;value&lt;/Config&gt;';
         const matches = colorFor(line);
-        expect(
-            matches.some((m) => m.color === "#component" && m.text === '&lt;Config&nbsp;version="2"&gt;')
-        ).toBe(true);
+        expect(matches.some((m) => m.color === "#component" && m.text === '&lt;Config&nbsp;version="2"&gt;')).toBe(
+            true
+        );
         expect(matches.some((m) => m.color === "#component" && m.text === "&lt;/Config&gt;")).toBe(true);
     });
 

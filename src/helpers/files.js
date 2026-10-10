@@ -190,7 +190,7 @@ ipcMain.on("runFile", (_, filePath) => {
     loadFile([filePath]);
 });
 ipcMain.on("runUrl", (_, url) => {
-    loadUrl(url);
+    void loadUrl(url);
 });
 function packageBrs(code) {
     const manifest = `
@@ -241,9 +241,9 @@ function executeFile(window, fileData, filePath, input) {
     );
     // Send to the Roku peer
     if (fileExt === ".brs") {
-        runOnPeerRoku(packageBrs(fileData), input);
+        void runOnPeerRoku(packageBrs(fileData), input);
     } else if (fileExt !== ".bpk" && filePath !== BRS_HOME_APP_PATH) {
-        runOnPeerRoku(fileData, input);
+        void runOnPeerRoku(fileData, input);
     }
 }
 
@@ -258,7 +258,7 @@ function focusWindow(window) {
         window.restore();
     } else if (!window.isVisible()) {
         window.show();
-    } else if (!appFocused && !window.isAlwaysOnTop()) {
+    } else if (!appFocused() && !window.isAlwaysOnTop()) {
         window.setAlwaysOnTop(true);
         window.focus({ steal: true });
         window.setAlwaysOnTop(false);

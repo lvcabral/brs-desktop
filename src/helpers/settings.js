@@ -1261,7 +1261,7 @@ export function setRemoteKeys(defaults, remote) {
     }
 }
 
-export async function showSettings(section) {
+export function showSettings(section) {
     const window = BrowserWindow.fromId(1);
     if (window.isFullScreen()) {
         window.setFullScreen(false);
@@ -1617,13 +1617,6 @@ ipcMain.on("externalVolumeReady", (event) => {
     }
 });
 
-export function getModelName(model) {
-    // See the note on the matching helper in src/server/ecp.js: `models` only exists once
-    // the renderer has sent deviceData.
-    const modelName = globalThis.sharedObject.deviceInfo.models?.get(model);
-    return modelName ? modelName[0].replaceAll(/ *\([^)]*\) */g, "") : `Roku (${model})`;
-}
-
 export function updateServerStatus(service, menuItem, enabled, port) {
     setPreference(`services.${service.toLowerCase()}`, enabled ? ["enabled"] : []);
     checkMenuItem(menuItem, enabled);
@@ -1660,7 +1653,7 @@ export const NETWORK_SERVICES = [
     {
         key: "installer",
         get running() {
-            return isInstallerEnabled;
+            return isInstallerEnabled();
         },
         // The installer is the only one with credentials. The password is applied whether or not
         // it is already listening, since it is checked per request; the port only matters when
@@ -1674,7 +1667,7 @@ export const NETWORK_SERVICES = [
     {
         key: "ecp",
         get running() {
-            return isECPEnabled;
+            return isECPEnabled();
         },
         enable: (window, localOnly) => enableECP(window, ECP_PORT, { localOnly }),
         setLocalOnly: setECPLocalOnly,
@@ -1683,7 +1676,7 @@ export const NETWORK_SERVICES = [
     {
         key: "telnet",
         get running() {
-            return isTelnetEnabled;
+            return isTelnetEnabled();
         },
         enable: (window, localOnly) => enableTelnet(window, TELNET_PORT, { localOnly }),
         setLocalOnly: setTelnetLocalOnly,
@@ -1692,7 +1685,7 @@ export const NETWORK_SERVICES = [
     {
         key: "debug",
         get running() {
-            return isDebugEnabled;
+            return isDebugEnabled();
         },
         enable: (window, localOnly) => enableDebugServer(window, settings, DEBUG_PORT, { localOnly }),
         setLocalOnly: setDebugLocalOnly,

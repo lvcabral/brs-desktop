@@ -14,11 +14,26 @@ import { spawnSync } from "node:child_process";
 const isWindows = process.platform === "win32";
 
 /**
+ * Split a console command line into the command and the rest of the line
+ *
+ * Cuts at the first whitespace character only, so the argument keeps its inner spacing.
+ * @param {string} line - The line as typed, surrounding whitespace included
+ * @returns {string[]} - [command] when there is no argument, otherwise [command, rest]
+ */
+export function splitCommand(line) {
+    const trimmed = line.trim();
+    const sep = trimmed.search(/\s/);
+    return sep < 0 ? [trimmed] : [trimmed.slice(0, sep), trimmed.slice(sep + 1)];
+}
+
+/**
  * Function to check if a remote address is a loopback address
  * @param {string} addr - The remote address to check
  * @returns {boolean} - True if the address is localhost, false otherwise
  */
 export function isLocalhostAddress(addr) {
+    // The IPv4-mapped IPv6 form of loopback, which is how a dual-stack socket reports 127.0.0.1.
+    // eslint-disable-next-line sonarjs/no-hardcoded-ip
     return addr === "127.0.0.1" || addr === "::1" || addr === "::ffff:127.0.0.1";
 }
 

@@ -98,11 +98,6 @@ let screenEnabled = false;
 
 /**
  * Whether the service is listening.
- *
- * A function where the other services in this directory export a mutable `let` (`isECPEnabled` and
- * friends): those are live bindings that only work because every consumer re-reads them, which is
- * easy to break by destructuring or caching. The siblings are left alone rather than churned for
- * consistency's sake.
  * @returns {boolean} - True while the server is bound
  */
 export function isRemoteScreenEnabled() {
@@ -406,7 +401,7 @@ function getLanHost() {
 export function serveConfig(req, res) {
     const body = JSON.stringify({
         ecpPort: ECP_PORT,
-        ecpEnabled: isECPEnabled,
+        ecpEnabled: isECPEnabled(),
         displayMode: globalThis.sharedObject?.deviceInfo?.displayMode ?? "720p",
         maxViewers: MAX_VIEWERS,
         // Both are needed to build the embed URL: the page may be on localhost, and the bound

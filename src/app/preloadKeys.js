@@ -123,10 +123,17 @@ function convertSettingsChar(keyChar) {
         return `Key${keyChar.toUpperCase()}`;
     }
     const keyMap = {
-        "`": "Backquote", "-": "Minus", "=": "Equal",
-        "[": "BracketLeft", "]": "BracketRight", ";": "Semicolon",
-        "'": "Quote", ",": "Comma", ".": "Period",
-        "\\": "Backslash", "/": "Slash",
+        "`": "Backquote",
+        "-": "Minus",
+        "=": "Equal",
+        "[": "BracketLeft",
+        "]": "BracketRight",
+        ";": "Semicolon",
+        "'": "Quote",
+        ",": "Comma",
+        ".": "Period",
+        "\\": "Backslash",
+        "/": "Slash",
     };
     return keyMap[keyChar] ?? keyChar;
 }

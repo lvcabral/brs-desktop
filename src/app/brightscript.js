@@ -9,7 +9,6 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-
 /*
 BrightScript Language Mode
 
@@ -28,16 +27,66 @@ export function defineBrightScriptLanguage(monaco) {
         ignoreCase: true,
 
         keywords: [
-            "and", "as", "catch", "continue", "dim", "do", "each", "else", "elseif", "end",
-            "endfor", "endfunction", "endif", "endsub", "endtry", "endwhile", "eval", "exit",
-            "false", "for", "function", "goto", "if", "in", "invalid", "let", "library",
-            "loop", "mod", "next", "not", "or", "print", "rem", "return", "run", "step",
-            "stop", "sub", "then", "throw", "to", "true", "try", "while"
+            "and",
+            "as",
+            "catch",
+            "continue",
+            "dim",
+            "do",
+            "each",
+            "else",
+            "elseif",
+            "end",
+            "endfor",
+            "endfunction",
+            "endif",
+            "endsub",
+            "endtry",
+            "endwhile",
+            "eval",
+            "exit",
+            "false",
+            "for",
+            "function",
+            "goto",
+            "if",
+            "in",
+            "invalid",
+            "let",
+            "library",
+            "loop",
+            "mod",
+            "next",
+            "not",
+            "or",
+            "print",
+            "rem",
+            "return",
+            "run",
+            "step",
+            "stop",
+            "sub",
+            "then",
+            "throw",
+            "to",
+            "true",
+            "try",
+            "while",
         ],
 
         typeKeywords: [
-            "boolean", "integer", "longinteger", "float", "double", "string", "object",
-            "interface", "dynamic", "brsub", "void", "as"
+            "boolean",
+            "integer",
+            "longinteger",
+            "float",
+            "double",
+            "string",
+            "object",
+            "interface",
+            "dynamic",
+            "brsub",
+            "void",
+            "as",
         ],
 
         operators: ["=", ">=", "<=", "<", ">", "<>", "+", "-", "*", "/", "^", "\\", "&"],
@@ -50,7 +99,7 @@ export function defineBrightScriptLanguage(monaco) {
             root: [
                 // Comments
                 [/^\s*rem\b.*$/i, "comment"],
-                [/'.*$/, "comment"],
+                [/'.*/, "comment"],
 
                 // Region markers
                 [/^\s*'\s*#region/i, "comment.region"],
@@ -73,10 +122,14 @@ export function defineBrightScriptLanguage(monaco) {
                 [/&O[0-7]+/i, "number.octal"],
 
                 // Floats
-                [/\d*\.\d+([eE][+-]?\d+)?[fFdD]?/, "number.float"],
+                [/(?:\b\d+)?\.\d+(?:[eE][+-]?\d+)?[fFdD]?/, "number.float"],
 
                 // Integers
                 [/\d+[fFdDlL]?/, "number"],
+
+                // Function/sub as types (after 'as') - MUST come before the declarations below. Monarch
+                // matches against the rest of the line, so a lookbehind for 'as' could never see it.
+                [/(as)(\s+)(function|sub)\b/i, ["keyword", "white", "type"]],
 
                 // Function/Sub declarations - MUST come before general keyword matching
                 [/\bfunction\b/i, { token: "keyword", next: "@functionName" }],
@@ -106,7 +159,10 @@ export function defineBrightScriptLanguage(monaco) {
                 [/\bcontinue\s+while\b/i, "keyword"],
 
                 // Keywords (function and sub are handled separately in declarations)
-                [/\b(?:if|then|else|elseif|for|to|step|while|end|exit|return|as|next|stop|goto|dim|print|rem|new|try|catch|throw|run|library|continue|do|loop|each|in)\b/i, "keyword"],
+                [
+                    /\b(?:if|then|else|elseif|for|to|step|while|end|exit|return|as|next|stop|goto|dim|print|rem|new|try|catch|throw|run|library|continue|do|loop|each|in)\b/i,
+                    "keyword",
+                ],
 
                 // Boolean and null constants
                 [/\b(?:true|false)\b/i, "constant.language"],
@@ -119,11 +175,11 @@ export function defineBrightScriptLanguage(monaco) {
                 // Logical operators
                 [/\b(?:and|or|not|mod)\b/i, "keyword.operator"],
 
-                // Type keywords (function/sub as types only after 'as' keyword)
-                [/(?<=\bas\s+)(function|sub)\b/i, "type"],
-
                 // Other type keywords
-                [/\b(?:boolean|integer|longinteger|float|double|string|object|interface|dynamic|brsub|void)\b/i, "type"],
+                [
+                    /\b(?:boolean|integer|longinteger|float|double|string|object|interface|dynamic|brsub|void)\b/i,
+                    "type",
+                ],
 
                 // Class, namespace, interface declarations
                 [/\b(class|namespace|interface|enum)\s+([a-z_]\w*)/i, ["keyword", "type.identifier"]],
@@ -138,12 +194,15 @@ export function defineBrightScriptLanguage(monaco) {
                 [/[a-z_]\w*/i, "identifier"],
 
                 // Operators
-                [/@symbols/, {
-                    cases: {
-                        "@operators": "operator",
-                        "@default": ""
-                    }
-                }],
+                [
+                    /@symbols/,
+                    {
+                        cases: {
+                            "@operators": "operator",
+                            "@default": "",
+                        },
+                    },
+                ],
 
                 // Delimiters and brackets
                 [/[{}()[\]]/, "@brackets"],
@@ -154,39 +213,34 @@ export function defineBrightScriptLanguage(monaco) {
                 { include: "@whitespace" },
             ],
 
-            whitespace: [
-                [/\s+/, "white"],
-            ],
+            whitespace: [[/\s+/, "white"]],
 
             string: [
                 [/[^\\"]+/, "string"],
                 [/@escapes/, "string.escape"],
                 [/\\./, "string.escape.invalid"],
-                [/"/, { token: "string.quote", bracket: "@close", next: "@pop" }]
+                [/"/, { token: "string.quote", bracket: "@close", next: "@pop" }],
             ],
 
             templateString: [
                 [/\$\{/, { token: "delimiter.bracket", next: "@templateExpression" }],
                 [/[^`$]+/, "string.backtick"],
                 [/\$[^{]/, "string.backtick"],
-                [/`/, { token: "string.backtick", bracket: "@close", next: "@pop" }]
+                [/`/, { token: "string.backtick", bracket: "@close", next: "@pop" }],
             ],
 
-            templateExpression: [
-                [/\}/, { token: "delimiter.bracket", next: "@pop" }],
-                { include: "root" }
-            ],
+            templateExpression: [[/\}/, { token: "delimiter.bracket", next: "@pop" }], { include: "root" }],
 
             functionName: [
                 [/\s+/, "white"],
                 [/[a-z_]\w*/i, { token: "entity.name.function", next: "@pop" }],
-                [/./, { token: "@rematch", next: "@pop" }]
+                [/./, { token: "@rematch", next: "@pop" }],
             ],
 
             subName: [
                 [/\s+/, "white"],
                 [/[a-z_]\w*/i, { token: "entity.name.function", next: "@pop" }],
-                [/./, { token: "@rematch", next: "@pop" }]
+                [/./, { token: "@rematch", next: "@pop" }],
             ],
         },
     });
@@ -234,8 +288,10 @@ export function defineBrightScriptLanguage(monaco) {
             },
         ],
         indentationRules: {
-            increaseIndentPattern: /^\s*(?:(?:function|sub)\s+\w+|(?:if\b(?!.*\bthen\b.*$))|(?:for\b)|(?:while\b)|(?:try\b)|(?:else\s*$))/i,
-            decreaseIndentPattern: /^\s*(?:(?:end\s+(?:function|sub|if|for|while|try))|(?:endfunction|endsub|endif|endfor|endwhile|endtry)|(?:else\b)|(?:elseif\b)|(?:catch\b))/i,
+            increaseIndentPattern:
+                /^\s*(?:(?:function|sub)\s+\w+|(?:if\b(?!.*\bthen\b.*$))|(?:for\b)|(?:while\b)|(?:try\b)|(?:else\s*$))/i,
+            decreaseIndentPattern:
+                /^\s*(?:(?:end\s+(?:function|sub|if|for|while|try))|(?:endfunction|endsub|endif|endfor|endwhile|endtry)|(?:else\b)|(?:elseif\b)|(?:catch\b))/i,
         },
         wordPattern: /[a-zA-Z_]\w*/,
     });

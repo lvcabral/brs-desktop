@@ -8,12 +8,7 @@
 const { contextBridge, ipcRenderer, shell } = require("electron");
 const { getCurrentWebContents, getGlobal } = require("@electron/remote");
 const customTitlebar = require("custom-electron-titlebar");
-const {
-    SEND_CHANNELS,
-    RECEIVE_CHANNELS,
-    convertSettingsKey,
-    matchesKey,
-} = require("./preloadKeys");
+const { SEND_CHANNELS, RECEIVE_CHANNELS, convertSettingsKey, matchesKey } = require("./preloadKeys");
 const Mousetrap = require("mousetrap");
 const path = require("node:path");
 const isMacOS = process.platform === "darwin";
@@ -31,29 +26,35 @@ globalThis.addEventListener("DOMContentLoaded", () => {
     // Only apply keyboard interceptions in the main simulator window (which has the #display canvas)
     if (document.getElementById("display")) {
         // Intercept Cmd+V / Ctrl+V in capture phase to prevent "v" from reaching brs-engine
-        document.addEventListener("keydown", function (e) {
-            if ((e.metaKey || e.ctrlKey) && e.key === "v") {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                const { clipboard } = require("electron");
-                const text = clipboard.readText();
-                if (text && text.length > 0) {
-                    getCurrentWebContents().send("pasteText", text);
+        document.addEventListener(
+            "keydown",
+            function (e) {
+                if ((e.metaKey || e.ctrlKey) && e.key === "v") {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    const { clipboard } = require("electron");
+                    const text = clipboard.readText();
+                    if (text && text.length > 0) {
+                        getCurrentWebContents().send("pasteText", text);
+                    }
                 }
-            }
-        }, true); // capture phase fires before brs-engine's bubbling-phase handler
+            },
+            true
+        ); // capture phase fires before brs-engine's bubbling-phase handler
 
         // Intercept the Home remote key to act as "Close App"
-        let homeKeyCode = convertSettingsKey(
-            ipcRenderer.sendSync("getPreferences")?.remote?.keyHome ?? "Home"
-        );
-        document.addEventListener("keydown", function (e) {
-            if (matchesKey(e, homeKeyCode)) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                getCurrentWebContents().send("closeChannel", "EXIT_USER_NAV");
-            }
-        }, true); // capture phase fires before brs-engine's bubbling-phase handler
+        let homeKeyCode = convertSettingsKey(ipcRenderer.sendSync("getPreferences")?.remote?.keyHome ?? "Home");
+        document.addEventListener(
+            "keydown",
+            function (e) {
+                if (matchesKey(e, homeKeyCode)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    getCurrentWebContents().send("closeChannel", "EXIT_USER_NAV");
+                }
+            },
+            true
+        ); // capture phase fires before brs-engine's bubbling-phase handler
 
         // Update the Home key binding when preferences change
         ipcRenderer.on("preferencesUpdated", (_, preferences) => {
@@ -63,9 +64,6 @@ globalThis.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-
-
-
 
 contextBridge.exposeInMainWorld("api", {
     showPreferences: () => {

@@ -83,7 +83,7 @@ export const fileMenuTemplate = {
                 )
                     .then((url) => {
                         if (url) {
-                            loadUrl(url);
+                            void loadUrl(url);
                         }
                     })
                     .catch(console.error);

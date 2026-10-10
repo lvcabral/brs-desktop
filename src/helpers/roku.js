@@ -22,9 +22,9 @@ ipcMain.on("keySent", (_, data) => {
             ecpKey = `lit_${encodeURIComponent(ecpKey.charAt(4))}`;
         }
         if (data.mod === 0) {
-            postEcpRequest(device, `/keydown/${ecpKey}`);
+            void postEcpRequest(device, `/keydown/${ecpKey}`);
         } else {
-            postEcpRequest(device, `/keyup/${ecpKey}`);
+            void postEcpRequest(device, `/keyup/${ecpKey}`);
         }
         if (data.key === "poweroff") {
             const window = BrowserWindow.fromId(1);
@@ -43,8 +43,8 @@ ipcMain.on("currentApp", (_, data) => {
         }
         if (isValidIP(device.ip)) {
             if (!device.keepAppOpen) {
-                postEcpRequest(device, "/exit-app/dev");
-                postEcpRequest(device, "/keypress/home");
+                void postEcpRequest(device, "/exit-app/dev");
+                void postEcpRequest(device, "/keypress/home");
             }
         }
     }
@@ -66,10 +66,10 @@ export async function runOnPeerRoku(fileData, deepLink) {
     if (isValidIP(device.ip)) {
         try {
             // Press home button twice to ensure we are on the home screen
-            postEcpRequest(device, "/keypress/home");
+            void postEcpRequest(device, "/keypress/home");
             await new Promise((r) => setTimeout(r, 500));
-            postEcpRequest(device, "/keypress/home");
-            postInstallerRequest(
+            void postEcpRequest(device, "/keypress/home");
+            void postInstallerRequest(
                 device,
                 "/plugin_install",
                 {
@@ -245,5 +245,5 @@ async function postInstallerRequest(device, path, formData, callback) {
 export function isCompileError(responseHtml) {
     // \s+ rather than \s: the phrase is embedded in an HTML page whose whitespace and line
     // wrapping vary between Roku firmware versions, so a single-space match is too strict.
-    return !!/install\s+failure:\s+compilation\s+failed/i.exec(responseHtml);
+    return /install\s+failure:\s+compilation\s+failed/i.test(responseHtml);
 }

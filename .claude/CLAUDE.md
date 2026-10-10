@@ -98,6 +98,12 @@ Rules this codebase trips most often, worth writing to up front:
 | S7755, S7771 | `.at(-1)` and negative `splice` indices over `length - n`. |
 | S7781, S7780, S7757 | `replaceAll` over `replace(/…/g)`; `String.raw` over escaped backslashes; class fields over constructor assignment of constants. |
 
+`npm run lint` enforces the rules above that have a type-free ESLint equivalent (`sonarRules` in
+`eslint.config.mjs`, via `eslint-plugin-sonarjs`, `unicorn` and `import`), so they fail locally before
+a push. Not covered: S2699, S2871, S1128, S6353 (the plugin needs TypeScript type info for them),
+S4123, and S9383 (floating promises). The security hotspot rules are off under `test/`, matching
+SonarCloud, which does not run them on test code.
+
 When a finding is deliberately left open, record why in a comment at the code rather than only in the
 PR description — the next person to meet it will be reading the file, not the pull request.
 

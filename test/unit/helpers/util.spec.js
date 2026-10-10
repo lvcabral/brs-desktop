@@ -19,6 +19,7 @@ import {
     readJsonFile,
     writeJsonFile,
     getGateway,
+    splitCommand,
 } from "../../../src/helpers/util";
 import { __setActiveInterface, __setError } from "../../mocks/network";
 
@@ -71,6 +72,24 @@ describe("isValidIP", () => {
         // hand-typed addresses and remain acceptable.
         expect(isValidIP("192.168.001.1")).toBe(true);
         expect(isValidIP("010.0.0.1")).toBe(true);
+    });
+});
+
+describe("splitCommand", () => {
+    it("returns the command alone when there is no argument", () => {
+        expect(splitCommand("  bt  ")).toEqual(["bt"]);
+    });
+
+    it("splits at the first whitespace only, keeping the argument's inner spacing", () => {
+        expect(splitCommand("press  a b\tc")).toEqual(["press", " a b\tc"]);
+    });
+
+    it("splits at a tab as well as a space", () => {
+        expect(splitCommand("var\tm")).toEqual(["var", "m"]);
+    });
+
+    it("returns an empty command for a blank line", () => {
+        expect(splitCommand("   ")).toEqual([""]);
     });
 });
 

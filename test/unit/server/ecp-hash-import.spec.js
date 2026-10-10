@@ -40,7 +40,7 @@ describe("ecp.js prototype dependencies", () => {
     it("does not depend on menuService having been loaded first", async () => {
         // Import ecp.js in isolation, with no other src/ module in the graph.
         const ecp = await import("../../../src/server/ecp");
-        expect(ecp.isECPEnabled).toBe(false);
+        expect(ecp.isECPEnabled()).toBe(false);
         expect(() => "/fixtures/apps/dev.zip".hashCode()).not.toThrow();
     });
 });
