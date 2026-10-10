@@ -272,7 +272,8 @@
         const text = textInput.value;
         if (text.length > 0) {
             // Cleared only once the app has the text, so a rejected or failed send can be retried.
-            sendText(text).then(function (sent) {
+            // sendText never rejects: it reports failures itself and resolves false.
+            void sendText(text).then(function (sent) {
                 if (sent) {
                     textInput.value = "";
                 }

@@ -158,11 +158,10 @@ export function defineBrightScriptLanguage(monaco) {
                 [/\bcontinue\s+for\b/i, "keyword"],
                 [/\bcontinue\s+while\b/i, "keyword"],
 
-                // Keywords (function and sub are handled separately in declarations)
-                [
-                    /\b(?:if|then|else|elseif|for|to|step|while|end|exit|return|as|next|stop|goto|dim|print|rem|new|try|catch|throw|run|library|continue|do|loop|each|in)\b/i,
-                    "keyword",
-                ],
+                // Keywords (function and sub are handled separately in declarations), split in two
+                // only to keep each regex under the complexity limit (S5843)
+                [/\b(?:if|then|else|elseif|for|to|step|while|end|exit|return|as|next|stop|goto)\b/i, "keyword"],
+                [/\b(?:dim|print|rem|new|try|catch|throw|run|library|continue|do|loop|each|in)\b/i, "keyword"],
 
                 // Boolean and null constants
                 [/\b(?:true|false)\b/i, "constant.language"],
@@ -288,10 +287,8 @@ export function defineBrightScriptLanguage(monaco) {
             },
         ],
         indentationRules: {
-            increaseIndentPattern:
-                /^\s*(?:(?:function|sub)\s+\w+|(?:if\b(?!.*\bthen\b.*$))|(?:for\b)|(?:while\b)|(?:try\b)|(?:else\s*$))/i,
-            decreaseIndentPattern:
-                /^\s*(?:(?:end\s+(?:function|sub|if|for|while|try))|(?:endfunction|endsub|endif|endfor|endwhile|endtry)|(?:else\b)|(?:elseif\b)|(?:catch\b))/i,
+            increaseIndentPattern: /^\s*(?:(?:function|sub)\s+\w+|if\b(?!.*\bthen\b)|(?:for|while|try)\b|else\s*$)/i,
+            decreaseIndentPattern: /^\s*(?:end\s*(?:function|sub|if|for|while|try)|else(?:if)?\b|catch\b)/i,
         },
         wordPattern: /[a-zA-Z_]\w*/,
     });

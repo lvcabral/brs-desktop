@@ -50,6 +50,7 @@ const sonarRules = {
     "sonarjs/no-hardcoded-ip": "error", // S1313
     "sonarjs/cognitive-complexity": ["error", 25], // S3776
     "sonarjs/super-linear-regex": "error", // S8786
+    "sonarjs/regex-complexity": "error", // S5843 (scores a little below SonarCloud, so a near-miss can still fail there)
     "import/no-mutable-exports": "error", // S6861
     "unicorn/prefer-negative-index": "error", // S7771
     "unicorn/prefer-regexp-test": "error", // S6594
