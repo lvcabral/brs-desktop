@@ -110,13 +110,20 @@
      * keypress path cannot carry it: restana does not percent-decode path params, so
      * /keypress/lit_%20 arrives undecoded and the engine rejects it as a multi-character key.
      * @param {string} text - The text to type into the app
+     * @returns {Promise<boolean>} - True once the app has accepted the text; never rejects
      */
     function sendText(text) {
-        return fetch("/paste", { method: "POST", body: text }).then(function (res) {
-            if (!res.ok) {
-                setStatus(res.status === 413 ? "Text too long" : "Text rejected");
-            }
-        });
+        return fetch("/paste", { method: "POST", body: text })
+            .then(function (res) {
+                if (!res.ok) {
+                    setStatus(res.status === 413 ? "Text too long" : "Text rejected");
+                }
+                return res.ok;
+            })
+            .catch(function () {
+                setStatus("Text not sent");
+                return false;
+            });
     }
 
     /**
@@ -264,8 +271,13 @@
         event.preventDefault();
         const text = textInput.value;
         if (text.length > 0) {
-            sendText(text);
-            textInput.value = "";
+            // Cleared only once the app has the text, so a rejected or failed send can be retried.
+            // sendText never rejects: it reports failures itself and resolves false.
+            void sendText(text).then(function (sent) {
+                if (sent) {
+                    textInput.value = "";
+                }
+            });
         }
     });
     document.getElementById("screenshot").addEventListener("click", screenshot);

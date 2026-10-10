@@ -38,7 +38,12 @@ export function getBrsConsolePatterns(theme, colorThemes) {
         // Standard 8-4-4-4-12 GUID/UUID, e.g. "3F2504E0-4F89-41D3-9A0C-0305E82C3301". A dedicated
         // rule because the generic number/hex rules below can't cleanly match a run that mixes
         // digits and letters across dash-separated groups.
-        { regex: /\b[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\b/g, color: c.hex, type: "hex", priority: 85 },
+        {
+            regex: /\b[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\b/g,
+            color: c.hex,
+            type: "hex",
+            priority: 85,
+        },
         // Component names may carry a namespace, e.g. "roSGNode:ContentNode" — [\w:.]+ covers that.
         { regex: /&lt;Component:&nbsp;ro[\w:.]+&gt;/g, color: c.component, type: "component", priority: 85 },
         { regex: /&lt;Function:&nbsp;\w+&gt;/g, color: c.info, type: "function", priority: 85 },
@@ -88,8 +93,9 @@ export function getBrsConsolePatterns(theme, colorThemes) {
             type: "structure",
             priority: 65,
         },
-        // Bracketed log tags, e.g. "[scrpt.ctx.run.enter]", "[beacon.report]".
-        { regex: /\[[^\]]+\]/g, color: c.tag, type: "structure", priority: 60 },
+        // Bracketed log tags, e.g. "[scrpt.ctx.run.enter]", "[beacon.report]". "[" is excluded from
+        // the body too, so a run of unclosed brackets cannot make the scan quadratic (S8786).
+        { regex: /\[[^[\]]+\]/g, color: c.tag, type: "structure", priority: 60 },
         { regex: /\binvalid\b/g, color: c.invalid, type: "null", priority: 55 },
         { regex: /\btrue\b/g, color: c.boolTrue, type: "boolean", priority: 55 },
         { regex: /\bfalse\b/g, color: c.boolean, type: "boolean", priority: 55 },

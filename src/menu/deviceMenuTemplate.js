@@ -176,7 +176,7 @@ export const deviceMenuTemplate = {
             type: "checkbox",
             checked: false,
             click: (item, window) => {
-                if (isInstallerEnabled) {
+                if (isInstallerEnabled()) {
                     disableInstaller();
                 } else {
                     enableInstaller(undefined, { localOnly: getRemoteAccessLocalOnly() });
@@ -189,7 +189,7 @@ export const deviceMenuTemplate = {
             type: "checkbox",
             checked: false,
             click: (item, window) => {
-                if (isECPEnabled) {
+                if (isECPEnabled()) {
                     disableECP();
                 } else {
                     enableECP(undefined, undefined, { localOnly: getRemoteAccessLocalOnly() });
@@ -202,7 +202,7 @@ export const deviceMenuTemplate = {
             type: "checkbox",
             checked: false,
             click: (item, window) => {
-                if (isTelnetEnabled) {
+                if (isTelnetEnabled()) {
                     disableTelnet();
                 } else {
                     enableTelnet(undefined, undefined, { localOnly: getRemoteAccessLocalOnly() });
@@ -215,7 +215,7 @@ export const deviceMenuTemplate = {
             type: "checkbox",
             checked: false,
             click: (item, window) => {
-                if (isDebugEnabled) {
+                if (isDebugEnabled()) {
                     disableDebugServer();
                 } else {
                     enableDebugServer(undefined, undefined, undefined, { localOnly: getRemoteAccessLocalOnly() });

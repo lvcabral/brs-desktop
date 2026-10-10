@@ -6,10 +6,7 @@
  *  Licensed under the MIT License. See LICENSE in the repository root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import {
-    defineBrightScriptLanguage,
-    defineBrightScriptTheme,
-} from "../../../src/app/brightscript";
+import { defineBrightScriptLanguage, defineBrightScriptTheme } from "../../../src/app/brightscript";
 
 /**
  * Minimal stand-in for the Monaco namespace: just the surface these two functions touch.
@@ -117,9 +114,9 @@ describe("indentation rules", () => {
     });
 
     it("ignores ordinary statements", () => {
-        expect(increase.test("print \"hello\"")).toBe(false);
+        expect(increase.test('print "hello"')).toBe(false);
         expect(increase.test("x = 1")).toBe(false);
-        expect(decrease.test("print \"hello\"")).toBe(false);
+        expect(decrease.test('print "hello"')).toBe(false);
         // "subtotal" starts with "sub" but is an identifier, not a declaration.
         expect(increase.test("subtotal = 1")).toBe(false);
     });
@@ -146,7 +143,7 @@ describe("folding markers", () => {
 
     it("does not match region words outside comments", () => {
         expect(start.test("region = 1")).toBe(false);
-        expect(start.test("print \"#region\"")).toBe(false);
+        expect(start.test('print "#region"')).toBe(false);
     });
 });
 

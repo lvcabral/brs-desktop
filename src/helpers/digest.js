@@ -30,6 +30,7 @@ import crypto from "node:crypto";
  * @returns {string} - The hex digest
  */
 export function cryptoUsingMD5(data) {
+    // eslint-disable-next-line sonarjs/hashing -- protocol-mandated, see above
     return crypto.createHash("md5").update(data).digest("hex"); // NOSONAR - protocol-mandated, see above
 }
 
@@ -91,6 +92,7 @@ export function parseDigestChallenge(authHeader) {
     // Emulating an atomic group (`(?=(\w+))\1`) removes backtracking inside the pattern but
     // not the repeated scan, and measures no better than quadratic either — about 25 ms for
     // an 8 KB input, which Node's header size cap already bounds.
+    // eslint-disable-next-line sonarjs/super-linear-regex -- bounded by the header size cap, see above
     const regex = /(\w+)=(?:"([^"]+)"|([^\s,]+))/g;
     let match;
     while ((match = regex.exec(authHeader))) {

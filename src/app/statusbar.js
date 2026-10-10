@@ -67,9 +67,14 @@ statusAudio.onclick = function () {
 };
 statusFile.onclick = function () {
     if (filePath) {
-        navigator.clipboard.writeText(filePath).then(() => {
-            showToast("Path copied to clipboard");
-        });
+        navigator.clipboard
+            .writeText(filePath)
+            .then(() => {
+                showToast("Path copied to clipboard");
+            })
+            .catch((err) => {
+                showToast(`Error copying path to clipboard: ${err.message}`, 5000, true);
+            });
     }
 };
 
@@ -313,4 +318,3 @@ function redrawStatus(fullscreen) {
         statusBar.style.visibility = "hidden";
     }
 }
-

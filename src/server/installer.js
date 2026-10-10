@@ -25,7 +25,11 @@ let port = WEB_INSTALLER_PORT;
 let server;
 let hash;
 let localOnly = false;
-export let isInstallerEnabled = false;
+let installerEnabled = false;
+/** @returns {boolean} - True while the server is bound */
+export function isInstallerEnabled() {
+    return installerEnabled;
+}
 export function setPassword(password) {
     if (password && password !== "") {
         credentials.password = password;
@@ -42,7 +46,7 @@ export function setInstallerLocalOnly(value) {
     localOnly = value;
 }
 export function enableInstaller(win, { localOnly: lo = false } = {}) {
-    if (isInstallerEnabled) {
+    if (installerEnabled) {
         return; // already started do nothing
     }
     localOnly = lo;
@@ -98,13 +102,13 @@ export function enableInstaller(win, { localOnly: lo = false } = {}) {
             // Report the port actually bound, which differs from the requested one when
             // port 0 was used to let the OS choose.
             port = server.address().port;
-            isInstallerEnabled = true;
+            installerEnabled = true;
             notifyAll("enabled", { enabled: true, port: port });
         });
     server.on("error", (e) => {
         if (e.code === "EADDRINUSE") {
             window.webContents.send("console", `Web Installer server failed:${e.message}`, true);
-            isInstallerEnabled = false;
+            installerEnabled = false;
         } else {
             window.webContents.send("console", e.message, true);
         }
@@ -112,11 +116,11 @@ export function enableInstaller(win, { localOnly: lo = false } = {}) {
 }
 
 export function disableInstaller() {
-    if (isInstallerEnabled) {
+    if (installerEnabled) {
         if (server) {
             server.close();
         }
-        isInstallerEnabled = false;
+        installerEnabled = false;
         notifyAll("enabled", { enabled: false, port: port });
     }
 }

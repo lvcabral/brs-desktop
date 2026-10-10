@@ -226,7 +226,7 @@ function main() {
             editorManager.focus();
         }
     });
-    
+
     initSearch();
 }
 
@@ -242,7 +242,7 @@ function initSearch() {
             }, 100);
         }
     });
-    
+
     reconnectObserver();
 
     searchBtn.addEventListener("click", () => {
@@ -259,7 +259,7 @@ function initSearch() {
     });
 
     searchInput.addEventListener("input", performSearch);
-    
+
     searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -294,7 +294,7 @@ function initSearch() {
 function performSearch(keepIndex = false) {
     const keyword = searchInput.value;
     const oldIndex = currentSearchIndex;
-    
+
     if (consoleLogsObserver) {
         consoleLogsObserver.disconnect();
     }
@@ -317,7 +317,7 @@ function performSearch(keepIndex = false) {
                             jumpToMatch(currentSearchIndex, !keepIndex);
                         }
                         reconnectObserver();
-                    }
+                    },
                 });
             } else {
                 searchResults = [];
@@ -325,7 +325,7 @@ function performSearch(keepIndex = false) {
                 updateSearchMatches();
                 reconnectObserver();
             }
-        }
+        },
     });
 }
 
@@ -334,7 +334,7 @@ function reconnectObserver() {
         consoleLogsObserver.observe(document.getElementById("console-logs"), {
             childList: true,
             characterData: true,
-            subtree: true
+            subtree: true,
         });
     }
 }
@@ -358,7 +358,7 @@ function updateSearchMatches() {
 
 function jumpToMatch(index, scroll = true) {
     if (searchResults.length === 0) return;
-    
+
     if (index < 0) {
         currentSearchIndex = searchResults.length - 1;
     } else if (index >= searchResults.length) {
@@ -378,7 +378,7 @@ function jumpToMatch(index, scroll = true) {
             currentMatch.scrollIntoView({ behavior: "smooth", block: "center" });
         }
     }
-    
+
     updateSearchMatches();
 }
 
@@ -631,9 +631,7 @@ function showDialog(message) {
 
 codeSelect.addEventListener("change", async (e) => {
     if (isCodeChanged) {
-        const confirmed = await showDialog(
-            "There are unsaved changes, do you want to discard and continue?"
-        );
+        const confirmed = await showDialog("There are unsaved changes, do you want to discard and continue?");
         if (!confirmed) {
             e.preventDefault();
             codeSelect.value = savedValue;
@@ -896,18 +894,22 @@ function shareCode() {
             id: currentId,
             code: code,
         };
-        getShareUrl(data).then(function (shareLink) {
-            navigator.clipboard.writeText(shareLink);
-            if (shareLink.length > 2048) {
-                showToast(
-                    "URL copied to clipboard, but it's longer than 2048 bytes, consider exporting as a file instead!",
-                    7000,
-                    true
-                );
-            } else {
-                showToast("brsFiddle.net share URL copied to clipboard.");
-            }
-        });
+        getShareUrl(data)
+            .then(async function (shareLink) {
+                await navigator.clipboard.writeText(shareLink);
+                if (shareLink.length > 2048) {
+                    showToast(
+                        "URL copied to clipboard, but it's longer than 2048 bytes, consider exporting as a file instead!",
+                        7000,
+                        true
+                    );
+                } else {
+                    showToast("brsFiddle.net share URL copied to clipboard.");
+                }
+            })
+            .catch((err) => {
+                showToast(`Error sharing code: ${err.message}`, 5000, true);
+            });
     } else {
         showToast("There is no Source Code to share!", 3000, true);
     }
@@ -923,10 +925,7 @@ function saveCode() {
             const codeName = codeSelect.options[codeSelect.selectedIndex].text.replace(/^⏺︎ /, "");
             localStorage.setItem(currentId, `@=${codeName}=@${code}`);
             unchangedCode = code;
-            showToast(
-                "Code saved in the simulator local storage.\nTo share it use the Share button.",
-                5000
-            );
+            showToast("Code saved in the simulator local storage.\nTo share it use the Share button.", 5000);
             markCodeAsSaved();
         }
     } else {
@@ -957,10 +956,7 @@ codeDialog.addEventListener("close", (e) => {
         if (actionType.value === "rename") {
             showToast("Code snippet renamed in the simulator local storage.", 5000);
         } else {
-            showToast(
-                "Code saved in the simulator local storage!\nTo share it use the Share button.",
-                5000
-            );
+            showToast("Code saved in the simulator local storage!\nTo share it use the Share button.", 5000);
         }
         markCodeAsSaved();
     }
@@ -1055,10 +1051,7 @@ function hotKeys(event) {
         ) {
             event.preventDefault();
             startDebug();
-        } else if (
-            (isMacOS && event.code === "Escape" && event.ctrlKey) ||
-            (!isMacOS && event.code === "Home")
-        ) {
+        } else if ((isMacOS && event.code === "Escape" && event.ctrlKey) || (!isMacOS && event.code === "Home")) {
             event.preventDefault();
             endExecution();
         }
@@ -1067,8 +1060,7 @@ function hotKeys(event) {
 
 function isHotKey(event, keyCode) {
     return (
-        (isMacOS && event.code === keyCode && event.metaKey) ||
-        (!isMacOS && event.code === keyCode && event.ctrlKey)
+        (isMacOS && event.code === keyCode && event.metaKey) || (!isMacOS && event.code === keyCode && event.ctrlKey)
     );
 }
 
@@ -1164,8 +1156,7 @@ function showToast(message, duration = 3000, error = false) {
 }
 
 // Theme Management
-globalThis.__currentTheme = () =>
-    globalThis.matchMedia("(prefers-color-scheme:dark)")?.matches ? "dark" : "light";
+globalThis.__currentTheme = () => (globalThis.matchMedia("(prefers-color-scheme:dark)")?.matches ? "dark" : "light");
 globalThis.__setTheme = () => {
     const preferences = api.getPreferences();
     let theme = preferences.simulator.theme || "purple";

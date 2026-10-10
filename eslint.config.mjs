@@ -10,6 +10,7 @@ import globals from "globals";
 import importPlugin from "eslint-plugin-import";
 import jsdoc from "eslint-plugin-jsdoc";
 import unicorn from "eslint-plugin-unicorn";
+import sonarjs from "eslint-plugin-sonarjs";
 import prettier from "eslint-config-prettier";
 
 // Ported from the brs-engine .eslintrc.js. The @typescript-eslint rules there have no
@@ -41,6 +42,20 @@ const sharedRules = {
     "use-isnan": "error",
 };
 
+// SonarCloud rules with a type-free ESLint equivalent, checked locally instead of after a push.
+// Which ones are not covered, and why, is listed in .claude/CLAUDE.md.
+const sonarRules = {
+    "sonarjs/hashing": "error", // S4790
+    "sonarjs/publicly-writable-directories": "error", // S5443
+    "sonarjs/no-hardcoded-ip": "error", // S1313
+    "sonarjs/cognitive-complexity": ["error", 25], // S3776
+    "sonarjs/super-linear-regex": "error", // S8786
+    "sonarjs/regex-complexity": "error", // S5843 (scores a little below SonarCloud, so a near-miss can still fail there)
+    "import/no-mutable-exports": "error", // S6861
+    "unicorn/prefer-negative-index": "error", // S7771
+    "unicorn/prefer-regexp-test": "error", // S6594
+};
+
 export default [
     {
         ignores: ["app/**", "dist/**", "out/**", "coverage/**", "src/app/web/**"],
@@ -48,7 +63,7 @@ export default [
     js.configs.recommended,
     {
         files: ["**/*.{js,mjs}"],
-        plugins: { import: importPlugin, jsdoc, unicorn },
+        plugins: { import: importPlugin, jsdoc, unicorn, sonarjs },
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: "module",
@@ -67,12 +82,23 @@ export default [
         },
         rules: {
             ...sharedRules,
+            ...sonarRules,
             // Nothing under src/ may reach for a devDependency: those are not installed in
             // the packaged app, so an import that lints clean here would throw at runtime.
             "import/no-extraneous-dependencies": ["error", { devDependencies: false }],
             // Unused arguments are unavoidable with positional callbacks such as Electron's
             // click(item, window, event); unused variables and imports are still errors.
             "no-unused-vars": ["error", { args: "none", caughtErrors: "none" }],
+        },
+    },
+    {
+        // SonarCloud analyses test/ as test code, where these security hotspot rules do not
+        // run: fixtures legitimately carry IP literals, temp paths and MD5 test vectors.
+        files: ["test/**/*.js"],
+        rules: {
+            "sonarjs/hashing": "off",
+            "sonarjs/no-hardcoded-ip": "off",
+            "sonarjs/publicly-writable-directories": "off",
         },
     },
     {

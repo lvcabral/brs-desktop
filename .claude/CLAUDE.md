@@ -93,10 +93,17 @@ Rules this codebase trips most often, worth writing to up front:
 | S4123 | `@returns` on an `async` function must be `Promise<T>`. Type inference reads JSDoc and trusts it over the `async` keyword, so a wrong annotation makes correct `await` code look like a bug. |
 | S3776 | Keep cognitive complexity under 25. A lookup table beats a long `switch` or `else if` chain. |
 | S8786 | No super-linear regex on externally supplied input. Measure before rewriting: emulated atomic groups remove backtracking inside a pattern but not the cost of a global scan retrying every start position. |
+| S5843 | Regex complexity at most 20. Split a long keyword alternation into several rules; the local lint scores a few points below SonarCloud. |
 | S1128 | Remove the imports a refactor leaves behind. |
 | S6594, S6353 | `RegExp.test()` or `.exec()` over `String.match()`; `\d` over `[0-9]`. |
 | S7755, S7771 | `.at(-1)` and negative `splice` indices over `length - n`. |
 | S7781, S7780, S7757 | `replaceAll` over `replace(/…/g)`; `String.raw` over escaped backslashes; class fields over constructor assignment of constants. |
+
+`npm run lint` enforces the rules above that have a type-free ESLint equivalent (`sonarRules` in
+`eslint.config.mjs`, via `eslint-plugin-sonarjs`, `unicorn` and `import`), so they fail locally before
+a push. Not covered: S2699, S2871, S1128, S6353 (the plugin needs TypeScript type info for them),
+S4123, and S9383 (floating promises). The security hotspot rules are off under `test/`, matching
+SonarCloud, which does not run them on test code.
 
 When a finding is deliberately left open, record why in a comment at the code rather than only in the
 PR description — the next person to meet it will be reading the file, not the pull request.

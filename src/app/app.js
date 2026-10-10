@@ -7,14 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import "./styles/main.css";
 import "./styles/fontawesome.min.css";
-import {
-    setStatusColor,
-    setAudioStatus,
-    showToast,
-    clearCounters,
-    updateStatus,
-    setLocaleStatus,
-} from "./statusbar";
+import { setStatusColor, setAudioStatus, showToast, clearCounters, updateStatus, setLocaleStatus } from "./statusbar";
 import { initRemoteScreen } from "./webrtc";
 import { BRS_HOME_APP_PATH } from "../constants";
 
@@ -96,10 +89,9 @@ async function main() {
     customKeys.set("Shift+ArrowUp", "up");
     customKeys.set("Shift+ArrowDown", "down");
     // Add SceneGraph extension
-    customDeviceInfo.extensions = new Map([
-        [brs.SupportedExtension.SceneGraph, getExtensionPath("brs-sg.js")],
-    ]);
+    customDeviceInfo.extensions = new Map([[brs.SupportedExtension.SceneGraph, getExtensionPath("brs-sg.js")]]);
     // Initialize BRS Engine
+    // eslint-disable-next-line sonarjs/cognitive-complexity -- pre-existing; split up when next reworked
     brs.subscribe("desktop", (event, data) => {
         if (event === "loaded") {
             if (!brsHomeMode) {
@@ -124,7 +116,7 @@ async function main() {
                         settings_display: "display",
                         settings_audio: "audio",
                         settings_captioning: "captions",
-                        settings_system:"device",
+                        settings_system: "device",
                     };
                     api.send("openSettings", settingsMap[data.app]);
                     return;
@@ -179,12 +171,7 @@ async function main() {
             isEngineReady = true;
             if (pendingExecute) {
                 prepareAppRegistry(pendingExecute.filePath);
-                brs.execute(
-                    pendingExecute.filePath,
-                    pendingExecute.data,
-                    pendingExecute.options,
-                    pendingExecute.input
-                );
+                brs.execute(pendingExecute.filePath, pendingExecute.data, pendingExecute.options, pendingExecute.input);
                 pendingExecute = null;
             }
             startupProcess();
@@ -209,10 +196,7 @@ async function main() {
     try {
         api.send("deviceData", clonedDeviceData);
     } catch (error) {
-        console.warn(
-            "Sending deviceData object via IPC failed, using JSON serialization workaround:",
-            error.message
-        );
+        console.warn("Sending deviceData object via IPC failed, using JSON serialization workaround:", error.message);
         // Use JSON serialization as a fallback in case of structured cloning issues
         const jsonSerializedData = JSON.parse(JSON.stringify(clonedDeviceData));
         api.send("deviceData", jsonSerializedData);
@@ -669,24 +653,19 @@ function takeScreenshot(file = "") {
     ctx.putImageData(screenshot, 0, 0);
     const ext = file.split(".").pop().toLowerCase();
     const mimeType = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : "image/png";
-    canvas.convertToBlob({ type: mimeType }).then(function (blob) {
-        // Copy to clipboard
-        if (file === "") {
-            const item = new ClipboardItem({ "image/png": blob });
-            navigator.clipboard.write([item]).catch((err) => {
-                showToast(`Error copying screenshot to clipboard: ${err.message}`, 5000, true);
-            });
-            return;
-        }
-        // Save to file
-        blob.arrayBuffer()
-            .then((buffer) => {
-                api.send("saveFile", [file, buffer]);
-            })
-            .catch((err) => {
-                showToast(`Error saving screenshot: ${err.message}`, 5000, true);
-            });
-    });
+    const action = file === "" ? "copying screenshot to clipboard" : "saving screenshot";
+    canvas
+        .convertToBlob({ type: mimeType })
+        .then(async function (blob) {
+            if (file === "") {
+                await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+            } else {
+                api.send("saveFile", [file, await blob.arrayBuffer()]);
+            }
+        })
+        .catch((err) => {
+            showToast(`Error ${action}: ${err.message}`, 5000, true);
+        });
 }
 
 function showCloseMessage(event, reason, success = true) {

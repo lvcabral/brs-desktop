@@ -15,7 +15,14 @@ const userDataDir = app.getPath("userData");
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
 
-export let appFocused = false;
+let appHasFocus = false;
+/**
+ * Whether any of the app's windows currently has focus.
+ * @returns {boolean} - True while an app window is focused
+ */
+export function appFocused() {
+    return appHasFocus;
+}
 
 export function createWindow(name, options) {
     const stateStoreFile = `window-state-${name}.json`;
@@ -87,7 +94,7 @@ export function createWindow(name, options) {
 
     // Window Focus Events
     win.on("focus", () => {
-        appFocused = true;
+        appHasFocus = true;
     });
     win.on("blur", () => {
         if (!isMacOS) {
@@ -97,7 +104,7 @@ export function createWindow(name, options) {
                 }
             }
         }
-        appFocused = false;
+        appHasFocus = false;
     });
     win.on("close", () => {
         saveWindowState(stateStoreFile, state, win);

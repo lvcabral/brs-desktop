@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { app, BrowserWindow, ipcMain } from "electron";
 import { consoleBuffer } from "../helpers/console";
-import { isLocalhostAddress, destroyRemoteClients } from "../helpers/util";
+import { isLocalhostAddress, destroyRemoteClients, splitCommand } from "../helpers/util";
 import { TELNET_PORT } from "../constants";
 import * as telnet from "net";
 let server;
@@ -16,7 +16,11 @@ let clients = new Map();
 let lines = new Map();
 let localOnly = false;
 
-export let isTelnetEnabled = false;
+let telnetEnabled = false;
+/** @returns {boolean} - True while the server is bound */
+export function isTelnetEnabled() {
+    return telnetEnabled;
+}
 export function setTelnetLocalOnly(value) {
     localOnly = value;
     if (localOnly) {
@@ -24,7 +28,7 @@ export function setTelnetLocalOnly(value) {
     }
 }
 export function enableTelnet(win, port = TELNET_PORT, { localOnly: lo = false } = {}) {
-    if (isTelnetEnabled) {
+    if (telnetEnabled) {
         return;
     }
     localOnly = lo;
@@ -58,7 +62,7 @@ export function enableTelnet(win, port = TELNET_PORT, { localOnly: lo = false } 
         lines.set(id, "");
     });
     server.on("listening", () => {
-        isTelnetEnabled = true;
+        telnetEnabled = true;
         notifyAll("enabled", true);
         ipcMain.on("telnet", (event, text) => {
             if (text !== undefined) {
@@ -76,7 +80,7 @@ export function enableTelnet(win, port = TELNET_PORT, { localOnly: lo = false } 
 }
 
 export function disableTelnet() {
-    if (isTelnetEnabled) {
+    if (telnetEnabled) {
         if (server) {
             server.close();
             clients.forEach((client, id) => {
@@ -86,7 +90,7 @@ export function disableTelnet() {
             clientId = 0;
             clients = new Map();
         }
-        isTelnetEnabled = false;
+        telnetEnabled = false;
         notifyAll("enabled", false);
     }
 }
@@ -142,7 +146,7 @@ export function processData(data, id, window) {
 }
 
 export function sendDebugCommand(line, client, window) {
-    const expr = line.trim().split(/(?<=^\S+)\s/);
+    const expr = splitCommand(line);
     const cmd = expr[0].toLowerCase();
     if (cmd.toLowerCase() === "close") {
         client.write("bye!\r\n");
