@@ -1,3 +1,4 @@
+const fs = require("node:fs");
 const path = require("node:path");
 const merge = require("webpack-merge");
 const base = require("./webpack.base.config");
@@ -18,6 +19,11 @@ module.exports = (env) => {
   let fileApi = libraryName + ".api.js";
   let fileWrk = libraryName + ".worker.js";
   let fileExt = libraryName + "-sg.js";
+  if (env.production) {
+    // Start release builds from an empty app/, since electron-builder packs all of it. Not `output.clean`:
+    // both compilers below write to app/ in parallel, so each would wipe the other's output.
+    fs.rmSync(path.resolve(__dirname, "../app"), { recursive: true, force: true });
+  }
   return [
     merge(base(env), {
       entry: {
