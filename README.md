@@ -24,7 +24,7 @@ With remote services enabled, the desktop simulator can be detected and [integra
 
 > [!IMPORTANT]
 >
-> The simulator can execute code compatible with Roku OS 16.0 and, since version 2.3.0, includes full **SceneGraph** support which is currently in **beta**.
+> The simulator can execute code compatible with Roku OS 16.0 and includes full **SceneGraph** support which is currently in **beta**.
 >
 >**Please be aware of the following:**
 >
