@@ -537,19 +537,21 @@ export function getSettings(window) {
                                     label: "Channel Client Id",
                                     key: "clientId",
                                     type: "text",
+                                    style: { width: "45%" },
                                     help: "Unique device identifier returned by ifDeviceInfo.GetChannelClientId()",
+                                },
+                                {
+                                    label: "Roku Customer Id",
+                                    key: "customerId",
+                                    type: "text",
+                                    style: { width: "45%" },
+                                    help: "Roku account id (32-digit hex) returned by the ChannelStore GetRokuCustomerId command",
                                 },
                                 {
                                     label: "RIDA",
                                     key: "RIDA",
                                     type: "text",
                                     help: "Unique identifier for advertisement tracking returned by ifDevideInfo.GetRIDA()",
-                                },
-                                {
-                                    label: "Roku Customer Id",
-                                    key: "customerId",
-                                    type: "text",
-                                    help: "Roku customer account identifier (32-digit hex string) returned by the ChannelStore node GetRokuCustomerId command",
                                 },
                                 {
                                     label: "Developer Id",
