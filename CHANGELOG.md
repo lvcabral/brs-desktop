@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.6.2"></a>
+
+## v2.6.2 - Engine Upgrade: Server-Sent Events and GetRokuCustomerId
+
+This release bumps `brs-engine` to v2.6.1 and `brs-scenegraph` to v0.6.1, completing the two **Roku OS 16.0**
+features left out of the previous engine release. `roUrlTransfer` now supports **Server-Sent Events (SSE)** through
+the new `AsyncGetSSEvents()` method, delivering streaming `roSSEvent`s to the message port, and the SceneGraph
+`ChannelStore` node gains the **`GetRokuCustomerId`** command, sent through its generic request framework
+(`request`/`requestStatus` fields) and returning the new `customerId` device-information property, now configurable
+in the **Device** settings. The documented Roku OS baseline is now 16.0. On the simulator side, the packaged app
+shrinks from 193 MB to 45 MB, a batch of SonarCloud reliability findings is cleared (with the Sonar rules now also
+enforced by the local lint), and `electron-builder` is upgraded to 26.15.3.
+
+See the **BrightScript Simulation Engine** v2.6.1 [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v2.6.1) for all the language and framework features and improvements.
+
+### New Features
+
+- Added a "Roku Customer Id" device setting, returned by the `ChannelStore` node `GetRokuCustomerId` command, with a random 32-digit hex default generated for each installation by [@lvcabral](https://github.com/lvcabral) in [#359](https://github.com/lvcabral/brs-desktop/pull/359)
+
+### Maintenance
+
+- Trimmed the packaged asar from 193 MB to 45 MB by [@lvcabral](https://github.com/lvcabral) in [#352](https://github.com/lvcabral/brs-desktop/pull/352)
+- Cleared SonarCloud reliability findings and enforced the Sonar rules in the local lint by [@lvcabral](https://github.com/lvcabral) in [#357](https://github.com/lvcabral/brs-desktop/pull/357)
+- Restored lockfile entries dropped by merging [#353](https://github.com/lvcabral/brs-desktop/pull/353) and [#354](https://github.com/lvcabral/brs-desktop/pull/354) by [@lvcabral](https://github.com/lvcabral) in [#358](https://github.com/lvcabral/brs-desktop/pull/358)
+
+### Dependency Bumps
+
+- Bump `brs-engine` from 2.6.0 to 2.6.1 by [@lvcabral](https://github.com/lvcabral)
+- Bump `brs-scenegraph` from 0.6.0 to 0.6.1 by [@lvcabral](https://github.com/lvcabral)
+- Bump `electron-builder` from 26.5.0 to 26.15.3 and `builder-util-runtime` from 9.5.1 to 9.7.0 by [@lvcabral](https://github.com/lvcabral) in [#354](https://github.com/lvcabral/brs-desktop/pull/354)
+- Bump `msgpack5` from 4.5.1 to 6.1.0 and `json-url` from 3.1.0 to 4.0.0 by [@lvcabral](https://github.com/lvcabral) in [#353](https://github.com/lvcabral/brs-desktop/pull/353)
+
+Full Changelog: [v2.6.2]
+
 <a name="v2.6.1"></a>
 
 ## v2.6.1 - Engine Upgrade: Effect Node, roWebSocket and Draw2D Updates
@@ -24,8 +58,8 @@ See the **BrightScript Simulation Engine** v2.6.0 [full changelog](https://githu
 
 ### Dependency Bumps
 
-* Bump `brs-engine` from 2.5.4 to 2.6.0 by [@lvcabral](https://github.com/lvcabral)
-* Bump `brs-scenegraph` from 0.5.4 to 0.6.0 by [@lvcabral](https://github.com/lvcabral)
+- Bump `brs-engine` from 2.5.4 to 2.6.0 by [@lvcabral](https://github.com/lvcabral)
+- Bump `brs-scenegraph` from 0.5.4 to 0.6.0 by [@lvcabral](https://github.com/lvcabral)
 
 Full Changelog: [v2.6.1]
 
@@ -39,25 +73,25 @@ See the **BrightScript Simulation Engine** v2.5.4 [full changelog](https://githu
 
 ### New Features
 
-* Added a "Registry by App" device setting that segregates registry data per running sideloaded app, taking effect for the next app started with no device reset or simulator restart needed by [@lvcabral](https://github.com/lvcabral) in [#347](https://github.com/lvcabral/brs-desktop/pull/347)
+- Added a "Registry by App" device setting that segregates registry data per running sideloaded app, taking effect for the next app started with no device reset or simulator restart needed by [@lvcabral](https://github.com/lvcabral) in [#347](https://github.com/lvcabral/brs-desktop/pull/347)
 
 ### Bug Fixes
 
-* Stopped corrupting zip/bpk package bytes on the `executeFile` IPC path, fixing `unknown compression type` errors sideloading some otherwise-valid packages by [@lvcabral](https://github.com/lvcabral) in [#348](https://github.com/lvcabral/brs-desktop/pull/348)
-* Fixed the Home app refreshing when focus returns to its left menu, "Options" showing in the Overhang menu outside the apps grid, and the main window title showing a duplicated "BrightScript Simulator" by [@lvcabral](https://github.com/lvcabral) in [#345](https://github.com/lvcabral/brs-desktop/pull/345)
-* Fixed bracketed console log tags only coloring up to the first non-word character instead of their full content by [@lvcabral](https://github.com/lvcabral) in [#346](https://github.com/lvcabral/brs-desktop/pull/346)
+- Stopped corrupting zip/bpk package bytes on the `executeFile` IPC path, fixing `unknown compression type` errors sideloading some otherwise-valid packages by [@lvcabral](https://github.com/lvcabral) in [#348](https://github.com/lvcabral/brs-desktop/pull/348)
+- Fixed the Home app refreshing when focus returns to its left menu, "Options" showing in the Overhang menu outside the apps grid, and the main window title showing a duplicated "BrightScript Simulator" by [@lvcabral](https://github.com/lvcabral) in [#345](https://github.com/lvcabral/brs-desktop/pull/345)
+- Fixed bracketed console log tags only coloring up to the first non-word character instead of their full content by [@lvcabral](https://github.com/lvcabral) in [#346](https://github.com/lvcabral/brs-desktop/pull/346)
 
 ### Maintenance
 
-* Set up the macOS signing keychain explicitly in CI instead of letting electron-builder manage it, working around an upstream `set-key-partition-list` unlock bug exposed by a macOS runner point release by [@lvcabral](https://github.com/lvcabral)
-* Stubbed `process.uptime()` in the ECP-2 device-info test to remove a rounding-boundary flake by [@lvcabral](https://github.com/lvcabral)
+- Set up the macOS signing keychain explicitly in CI instead of letting electron-builder manage it, working around an upstream `set-key-partition-list` unlock bug exposed by a macOS runner point release by [@lvcabral](https://github.com/lvcabral)
+- Stubbed `process.uptime()` in the ECP-2 device-info test to remove a rounding-boundary flake by [@lvcabral](https://github.com/lvcabral)
 
 ### Dependency Bumps
 
-* Bump `brs-engine` from 2.5.2 to 2.5.4 by [@lvcabral](https://github.com/lvcabral)
-* Bump `brs-scenegraph` from 0.5.2 to 0.5.4 by [@lvcabral](https://github.com/lvcabral)
-* Bump `@xmldom/xmldom` from 0.8.13 to 0.8.15 by [@lvcabral](https://github.com/lvcabral) in [#344](https://github.com/lvcabral/brs-desktop/pull/344)
-* Bump `fast-uri` from 3.1.5 to 3.1.7 by [@lvcabral](https://github.com/lvcabral) in [#343](https://github.com/lvcabral/brs-desktop/pull/343)
+- Bump `brs-engine` from 2.5.2 to 2.5.4 by [@lvcabral](https://github.com/lvcabral)
+- Bump `brs-scenegraph` from 0.5.2 to 0.5.4 by [@lvcabral](https://github.com/lvcabral)
+- Bump `@xmldom/xmldom` from 0.8.13 to 0.8.15 by [@lvcabral](https://github.com/lvcabral) in [#344](https://github.com/lvcabral/brs-desktop/pull/344)
+- Bump `fast-uri` from 3.1.5 to 3.1.7 by [@lvcabral](https://github.com/lvcabral) in [#343](https://github.com/lvcabral/brs-desktop/pull/343)
 
 Full Changelog: [v2.6.0]
 
@@ -69,14 +103,14 @@ This release fixes file dialogs forgetting their last-used folder, the Copy Scre
 
 ### Bug Fixes
 
-* Preserved dynamically-enabled menu item states (Copy Screenshot, Save Screenshot, Close App) across macOS menu rebuilds by [@lvcabral](https://github.com/lvcabral) in [#342](https://github.com/lvcabral/brs-desktop/pull/342)
-* Persisted last-used folder for file dialogs so Open/Save dialogs remember the previous directory by [@lvcabral](https://github.com/lvcabral) in [#341](https://github.com/lvcabral/brs-desktop/pull/341)
-* Reflected request Origin and credentials in CORS headers instead of hardcoding wildcards, fixing credentialed cross-origin fetches by [@lvcabral](https://github.com/lvcabral) in [#340](https://github.com/lvcabral/brs-desktop/pull/340)
+- Preserved dynamically-enabled menu item states (Copy Screenshot, Save Screenshot, Close App) across macOS menu rebuilds by [@lvcabral](https://github.com/lvcabral) in [#342](https://github.com/lvcabral/brs-desktop/pull/342)
+- Persisted last-used folder for file dialogs so Open/Save dialogs remember the previous directory by [@lvcabral](https://github.com/lvcabral) in [#341](https://github.com/lvcabral/brs-desktop/pull/341)
+- Reflected request Origin and credentials in CORS headers instead of hardcoding wildcards, fixing credentialed cross-origin fetches by [@lvcabral](https://github.com/lvcabral) in [#340](https://github.com/lvcabral/brs-desktop/pull/340)
 
 ### Dependency Bumps
 
-* Bump `brs-engine` from 2.5.1 to 2.5.2 by [@lvcabral](https://github.com/lvcabral)
-* Bump `brs-scenegraph` from 0.5.1 to 0.5.2 by [@lvcabral](https://github.com/lvcabral)
+- Bump `brs-engine` from 2.5.1 to 2.5.2 by [@lvcabral](https://github.com/lvcabral)
+- Bump `brs-scenegraph` from 0.5.1 to 0.5.2 by [@lvcabral](https://github.com/lvcabral)
 
 Full Changelog: [v2.5.2]
 
@@ -88,15 +122,15 @@ This release gives the Editor console panel BrightScript-aware syntax coloring �
 
 ### New Features
 
-* Added BrightScript-aware syntax coloring to the Editor console panel, with a setting to disable it, by [@lvcabral](https://github.com/lvcabral) in [#339](https://github.com/lvcabral/brs-desktop/pull/339)
+- Added BrightScript-aware syntax coloring to the Editor console panel, with a setting to disable it, by [@lvcabral](https://github.com/lvcabral) in [#339](https://github.com/lvcabral/brs-desktop/pull/339)
 
 ### Bug Fixes
 
-* Forced 200 status on CORS preflight responses so cross-origin channel content loads correctly after the Electron 43 `app://` origin change by [@lvcabral](https://github.com/lvcabral) in [#338](https://github.com/lvcabral/brs-desktop/pull/338)
+- Forced 200 status on CORS preflight responses so cross-origin channel content loads correctly after the Electron 43 `app://` origin change by [@lvcabral](https://github.com/lvcabral) in [#338](https://github.com/lvcabral/brs-desktop/pull/338)
 
 ### Dependency Bumps
 
-* Bump `@lvcabral/terminal` from 1.1.0 to 1.3.0 by [@lvcabral](https://github.com/lvcabral)
+- Bump `@lvcabral/terminal` from 1.1.0 to 1.3.0 by [@lvcabral](https://github.com/lvcabral)
 
 Full Changelog: [v2.5.1]
 
@@ -110,29 +144,29 @@ See the **BrightScript Simulation Engine** v2.5.1 [full changelog](https://githu
 
 ### New Features
 
-* Replaced the Home app by a new SceneGraph based, with new features for removing recent/sideloaded apps from the grid and opening a specific settings sections by [@lvcabral](https://github.com/lvcabral) in [#336](https://github.com/lvcabral/brs-desktop/pull/336)
-* Added persistence for Roku device discovery results and a dynamic peer Roku menu label showing the discovered device's name by [@lvcabral](https://github.com/lvcabral) in [#335](https://github.com/lvcabral/brs-desktop/pull/335)
-* Added a configurable console log level to the editor settings by [@lvcabral](https://github.com/lvcabral) in [#334](https://github.com/lvcabral/brs-desktop/pull/334)
+- Replaced the Home app by a new SceneGraph based, with new features for removing recent/sideloaded apps from the grid and opening a specific settings sections by [@lvcabral](https://github.com/lvcabral) in [#336](https://github.com/lvcabral/brs-desktop/pull/336)
+- Added persistence for Roku device discovery results and a dynamic peer Roku menu label showing the discovered device's name by [@lvcabral](https://github.com/lvcabral) in [#335](https://github.com/lvcabral/brs-desktop/pull/335)
+- Added a configurable console log level to the editor settings by [@lvcabral](https://github.com/lvcabral) in [#334](https://github.com/lvcabral/brs-desktop/pull/334)
 
 ### Maintenance
 
-* Upgraded Electron from v39 to v43 by [@lvcabral](https://github.com/lvcabral)
-  * App windows now load from a privileged `app://` scheme instead of `file://` (`src/helpers/protocol.js`), since Electron 43 stopped granting `crossOriginIsolated` to `file://` documents ([electron/electron#50789](https://github.com/electron/electron/pull/50789)), which `brs-engine`'s worker needs for `SharedArrayBuffer`
-  * Restored CORS-free cross-origin fetches for channel content, which `file://` provided for free but a real origin like `app://` does not
-  * Home app recent-apps icons now serve from `app://` too, cached under a dedicated `icons/` subdirectory of `userData` rather than its root (so the rest of `userData`, including `brs-settings.json`, isn't reachable from the app windows), with a matching fix in the `brs-home.zip` app so its icon loading recognizes the new scheme. Icons cached by earlier versions are moved into the new location automatically on first launch
-  * `toastify-js` is now copied into the build output instead of referenced via `../node_modules/...`, which only worked under `file://`
-  * The `file://` → `app://` change also moves `localStorage` to a new origin, which would otherwise orphan the editor's saved code snippets and `brs-engine`'s per-channel registry values from before the upgrade. These are now migrated automatically on first launch of the new version
-  * Preserved the app's square frameless window look on Linux, where v43 defaults frameless windows to rounded corners
+- Upgraded Electron from v39 to v43 by [@lvcabral](https://github.com/lvcabral)
+    - App windows now load from a privileged `app://` scheme instead of `file://` (`src/helpers/protocol.js`), since Electron 43 stopped granting `crossOriginIsolated` to `file://` documents ([electron/electron#50789](https://github.com/electron/electron/pull/50789)), which `brs-engine`'s worker needs for `SharedArrayBuffer`
+    - Restored CORS-free cross-origin fetches for channel content, which `file://` provided for free but a real origin like `app://` does not
+    - Home app recent-apps icons now serve from `app://` too, cached under a dedicated `icons/` subdirectory of `userData` rather than its root (so the rest of `userData`, including `brs-settings.json`, isn't reachable from the app windows), with a matching fix in the `brs-home.zip` app so its icon loading recognizes the new scheme. Icons cached by earlier versions are moved into the new location automatically on first launch
+    - `toastify-js` is now copied into the build output instead of referenced via `../node_modules/...`, which only worked under `file://`
+    - The `file://` → `app://` change also moves `localStorage` to a new origin, which would otherwise orphan the editor's saved code snippets and `brs-engine`'s per-channel registry values from before the upgrade. These are now migrated automatically on first launch of the new version
+    - Preserved the app's square frameless window look on Linux, where v43 defaults frameless windows to rounded corners
 
 ### Documentation
 
-* Documented the Debug Server command set and updated the VS Code integration guide to drop the retired `rendezvousTracking` launch config option by [@lvcabral](https://github.com/lvcabral) in [#333](https://github.com/lvcabral/brs-desktop/pull/333)
+- Documented the Debug Server command set and updated the VS Code integration guide to drop the retired `rendezvousTracking` launch config option by [@lvcabral](https://github.com/lvcabral) in [#333](https://github.com/lvcabral/brs-desktop/pull/333)
 
 ### Dependency Bumps
 
-* Bump `brs-engine` from 2.4.0 to 2.5.1 by [@lvcabral](https://github.com/lvcabral)
-* Bump `brs-scenegraph` from 0.4.0 to 0.5.0 by [@lvcabral](https://github.com/lvcabral)
-* Bump `electron` from 39.2.7 to 43.4.0 by [@lvcabral](https://github.com/lvcabral)
+- Bump `brs-engine` from 2.4.0 to 2.5.1 by [@lvcabral](https://github.com/lvcabral)
+- Bump `brs-scenegraph` from 0.4.0 to 0.5.0 by [@lvcabral](https://github.com/lvcabral)
+- Bump `electron` from 39.2.7 to 43.4.0 by [@lvcabral](https://github.com/lvcabral)
 
 Full Changelog: [v2.5.0]
 
@@ -146,32 +180,32 @@ See the **BrightScript Simulation Engine** v2.4.0 [full changelog](https://githu
 
 ### New Features
 
-* Added the **Remote Screen** service: streams the simulator display to a browser on the local network over WebRTC, with an on-screen Roku remote, keyboard mapping, text entry and a screenshot download — see the [documentation](docs/remote-access.md#remote-screen). by [@lvcabral](https://github.com/lvcabral) in [#322](https://github.com/lvcabral/brs-desktop/pull/322)
-* Added 'Allow Remote Access' setting to restrict network services to localhost by [@anupamme](https://github.com/anupamme) in [#314](https://github.com/lvcabral/brs-desktop/pull/314)
-* Implemented Live rendezvous logging via brs-engine API & ECP endpoints by [@lvcabral](https://github.com/lvcabral) in [#320](https://github.com/lvcabral/brs-desktop/pull/320)
-* Implemented ECP rendezvous tracking by [@lvcabral](https://github.com/lvcabral) in [#323](https://github.com/lvcabral/brs-desktop/pull/323)
-* Added `target` command handler to debug server by [@lvcabral](https://github.com/lvcabral) in [#325](https://github.com/lvcabral/brs-desktop/pull/325)
-* Added ability to copy file path to clipboard by clicking status bar text by [@lvcabral](https://github.com/lvcabral) in [#326](https://github.com/lvcabral/brs-desktop/pull/326)
-* Added option to clear console on startup and implement trigger in engine events by [@lvcabral](https://github.com/lvcabral) in [#331](https://github.com/lvcabral/brs-desktop/pull/331)
+- Added the **Remote Screen** service: streams the simulator display to a browser on the local network over WebRTC, with an on-screen Roku remote, keyboard mapping, text entry and a screenshot download — see the [documentation](docs/remote-access.md#remote-screen). by [@lvcabral](https://github.com/lvcabral) in [#322](https://github.com/lvcabral/brs-desktop/pull/322)
+- Added 'Allow Remote Access' setting to restrict network services to localhost by [@anupamme](https://github.com/anupamme) in [#314](https://github.com/lvcabral/brs-desktop/pull/314)
+- Implemented Live rendezvous logging via brs-engine API & ECP endpoints by [@lvcabral](https://github.com/lvcabral) in [#320](https://github.com/lvcabral/brs-desktop/pull/320)
+- Implemented ECP rendezvous tracking by [@lvcabral](https://github.com/lvcabral) in [#323](https://github.com/lvcabral/brs-desktop/pull/323)
+- Added `target` command handler to debug server by [@lvcabral](https://github.com/lvcabral) in [#325](https://github.com/lvcabral/brs-desktop/pull/325)
+- Added ability to copy file path to clipboard by clicking status bar text by [@lvcabral](https://github.com/lvcabral) in [#326](https://github.com/lvcabral/brs-desktop/pull/326)
+- Added option to clear console on startup and implement trigger in engine events by [@lvcabral](https://github.com/lvcabral) in [#331](https://github.com/lvcabral/brs-desktop/pull/331)
 
 ### Bug Fixes
 
-* Fixed: align localStorage key so 'don't show again' checkbox persists by [@lvcabral](https://github.com/lvcabral) in [#317](https://github.com/lvcabral/brs-desktop/pull/317)
-* Fixed: drop remote connections on local-only toggle and document the setting by [@lvcabral](https://github.com/lvcabral) in [#318](https://github.com/lvcabral/brs-desktop/pull/318)
-* Fixed: restore minimum window size overridden by custom-electron-titlebar by [@lvcabral](https://github.com/lvcabral) in [#319](https://github.com/lvcabral/brs-desktop/pull/319)
-* Fixed: reverted ECP rendezvous tracking IPC calls linked with the Debug service by [@lvcabral](https://github.com/lvcabral) in [#321](https://github.com/lvcabral/brs-desktop/pull/321)
-* Fixed: console buffer losing warning/error coloring when editor opens late by [@lvcabral](https://github.com/lvcabral) in [#327](https://github.com/lvcabral/brs-desktop/pull/327)
-* Fixed: startup race between queued app launch and auto-start logic by [@lvcabral](https://github.com/lvcabral) in [#328](https://github.com/lvcabral/brs-desktop/pull/328)
-* Resolved `npm audit` findings without breaking minimatch@3 chain by [@lvcabral](https://github.com/lvcabral)
+- Fixed: align localStorage key so 'don't show again' checkbox persists by [@lvcabral](https://github.com/lvcabral) in [#317](https://github.com/lvcabral/brs-desktop/pull/317)
+- Fixed: drop remote connections on local-only toggle and document the setting by [@lvcabral](https://github.com/lvcabral) in [#318](https://github.com/lvcabral/brs-desktop/pull/318)
+- Fixed: restore minimum window size overridden by custom-electron-titlebar by [@lvcabral](https://github.com/lvcabral) in [#319](https://github.com/lvcabral/brs-desktop/pull/319)
+- Fixed: reverted ECP rendezvous tracking IPC calls linked with the Debug service by [@lvcabral](https://github.com/lvcabral) in [#321](https://github.com/lvcabral/brs-desktop/pull/321)
+- Fixed: console buffer losing warning/error coloring when editor opens late by [@lvcabral](https://github.com/lvcabral) in [#327](https://github.com/lvcabral/brs-desktop/pull/327)
+- Fixed: startup race between queued app launch and auto-start logic by [@lvcabral](https://github.com/lvcabral) in [#328](https://github.com/lvcabral/brs-desktop/pull/328)
+- Resolved `npm audit` findings without breaking minimatch@3 chain by [@lvcabral](https://github.com/lvcabral)
 
 ### Testing & Tooling
 
-* Run ESLint and Prettier as a CI job, fix pending lint errors by [@lvcabral](https://github.com/lvcabral) in [#329](https://github.com/lvcabral/brs-desktop/pull/329)
+- Run ESLint and Prettier as a CI job, fix pending lint errors by [@lvcabral](https://github.com/lvcabral) in [#329](https://github.com/lvcabral/brs-desktop/pull/329)
 
 ### Dependency Bumps
 
-* Bump `fast-uri` from 3.1.4 to 3.1.5 by [@dependabot](https://github.com/dependabot) in [#324](https://github.com/lvcabral/brs-desktop/pull/324)
-* Bump `js-yaml` from 4.3.0 to 4.3.1 by [@dependabot](https://github.com/dependabot) in [#330](https://github.com/lvcabral/brs-desktop/pull/330)
+- Bump `fast-uri` from 3.1.4 to 3.1.5 by [@dependabot](https://github.com/dependabot) in [#324](https://github.com/lvcabral/brs-desktop/pull/324)
+- Bump `js-yaml` from 4.3.0 to 4.3.1 by [@dependabot](https://github.com/dependabot) in [#330](https://github.com/lvcabral/brs-desktop/pull/330)
 
 Full Changelog: [v2.4.0]
 
@@ -183,86 +217,86 @@ This release brings a large set of new features, bug fixes, and infrastructure i
 
 ### New Features
 
-* Implemented the Debug Server on telnet port 8080 by [@lvcabral](https://github.com/lvcabral) in [#276](https://github.com/lvcabral/brs-desktop/pull/276)
-* Added search feature to the console panel by [@lvcabral](https://github.com/lvcabral) in [#273](https://github.com/lvcabral/brs-desktop/pull/273)
-* Added `keepAppOpen` setting for Peer Roku by [@lvcabral](https://github.com/lvcabral) in [#272](https://github.com/lvcabral/brs-desktop/pull/272)
-* Added clipboard paste support for sending text to the simulator via sequential keypresses by [@lvcabral](https://github.com/lvcabral) in [#280](https://github.com/lvcabral/brs-desktop/pull/280)
-* Added customization settings for managing custom feature flags via `roDeviceInfo` by [@lvcabral](https://github.com/lvcabral) in [#281](https://github.com/lvcabral/brs-desktop/pull/281)
-* Added video auto-play setting to device configuration and UI preferences by [@lvcabral](https://github.com/lvcabral) in [#284](https://github.com/lvcabral/brs-desktop/pull/284)
-* Added custom features icon and updated settings configuration labels by [@lvcabral](https://github.com/lvcabral) in [#283](https://github.com/lvcabral/brs-desktop/pull/283)
-* Installer password now updates immediately; service restart instruction only applies to port changes by [@lvcabral](https://github.com/lvcabral) in [#285](https://github.com/lvcabral/brs-desktop/pull/285)
-* Added JPEG support for screenshot exports and save dialog filters by [@lvcabral](https://github.com/lvcabral) in [#287](https://github.com/lvcabral/brs-desktop/pull/287)
-* Home key now intercepts to exit apps even with the debugger active by [@lvcabral](https://github.com/lvcabral) in [#288](https://github.com/lvcabral/brs-desktop/pull/288)
-* Enhanced toast system with click-to-disable functionality and DevTools performance warning by [@lvcabral](https://github.com/lvcabral) in [#291](https://github.com/lvcabral/brs-desktop/pull/291)
-* Added auto-save functionality when running code in the editor via configurable preference by [@lvcabral](https://github.com/lvcabral) in [#292](https://github.com/lvcabral/brs-desktop/pull/292)
-* Implemented OOM and crash recovery with automatic device reload and user notification by [@lvcabral](https://github.com/lvcabral) in [#279](https://github.com/lvcabral/brs-desktop/pull/279)
-* Adjusted update check intervals and added skip version option by [@lvcabral](https://github.com/lvcabral) in [#277](https://github.com/lvcabral/brs-desktop/pull/277)
-* Resolved system theme setting to current application theme in editor initialization
-* Added support for HEAD HTTP request on the Installer Service by [@lvcabral](https://github.com/lvcabral) in [#266](https://github.com/lvcabral/brs-desktop/pull/266)
-* Updated SceneGraph warning dialog to reflect beta status and changed `localStorage` key by [@lvcabral](https://github.com/lvcabral) in [#315](https://github.com/lvcabral/brs-desktop/pull/315)
+- Implemented the Debug Server on telnet port 8080 by [@lvcabral](https://github.com/lvcabral) in [#276](https://github.com/lvcabral/brs-desktop/pull/276)
+- Added search feature to the console panel by [@lvcabral](https://github.com/lvcabral) in [#273](https://github.com/lvcabral/brs-desktop/pull/273)
+- Added `keepAppOpen` setting for Peer Roku by [@lvcabral](https://github.com/lvcabral) in [#272](https://github.com/lvcabral/brs-desktop/pull/272)
+- Added clipboard paste support for sending text to the simulator via sequential keypresses by [@lvcabral](https://github.com/lvcabral) in [#280](https://github.com/lvcabral/brs-desktop/pull/280)
+- Added customization settings for managing custom feature flags via `roDeviceInfo` by [@lvcabral](https://github.com/lvcabral) in [#281](https://github.com/lvcabral/brs-desktop/pull/281)
+- Added video auto-play setting to device configuration and UI preferences by [@lvcabral](https://github.com/lvcabral) in [#284](https://github.com/lvcabral/brs-desktop/pull/284)
+- Added custom features icon and updated settings configuration labels by [@lvcabral](https://github.com/lvcabral) in [#283](https://github.com/lvcabral/brs-desktop/pull/283)
+- Installer password now updates immediately; service restart instruction only applies to port changes by [@lvcabral](https://github.com/lvcabral) in [#285](https://github.com/lvcabral/brs-desktop/pull/285)
+- Added JPEG support for screenshot exports and save dialog filters by [@lvcabral](https://github.com/lvcabral) in [#287](https://github.com/lvcabral/brs-desktop/pull/287)
+- Home key now intercepts to exit apps even with the debugger active by [@lvcabral](https://github.com/lvcabral) in [#288](https://github.com/lvcabral/brs-desktop/pull/288)
+- Enhanced toast system with click-to-disable functionality and DevTools performance warning by [@lvcabral](https://github.com/lvcabral) in [#291](https://github.com/lvcabral/brs-desktop/pull/291)
+- Added auto-save functionality when running code in the editor via configurable preference by [@lvcabral](https://github.com/lvcabral) in [#292](https://github.com/lvcabral/brs-desktop/pull/292)
+- Implemented OOM and crash recovery with automatic device reload and user notification by [@lvcabral](https://github.com/lvcabral) in [#279](https://github.com/lvcabral/brs-desktop/pull/279)
+- Adjusted update check intervals and added skip version option by [@lvcabral](https://github.com/lvcabral) in [#277](https://github.com/lvcabral/brs-desktop/pull/277)
+- Resolved system theme setting to current application theme in editor initialization
+- Added support for HEAD HTTP request on the Installer Service by [@lvcabral](https://github.com/lvcabral) in [#266](https://github.com/lvcabral/brs-desktop/pull/266)
+- Updated SceneGraph warning dialog to reflect beta status and changed `localStorage` key by [@lvcabral](https://github.com/lvcabral) in [#315](https://github.com/lvcabral/brs-desktop/pull/315)
 
 ### Bug Fixes
 
-* Fixed: respect `disableCheckForUpdates` setting dynamically inside timers by [@lvcabral](https://github.com/lvcabral) in [#278](https://github.com/lvcabral/brs-desktop/pull/278)
-* Fixed: enforce OS-specific search shortcuts in console by [@lvcabral](https://github.com/lvcabral) in [#274](https://github.com/lvcabral/brs-desktop/pull/274)
-* Fixed: auto-update search matches when console output changes by [@lvcabral](https://github.com/lvcabral) in [#275](https://github.com/lvcabral/brs-desktop/pull/275)
-* Fixed: add key-press delay and enable native paste for secondary windows by [@lvcabral](https://github.com/lvcabral) in [#282](https://github.com/lvcabral/brs-desktop/pull/282)
-* Fixed: restrict clipboard copy shortcut to platform-specific key combination by [@lvcabral](https://github.com/lvcabral) in [#290](https://github.com/lvcabral/brs-desktop/pull/290)
-* Fixed: restore terminal input focus after updates to prevent intermittent focus loss by [@lvcabral](https://github.com/lvcabral) in [#289](https://github.com/lvcabral/brs-desktop/pull/289)
-* Fixed: removed calls to a non-existent function
-* Fixed: removed duplicated `autoPlayEnabled` property from main configuration object
-* Fixed: detect a compile failure regardless of whitespace by [@lvcabral](https://github.com/lvcabral) in [#301](https://github.com/lvcabral/brs-desktop/pull/301)
-* Fixed: ECP now resolves bundled assets so routes work outside the bundle too by [@lvcabral](https://github.com/lvcabral) in [#309](https://github.com/lvcabral/brs-desktop/pull/309)
-* Fixed: ECP answers device queries during the pre-`deviceData` startup window by [@lvcabral](https://github.com/lvcabral) in [#297](https://github.com/lvcabral/brs-desktop/pull/297)
-* Fixed: keep the shortened path within its budget in the status bar by [@lvcabral](https://github.com/lvcabral) in [#307](https://github.com/lvcabral/brs-desktop/pull/307)
-* Fixed: return a string from `hashCode` for every input by [@lvcabral](https://github.com/lvcabral) in [#306](https://github.com/lvcabral/brs-desktop/pull/306)
-* Fixed: reject malformed IP addresses instead of coercing them by [@lvcabral](https://github.com/lvcabral) in [#305](https://github.com/lvcabral/brs-desktop/pull/305)
-* Fixed: return nothing for firmware outside the version alphabet by [@lvcabral](https://github.com/lvcabral) in [#304](https://github.com/lvcabral/brs-desktop/pull/304)
-* Fixed: stop a bare `-w` flag persisting `NaN` as the web installer port by [@lvcabral](https://github.com/lvcabral) in [#303](https://github.com/lvcabral/brs-desktop/pull/303)
-* Fixed: read the numeric prefix of a version segment in update checker by [@lvcabral](https://github.com/lvcabral) in [#302](https://github.com/lvcabral/brs-desktop/pull/302)
-* Fixed: support remote shortcuts with more than one modifier by [@lvcabral](https://github.com/lvcabral) in [#299](https://github.com/lvcabral/brs-desktop/pull/299)
-* Fixed: restore the default for a missing remote key instead of throwing by [@lvcabral](https://github.com/lvcabral) in [#300](https://github.com/lvcabral/brs-desktop/pull/300)
-* Fixed: stop custom key bindings firing on unrelated chords by [@lvcabral](https://github.com/lvcabral) in [#298](https://github.com/lvcabral/brs-desktop/pull/298)
-* Resolved `npm audit` vulnerabilities in shipped dependencies by [@lvcabral](https://github.com/lvcabral) in [#295](https://github.com/lvcabral/brs-desktop/pull/295)
+- Fixed: respect `disableCheckForUpdates` setting dynamically inside timers by [@lvcabral](https://github.com/lvcabral) in [#278](https://github.com/lvcabral/brs-desktop/pull/278)
+- Fixed: enforce OS-specific search shortcuts in console by [@lvcabral](https://github.com/lvcabral) in [#274](https://github.com/lvcabral/brs-desktop/pull/274)
+- Fixed: auto-update search matches when console output changes by [@lvcabral](https://github.com/lvcabral) in [#275](https://github.com/lvcabral/brs-desktop/pull/275)
+- Fixed: add key-press delay and enable native paste for secondary windows by [@lvcabral](https://github.com/lvcabral) in [#282](https://github.com/lvcabral/brs-desktop/pull/282)
+- Fixed: restrict clipboard copy shortcut to platform-specific key combination by [@lvcabral](https://github.com/lvcabral) in [#290](https://github.com/lvcabral/brs-desktop/pull/290)
+- Fixed: restore terminal input focus after updates to prevent intermittent focus loss by [@lvcabral](https://github.com/lvcabral) in [#289](https://github.com/lvcabral/brs-desktop/pull/289)
+- Fixed: removed calls to a non-existent function
+- Fixed: removed duplicated `autoPlayEnabled` property from main configuration object
+- Fixed: detect a compile failure regardless of whitespace by [@lvcabral](https://github.com/lvcabral) in [#301](https://github.com/lvcabral/brs-desktop/pull/301)
+- Fixed: ECP now resolves bundled assets so routes work outside the bundle too by [@lvcabral](https://github.com/lvcabral) in [#309](https://github.com/lvcabral/brs-desktop/pull/309)
+- Fixed: ECP answers device queries during the pre-`deviceData` startup window by [@lvcabral](https://github.com/lvcabral) in [#297](https://github.com/lvcabral/brs-desktop/pull/297)
+- Fixed: keep the shortened path within its budget in the status bar by [@lvcabral](https://github.com/lvcabral) in [#307](https://github.com/lvcabral/brs-desktop/pull/307)
+- Fixed: return a string from `hashCode` for every input by [@lvcabral](https://github.com/lvcabral) in [#306](https://github.com/lvcabral/brs-desktop/pull/306)
+- Fixed: reject malformed IP addresses instead of coercing them by [@lvcabral](https://github.com/lvcabral) in [#305](https://github.com/lvcabral/brs-desktop/pull/305)
+- Fixed: return nothing for firmware outside the version alphabet by [@lvcabral](https://github.com/lvcabral) in [#304](https://github.com/lvcabral/brs-desktop/pull/304)
+- Fixed: stop a bare `-w` flag persisting `NaN` as the web installer port by [@lvcabral](https://github.com/lvcabral) in [#303](https://github.com/lvcabral/brs-desktop/pull/303)
+- Fixed: read the numeric prefix of a version segment in update checker by [@lvcabral](https://github.com/lvcabral) in [#302](https://github.com/lvcabral/brs-desktop/pull/302)
+- Fixed: support remote shortcuts with more than one modifier by [@lvcabral](https://github.com/lvcabral) in [#299](https://github.com/lvcabral/brs-desktop/pull/299)
+- Fixed: restore the default for a missing remote key instead of throwing by [@lvcabral](https://github.com/lvcabral) in [#300](https://github.com/lvcabral/brs-desktop/pull/300)
+- Fixed: stop custom key bindings firing on unrelated chords by [@lvcabral](https://github.com/lvcabral) in [#298](https://github.com/lvcabral/brs-desktop/pull/298)
+- Resolved `npm audit` vulnerabilities in shipped dependencies by [@lvcabral](https://github.com/lvcabral) in [#295](https://github.com/lvcabral/brs-desktop/pull/295)
 
 ### Refactoring & Code Quality
 
-* Dynamically generate recent files submenu and increased recent file limits by [@lvcabral](https://github.com/lvcabral) in [#286](https://github.com/lvcabral/brs-desktop/pull/286)
-* Refactored dev-console commands dispatch from a table by [@lvcabral](https://github.com/lvcabral) in [#310](https://github.com/lvcabral/brs-desktop/pull/310)
-* Resolved recent-file menu items by id instead of position by [@lvcabral](https://github.com/lvcabral) in [#308](https://github.com/lvcabral/brs-desktop/pull/308)
-* Removed the `fs-jetpack` dependency, replacing its five usages with Node's built-in `fs` module and
+- Dynamically generate recent files submenu and increased recent file limits by [@lvcabral](https://github.com/lvcabral) in [#286](https://github.com/lvcabral/brs-desktop/pull/286)
+- Refactored dev-console commands dispatch from a table by [@lvcabral](https://github.com/lvcabral) in [#310](https://github.com/lvcabral/brs-desktop/pull/310)
+- Resolved recent-file menu items by id instead of position by [@lvcabral](https://github.com/lvcabral) in [#308](https://github.com/lvcabral/brs-desktop/pull/308)
+- Removed the `fs-jetpack` dependency, replacing its five usages with Node's built-in `fs` module and
   two small helpers (`readJsonFile`/`writeJsonFile` in `src/helpers/util.js`) that preserve the previous
   behaviour, including atomic writes of `recent-files.json` and `window-state-*.json`
-* Removed `build/webpack.unit.config.js` and `build/webpack.e2e.config.js`, unused leftovers from the
+- Removed `build/webpack.unit.config.js` and `build/webpack.e2e.config.js`, unused leftovers from the
   electron-boilerplate template
-* Removed dead CodeMirror leftovers by [@lvcabral](https://github.com/lvcabral) in [#294](https://github.com/lvcabral/brs-desktop/pull/294)
-* Updated simulator info modal with bold text and issue tracker link
+- Removed dead CodeMirror leftovers by [@lvcabral](https://github.com/lvcabral) in [#294](https://github.com/lvcabral/brs-desktop/pull/294)
+- Updated simulator info modal with bold text and issue tracker link
 
 ### Testing & Tooling
 
-* Added Vitest test suite covering pure logic and network services by [@lvcabral](https://github.com/lvcabral) in [#296](https://github.com/lvcabral/brs-desktop/pull/296)
-* Modeled Electron submenus so the menu suite runs on Windows and Linux by [@lvcabral](https://github.com/lvcabral) in [#311](https://github.com/lvcabral/brs-desktop/pull/311)
-* Added ESLint with the `brs-engine` ruleset ported to JavaScript by [@lvcabral](https://github.com/lvcabral) in [#313](https://github.com/lvcabral/brs-desktop/pull/313)
-* Added Prettier config and formatted the codebase by [@lvcabral](https://github.com/lvcabral) in [#312](https://github.com/lvcabral/brs-desktop/pull/312)
-* Upgraded `monaco-editor` to v0.56.0 and added `overrides` for `dompurify`, `@electron/asar`,
+- Added Vitest test suite covering pure logic and network services by [@lvcabral](https://github.com/lvcabral) in [#296](https://github.com/lvcabral/brs-desktop/pull/296)
+- Modeled Electron submenus so the menu suite runs on Windows and Linux by [@lvcabral](https://github.com/lvcabral) in [#311](https://github.com/lvcabral/brs-desktop/pull/311)
+- Added ESLint with the `brs-engine` ruleset ported to JavaScript by [@lvcabral](https://github.com/lvcabral) in [#313](https://github.com/lvcabral/brs-desktop/pull/313)
+- Added Prettier config and formatted the codebase by [@lvcabral](https://github.com/lvcabral) in [#312](https://github.com/lvcabral/brs-desktop/pull/312)
+- Upgraded `monaco-editor` to v0.56.0 and added `overrides` for `dompurify`, `@electron/asar`,
   `@electron/universal` and `filelist` to resolve `npm audit` reports
-* `npm audit` went from 19 vulnerabilities (2 moderate, 17 high) to 10 (all high), and
+- `npm audit` went from 19 vulnerabilities (2 moderate, 17 high) to 10 (all high), and
   `npm audit --omit=dev` now reports **0 vulnerabilities** — nothing vulnerable ships in the application
 
 ### Dependency Bumps
 
-* Bump `@xmldom/xmldom` from 0.8.12 to 0.8.13 by [@dependabot](https://github.com/dependabot) in [#259](https://github.com/lvcabral/brs-desktop/pull/259)
-* Bump `ip-address` from 10.1.0 to 10.2.0 by [@dependabot](https://github.com/dependabot) in [#260](https://github.com/lvcabral/brs-desktop/pull/260)
-* Bump `fast-uri` from 3.1.0 to 3.1.2 by [@dependabot](https://github.com/dependabot) in [#261](https://github.com/lvcabral/brs-desktop/pull/261)
-* Bump `@babel/plugin-transform-modules-systemjs` from 7.28.5 to 7.29.4 by [@dependabot](https://github.com/dependabot) in [#262](https://github.com/lvcabral/brs-desktop/pull/262)
-* Bump `serialize-javascript`, `@lvcabral/electron-preferences` and `copy-webpack-plugin` by [@dependabot](https://github.com/dependabot) in [#263](https://github.com/lvcabral/brs-desktop/pull/263)
-* Bump `postcss` from 8.5.6 to 8.5.15 by [@dependabot](https://github.com/dependabot) in [#264](https://github.com/lvcabral/brs-desktop/pull/264)
-* Bump `tmp` from 0.2.5 to 0.2.7 by [@dependabot](https://github.com/dependabot) in [#265](https://github.com/lvcabral/brs-desktop/pull/265)
-* Bump `form-data` by [@dependabot](https://github.com/dependabot) in [#267](https://github.com/lvcabral/brs-desktop/pull/267)
-* Bump `ws` by [@dependabot](https://github.com/dependabot) in [#268](https://github.com/lvcabral/brs-desktop/pull/268)
-* Bump `tar` from 7.5.13 to 7.5.16 by [@dependabot](https://github.com/dependabot) in [#269](https://github.com/lvcabral/brs-desktop/pull/269)
-* Bump `js-yaml` from 4.1.1 to 4.2.0 by [@dependabot](https://github.com/dependabot) in [#270](https://github.com/lvcabral/brs-desktop/pull/270)
-* Bump `@babel/core`, `@babel/preset-env` and `babel-loader` by [@dependabot](https://github.com/dependabot) in [#271](https://github.com/lvcabral/brs-desktop/pull/271)
+- Bump `@xmldom/xmldom` from 0.8.12 to 0.8.13 by [@dependabot](https://github.com/dependabot) in [#259](https://github.com/lvcabral/brs-desktop/pull/259)
+- Bump `ip-address` from 10.1.0 to 10.2.0 by [@dependabot](https://github.com/dependabot) in [#260](https://github.com/lvcabral/brs-desktop/pull/260)
+- Bump `fast-uri` from 3.1.0 to 3.1.2 by [@dependabot](https://github.com/dependabot) in [#261](https://github.com/lvcabral/brs-desktop/pull/261)
+- Bump `@babel/plugin-transform-modules-systemjs` from 7.28.5 to 7.29.4 by [@dependabot](https://github.com/dependabot) in [#262](https://github.com/lvcabral/brs-desktop/pull/262)
+- Bump `serialize-javascript`, `@lvcabral/electron-preferences` and `copy-webpack-plugin` by [@dependabot](https://github.com/dependabot) in [#263](https://github.com/lvcabral/brs-desktop/pull/263)
+- Bump `postcss` from 8.5.6 to 8.5.15 by [@dependabot](https://github.com/dependabot) in [#264](https://github.com/lvcabral/brs-desktop/pull/264)
+- Bump `tmp` from 0.2.5 to 0.2.7 by [@dependabot](https://github.com/dependabot) in [#265](https://github.com/lvcabral/brs-desktop/pull/265)
+- Bump `form-data` by [@dependabot](https://github.com/dependabot) in [#267](https://github.com/lvcabral/brs-desktop/pull/267)
+- Bump `ws` by [@dependabot](https://github.com/dependabot) in [#268](https://github.com/lvcabral/brs-desktop/pull/268)
+- Bump `tar` from 7.5.13 to 7.5.16 by [@dependabot](https://github.com/dependabot) in [#269](https://github.com/lvcabral/brs-desktop/pull/269)
+- Bump `js-yaml` from 4.1.1 to 4.2.0 by [@dependabot](https://github.com/dependabot) in [#270](https://github.com/lvcabral/brs-desktop/pull/270)
+- Bump `@babel/core`, `@babel/preset-env` and `babel-loader` by [@dependabot](https://github.com/dependabot) in [#271](https://github.com/lvcabral/brs-desktop/pull/271)
 
 Full Changelog: [v2.3.0]
 
@@ -274,49 +308,49 @@ This release includes several improvements and bug fixes to the BrightScript Sim
 
 ![brs-desktop-hide-editor](https://github.com/user-attachments/assets/6bc4baaf-913f-4bca-8e54-00e6f460d170)
 
-* Upgraded Electron to v39 by [@lvcabral](https://github.com/lvcabral) in [#241](https://github.com/lvcabral/brs-desktop/pull/241)
-* Changed the Editor/Console window to allow user to hide/show the editor panel manually by [@lvcabral](https://github.com/lvcabral) in [#242](https://github.com/lvcabral/brs-desktop/pull/242)
-* Upgraded `brs-engine` to v2.1.0  (with RSG extension), main changes were:
-  * (brs) Fixed MicroDebugger stack trace and context (variables)
-  * (brs) Properly handle crash during debugger session
-  * (brs) Properly handle files with `UTF-8 BOM` on `Lexer`
-  * (brs) Implemented DRM detection in browser environment to populate `roDeviceInfo.getDrmInfoEx()`
-  * (brs) Fix video URL handling to correctly process package video files
-  * (brs) Added support for the `milliseconds` param on `roDateTime.toISOString()`
-  * (brs) Allowed to use `global` as function parameter name
-  * (brs) Add LongInteger (Int64) support to Str() global function
-  * Changes on `brs-scenegraph` package (release v0.1.0):
-    * (rsg) Implement thread updates similar to SceneGraph Rendezvous
-    * (rsg) Fixed `Scenegraph` crash handling and stack trace
-    * (rsg) Implemented support for debugging Task threads
-    * (rsg) Added `PosterGrid` and improved focus style handling on `ArrayGrid` based nodes
-    * (rsg) Fixed `ScrollingLabel` to handle `horizAlign` and actually scroll when needed
-    * (rsg) Added `InfoPane` node
-    * (rsg) Fixed the handling of `OK` key in `RowList` and `ZoomRowList`
-    * (rsg) Added `setNodeFocus` method to `ArrayGrid` to reset `itemFocused` when getting the focus
-    * (rsg) Added `sgnodes` command to `MicroDebugger` to list node type statistics
-    * (rsg) Added `MaskGroup` draft and fixed several issues with field assignment
-    * (rsg) Fixed component XML parsing of `interface` to handle attributes as case-insensitive
-    * (rsg) Improved parsing of field types: `StringArray`, `Vector2D` and `Vector2DArray`
-    * (rsg) Fixed XML parsing to support `alias` field to be set without `type`
-    * (rsg) Added support for default item component on `RowList` and item focus callback in `ArrayGrid`
-    * (rsg) Implemented all `PanelSet` related nodes
-    * (rsg) Fixed `role` fields to not be case sensitive
-    * (rsg) Implemented the context expansion for the Main thread
-    * (rsg) Allowed replacing hidden fields when extending `ContentNode`
-    * (rsg) Prevent issues with `Video` node on startup (after the Splash)
-    * (rsg) Improved handling of manifest entries `ui_resolutions` and `uri_resolution_autosub`
-    * (rsg) Fixed crash when `m.top.getScene()` is used on `init()` in a `Task` thread
-    * (rsg) Implemented `ancestorBoundingRect()` method
-    * (rsg) Added support for multiple `Node` field aliases (CSV)
-    * (rsg) Fixed `Node.setValue()` signature to prevent field creation on assignment
-    * (rsg) Fixed item component handling to not fail when fields are not defined in XML
-    * (rsg) Fixed `Node` field aliases observer trigger
-    * (rsg) Fixed `Poster`, `BusySpinner`, `Video` and `TrickPlayBar` to properly handle child nodes `uri` update
-    * (rsg) Fixed `BusySpinner` dimensions calculation
-    * (rsg) Fixed circular dependency issue when `Node` has child with its same `id` in `alias`
-    * (rsg) Fixed `StandardDialog` focus and `back` key press handling
-    * (rsg) Fixed observables serialization and handling of `InfoFields`
+- Upgraded Electron to v39 by [@lvcabral](https://github.com/lvcabral) in [#241](https://github.com/lvcabral/brs-desktop/pull/241)
+- Changed the Editor/Console window to allow user to hide/show the editor panel manually by [@lvcabral](https://github.com/lvcabral) in [#242](https://github.com/lvcabral/brs-desktop/pull/242)
+- Upgraded `brs-engine` to v2.1.0 (with RSG extension), main changes were:
+    - (brs) Fixed MicroDebugger stack trace and context (variables)
+    - (brs) Properly handle crash during debugger session
+    - (brs) Properly handle files with `UTF-8 BOM` on `Lexer`
+    - (brs) Implemented DRM detection in browser environment to populate `roDeviceInfo.getDrmInfoEx()`
+    - (brs) Fix video URL handling to correctly process package video files
+    - (brs) Added support for the `milliseconds` param on `roDateTime.toISOString()`
+    - (brs) Allowed to use `global` as function parameter name
+    - (brs) Add LongInteger (Int64) support to Str() global function
+    - Changes on `brs-scenegraph` package (release v0.1.0):
+        - (rsg) Implement thread updates similar to SceneGraph Rendezvous
+        - (rsg) Fixed `Scenegraph` crash handling and stack trace
+        - (rsg) Implemented support for debugging Task threads
+        - (rsg) Added `PosterGrid` and improved focus style handling on `ArrayGrid` based nodes
+        - (rsg) Fixed `ScrollingLabel` to handle `horizAlign` and actually scroll when needed
+        - (rsg) Added `InfoPane` node
+        - (rsg) Fixed the handling of `OK` key in `RowList` and `ZoomRowList`
+        - (rsg) Added `setNodeFocus` method to `ArrayGrid` to reset `itemFocused` when getting the focus
+        - (rsg) Added `sgnodes` command to `MicroDebugger` to list node type statistics
+        - (rsg) Added `MaskGroup` draft and fixed several issues with field assignment
+        - (rsg) Fixed component XML parsing of `interface` to handle attributes as case-insensitive
+        - (rsg) Improved parsing of field types: `StringArray`, `Vector2D` and `Vector2DArray`
+        - (rsg) Fixed XML parsing to support `alias` field to be set without `type`
+        - (rsg) Added support for default item component on `RowList` and item focus callback in `ArrayGrid`
+        - (rsg) Implemented all `PanelSet` related nodes
+        - (rsg) Fixed `role` fields to not be case sensitive
+        - (rsg) Implemented the context expansion for the Main thread
+        - (rsg) Allowed replacing hidden fields when extending `ContentNode`
+        - (rsg) Prevent issues with `Video` node on startup (after the Splash)
+        - (rsg) Improved handling of manifest entries `ui_resolutions` and `uri_resolution_autosub`
+        - (rsg) Fixed crash when `m.top.getScene()` is used on `init()` in a `Task` thread
+        - (rsg) Implemented `ancestorBoundingRect()` method
+        - (rsg) Added support for multiple `Node` field aliases (CSV)
+        - (rsg) Fixed `Node.setValue()` signature to prevent field creation on assignment
+        - (rsg) Fixed item component handling to not fail when fields are not defined in XML
+        - (rsg) Fixed `Node` field aliases observer trigger
+        - (rsg) Fixed `Poster`, `BusySpinner`, `Video` and `TrickPlayBar` to properly handle child nodes `uri` update
+        - (rsg) Fixed `BusySpinner` dimensions calculation
+        - (rsg) Fixed circular dependency issue when `Node` has child with its same `id` in `alias`
+        - (rsg) Fixed `StandardDialog` focus and `back` key press handling
+        - (rsg) Fixed observables serialization and handling of `InfoFields`
 
 Full Changelog: [v2.2.0]
 
@@ -330,23 +364,23 @@ This release includes several bug fixes and improvements to the BrightScript Sim
 
 ### Release Changes
 
-* Fixed custom Settings icons on Windows OS by [@lvcabral](https://github.com/lvcabral) in [#237](https://github.com/lvcabral/brs-desktop/pull/237)
-* Improved Roku devices detection on computers with several NICs by [@lvcabral](https://github.com/lvcabral) in [#238](https://github.com/lvcabral/brs-desktop/pull/238)
-* Fixed resizing main window on MacOS by [@lvcabral](https://github.com/lvcabral) in [#239](https://github.com/lvcabral/brs-desktop/pull/239)
-* Enforce single application instance by [@lvcabral](https://github.com/lvcabral) in [#240](https://github.com/lvcabral/brs-desktop/pull/240)
-* Upgraded `brs-engine` to v2.0.4 (with RSG extension), main changes were:
-  * (brs) Fixed debugger to restore the context on `RunTimeError`
-  * (brs) Added `toBoolean` for all numeric components
-  * (brs) Fixed `CreateObject` to properly handle boxed parameters and raise `RunTimeError`
-  * (rsg) Fixed `roSGNode` creation using boxed `String` as `nodeType`
-  * (rsg) Fixed focus when `initialFocus` is not set
-  * (rsg) Fixed: `ArrayGrid` based nodes must reset focused item when `content` is updated
-  * (rsg) Fixed `findNode` to prioritize search on `children`
-  * (rsg) Implemented `Animation` and `Interpolator` nodes
-  * (rsg) Changed `Node` to preserve field name case
-  * (rsg) Fixed conflict on `roSGScreen` scene events handling
-  * (cli) Fixed CLI loading SceneGraph components on Windows file system
-  * (rsg) Optimized `roSGScreen` to only render when changes happened
+- Fixed custom Settings icons on Windows OS by [@lvcabral](https://github.com/lvcabral) in [#237](https://github.com/lvcabral/brs-desktop/pull/237)
+- Improved Roku devices detection on computers with several NICs by [@lvcabral](https://github.com/lvcabral) in [#238](https://github.com/lvcabral/brs-desktop/pull/238)
+- Fixed resizing main window on MacOS by [@lvcabral](https://github.com/lvcabral) in [#239](https://github.com/lvcabral/brs-desktop/pull/239)
+- Enforce single application instance by [@lvcabral](https://github.com/lvcabral) in [#240](https://github.com/lvcabral/brs-desktop/pull/240)
+- Upgraded `brs-engine` to v2.0.4 (with RSG extension), main changes were:
+    - (brs) Fixed debugger to restore the context on `RunTimeError`
+    - (brs) Added `toBoolean` for all numeric components
+    - (brs) Fixed `CreateObject` to properly handle boxed parameters and raise `RunTimeError`
+    - (rsg) Fixed `roSGNode` creation using boxed `String` as `nodeType`
+    - (rsg) Fixed focus when `initialFocus` is not set
+    - (rsg) Fixed: `ArrayGrid` based nodes must reset focused item when `content` is updated
+    - (rsg) Fixed `findNode` to prioritize search on `children`
+    - (rsg) Implemented `Animation` and `Interpolator` nodes
+    - (rsg) Changed `Node` to preserve field name case
+    - (rsg) Fixed conflict on `roSGScreen` scene events handling
+    - (cli) Fixed CLI loading SceneGraph components on Windows file system
+    - (rsg) Optimized `roSGScreen` to only render when changes happened
 
 Full Changelog: [v2.1.3]
 
@@ -358,14 +392,14 @@ This release brings several bug fixes to the BrightScript Simulator by upgrading
 
 ### Release Changes
 
-* Upgraded `brs-engine` to v2.0.4 (with RSG extension), main changes were:
-  * (brs) Prevented division by zero on `roAudioMetadata`
-  * (brs) Fixed `roFontRegistry` to properly check parsed font metrics
-  * (rsg) Fixed `Poster` rendering to match Roku's automatic scaling
-  * (rsg) Fixed `Overhang` default logo scaling
-  * (rsg) Fixed item component's events on `ArrayGrid` based nodes
-  * (rsg) Changed `Field` to allow assign `roPath` to a `String` field
-  * (rsg) Fixed `Task` to prevent crash on updated fields with `null`
+- Upgraded `brs-engine` to v2.0.4 (with RSG extension), main changes were:
+    - (brs) Prevented division by zero on `roAudioMetadata`
+    - (brs) Fixed `roFontRegistry` to properly check parsed font metrics
+    - (rsg) Fixed `Poster` rendering to match Roku's automatic scaling
+    - (rsg) Fixed `Overhang` default logo scaling
+    - (rsg) Fixed item component's events on `ArrayGrid` based nodes
+    - (rsg) Changed `Field` to allow assign `roPath` to a `String` field
+    - (rsg) Fixed `Task` to prevent crash on updated fields with `null`
 
 Full Changelog: [v2.1.2]
 
@@ -377,15 +411,15 @@ This release adds new settings tab to allow mounting and unmounting an external 
 
 ### Release Changes
 
-* Added support to mount/unmount an External volume (ext1:/) by [@lvcabral](https://github.com/lvcabral) in [#235](https://github.com/lvcabral/brs-desktop/pull/235)
-* Prevent duplicate `brs-engine` version on About dialog on reset by [@lvcabral](https://github.com/lvcabral) in [#236](https://github.com/lvcabral/brs-desktop/pull/236)
-* Upgraded `brs-engine` to v2.0.3 (with RSG extension), bringing the following changes
-  * (brs) Added support to dynamically mount/unmount `ext1:` volume
-  * (brs) Changed `roFileSystem.getVolumeInfo()` to properly return `ext1:/` information
-  * (rsg) Implemented support for `change` field in `Node`
-  * (rsg) Changed `Task` to update existing `Node` fields to preserve references
-  * (rsg) Fixed `Node` environment `hostNode` initialization
-  * (rsg) Fixed `Node.callFunc()` to not be case sensitive
+- Added support to mount/unmount an External volume (ext1:/) by [@lvcabral](https://github.com/lvcabral) in [#235](https://github.com/lvcabral/brs-desktop/pull/235)
+- Prevent duplicate `brs-engine` version on About dialog on reset by [@lvcabral](https://github.com/lvcabral) in [#236](https://github.com/lvcabral/brs-desktop/pull/236)
+- Upgraded `brs-engine` to v2.0.3 (with RSG extension), bringing the following changes
+    - (brs) Added support to dynamically mount/unmount `ext1:` volume
+    - (brs) Changed `roFileSystem.getVolumeInfo()` to properly return `ext1:/` information
+    - (rsg) Implemented support for `change` field in `Node`
+    - (rsg) Changed `Task` to update existing `Node` fields to preserve references
+    - (rsg) Fixed `Node` environment `hostNode` initialization
+    - (rsg) Fixed `Node.callFunc()` to not be case sensitive
 
 Full Changelog: [v2.1.1]
 
@@ -395,26 +429,26 @@ Full Changelog: [v2.1.1]
 
 ### Release Changes
 
-* Use `Monaco` as code editor by [@lvcabral](https://github.com/lvcabral) in [#223](https://github.com/lvcabral/brs-desktop/pull/223)
-* Add Deep Linking support by [@lvcabral](https://github.com/lvcabral) in [#225](https://github.com/lvcabral/brs-desktop/pull/225)
-* Added new buttons to control customization (rew, ff, mute) and improved settings layout by [@lvcabral](https://github.com/lvcabral) in [#226](https://github.com/lvcabral/brs-desktop/pull/226)
-* Fixed Deep Linking with peer Roku devices by [@lvcabral](https://github.com/lvcabral) in [#227](https://github.com/lvcabral/brs-desktop/pull/227)
-* Upgraded `brs-engine` to v2.0.0 (with RSG extension) and other dependencies by [@lvcabral](https://github.com/lvcabral) in [#228](https://github.com/lvcabral/brs-desktop/pull/228)
-  * Refactored `brs-engine` to support extensions and moved **SceneGraph** code to a separate package
-    * Introduced an extension system with the `BrsExtension` interface and lifecycle hooks
-    * Moved SceneGraph code to the `src/extensions/scenegraph/` directory
-    * Several documentation updates to reflect the new extension model, including a new [Extensions](docs/extensions.md) document
-    * Refactored test file imports to use top-level `brs` exports
-    * Created the new `brs-scenegraph` package with independent build configuration
-  * Added support to field array types: `intarray`, `floatarray`, `boolarray`, `stringarray`, `colorarray` and `timearray`
-  * Fixed `Field.canAcceptValue` to properly validate array values
-  * Refactored `roSGNode` to remove `BrsIterable` and use `SetValue` instead of `Set`
-  * Raise type mismatch error when passing `Uninitialized` value to non-dynamic function parameters
-  * Prevented removing system fields and `setFields` to add fields
-  * Added `BrsEvent` abstract class and `BrsCollection` interface
-  * Prevent media nodes to send messages in task threads
-  * Fixed optional chaining with `roInvalid` when using methods
-  * Changed `Node.ts` to handle all default fields as system fields
+- Use `Monaco` as code editor by [@lvcabral](https://github.com/lvcabral) in [#223](https://github.com/lvcabral/brs-desktop/pull/223)
+- Add Deep Linking support by [@lvcabral](https://github.com/lvcabral) in [#225](https://github.com/lvcabral/brs-desktop/pull/225)
+- Added new buttons to control customization (rew, ff, mute) and improved settings layout by [@lvcabral](https://github.com/lvcabral) in [#226](https://github.com/lvcabral/brs-desktop/pull/226)
+- Fixed Deep Linking with peer Roku devices by [@lvcabral](https://github.com/lvcabral) in [#227](https://github.com/lvcabral/brs-desktop/pull/227)
+- Upgraded `brs-engine` to v2.0.0 (with RSG extension) and other dependencies by [@lvcabral](https://github.com/lvcabral) in [#228](https://github.com/lvcabral/brs-desktop/pull/228)
+    - Refactored `brs-engine` to support extensions and moved **SceneGraph** code to a separate package
+        - Introduced an extension system with the `BrsExtension` interface and lifecycle hooks
+        - Moved SceneGraph code to the `src/extensions/scenegraph/` directory
+        - Several documentation updates to reflect the new extension model, including a new [Extensions](docs/extensions.md) document
+        - Refactored test file imports to use top-level `brs` exports
+        - Created the new `brs-scenegraph` package with independent build configuration
+    - Added support to field array types: `intarray`, `floatarray`, `boolarray`, `stringarray`, `colorarray` and `timearray`
+    - Fixed `Field.canAcceptValue` to properly validate array values
+    - Refactored `roSGNode` to remove `BrsIterable` and use `SetValue` instead of `Set`
+    - Raise type mismatch error when passing `Uninitialized` value to non-dynamic function parameters
+    - Prevented removing system fields and `setFields` to add fields
+    - Added `BrsEvent` abstract class and `BrsCollection` interface
+    - Prevent media nodes to send messages in task threads
+    - Fixed optional chaining with `roInvalid` when using methods
+    - Changed `Node.ts` to handle all default fields as system fields
 
 [Full Changelog][v2.1.0]
 
@@ -424,19 +458,19 @@ Full Changelog: [v2.1.1]
 
 ### Release Changes
 
-* Implemented Peer Roku list discovery via SSDP by [@lvcabral](https://github.com/lvcabral) in [#222](https://github.com/lvcabral/brs-desktop/pull/222)
-* Bump `brs-engine` to v2.0.0-alpha.25 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
-  * Clear the display before showing icon as splash
-  * Added support for the `not` operator in the preprocessor's `#if` clause evaluation
-  * Fixed exception handling for Parser and Preprocessor
-  * Added UTF-16 support for `StringI` and prevented crash with negative `string.repeat()`
-  * Added validation to `#if` to not allow extra text after the condition token
-  * Fixed loading of SG localized terms and added missing `es_ES` and `it_IT` files
-  * Fixed ZIP based volumes `pkg:`, `common:` and `ext1:` to show the original case on path names
-  * Prevented debug error messages in `Network.ts`
-  * Replaced dependency `xml2js` by `xmldoc`
-  * Added test case for `common:` volume
-  * Refactored API to create a `task` module
+- Implemented Peer Roku list discovery via SSDP by [@lvcabral](https://github.com/lvcabral) in [#222](https://github.com/lvcabral/brs-desktop/pull/222)
+- Bump `brs-engine` to v2.0.0-alpha.25 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
+    - Clear the display before showing icon as splash
+    - Added support for the `not` operator in the preprocessor's `#if` clause evaluation
+    - Fixed exception handling for Parser and Preprocessor
+    - Added UTF-16 support for `StringI` and prevented crash with negative `string.repeat()`
+    - Added validation to `#if` to not allow extra text after the condition token
+    - Fixed loading of SG localized terms and added missing `es_ES` and `it_IT` files
+    - Fixed ZIP based volumes `pkg:`, `common:` and `ext1:` to show the original case on path names
+    - Prevented debug error messages in `Network.ts`
+    - Replaced dependency `xml2js` by `xmldoc`
+    - Added test case for `common:` volume
+    - Refactored API to create a `task` module
 
 [Full Changelog][v2.0.5]
 
@@ -448,22 +482,22 @@ This release brings several improvements to the BrightScript Simulator's file sy
 
 ### Release Changes
 
-* Bump `brs-engine` to v2.0.0-alpha.22 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
-  * Upgraded `zenFS` dependency and removed `memory-fs`
-  * Added `common:/certs/ca-bundle.crt` file and upgraded `zenFS`
-  * Fixed issue that prevented playback of the first loaded audio
-  * Save paths in writeable volumes with original case
-  * Changed `tmp:` and `cachefs:` to be shared among threads
-  * Refactored `RoSGNode` to use type `SGNode` and fixed `clone()` and `roUtils.deepCopy()`
-  * Forced ignore cache for `common.zip` when new version is available
-  * Improved serialization of `RoSGNode` to transfer among threads
-  * Prevent Node child serialization in AA and Array
-  * Refactored `RoSGNode` to be an abstract class and created the new SceneGraph `Node` class
-  * Fixed `ContentNode` field setting
-  * Fixed setting fields with default values in the XML
-  * Fixed `MicroDebugger` to properly handle a line with multiple statements separated by colon `:`
-  * Generate a `registry` event when loading the registry during startup of the engine
-  * Improvements on node thread ownership
+- Bump `brs-engine` to v2.0.0-alpha.22 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
+    - Upgraded `zenFS` dependency and removed `memory-fs`
+    - Added `common:/certs/ca-bundle.crt` file and upgraded `zenFS`
+    - Fixed issue that prevented playback of the first loaded audio
+    - Save paths in writeable volumes with original case
+    - Changed `tmp:` and `cachefs:` to be shared among threads
+    - Refactored `RoSGNode` to use type `SGNode` and fixed `clone()` and `roUtils.deepCopy()`
+    - Forced ignore cache for `common.zip` when new version is available
+    - Improved serialization of `RoSGNode` to transfer among threads
+    - Prevent Node child serialization in AA and Array
+    - Refactored `RoSGNode` to be an abstract class and created the new SceneGraph `Node` class
+    - Fixed `ContentNode` field setting
+    - Fixed setting fields with default values in the XML
+    - Fixed `MicroDebugger` to properly handle a line with multiple statements separated by colon `:`
+    - Generate a `registry` event when loading the registry during startup of the engine
+    - Improvements on node thread ownership
 
 [Full Changelog][v2.0.4]
 
@@ -475,15 +509,15 @@ This release improves several features of the SceneGraph support, including the 
 
 ### Release Changes
 
-* Fixed App Installer Screenshot response to VS Code Extension by [@lvcabral](https://github.com/lvcabral) in [#217](https://github.com/lvcabral/brs-desktop/pull/217)
-* Improved app crash handling in Home App mode by [@lvcabral](https://github.com/lvcabral) in [#218](https://github.com/lvcabral/brs-desktop/pull/218)
-* Allow update device locale without need of reset by [@lvcabral](https://github.com/lvcabral) in [#219](https://github.com/lvcabral/brs-desktop/pull/219)
-* Fixed Console to not ignore empty lines and properly wrap long strings by [@lvcabral](https://github.com/lvcabral) in [#220](https://github.com/lvcabral/brs-desktop/pull/220)
-* Bump `brs-engine` to v2.0.0-alpha.19 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
-  * Added support for `roSGNode.getScene()` in `Task` threads
-  * Added 50 missing supported Nodes to `SGNodeType` enumerator
-  * Fixed return type for `roRegex.split()` to `roList` instead of `roArray`
-  * Fixed: `stop` not working as the last statement
+- Fixed App Installer Screenshot response to VS Code Extension by [@lvcabral](https://github.com/lvcabral) in [#217](https://github.com/lvcabral/brs-desktop/pull/217)
+- Improved app crash handling in Home App mode by [@lvcabral](https://github.com/lvcabral) in [#218](https://github.com/lvcabral/brs-desktop/pull/218)
+- Allow update device locale without need of reset by [@lvcabral](https://github.com/lvcabral) in [#219](https://github.com/lvcabral/brs-desktop/pull/219)
+- Fixed Console to not ignore empty lines and properly wrap long strings by [@lvcabral](https://github.com/lvcabral) in [#220](https://github.com/lvcabral/brs-desktop/pull/220)
+- Bump `brs-engine` to v2.0.0-alpha.19 by [@lvcabral](https://github.com/lvcabral) - main changes since last release:
+    - Added support for `roSGNode.getScene()` in `Task` threads
+    - Added 50 missing supported Nodes to `SGNodeType` enumerator
+    - Fixed return type for `roRegex.split()` to `roList` instead of `roArray`
+    - Fixed: `stop` not working as the last statement
 
 [Full Changelog][v2.0.3]
 
@@ -495,45 +529,45 @@ This release brings several fixes and improvements to the BrightScript Simulator
 
 ### Release Changes
 
-* Fixed peer Roku app deploy to not install home app by [@lvcabral](https://github.com/lvcabral) in [#202](https://github.com/lvcabral/brs-desktop/pull/202)
-* Fixed ECP to properly encode literal keys sent to peer Roku by [@lvcabral](https://github.com/lvcabral) in [#203](https://github.com/lvcabral/brs-desktop/pull/203)
-* Replaced dependency `postman-request` using node native `fetch` and `crypto` by [@lvcabral](https://github.com/lvcabral) in [#204](https://github.com/lvcabral/brs-desktop/pull/204)
-* Upgraded `terminal` to v1.1.0 and added theme support to the console by [@lvcabral](https://github.com/lvcabral) in [#205](https://github.com/lvcabral/brs-desktop/pull/205)
-* Prevent loading a package larger than 5MB by [@lvcabral](https://github.com/lvcabral) in [#206](https://github.com/lvcabral/brs-desktop/pull/206)
-* Fixed: In MacOS, hiding Display with Settings open would not allow reopen Settings by [@lvcabral](https://github.com/lvcabral) in [#207](https://github.com/lvcabral/brs-desktop/pull/207)
-* Changed Save as.. option, in Code Editor, to act like Save button if no snippet is selected by [@lvcabral](https://github.com/lvcabral) in [#208](https://github.com/lvcabral/brs-desktop/pull/208)
-* Improved web installer to act like Roku and allow VSCode to take screenshots by [@lvcabral](https://github.com/lvcabral) in [#209](https://github.com/lvcabral/brs-desktop/pull/209)
-* Updated installer and utilities page titles to match Roku by [@lvcabral](https://github.com/lvcabral) in [#210](https://github.com/lvcabral/brs-desktop/pull/210)
-* Added Check for Updates feature by [@lvcabral](https://github.com/lvcabral) in [#211](https://github.com/lvcabral/brs-desktop/pull/211)
-* Add missing ECP queries and fixed others by [@lvcabral](https://github.com/lvcabral) in [#212](https://github.com/lvcabral/brs-desktop/pull/212)
-* In home app mode, only display closing app toast with `error` or `crash` by [@lvcabral](https://github.com/lvcabral) in [#213](https://github.com/lvcabral/brs-desktop/pull/213)
-* Prevent app installer to be enabled by default in Linux by [@lvcabral](https://github.com/lvcabral) in [#214](https://github.com/lvcabral/brs-desktop/pull/214)
-* Changed Editor code list to be case insensitive by [@lvcabral](https://github.com/lvcabral) in [#215](https://github.com/lvcabral/brs-desktop/pull/215)
-* Improved take `Screenshot` feature to get full resolution image by [@lvcabral](https://github.com/lvcabral) in [#216](https://github.com/lvcabral/brs-desktop/pull/216)
-* Bump `brs-engine` to v2.0.0-alpha.18 by @lvcabral - main changes since last release:
-  * Implemented support for `roSGNode.update()` recursive child tree creation
-  * Added support for `Invalid` children in `roSGNode`
-  * Implemented support for `RowList` field `rowItemSelected`
-  * Fixed deserialization of `Nodes` from `Tasks` and `roSGNode.update()`
-  * Fixed when `Video` node field `contentIsPlaylist` is set after `content`
-  * Refactored `RootObjects` into a separate module `SGRoot` to fix `Audio` and `Video` reset
-  * Fixed `Audio` and `Video` to resend and reset the `content` when `contentIsPlaylist` changes
-  * Several fixes on `RowList` rendering and behavior
-  * Implement `LayoutGroup` node
-  * Implemented `ZoomRowList` node
-  * Fixed `Video` and `Audio` handling of changes in `content` field
-  * Added mapping of `MaskGroup` and `TargetGroup` to `Group` before implementation
-  * Improved `Task` handling of `Node` field changes
-  * Fixed more `LayoutGroup` rendering issues
-  * Improved focus feedback rendering in `RowList` and `ZoomRowList`
-  * Fixed `Overhang` logo rendering to match Roku behavior
-  * Fixes in `RowList` and refactoring of `ZoomRowList`
-  * Implement missing `roSGNode` methods
-  * Fixed `LabelList` and `MarkupList` vertical navigation in `floatingFocus` mode
-  * Added new API method `getScreenshot()`
-  * Updated API documentation to add new `getScreenshot()` method
-  * Prevent crash on Micro Debugger with `bpk` files
-  * Fixed `Dialog` spacing to the divider in HD resolution
+- Fixed peer Roku app deploy to not install home app by [@lvcabral](https://github.com/lvcabral) in [#202](https://github.com/lvcabral/brs-desktop/pull/202)
+- Fixed ECP to properly encode literal keys sent to peer Roku by [@lvcabral](https://github.com/lvcabral) in [#203](https://github.com/lvcabral/brs-desktop/pull/203)
+- Replaced dependency `postman-request` using node native `fetch` and `crypto` by [@lvcabral](https://github.com/lvcabral) in [#204](https://github.com/lvcabral/brs-desktop/pull/204)
+- Upgraded `terminal` to v1.1.0 and added theme support to the console by [@lvcabral](https://github.com/lvcabral) in [#205](https://github.com/lvcabral/brs-desktop/pull/205)
+- Prevent loading a package larger than 5MB by [@lvcabral](https://github.com/lvcabral) in [#206](https://github.com/lvcabral/brs-desktop/pull/206)
+- Fixed: In MacOS, hiding Display with Settings open would not allow reopen Settings by [@lvcabral](https://github.com/lvcabral) in [#207](https://github.com/lvcabral/brs-desktop/pull/207)
+- Changed Save as.. option, in Code Editor, to act like Save button if no snippet is selected by [@lvcabral](https://github.com/lvcabral) in [#208](https://github.com/lvcabral/brs-desktop/pull/208)
+- Improved web installer to act like Roku and allow VSCode to take screenshots by [@lvcabral](https://github.com/lvcabral) in [#209](https://github.com/lvcabral/brs-desktop/pull/209)
+- Updated installer and utilities page titles to match Roku by [@lvcabral](https://github.com/lvcabral) in [#210](https://github.com/lvcabral/brs-desktop/pull/210)
+- Added Check for Updates feature by [@lvcabral](https://github.com/lvcabral) in [#211](https://github.com/lvcabral/brs-desktop/pull/211)
+- Add missing ECP queries and fixed others by [@lvcabral](https://github.com/lvcabral) in [#212](https://github.com/lvcabral/brs-desktop/pull/212)
+- In home app mode, only display closing app toast with `error` or `crash` by [@lvcabral](https://github.com/lvcabral) in [#213](https://github.com/lvcabral/brs-desktop/pull/213)
+- Prevent app installer to be enabled by default in Linux by [@lvcabral](https://github.com/lvcabral) in [#214](https://github.com/lvcabral/brs-desktop/pull/214)
+- Changed Editor code list to be case insensitive by [@lvcabral](https://github.com/lvcabral) in [#215](https://github.com/lvcabral/brs-desktop/pull/215)
+- Improved take `Screenshot` feature to get full resolution image by [@lvcabral](https://github.com/lvcabral) in [#216](https://github.com/lvcabral/brs-desktop/pull/216)
+- Bump `brs-engine` to v2.0.0-alpha.18 by @lvcabral - main changes since last release:
+    - Implemented support for `roSGNode.update()` recursive child tree creation
+    - Added support for `Invalid` children in `roSGNode`
+    - Implemented support for `RowList` field `rowItemSelected`
+    - Fixed deserialization of `Nodes` from `Tasks` and `roSGNode.update()`
+    - Fixed when `Video` node field `contentIsPlaylist` is set after `content`
+    - Refactored `RootObjects` into a separate module `SGRoot` to fix `Audio` and `Video` reset
+    - Fixed `Audio` and `Video` to resend and reset the `content` when `contentIsPlaylist` changes
+    - Several fixes on `RowList` rendering and behavior
+    - Implement `LayoutGroup` node
+    - Implemented `ZoomRowList` node
+    - Fixed `Video` and `Audio` handling of changes in `content` field
+    - Added mapping of `MaskGroup` and `TargetGroup` to `Group` before implementation
+    - Improved `Task` handling of `Node` field changes
+    - Fixed more `LayoutGroup` rendering issues
+    - Improved focus feedback rendering in `RowList` and `ZoomRowList`
+    - Fixed `Overhang` logo rendering to match Roku behavior
+    - Fixes in `RowList` and refactoring of `ZoomRowList`
+    - Implement missing `roSGNode` methods
+    - Fixed `LabelList` and `MarkupList` vertical navigation in `floatingFocus` mode
+    - Added new API method `getScreenshot()`
+    - Updated API documentation to add new `getScreenshot()` method
+    - Prevent crash on Micro Debugger with `bpk` files
+    - Fixed `Dialog` spacing to the divider in HD resolution
 
 [Full Changelog][v2.0.2]
 
@@ -543,9 +577,9 @@ This release brings several fixes and improvements to the BrightScript Simulator
 
 ### Release Changes
 
-* Fixed `getSSID` to prevent startup error message on Raspberry Pi OS by [@lvcabral](https://github.com/lvcabral) in [#199](https://github.com/lvcabral/brs-desktop/pull/199)
-* Fixed option to run last loaded app on startup by [@lvcabral](https://github.com/lvcabral) in [#200](https://github.com/lvcabral/brs-desktop/pull/200)
-* Fixed race condition with VSCode deployment by [@lvcabral](https://github.com/lvcabral) in [#201](https://github.com/lvcabral/brs-desktop/pull/201)
+- Fixed `getSSID` to prevent startup error message on Raspberry Pi OS by [@lvcabral](https://github.com/lvcabral) in [#199](https://github.com/lvcabral/brs-desktop/pull/199)
+- Fixed option to run last loaded app on startup by [@lvcabral](https://github.com/lvcabral) in [#200](https://github.com/lvcabral/brs-desktop/pull/200)
+- Fixed race condition with VSCode deployment by [@lvcabral](https://github.com/lvcabral) in [#201](https://github.com/lvcabral/brs-desktop/pull/201)
 
 [Full Changelog][v2.0.1]
 
@@ -557,40 +591,40 @@ This version of the BrightScript Simulator can execute code compatible with lang
 
 **Please be aware of the following:**
 
-* SceneGraph components may not render correctly
-* Some SceneGraph features are not yet implemented
-* Apps may crash or behave unexpectedly
-* Check all [current limitations](https://github.com/lvcabral/brs-engine/blob/scenegraph/docs/limitations.md) for more details
+- SceneGraph components may not render correctly
+- Some SceneGraph features are not yet implemented
+- Apps may crash or behave unexpectedly
+- Check all [current limitations](https://github.com/lvcabral/brs-engine/blob/scenegraph/docs/limitations.md) for more details
 
 ### Release Changes
 
-* Bump to v2.0.0 and upgraded Electron to v2.9 [@lvcabral](https://github.com/lvcabral) in [#190](https://github.com/lvcabral/brs-desktop/pull/190)
-* Added a message dialog to warn users that SceneGraph is in alpha stage by [@lvcabral](https://github.com/lvcabral) in [#191](https://github.com/lvcabral/brs-desktop/pull/191)
-* Added closed caption style settings and updated the the SG warning dialog by [@lvcabral](https://github.com/lvcabral) in [#194](https://github.com/lvcabral/brs-desktop/pull/194)
-* Added new ECP device info fields introduced in Roku OS 15 by [@lvcabral](https://github.com/lvcabral) in [#193](https://github.com/lvcabral/brs-desktop/pull/193)
-* Added BRS bouncing splash video on startup by [@lvcabral](https://github.com/lvcabral) in [#186](https://github.com/lvcabral/brs-desktop/pull/186)
-* Implemented simulator home screen and improved app list handling by [@lvcabral](https://github.com/lvcabral) in [#196](https://github.com/lvcabral/brs-desktop/pull/196)
-* Moved `keepDisplayOnExit` and `perfStats` options from `simulator` to `display` tab on Settings screen by [@lvcabral](https://github.com/lvcabral) in [#196](https://github.com/lvcabral/brs-desktop/pull/196)
-* Refactored server event handlers to new `events.js` helper module by [@lvcabral](https://github.com/lvcabral) in [#197](https://github.com/lvcabral/brs-desktop/pull/197)
-* Added option to import and export `.brs` files in Editor and removed Open Source file from File menu by [@lvcabral](https://github.com/lvcabral) in [#198](https://github.com/lvcabral/brs-desktop/pull/198)
-* Bump `brs-engine` to v2.0.0-alpha.16 [@lvcabral](https://github.com/lvcabral) - main changes since last release:
-  * v1.8.6 - Changed the internal device assets (fonts, sounds, images and libraries) to be stored in the `common.zip` file that holds the `common:/` volume in the file system, and mainly this release brings a fix for the `m` context when using indexed get to retrieve functions. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.6))
-  * v1.8.7 - Brings the undocumented signature for `InStr()` function with only 2 parameters, the  `roTimespan.totalMicroseconds()` method and the `Type()` function returning "legacy" types (unless you pass version 3 parameter). Other important fixes to highlight are the support for boxed values as array indexes and having `roBoolean` to be properly comparable. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.7))
-  * v1.8.8 - Added the support for the `flags` parameter on the `ParseJSON()` to make the AA returned to be case insensitive, and `FormatJSON` flag now allows you to disable the escape of non-ASCII characters. There are also, fixes for `Left()` and `Mid()` that were not handling negative values properly and `Substitute()` that now supports the `^0` notation. The `chr()` and `asc()` functions were also updated to support extended Unicode. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.8))
-  * v1.8.9 - Introduces a few missing methods in `roDeviceInfo` and a new method to `ifStringOps`, also several enhancements on Video and Audio handling. The default font was replaced by `DejaVuSansCondensed` that is used in Roku devices for `Draw2D` text rendering. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.9))
-  * v1.9.1 - Reorganized the repository as a monorepo splitting the released artifacts into two separate NPM packages: `brs-engine` (for Web applications) and `brs-node` (for Node.js and CLI). Also, with this release, the BrightScript language and components are now synchronized with Roku OS 15.0. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.1))
-  * v1.9.2 - Implemented new method `createPayloadFromFileMap` in `brs-node` library and updated documentation. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.2))
-  * v1.9.3 - Fixed issues related to `roNDK.start()` allowing URL as `ChannelId` on `SDKLaunch` and `RokuBrowser.brs` library now parses arrays in options object. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.3))
-  * v1.9.4 - Remapping of the game pad buttons to the Roku remote control, allowing for a better experience using the game pad with Roku apps. It also documents the custom `manifest` option `multi_key_events` that allows apps to receive multiple key events at the same time. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.4))
-  * v1.9.5 - Added new methods in the engine API, improvements to `roAppManager`, and the `manifest` parsing now matches the behavior of Roku devices. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.5))
-  * v1.9.6 - This release brings a couple of fixes for the CORS proxy usage and the `NDKStart` handling of `SDKLauncher`. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.6))
-  * v1.9.7 - This release fixes issues on the API methods `enableStats` and improves the handling of the `dev` app. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.7))
-  * v2.0.0-alpha.16 - Contains the current state for the experimental SceneGraph framework support, for more details about what is implemented and what is still missing check the [current limitations document](https://github.com/lvcabral/brs-engine/tree/scenegraph/docs/limitations.md)
-* Bump `brs-engine` to v1.8.9 and upgraded other dependencies by [@lvcabral](https://github.com/lvcabral) in [#187](https://github.com/lvcabral/brs-desktop/pull/187)
-* Bump electron from 25.9.8 to 28.3.2 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#185](https://github.com/lvcabral/brs-desktop/pull/185)
-* Bump pbkdf2 from 3.1.2 to 3.1.3 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#184](https://github.com/lvcabral/brs-desktop/pull/184)
-* Bump @babel/runtime-corejs2 from 7.26.0 to 7.26.10 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#183](https://github.com/lvcabral/brs-desktop/pull/183)
-* Bump tmp from 0.2.3 to 0.2.4 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#188](https://github.com/lvcabral/brs-desktop/pull/188)
+- Bump to v2.0.0 and upgraded Electron to v2.9 [@lvcabral](https://github.com/lvcabral) in [#190](https://github.com/lvcabral/brs-desktop/pull/190)
+- Added a message dialog to warn users that SceneGraph is in alpha stage by [@lvcabral](https://github.com/lvcabral) in [#191](https://github.com/lvcabral/brs-desktop/pull/191)
+- Added closed caption style settings and updated the the SG warning dialog by [@lvcabral](https://github.com/lvcabral) in [#194](https://github.com/lvcabral/brs-desktop/pull/194)
+- Added new ECP device info fields introduced in Roku OS 15 by [@lvcabral](https://github.com/lvcabral) in [#193](https://github.com/lvcabral/brs-desktop/pull/193)
+- Added BRS bouncing splash video on startup by [@lvcabral](https://github.com/lvcabral) in [#186](https://github.com/lvcabral/brs-desktop/pull/186)
+- Implemented simulator home screen and improved app list handling by [@lvcabral](https://github.com/lvcabral) in [#196](https://github.com/lvcabral/brs-desktop/pull/196)
+- Moved `keepDisplayOnExit` and `perfStats` options from `simulator` to `display` tab on Settings screen by [@lvcabral](https://github.com/lvcabral) in [#196](https://github.com/lvcabral/brs-desktop/pull/196)
+- Refactored server event handlers to new `events.js` helper module by [@lvcabral](https://github.com/lvcabral) in [#197](https://github.com/lvcabral/brs-desktop/pull/197)
+- Added option to import and export `.brs` files in Editor and removed Open Source file from File menu by [@lvcabral](https://github.com/lvcabral) in [#198](https://github.com/lvcabral/brs-desktop/pull/198)
+- Bump `brs-engine` to v2.0.0-alpha.16 [@lvcabral](https://github.com/lvcabral) - main changes since last release:
+    - v1.8.6 - Changed the internal device assets (fonts, sounds, images and libraries) to be stored in the `common.zip` file that holds the `common:/` volume in the file system, and mainly this release brings a fix for the `m` context when using indexed get to retrieve functions. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.6))
+    - v1.8.7 - Brings the undocumented signature for `InStr()` function with only 2 parameters, the `roTimespan.totalMicroseconds()` method and the `Type()` function returning "legacy" types (unless you pass version 3 parameter). Other important fixes to highlight are the support for boxed values as array indexes and having `roBoolean` to be properly comparable. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.7))
+    - v1.8.8 - Added the support for the `flags` parameter on the `ParseJSON()` to make the AA returned to be case insensitive, and `FormatJSON` flag now allows you to disable the escape of non-ASCII characters. There are also, fixes for `Left()` and `Mid()` that were not handling negative values properly and `Substitute()` that now supports the `^0` notation. The `chr()` and `asc()` functions were also updated to support extended Unicode. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.8))
+    - v1.8.9 - Introduces a few missing methods in `roDeviceInfo` and a new method to `ifStringOps`, also several enhancements on Video and Audio handling. The default font was replaced by `DejaVuSansCondensed` that is used in Roku devices for `Draw2D` text rendering. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.9))
+    - v1.9.1 - Reorganized the repository as a monorepo splitting the released artifacts into two separate NPM packages: `brs-engine` (for Web applications) and `brs-node` (for Node.js and CLI). Also, with this release, the BrightScript language and components are now synchronized with Roku OS 15.0. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.1))
+    - v1.9.2 - Implemented new method `createPayloadFromFileMap` in `brs-node` library and updated documentation. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.2))
+    - v1.9.3 - Fixed issues related to `roNDK.start()` allowing URL as `ChannelId` on `SDKLaunch` and `RokuBrowser.brs` library now parses arrays in options object. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.3))
+    - v1.9.4 - Remapping of the game pad buttons to the Roku remote control, allowing for a better experience using the game pad with Roku apps. It also documents the custom `manifest` option `multi_key_events` that allows apps to receive multiple key events at the same time. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.4))
+    - v1.9.5 - Added new methods in the engine API, improvements to `roAppManager`, and the `manifest` parsing now matches the behavior of Roku devices. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.5))
+    - v1.9.6 - This release brings a couple of fixes for the CORS proxy usage and the `NDKStart` handling of `SDKLauncher`. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.6))
+    - v1.9.7 - This release fixes issues on the API methods `enableStats` and improves the handling of the `dev` app. (see [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v1.9.7))
+    - v2.0.0-alpha.16 - Contains the current state for the experimental SceneGraph framework support, for more details about what is implemented and what is still missing check the [current limitations document](https://github.com/lvcabral/brs-engine/tree/scenegraph/docs/limitations.md)
+- Bump `brs-engine` to v1.8.9 and upgraded other dependencies by [@lvcabral](https://github.com/lvcabral) in [#187](https://github.com/lvcabral/brs-desktop/pull/187)
+- Bump electron from 25.9.8 to 28.3.2 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#185](https://github.com/lvcabral/brs-desktop/pull/185)
+- Bump pbkdf2 from 3.1.2 to 3.1.3 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#184](https://github.com/lvcabral/brs-desktop/pull/184)
+- Bump @babel/runtime-corejs2 from 7.26.0 to 7.26.10 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#183](https://github.com/lvcabral/brs-desktop/pull/183)
+- Bump tmp from 0.2.3 to 0.2.4 [@dependabot[bot]](https://github.com/dependabot[bot]) in [#188](https://github.com/lvcabral/brs-desktop/pull/188)
 
 [Full Changelog][v2.0.0]
 
@@ -600,48 +634,48 @@ This version of the BrightScript Simulator can execute code compatible with lang
 
 ### Release Changes
 
-* Replaced the Delete button by new code snippet tools button by [@lvcabral](https://github.com/lvcabral) in [#167](https://github.com/lvcabral/brs-desktop/pull/167)
-* Added support for ECP `launch`, `input` and `exit-app` endpoints by [@lvcabral](https://github.com/lvcabral) in [#170](https://github.com/lvcabral/brs-desktop/pull/170)
-* Added Peer Roku device menu options by [@lvcabral](https://github.com/lvcabral) in [#172](https://github.com/lvcabral/brs-desktop/pull/172)
-* Remove locales not supported on Roku by [@lvcabral](https://github.com/lvcabral) in [#173](https://github.com/lvcabral/brs-desktop/pull/173)
-* Editor: Save single snippet and alert to changes by [@lvcabral](https://github.com/lvcabral) in [#174](https://github.com/lvcabral/brs-desktop/pull/174)
-* Added editor context menu and improved change control by [@lvcabral](https://github.com/lvcabral) in [#176](https://github.com/lvcabral/brs-desktop/pull/176)
-* Removed ECP service circular dependencies by [@lvcabral](https://github.com/lvcabral) in [#177](https://github.com/lvcabral/brs-desktop/pull/177)
-* Removed Installer service circular dependencies by [@lvcabral](https://github.com/lvcabral) in [#178](https://github.com/lvcabral/brs-desktop/pull/178)
-* Removed Telnet service circular dependencies by [@lvcabral](https://github.com/lvcabral) in [#179](https://github.com/lvcabral/brs-desktop/pull/179)
-* Close app on peer Roku device when closed on simulator by [@lvcabral](https://github.com/lvcabral) in [#180](https://github.com/lvcabral/brs-desktop/pull/180)
-* Improved `roDeviceInfo.getConnectionInfo()` by getting actual network information by [@lvcabral](https://github.com/lvcabral) in [#181](https://github.com/lvcabral/brs-desktop/pull/181)
-* Upgraded `brs-engine` to [v1.8.5](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.5) - main changes since last release:
-  * Implemented BrightScript features up to Roku OS 14.0 by [@lvcabral](https://github.com/lvcabral) in [#420](https://github.com/lvcabral/brs-engine/pull/420)
-  * Several Registry improvements by [@lvcabral](https://github.com/lvcabral) in [#407](https://github.com/lvcabral/brs-engine/pull/407)
-  * Several App handling/management improvements by [@lvcabral](https://github.com/lvcabral) in [#413](https://github.com/lvcabral/brs-engine/pull/413)
-  * Added `Platform` info to the result of `roDeviceInfo.getModelDetails()` by [@lvcabral](https://github.com/lvcabral) in [#414](https://github.com/lvcabral/brs-engine/pull/414)
-  * Allowed `m` object to be re-assigned in Function scope by [@lvcabral](https://github.com/lvcabral) in [#417](https://github.com/lvcabral/brs-engine/pull/417)
-  * Implemented `global` static object by [@lvcabral](https://github.com/lvcabral) in [#418](https://github.com/lvcabral/brs-engine/pull/418)
-  * Add new supported control buttons and ECP command by [@lvcabral](https://github.com/lvcabral) in [#421](https://github.com/lvcabral/brs-engine/pull/421)
-  * Fixed `CreateObject` behavior to match Roku by [@lvcabral](https://github.com/lvcabral) in [#423](https://github.com/lvcabral/brs-engine/pull/423)
-  * Implemented `roSystemLog` and refactored `roMessagePort` by [@lvcabral](https://github.com/lvcabral) in [#426](https://github.com/lvcabral/brs-engine/pull/426)
-  * Implemented `roDeviceInfoEvent` by [@lvcabral](https://github.com/lvcabral) in [#429](https://github.com/lvcabral/brs-engine/pull/429)
-  * Implement `roCECStatus` component by [@lvcabral](https://github.com/lvcabral) in [#430](https://github.com/lvcabral/brs-engine/pull/430)
-  * Add fake server support to `roChannelStore` by [@lvcabral](https://github.com/lvcabral) in [#431](https://github.com/lvcabral/brs-engine/pull/431)
-  * Fixed `Int32` constructor handling of overflow to match Roku by [@lvcabral](https://github.com/lvcabral) in [#435](https://github.com/lvcabral/brs-engine/pull/435)
-  * Added new `roDateTime` methods: `asSecondsLong` and `fromSecondsLong` by [@lvcabral](https://github.com/lvcabral) in [#437](https://github.com/lvcabral/brs-engine/pull/437)
-  * Fixed `Int32` and `Int64` hex parsing and formatting by [@lvcabral](https://github.com/lvcabral) in [#438](https://github.com/lvcabral/brs-engine/pull/438)
-  * Improved `sprintf` formatting by [@lvcabral](https://github.com/lvcabral) in [#443](https://github.com/lvcabral/brs-engine/pull/443)
-  * Improved `IfToStr` type checking by [@lvcabral](https://github.com/lvcabral) in [#449](https://github.com/lvcabral/brs-engine/pull/449)
-  * Fixed `roVideoPlayer` method `getAudioTracks` by [@lvcabral](https://github.com/lvcabral) in [#457](https://github.com/lvcabral/brs-engine/pull/457)
-  * Added `serialNumber` to device info object and to response of `GetModelDetails()`
-  * Fixed behavior of `End` statement to terminate the app
-  * Improved and documented MicroDebugger functions
-  * Improvements on WAV handling
-  * Improved component `roURLTransfer` by [@lvcabral](https://github.com/lvcabral) in [#461](https://github.com/lvcabral/brs-engine/pull/461)
-  * Implemented `roHdmiStatus` and `roHdmiStatusEvent` components by [@lvcabral](https://github.com/lvcabral) in [#463](https://github.com/lvcabral/brs-engine/pull/463)
-  * Implemented `roTextureRequest` and `roTextureManager` by [@lvcabral](https://github.com/lvcabral) in [#465](https://github.com/lvcabral/brs-engine/pull/465)
-  * Implemented `roSocketAddress` by [@lvcabral](https://github.com/lvcabral) in [#460](https://github.com/lvcabral/brs-engine/pull/460)
-  * Implemented **mocked** `roStreamSocket` component by [@lvcabral](https://github.com/lvcabral) in [#462](https://github.com/lvcabral/brs-engine/pull/462)
-  * Implemented **mocked** `roDataGramSocket` and extracted common interfaces into `ifSocket` by [@lvcabral](https://github.com/lvcabral) in [#466](https://github.com/lvcabral/brs-engine/pull/466)
-* Fixed: Some menu options were disabled when Settings is opened with app running by [@lvcabral](https://github.com/lvcabral) in [#171](https://github.com/lvcabral/brs-desktop/pull/171)
-* Bump nanoid from 3.3.7 to 5.0.9 by **@dependabot** in [#]175](https://github.com/lvcabral/brs-desktop/pull/175)
+- Replaced the Delete button by new code snippet tools button by [@lvcabral](https://github.com/lvcabral) in [#167](https://github.com/lvcabral/brs-desktop/pull/167)
+- Added support for ECP `launch`, `input` and `exit-app` endpoints by [@lvcabral](https://github.com/lvcabral) in [#170](https://github.com/lvcabral/brs-desktop/pull/170)
+- Added Peer Roku device menu options by [@lvcabral](https://github.com/lvcabral) in [#172](https://github.com/lvcabral/brs-desktop/pull/172)
+- Remove locales not supported on Roku by [@lvcabral](https://github.com/lvcabral) in [#173](https://github.com/lvcabral/brs-desktop/pull/173)
+- Editor: Save single snippet and alert to changes by [@lvcabral](https://github.com/lvcabral) in [#174](https://github.com/lvcabral/brs-desktop/pull/174)
+- Added editor context menu and improved change control by [@lvcabral](https://github.com/lvcabral) in [#176](https://github.com/lvcabral/brs-desktop/pull/176)
+- Removed ECP service circular dependencies by [@lvcabral](https://github.com/lvcabral) in [#177](https://github.com/lvcabral/brs-desktop/pull/177)
+- Removed Installer service circular dependencies by [@lvcabral](https://github.com/lvcabral) in [#178](https://github.com/lvcabral/brs-desktop/pull/178)
+- Removed Telnet service circular dependencies by [@lvcabral](https://github.com/lvcabral) in [#179](https://github.com/lvcabral/brs-desktop/pull/179)
+- Close app on peer Roku device when closed on simulator by [@lvcabral](https://github.com/lvcabral) in [#180](https://github.com/lvcabral/brs-desktop/pull/180)
+- Improved `roDeviceInfo.getConnectionInfo()` by getting actual network information by [@lvcabral](https://github.com/lvcabral) in [#181](https://github.com/lvcabral/brs-desktop/pull/181)
+- Upgraded `brs-engine` to [v1.8.5](https://github.com/lvcabral/brs-engine/releases/tag/v1.8.5) - main changes since last release:
+    - Implemented BrightScript features up to Roku OS 14.0 by [@lvcabral](https://github.com/lvcabral) in [#420](https://github.com/lvcabral/brs-engine/pull/420)
+    - Several Registry improvements by [@lvcabral](https://github.com/lvcabral) in [#407](https://github.com/lvcabral/brs-engine/pull/407)
+    - Several App handling/management improvements by [@lvcabral](https://github.com/lvcabral) in [#413](https://github.com/lvcabral/brs-engine/pull/413)
+    - Added `Platform` info to the result of `roDeviceInfo.getModelDetails()` by [@lvcabral](https://github.com/lvcabral) in [#414](https://github.com/lvcabral/brs-engine/pull/414)
+    - Allowed `m` object to be re-assigned in Function scope by [@lvcabral](https://github.com/lvcabral) in [#417](https://github.com/lvcabral/brs-engine/pull/417)
+    - Implemented `global` static object by [@lvcabral](https://github.com/lvcabral) in [#418](https://github.com/lvcabral/brs-engine/pull/418)
+    - Add new supported control buttons and ECP command by [@lvcabral](https://github.com/lvcabral) in [#421](https://github.com/lvcabral/brs-engine/pull/421)
+    - Fixed `CreateObject` behavior to match Roku by [@lvcabral](https://github.com/lvcabral) in [#423](https://github.com/lvcabral/brs-engine/pull/423)
+    - Implemented `roSystemLog` and refactored `roMessagePort` by [@lvcabral](https://github.com/lvcabral) in [#426](https://github.com/lvcabral/brs-engine/pull/426)
+    - Implemented `roDeviceInfoEvent` by [@lvcabral](https://github.com/lvcabral) in [#429](https://github.com/lvcabral/brs-engine/pull/429)
+    - Implement `roCECStatus` component by [@lvcabral](https://github.com/lvcabral) in [#430](https://github.com/lvcabral/brs-engine/pull/430)
+    - Add fake server support to `roChannelStore` by [@lvcabral](https://github.com/lvcabral) in [#431](https://github.com/lvcabral/brs-engine/pull/431)
+    - Fixed `Int32` constructor handling of overflow to match Roku by [@lvcabral](https://github.com/lvcabral) in [#435](https://github.com/lvcabral/brs-engine/pull/435)
+    - Added new `roDateTime` methods: `asSecondsLong` and `fromSecondsLong` by [@lvcabral](https://github.com/lvcabral) in [#437](https://github.com/lvcabral/brs-engine/pull/437)
+    - Fixed `Int32` and `Int64` hex parsing and formatting by [@lvcabral](https://github.com/lvcabral) in [#438](https://github.com/lvcabral/brs-engine/pull/438)
+    - Improved `sprintf` formatting by [@lvcabral](https://github.com/lvcabral) in [#443](https://github.com/lvcabral/brs-engine/pull/443)
+    - Improved `IfToStr` type checking by [@lvcabral](https://github.com/lvcabral) in [#449](https://github.com/lvcabral/brs-engine/pull/449)
+    - Fixed `roVideoPlayer` method `getAudioTracks` by [@lvcabral](https://github.com/lvcabral) in [#457](https://github.com/lvcabral/brs-engine/pull/457)
+    - Added `serialNumber` to device info object and to response of `GetModelDetails()`
+    - Fixed behavior of `End` statement to terminate the app
+    - Improved and documented MicroDebugger functions
+    - Improvements on WAV handling
+    - Improved component `roURLTransfer` by [@lvcabral](https://github.com/lvcabral) in [#461](https://github.com/lvcabral/brs-engine/pull/461)
+    - Implemented `roHdmiStatus` and `roHdmiStatusEvent` components by [@lvcabral](https://github.com/lvcabral) in [#463](https://github.com/lvcabral/brs-engine/pull/463)
+    - Implemented `roTextureRequest` and `roTextureManager` by [@lvcabral](https://github.com/lvcabral) in [#465](https://github.com/lvcabral/brs-engine/pull/465)
+    - Implemented `roSocketAddress` by [@lvcabral](https://github.com/lvcabral) in [#460](https://github.com/lvcabral/brs-engine/pull/460)
+    - Implemented **mocked** `roStreamSocket` component by [@lvcabral](https://github.com/lvcabral) in [#462](https://github.com/lvcabral/brs-engine/pull/462)
+    - Implemented **mocked** `roDataGramSocket` and extracted common interfaces into `ifSocket` by [@lvcabral](https://github.com/lvcabral) in [#466](https://github.com/lvcabral/brs-engine/pull/466)
+- Fixed: Some menu options were disabled when Settings is opened with app running by [@lvcabral](https://github.com/lvcabral) in [#171](https://github.com/lvcabral/brs-desktop/pull/171)
+- Bump nanoid from 3.3.7 to 5.0.9 by **@dependabot** in [#]175](https://github.com/lvcabral/brs-desktop/pull/175)
 
 [Full Changelog][v1.4.0]
 
@@ -651,10 +685,10 @@ This version of the BrightScript Simulator can execute code compatible with lang
 
 ### Release Changes
 
-* Added checkbox to enable/disable peer Roku device by [@lvcabral](https://github.com/lvcabral) in [#164](https://github.com/lvcabral/brs-desktop/pull/164)
-* Bump elliptic from 6.5.7 to 6.6.0 by @dependabot in [#165](https://github.com/lvcabral/brs-desktop/pull/165)
-* Fixed build on MacOS by [@lvcabral](https://github.com/lvcabral) in [#166](https://github.com/lvcabral/brs-desktop/pull/166)
-* Changed build to generate MacOS Universal installer (for both Intel and Arm machines)
+- Added checkbox to enable/disable peer Roku device by [@lvcabral](https://github.com/lvcabral) in [#164](https://github.com/lvcabral/brs-desktop/pull/164)
+- Bump elliptic from 6.5.7 to 6.6.0 by @dependabot in [#165](https://github.com/lvcabral/brs-desktop/pull/165)
+- Fixed build on MacOS by [@lvcabral](https://github.com/lvcabral) in [#166](https://github.com/lvcabral/brs-desktop/pull/166)
+- Changed build to generate MacOS Universal installer (for both Intel and Arm machines)
 
 [Full Changelog][v1.3.2]
 
@@ -664,41 +698,41 @@ This version of the BrightScript Simulator can execute code compatible with lang
 
 ### Release Changes
 
-* Implemented option to Open from URL by [@lvcabral](https://github.com/lvcabral) in [#163](https://github.com/lvcabral/brs-desktop/pull/163)
-  * New option in File menu that allows to download and run any app package (zip/bpk) or code file (brs)
-  * The downloaded file is also executed on the peer Roku device (if configured in the settings screen)
-  * Updated documentation with the new recent features
-* Upgraded `brs-engine` to [v1.7.0](https://github.com/lvcabral/brs-engine/releases) - main changes since last release:
-  * Added a way to add custom features to be checked by `roDeviceInfo.hasFeatures()`
-  * Created new document [docs/customization.md](https://github.com/lvcabral/brs-engine/blob/master/docs/customization.md)
-  * Implemented `try...catch` and `throw` by [@lvcabral](https://github.com/lvcabral) in [#318](https://github.com/lvcabral/brs-engine/pull/318)
-  * Implemented `goto` statement by [@lvcabral](https://github.com/lvcabral) in [#367](https://github.com/lvcabral/brs-engine/pull/367)
-  * Implemented `Continue For` and `Continue While` statements by [@lvcabral](https://github.com/lvcabral) in [#332](https://github.com/lvcabral/brs-engine/pull/332)
-  * Added: `roEVPDigest` component by [@lvcabral](https://github.com/lvcabral) in [#301](https://github.com/lvcabral/brs-engine/pull/301)
-  * Added: `roEVPCipher` component by [@lvcabral](https://github.com/lvcabral) in [#303](https://github.com/lvcabral/brs-engine/pull/303)
-  * Added: `roHMAC` component by [@lvcabral](https://github.com/lvcabral) in [#305](https://github.com/lvcabral/brs-engine/pull/305)
-  * Added: `roDeviceCrypto` component by [@lvcabral](https://github.com/lvcabral) in [#309](https://github.com/lvcabral/brs-engine/pull/309)
-  * Added: `roFunction` component and `Box()` runtime function by [@lvcabral](https://github.com/lvcabral) in [#310](https://github.com/lvcabral/brs-engine/pull/310)
-  * Implemented `pos()` and `tab()` for `print` statement by [@lvcabral](https://github.com/lvcabral) in [#339](https://github.com/lvcabral/brs-engine/pull/339)
-  * Implemented `slice()` method in `roArray` under `ifArraySlice`
-  * Implemented `ifArraySizeInfo` in `roArray` by [@lvcabral](https://github.com/lvcabral) in [#316](https://github.com/lvcabral/brs-engine/pull/316)
-  * Implemented `roImageMetadata` component by [@lvcabral](https://github.com/lvcabral) in [#325](https://github.com/lvcabral/brs-engine/pull/325)
-  * Implemented `roAudioMetadata` component by [@lvcabral](https://github.com/lvcabral) in [#326](https://github.com/lvcabral/brs-engine/pull/326)
-  * Implemented support for multi-dimensional indexes of `roArray` and `roList` by [@lvcabral](https://github.com/lvcabral) in [#331](https://github.com/lvcabral/brs-engine/pull/331)
-  * Implemented `ObjFun()` global function and support for `variadic` arguments on `Callable` by [@lvcabral](https://github.com/lvcabral) in [#375](https://github.com/lvcabral/brs-engine/pull/375)
-  * Added support for `formatJson()` undocumented flags 256 and 512 by [@lvcabral](https://github.com/lvcabral) in [#377](https://github.com/lvcabral/brs-engine/pull/377)
-  * Implemented Micro Debugger commands:  `classes`,  `bscs` and `stats` by [@lvcabral](https://github.com/lvcabral) in [#385](https://github.com/lvcabral/brs-engine/pull/385)
-  * Improvements to `roPath` by [@lvcabral](https://github.com/lvcabral) in [#296](https://github.com/lvcabral/brs-engine/pull/296)
-  * Changed `roUrlEvent` and `roUniversalControlEvent` to be comparable by [@lvcabral](https://github.com/lvcabral) in [#299](https://github.com/lvcabral/brs-engine/pull/299)
-  * Updated Firmware Version to 11.5 as `continue for/while` is now supported by [@lvcabral](https://github.com/lvcabral) in [#357](https://github.com/lvcabral/brs-engine/pull/357)
-  * Fixed: `ifString.tokenize()` behavior to match Roku by [@lvcabral](https://github.com/lvcabral) in [#295](https://github.com/lvcabral/brs-engine/pull/295)
-  * Fixed: `String` comparison and concatenation by [@lvcabral](https://github.com/lvcabral) in [#298](https://github.com/lvcabral/brs-engine/pull/298)
-  * Allow to use AND/OR between Boolean and Numbers by [@lvcabral](https://github.com/lvcabral) in [#307](https://github.com/lvcabral/brs-engine/pull/307)
-  * Fixed Boxing on Numbers and Booleans by [@lvcabral](https://github.com/lvcabral) in [#313](https://github.com/lvcabral/brs-engine/pull/313)
-  * Fixed Boxing for Callable parameters and implemented Coercion properly by [@lvcabral](https://github.com/lvcabral) in [#327](https://github.com/lvcabral/brs-engine/pull/327)
-  * Fixed Callable signature check by [@lvcabral](https://github.com/lvcabral) in [#340](https://github.com/lvcabral/brs-engine/pull/340)
-  * Fixed conversion functions to Integer: `Int()`, `CInt()` and `Fix()` by [@lvcabral](https://github.com/lvcabral) in [#342](https://github.com/lvcabral/brs-engine/pull/342)
-  * Fixed Video seek causing a stack overflow crash by [@lvcabral](https://github.com/lvcabral) in [#349](https://github.com/lvcabral/brs-engine/pull/349)
+- Implemented option to Open from URL by [@lvcabral](https://github.com/lvcabral) in [#163](https://github.com/lvcabral/brs-desktop/pull/163)
+    - New option in File menu that allows to download and run any app package (zip/bpk) or code file (brs)
+    - The downloaded file is also executed on the peer Roku device (if configured in the settings screen)
+    - Updated documentation with the new recent features
+- Upgraded `brs-engine` to [v1.7.0](https://github.com/lvcabral/brs-engine/releases) - main changes since last release:
+    - Added a way to add custom features to be checked by `roDeviceInfo.hasFeatures()`
+    - Created new document [docs/customization.md](https://github.com/lvcabral/brs-engine/blob/master/docs/customization.md)
+    - Implemented `try...catch` and `throw` by [@lvcabral](https://github.com/lvcabral) in [#318](https://github.com/lvcabral/brs-engine/pull/318)
+    - Implemented `goto` statement by [@lvcabral](https://github.com/lvcabral) in [#367](https://github.com/lvcabral/brs-engine/pull/367)
+    - Implemented `Continue For` and `Continue While` statements by [@lvcabral](https://github.com/lvcabral) in [#332](https://github.com/lvcabral/brs-engine/pull/332)
+    - Added: `roEVPDigest` component by [@lvcabral](https://github.com/lvcabral) in [#301](https://github.com/lvcabral/brs-engine/pull/301)
+    - Added: `roEVPCipher` component by [@lvcabral](https://github.com/lvcabral) in [#303](https://github.com/lvcabral/brs-engine/pull/303)
+    - Added: `roHMAC` component by [@lvcabral](https://github.com/lvcabral) in [#305](https://github.com/lvcabral/brs-engine/pull/305)
+    - Added: `roDeviceCrypto` component by [@lvcabral](https://github.com/lvcabral) in [#309](https://github.com/lvcabral/brs-engine/pull/309)
+    - Added: `roFunction` component and `Box()` runtime function by [@lvcabral](https://github.com/lvcabral) in [#310](https://github.com/lvcabral/brs-engine/pull/310)
+    - Implemented `pos()` and `tab()` for `print` statement by [@lvcabral](https://github.com/lvcabral) in [#339](https://github.com/lvcabral/brs-engine/pull/339)
+    - Implemented `slice()` method in `roArray` under `ifArraySlice`
+    - Implemented `ifArraySizeInfo` in `roArray` by [@lvcabral](https://github.com/lvcabral) in [#316](https://github.com/lvcabral/brs-engine/pull/316)
+    - Implemented `roImageMetadata` component by [@lvcabral](https://github.com/lvcabral) in [#325](https://github.com/lvcabral/brs-engine/pull/325)
+    - Implemented `roAudioMetadata` component by [@lvcabral](https://github.com/lvcabral) in [#326](https://github.com/lvcabral/brs-engine/pull/326)
+    - Implemented support for multi-dimensional indexes of `roArray` and `roList` by [@lvcabral](https://github.com/lvcabral) in [#331](https://github.com/lvcabral/brs-engine/pull/331)
+    - Implemented `ObjFun()` global function and support for `variadic` arguments on `Callable` by [@lvcabral](https://github.com/lvcabral) in [#375](https://github.com/lvcabral/brs-engine/pull/375)
+    - Added support for `formatJson()` undocumented flags 256 and 512 by [@lvcabral](https://github.com/lvcabral) in [#377](https://github.com/lvcabral/brs-engine/pull/377)
+    - Implemented Micro Debugger commands: `classes`, `bscs` and `stats` by [@lvcabral](https://github.com/lvcabral) in [#385](https://github.com/lvcabral/brs-engine/pull/385)
+    - Improvements to `roPath` by [@lvcabral](https://github.com/lvcabral) in [#296](https://github.com/lvcabral/brs-engine/pull/296)
+    - Changed `roUrlEvent` and `roUniversalControlEvent` to be comparable by [@lvcabral](https://github.com/lvcabral) in [#299](https://github.com/lvcabral/brs-engine/pull/299)
+    - Updated Firmware Version to 11.5 as `continue for/while` is now supported by [@lvcabral](https://github.com/lvcabral) in [#357](https://github.com/lvcabral/brs-engine/pull/357)
+    - Fixed: `ifString.tokenize()` behavior to match Roku by [@lvcabral](https://github.com/lvcabral) in [#295](https://github.com/lvcabral/brs-engine/pull/295)
+    - Fixed: `String` comparison and concatenation by [@lvcabral](https://github.com/lvcabral) in [#298](https://github.com/lvcabral/brs-engine/pull/298)
+    - Allow to use AND/OR between Boolean and Numbers by [@lvcabral](https://github.com/lvcabral) in [#307](https://github.com/lvcabral/brs-engine/pull/307)
+    - Fixed Boxing on Numbers and Booleans by [@lvcabral](https://github.com/lvcabral) in [#313](https://github.com/lvcabral/brs-engine/pull/313)
+    - Fixed Boxing for Callable parameters and implemented Coercion properly by [@lvcabral](https://github.com/lvcabral) in [#327](https://github.com/lvcabral/brs-engine/pull/327)
+    - Fixed Callable signature check by [@lvcabral](https://github.com/lvcabral) in [#340](https://github.com/lvcabral/brs-engine/pull/340)
+    - Fixed conversion functions to Integer: `Int()`, `CInt()` and `Fix()` by [@lvcabral](https://github.com/lvcabral) in [#342](https://github.com/lvcabral/brs-engine/pull/342)
+    - Fixed Video seek causing a stack overflow crash by [@lvcabral](https://github.com/lvcabral) in [#349](https://github.com/lvcabral/brs-engine/pull/349)
 
 [Full Changelog][v1.3.0]
 
@@ -708,27 +742,27 @@ This version of the BrightScript Simulator can execute code compatible with lang
 
 ### Release Changes
 
-* Implemented Code Editor and Console window by [@lvcabral](https://github.com/lvcabral) in [#154](https://github.com/lvcabral/brs-desktop/pull/154)
-  * Added editor and console code based on [brs-fiddle](https://github.com/lvcabral/brs-fiddle)
-  * Removed app folder from git (all files are generated from `src` now)
-  * Linked code editor to main simulator display
-  * Removed display and hooked to the app.js
-  * Added Theme Support, Startup Setting and Command Line switch
-  * Clear Console also reset Status counters
-  * Editor improvements and fixes
-  * Change buttons to be displayed depending on the context
-  * Fixed Telnet behavior to handle IOC commands
-  * Added Telnet support for char by char when the client can't switch to line mode
-  * Several SonarCloud static analysis issues fixed
-* Upgraded `brs-engine` to [v1.3.1](https://github.com/lvcabral/brs-engine/releases/tag/v1.3.1) - some changes were:
-  * Added support to `volumemute` key
-  * Implemented support for `PowerOff` ECP key press
-  * Added `ifDraw2d` method `drawTransformedObject()` 
-  * Added to the MicroDebugger support for `Function`, `If`,  `For` and `While`
-  * Added `quit` command to the MicroDebugger
-  * Fixed MicroDebugger truncate String variable to max 94 characters
-  * Fixed MicroDebugger not exiting properly with `exit` command
-  * Fixed MicroDebugger formatting issues and the handling of linefeed
+- Implemented Code Editor and Console window by [@lvcabral](https://github.com/lvcabral) in [#154](https://github.com/lvcabral/brs-desktop/pull/154)
+    - Added editor and console code based on [brs-fiddle](https://github.com/lvcabral/brs-fiddle)
+    - Removed app folder from git (all files are generated from `src` now)
+    - Linked code editor to main simulator display
+    - Removed display and hooked to the app.js
+    - Added Theme Support, Startup Setting and Command Line switch
+    - Clear Console also reset Status counters
+    - Editor improvements and fixes
+    - Change buttons to be displayed depending on the context
+    - Fixed Telnet behavior to handle IOC commands
+    - Added Telnet support for char by char when the client can't switch to line mode
+    - Several SonarCloud static analysis issues fixed
+- Upgraded `brs-engine` to [v1.3.1](https://github.com/lvcabral/brs-engine/releases/tag/v1.3.1) - some changes were:
+    - Added support to `volumemute` key
+    - Implemented support for `PowerOff` ECP key press
+    - Added `ifDraw2d` method `drawTransformedObject()`
+    - Added to the MicroDebugger support for `Function`, `If`, `For` and `While`
+    - Added `quit` command to the MicroDebugger
+    - Fixed MicroDebugger truncate String variable to max 94 characters
+    - Fixed MicroDebugger not exiting properly with `exit` command
+    - Fixed MicroDebugger formatting issues and the handling of linefeed
 
 [Full Changelog][v1.2.0]
 
@@ -738,21 +772,21 @@ This version of the BrightScript Simulator can execute code compatible with lang
 
 ### Release Changes
 
-* Added feature to allow parallel deployment of apps on a peer Roku device by [@lvcabral](https://github.com/lvcabral) in [#151](https://github.com/lvcabral/brs-desktop/pull/151)
-* Upgraded `brs-engine` to [v1.2.11](https://github.com/lvcabral/brs-engine/releases/tag/v1.2.11)
-  * Added detection of Video Codecs
-  * Added support to HLS streams with multiple audio tracks
-  * Added support to video inside the app package (.zip/.bpk)
-  * Added new API event `control` to return key strokes pressed on the simulator
-  * Changed the priority of the app entry point to `runUserInterface()` over `main()`
-  * Fixed low resolution on Screen Resize
-  * Fixed Video not always pausing on `break` or `pause` commands
-  * Fixed several issues related to remote control simulation
-  * Fixed several issues related to ifDraw2D rendering
-* Fixed #148 - Get correct window reference when opening About Box by [@lvcabral](https://github.com/lvcabral) in [#149](https://github.com/lvcabral/brs-desktop/pull/149)
-* Fixed #146 - Force focus on simulator window when `app` is deployed via ECP by [@lvcabral](https://github.com/lvcabral) in [#150](https://github.com/lvcabral/brs-desktop/pull/150)
-* Fixed #147 - In SD Display mode, when goes to full screen, the area behind the display is not black
-* Fixed #145 -  Full screen mode on startup is showing the menu in Windows and Linux by [@lvcabral](https://github.com/lvcabral) in [#152](https://github.com/lvcabral/brs-desktop/pull/152)
+- Added feature to allow parallel deployment of apps on a peer Roku device by [@lvcabral](https://github.com/lvcabral) in [#151](https://github.com/lvcabral/brs-desktop/pull/151)
+- Upgraded `brs-engine` to [v1.2.11](https://github.com/lvcabral/brs-engine/releases/tag/v1.2.11)
+    - Added detection of Video Codecs
+    - Added support to HLS streams with multiple audio tracks
+    - Added support to video inside the app package (.zip/.bpk)
+    - Added new API event `control` to return key strokes pressed on the simulator
+    - Changed the priority of the app entry point to `runUserInterface()` over `main()`
+    - Fixed low resolution on Screen Resize
+    - Fixed Video not always pausing on `break` or `pause` commands
+    - Fixed several issues related to remote control simulation
+    - Fixed several issues related to ifDraw2D rendering
+- Fixed #148 - Get correct window reference when opening About Box by [@lvcabral](https://github.com/lvcabral) in [#149](https://github.com/lvcabral/brs-desktop/pull/149)
+- Fixed #146 - Force focus on simulator window when `app` is deployed via ECP by [@lvcabral](https://github.com/lvcabral) in [#150](https://github.com/lvcabral/brs-desktop/pull/150)
+- Fixed #147 - In SD Display mode, when goes to full screen, the area behind the display is not black
+- Fixed #145 - Full screen mode on startup is showing the menu in Windows and Linux by [@lvcabral](https://github.com/lvcabral) in [#152](https://github.com/lvcabral/brs-desktop/pull/152)
 
 [Full Changelog][v1.1.0]
 
@@ -768,44 +802,44 @@ The term _simulator_ was chosen instead of the former _emulator_ to better repre
 
 ### Release Changes
 
-* Renamed to "BrightScript Simulator" and updated the icon
-* Upgraded `brs-engine` to [v1.2.3](https://github.com/lvcabral/brs-engine/releases/tag/v1.2.3)
-  * Added support for Game Pad controllers
-  * Added support for `roVideoPlayer`
-  * Added configurable limit for BrightScript app framerate
-  * Added option to switch control behavior based on `manifest` entry
-  * Added way to detect the BrightScript app is running on the simulator
-  * Micro Debugger now can be triggered when a crash happens
-  * Multiple fixes and improvements on BrightScript language support (see [engine changelog](https://github.com/lvcabral/brs-engine/blob/master/CHANGELOG.md))
-* Upgraded `custom-electron-titlebar` to v4.2.8
-  * Fixed issue with title moving left (Windows and Linux)
-  * Fixed issue with menu alignment (Windows and Linux)
-* Menu updates:
-  * Reduced Menu options spacing
-  * Open Dev Tools detached and enabled Edit commands on Mac OS
-  * Changed Dev Tools shortcut to F12
-* Settings screen updates:
-  * Added new option `debugOnCrash` on settings
-  * Added Developer Password option for decrypting `.bpk` packages
-  * Added support for `maxFps` new display configuration
-  * Added option to pause App when Simulator loses the focus
-  * Updated Settings TitleBar customization
-  * Updated Settings screen configuration on Mac OS
-  * Fixed #143 - Edit commands are now working on Settings Screen in MacOS
-  * Fixed Linux issue when showing Settings Screen
-  * Fixed settings.css for Linux
-* Remote Access Services updates:
-  * Updated web Installer to support bpk, improve reliability
-  * Updated initialization source for ECP and Installer to match Roku
-  * ECP-2 now generates control events with remote type "RMOB"
-  * Fixed: Do not disable Web Installer on error
-* Closed #38 - Integrated `toastify` to show messages to the user
-* About Box improvements for Mac OS
-* Update dynamically AboutBox and Menu with package.json information
-* Fixed TitleBar text alignment on old MacOS
-* Removed several bugs and code smells reported by Sonar Cloud
-* Added CHANGELOG.md
-* Updated documentation
+- Renamed to "BrightScript Simulator" and updated the icon
+- Upgraded `brs-engine` to [v1.2.3](https://github.com/lvcabral/brs-engine/releases/tag/v1.2.3)
+    - Added support for Game Pad controllers
+    - Added support for `roVideoPlayer`
+    - Added configurable limit for BrightScript app framerate
+    - Added option to switch control behavior based on `manifest` entry
+    - Added way to detect the BrightScript app is running on the simulator
+    - Micro Debugger now can be triggered when a crash happens
+    - Multiple fixes and improvements on BrightScript language support (see [engine changelog](https://github.com/lvcabral/brs-engine/blob/master/CHANGELOG.md))
+- Upgraded `custom-electron-titlebar` to v4.2.8
+    - Fixed issue with title moving left (Windows and Linux)
+    - Fixed issue with menu alignment (Windows and Linux)
+- Menu updates:
+    - Reduced Menu options spacing
+    - Open Dev Tools detached and enabled Edit commands on Mac OS
+    - Changed Dev Tools shortcut to F12
+- Settings screen updates:
+    - Added new option `debugOnCrash` on settings
+    - Added Developer Password option for decrypting `.bpk` packages
+    - Added support for `maxFps` new display configuration
+    - Added option to pause App when Simulator loses the focus
+    - Updated Settings TitleBar customization
+    - Updated Settings screen configuration on Mac OS
+    - Fixed #143 - Edit commands are now working on Settings Screen in MacOS
+    - Fixed Linux issue when showing Settings Screen
+    - Fixed settings.css for Linux
+- Remote Access Services updates:
+    - Updated web Installer to support bpk, improve reliability
+    - Updated initialization source for ECP and Installer to match Roku
+    - ECP-2 now generates control events with remote type "RMOB"
+    - Fixed: Do not disable Web Installer on error
+- Closed #38 - Integrated `toastify` to show messages to the user
+- About Box improvements for Mac OS
+- Update dynamically AboutBox and Menu with package.json information
+- Fixed TitleBar text alignment on old MacOS
+- Removed several bugs and code smells reported by Sonar Cloud
+- Added CHANGELOG.md
+- Updated documentation
 
 [Full Changelog][v1.0.0]
 
@@ -815,14 +849,14 @@ The term _simulator_ was chosen instead of the former _emulator_ to better repre
 
 ### Release Changes
 
-* Bump custom-electron-titlebar from 4.2.4 to 4.2.7 by [@lvcabral](https://github.com/lvcabral)
-  * Fixed issue [#128](https://github.com/lvcabral/brs-desktop/issues/128)  (theme switch in macOS)
-  * Fixed issue with menu hover in Windows and Linux
-  * Fixed issue with debug console messages
-* Bump async from 2.6.3 to 2.6.4 by [@dependabot](https://github.com/dependabot) in [#126](https://github.com/lvcabral/brs-desktop/pull/126)
-* Bump ajv from 6.12.0 to 6.12.6 by [@dependabot](https://github.com/dependabot) in [#127](https://github.com/lvcabral/brs-desktop/pull/127)
-* Bump glob-parent from 5.1.0 to 5.1.2 by [@dependabot](https://github.com/dependabot) in [#131](https://github.com/lvcabral/brs-desktop/pull/131)
-* Bump semver from 5.7.1 to 5.7.2 by [@dependabot](https://github.com/dependabot) in [#132](https://github.com/lvcabral/brs-desktop/pull/132)
+- Bump custom-electron-titlebar from 4.2.4 to 4.2.7 by [@lvcabral](https://github.com/lvcabral)
+    - Fixed issue [#128](https://github.com/lvcabral/brs-desktop/issues/128) (theme switch in macOS)
+    - Fixed issue with menu hover in Windows and Linux
+    - Fixed issue with debug console messages
+- Bump async from 2.6.3 to 2.6.4 by [@dependabot](https://github.com/dependabot) in [#126](https://github.com/lvcabral/brs-desktop/pull/126)
+- Bump ajv from 6.12.0 to 6.12.6 by [@dependabot](https://github.com/dependabot) in [#127](https://github.com/lvcabral/brs-desktop/pull/127)
+- Bump glob-parent from 5.1.0 to 5.1.2 by [@dependabot](https://github.com/dependabot) in [#131](https://github.com/lvcabral/brs-desktop/pull/131)
+- Bump semver from 5.7.1 to 5.7.2 by [@dependabot](https://github.com/dependabot) in [#132](https://github.com/lvcabral/brs-desktop/pull/132)
 
 [Full Changelog][v0.10.31]
 
@@ -832,23 +866,22 @@ The term _simulator_ was chosen instead of the former _emulator_ to better repre
 
 ### Release Changes
 
-* Refactored the app to use the new library [brs-emu v0.10.22](https://www.npmjs.com/package/brs-emu)
-  * Improved performance, the simulation is multiple times faster than v0.9.x
-  * App code was simplified with the usage of the new [engine API](https://github.com/lvcabral/brs-engine/blob/master/docs/engine-api.md)
-* Upgrade electron, added settings screen and other improvements by [@lvcabral](https://github.com/lvcabral) in [#123](https://github.com/lvcabral/brs-desktop/pull/123)
-  * Removed borders between the simulator display and the container window
-  * Changed the application icon
-  * Added a  **Settings screen** allowing new configurations and customizations
-  * Added a switchable performance overlay to show rendering performance on the simulator display
-  * Added support to the **Micro Debugger** via the telnet service, allowing debug using VSCode extension
-  * Upgraded to Electron 20 and Webpack 5
-  * Upgraded multiple dependencies
-  * Fixed several small bugs
-* Fixed SonarCloud bugs and code smells by [@lvcabral](https://github.com/lvcabral) in [#124](https://github.com/lvcabral/brs-desktop/pull/124)
-* Upgrade `custom-electron-titlebar` dependency by [@lvcabral](https://github.com/lvcabral) in [#125](https://github.com/lvcabral/brs-desktop/pull/125)
+- Refactored the app to use the new library [brs-emu v0.10.22](https://www.npmjs.com/package/brs-emu)
+    - Improved performance, the simulation is multiple times faster than v0.9.x
+    - App code was simplified with the usage of the new [engine API](https://github.com/lvcabral/brs-engine/blob/master/docs/engine-api.md)
+- Upgrade electron, added settings screen and other improvements by [@lvcabral](https://github.com/lvcabral) in [#123](https://github.com/lvcabral/brs-desktop/pull/123)
+    - Removed borders between the simulator display and the container window
+    - Changed the application icon
+    - Added a **Settings screen** allowing new configurations and customizations
+    - Added a switchable performance overlay to show rendering performance on the simulator display
+    - Added support to the **Micro Debugger** via the telnet service, allowing debug using VSCode extension
+    - Upgraded to Electron 20 and Webpack 5
+    - Upgraded multiple dependencies
+    - Fixed several small bugs
+- Fixed SonarCloud bugs and code smells by [@lvcabral](https://github.com/lvcabral) in [#124](https://github.com/lvcabral/brs-desktop/pull/124)
+- Upgrade `custom-electron-titlebar` dependency by [@lvcabral](https://github.com/lvcabral) in [#125](https://github.com/lvcabral/brs-desktop/pull/125)
 
 [Full Changelog][v0.10.30]
-
 
 <a name="v0.9.0-app"></a>
 
@@ -930,6 +963,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.6.2]: https://github.com/lvcabral/brs-desktop/compare/v2.6.1...v2.6.2
 [v2.6.1]: https://github.com/lvcabral/brs-desktop/compare/v2.6.0...v2.6.1
 [v2.6.0]: https://github.com/lvcabral/brs-desktop/compare/v2.5.2...v2.6.0
 [v2.5.2]: https://github.com/lvcabral/brs-desktop/compare/v2.5.1...v2.5.2

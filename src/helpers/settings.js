@@ -115,6 +115,7 @@ export function getSettings(window) {
                 deviceModel: globalThis.sharedObject.deviceInfo.deviceModel,
                 clientId: globalThis.sharedObject.deviceInfo.clientId,
                 RIDA: globalThis.sharedObject.deviceInfo.RIDA,
+                customerId: globalThis.sharedObject.deviceInfo.customerId,
                 developerId: globalThis.sharedObject.deviceInfo.developerId,
                 developerPwd: "",
                 registryByApp: [],
@@ -536,7 +537,15 @@ export function getSettings(window) {
                                     label: "Channel Client Id",
                                     key: "clientId",
                                     type: "text",
+                                    style: { width: "45%" },
                                     help: "Unique device identifier returned by ifDeviceInfo.GetChannelClientId()",
+                                },
+                                {
+                                    label: "Roku Customer Id",
+                                    key: "customerId",
+                                    type: "text",
+                                    style: { width: "45%" },
+                                    help: "Roku account id (32-digit hex) returned by the ChannelStore GetRokuCustomerId command",
                                 },
                                 {
                                     label: "RIDA",
@@ -1150,6 +1159,7 @@ export function getSettings(window) {
         setDeviceInfo("device", "deviceModel", true);
         setDeviceInfo("device", "clientId", true);
         setDeviceInfo("device", "RIDA", true);
+        setDeviceInfo("device", "customerId", true);
         // Safe to notify live: prepareAppRegistry() in app.js only applies developerId when the
         // next app starts, never to one already running, so this can't corrupt a live registry.
         setDeviceInfo("device", "developerId", true);
