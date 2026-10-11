@@ -2,7 +2,7 @@
 
 [![screenshots](./docs/images/brs-desktop.png)](./docs/images/brs-desktop.png)
 
-[![Version 2.6.1](https://img.shields.io/badge/Version-2.6.1-blue.svg?logo=github)](https://github.com/lvcabral/brs-desktop/releases/)
+[![Version 2.6.2](https://img.shields.io/badge/Version-2.6.2-blue.svg?logo=github)](https://github.com/lvcabral/brs-desktop/releases/)
 [![License](https://img.shields.io/github/license/lvcabral/brs-desktop?logo=github)](https://github.com/lvcabral/brs-desktop/blob/master/LICENSE)
 [![Build](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml/badge.svg)](https://github.com/lvcabral/brs-desktop/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lvcabral_brs-emu-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lvcabral_brs-emu-app)
@@ -24,7 +24,7 @@ With remote services enabled, the desktop simulator can be detected and [integra
 
 > [!IMPORTANT]
 >
-> Since version 2.3.0, the simulator can execute code compatible with Roku OS 15.3 and includes full **SceneGraph** support which is currently in **beta**.
+> The simulator can execute code compatible with Roku OS 16.0 and, since version 2.3.0, includes full **SceneGraph** support which is currently in **beta**.
 >
 >**Please be aware of the following:**
 >

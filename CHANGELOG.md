@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+<a name="v2.6.2"></a>
+
+## v2.6.2 - Engine Upgrade: Server-Sent Events and GetRokuCustomerId
+
+This release bumps `brs-engine` to v2.6.1 and `brs-scenegraph` to v0.6.1, completing the two **Roku OS 16.0**
+features left out of the previous engine release. `roUrlTransfer` now supports **Server-Sent Events (SSE)**
+through the new `AsyncGetSSEvents()` method, delivering streaming `roSSEvent`s to the message port, and the
+SceneGraph `ChannelStore` node gains the **`GetRokuCustomerId`** command, sent through its generic request
+framework (`request`/`requestStatus` fields) and returning the new `customerId` device-information property. The
+documented Roku OS baseline is now 16.0. On the simulator side, the packaged app shrinks from 193 MB to 45 MB, a
+batch of SonarCloud reliability findings is cleared (with the Sonar rules now also enforced by the local lint),
+and `electron-builder` is upgraded to 26.15.3.
+
+See the **BrightScript Simulation Engine** v2.6.1 [full changelog](https://github.com/lvcabral/brs-engine/releases/tag/v2.6.1) for all the language and framework features and improvements.
+
+### Maintenance
+
+* Trimmed the packaged asar from 193 MB to 45 MB by [@lvcabral](https://github.com/lvcabral) in [#352](https://github.com/lvcabral/brs-desktop/pull/352)
+* Cleared SonarCloud reliability findings and enforced the Sonar rules in the local lint by [@lvcabral](https://github.com/lvcabral) in [#357](https://github.com/lvcabral/brs-desktop/pull/357)
+* Restored lockfile entries dropped by merging [#353](https://github.com/lvcabral/brs-desktop/pull/353) and [#354](https://github.com/lvcabral/brs-desktop/pull/354) by [@lvcabral](https://github.com/lvcabral) in [#358](https://github.com/lvcabral/brs-desktop/pull/358)
+
+### Dependency Bumps
+
+* Bump `brs-engine` from 2.6.0 to 2.6.1 by [@lvcabral](https://github.com/lvcabral)
+* Bump `brs-scenegraph` from 0.6.0 to 0.6.1 by [@lvcabral](https://github.com/lvcabral)
+* Bump `electron-builder` from 26.5.0 to 26.15.3 and `builder-util-runtime` from 9.5.1 to 9.7.0 by [@lvcabral](https://github.com/lvcabral) in [#354](https://github.com/lvcabral/brs-desktop/pull/354)
+* Bump `msgpack5` from 4.5.1 to 6.1.0 and `json-url` from 3.1.0 to 4.0.0 by [@lvcabral](https://github.com/lvcabral) in [#353](https://github.com/lvcabral/brs-desktop/pull/353)
+
+Full Changelog: [v2.6.2]
+
 <a name="v2.6.1"></a>
 
 ## v2.6.1 - Engine Upgrade: Effect Node, roWebSocket and Draw2D Updates
@@ -930,6 +960,7 @@ Binaries are published at the engine library repository: <https://github.com/lvc
 
 [Changes][v0.5.0-app]
 
+[v2.6.2]: https://github.com/lvcabral/brs-desktop/compare/v2.6.1...v2.6.2
 [v2.6.1]: https://github.com/lvcabral/brs-desktop/compare/v2.6.0...v2.6.1
 [v2.6.0]: https://github.com/lvcabral/brs-desktop/compare/v2.5.2...v2.6.0
 [v2.5.2]: https://github.com/lvcabral/brs-desktop/compare/v2.5.1...v2.5.2
