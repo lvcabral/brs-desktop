@@ -22,6 +22,19 @@ The objective of this application is to extend the `brs-engine`, making it a ful
 
 With remote services enabled, the desktop simulator can be detected and [integrated](./docs/vscode-integration.md) to the [VS Code BrightScript Extension](https://marketplace.visualstudio.com/items?itemName=RokuCommunity.brightscript), and other development tools, as a real Roku device, for deploy, control, deep linking and debugging. You can find the installers for this desktop application (for all platforms) in the [Releases](https://github.com/lvcabral/brs-desktop/releases) page.
 
+On macOS you can also install it with [Homebrew](https://brew.sh), which picks the Apple Silicon (`arm64`) or Intel (`x64`) build for your Mac:
+
+```bash
+brew tap lvcabral/brs-desktop
+brew install --cask brs-desktop
+```
+
+To upgrade to a new release:
+
+```bash
+brew upgrade --cask brs-desktop
+```
+
 > [!IMPORTANT]
 >
 > The simulator can execute code compatible with Roku OS 16.0 and includes full **SceneGraph** support which is currently in **beta**.
