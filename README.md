@@ -25,7 +25,14 @@ With remote services enabled, the desktop simulator can be detected and [integra
 On macOS you can also install it with [Homebrew](https://brew.sh), which picks the Apple Silicon (`arm64`) or Intel (`x64`) build for your Mac:
 
 ```bash
-brew install --cask lvcabral/brs-desktop/brs-desktop
+brew tap lvcabral/brs-desktop
+brew install --cask brs-desktop
+```
+
+To upgrade to a new release:
+
+```bash
+brew upgrade --cask brs-desktop
 ```
 
 > [!IMPORTANT]
