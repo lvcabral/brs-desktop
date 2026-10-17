@@ -255,7 +255,7 @@ npm run dist-deb64       # Linux x64 Debian
 - **No E2E layer**: window, menu and visual changes must still be verified by running the app. Remote Screen's media path is in the same category — there is no DOM canvas, `captureStream()` or `RTCPeerConnection` under Vitest, so only the server, signaling relay and local-only guards are covered
 - **CI/CD**: GitHub Actions in `.github/workflows/build.yml` — the `test` job runs on all three platforms and gates the `release` job
 - **Code Signing**: macOS notarization via Apple Developer credentials
-- **Multi-arch**: Universal macOS builds, x64/x86 Windows, ARM Linux support
+- **Multi-arch**: separate x64 and arm64 macOS builds (dmg + zip, consumed by the `lvcabral/brs-desktop` Homebrew tap), x64/x86 Windows, ARM Linux support
 
 ## External Dependencies
 - **Core Engine**: `brs-engine` provides BrightScript simulation

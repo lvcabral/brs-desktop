@@ -128,8 +128,10 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           build_script_name: "release"
+          # Separate x64 and arm64 dmg/zip artifacts (targets in package.json's build.mac) instead of
+          # one universal binary: half the download per user, and the Homebrew cask picks the right
+          # one per architecture.
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          args: "--universal"
 
       - name: Build/release Electron app for other platforms
         if: matrix.os != 'macos-latest'

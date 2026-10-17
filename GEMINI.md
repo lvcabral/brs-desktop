@@ -179,7 +179,7 @@ To keep the execution environment safe, code running in the Chromium Renderer ca
 ## Data Directories & Configuration
 *   **Preferences Storage**: Configs are stored as JSON structures via Electron's default app settings engine.
 *   **Sideload Directory**: Temporary sideloaded channels (`dev.zip` / `dev.bpk`) and screenshots (`dev.png`) are cached in Electron's standard user data directory:
-    *   **macOS**: `~/Library/Application Support/brs-desktop/`
+    *   **macOS**: `~/Library/Application Support/BrightScript Simulator/`
     *   **Windows**: `%APPDATA%\brs-desktop\`
     *   **Linux**: `~/.config/brs-desktop/`
 
