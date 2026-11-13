@@ -10,6 +10,7 @@ import "./styles/fontawesome.min.css";
 import { setStatusColor, setAudioStatus, showToast, clearCounters, updateStatus, setLocaleStatus } from "./statusbar";
 import { initRemoteScreen } from "./webrtc";
 import { BRS_HOME_APP_PATH } from "../constants";
+import { stripBuffers, stringifyWithMaps } from "../helpers/mapJson";
 
 const isMacOS = api.processPlatform() === "darwin";
 
@@ -76,6 +77,18 @@ let pendingExecute = null;
 
 // Initialize BrightScript Engine when window loads
 globalThis.addEventListener("load", main, false);
+
+// Sends `deviceData` to main; `encode` runs inside the try so a payload that can't be serialized
+// (BigInt, a cycle) is logged instead of aborting the rest of startup.
+function sendDeviceData(encode) {
+    try {
+        api.send("deviceData", encode());
+        return true;
+    } catch (error) {
+        console.warn("Sending deviceData via IPC failed:", error.message);
+        return false;
+    }
+}
 
 // Main function to initialize the BrightScript engine
 async function main() {
@@ -188,18 +201,10 @@ async function main() {
         customKeys: customKeys,
     });
 
-    // Send deviceData via IPC
-    const clonedDeviceData = { ...brs.deviceData };
-    delete clonedDeviceData.assets; // Remove assets to avoid issues with structured cloning
-    delete clonedDeviceData.registryBuffer; // Remove registryBuffer to avoid issues with structured cloning
-
-    try {
-        api.send("deviceData", clonedDeviceData);
-    } catch (error) {
-        console.warn("Sending deviceData object via IPC failed, using JSON serialization workaround:", error.message);
-        // Use JSON serialization as a fallback in case of structured cloning issues
-        const jsonSerializedData = JSON.parse(JSON.stringify(clonedDeviceData));
-        api.send("deviceData", jsonSerializedData);
+    // Send deviceData via IPC, falling back to Map-aware JSON if structured clone still fails.
+    const deviceData = stripBuffers(brs.deviceData);
+    if (!sendDeviceData(() => deviceData)) {
+        sendDeviceData(() => stringifyWithMaps(deviceData));
     }
     api.send("serialNumber", brs.getSerialNumber());
     api.send("engineVersion", brs.getVersion());

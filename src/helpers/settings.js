@@ -59,6 +59,7 @@ import {
     REMOTE_SCREEN_PORT,
 } from "../constants";
 import { getLocalIps, formatPath, readJsonFile, writeJsonFile } from "./util";
+import { parseWithMaps } from "./mapJson";
 
 const isMacOS = process.platform === "darwin";
 const isWindows = process.platform === "win32";
@@ -1590,26 +1591,38 @@ ipcMain.on("setCaptionMode", (event, mode) => {
     setPreference("captions.captionMode", mode);
 });
 
-ipcMain.on("deviceData", (_, deviceData) => {
-    if (deviceData) {
-        const appDeviceInfo = globalThis.sharedObject.deviceInfo;
-        for (const key of Object.keys(deviceData)) {
-            const ignoreKeys = ["audioCodecs", "fonts", "fontPath", "defaultFont", "appList"];
-            if (!ignoreKeys.includes(key) && !(key in appDeviceInfo)) {
-                appDeviceInfo[key] = deviceData[key];
-                if (key === "models" && appDeviceInfo.models?.size) {
-                    const deviceSection = settings.options.sections.find((s) => s.id === "device");
-                    if (deviceSection) {
-                        const deviceModelField = deviceSection.form.groups
-                            .flatMap((g) => g.fields)
-                            .find((f) => f.key === "deviceModel");
-                        if (deviceModelField) {
-                            deviceModelField.options = getRokuModelArray();
-                        }
-                    }
-                }
-            }
+// Looks up a field in the preferences schema, for options that can only be filled at runtime.
+function findSettingsField(sectionId, key) {
+    return settings?.options?.sections
+        ?.find((section) => section.id === sectionId)
+        ?.form?.groups?.flatMap((group) => group.fields || [])
+        .find((field) => field.key === key);
+}
+
+const DEVICE_DATA_IGNORED_KEYS = new Set(["audioCodecs", "fonts", "fontPath", "defaultFont", "appList"]);
+
+ipcMain.on("deviceData", (_, payload) => {
+    // A string is the renderer's JSON fallback, sent when structured clone failed.
+    const deviceData = typeof payload === "string" ? parseWithMaps(payload) : payload;
+    if (!deviceData) {
+        return;
+    }
+    const appDeviceInfo = globalThis.sharedObject.deviceInfo;
+    for (const [key, value] of Object.entries(deviceData)) {
+        if (DEVICE_DATA_IGNORED_KEYS.has(key) || key in appDeviceInfo) {
+            continue;
         }
+        // First delivery wins, so refuse a non-Map `models` (e.g. collapsed to `{}`) to let a later one fill it.
+        if (key === "models" && !(value instanceof Map)) {
+            console.warn("Ignoring deviceData.models: expected a Map, got", typeof value);
+            continue;
+        }
+        appDeviceInfo[key] = value;
+    }
+    // The schema is built at startup, before the engine's model list arrives.
+    const modelField = findSettingsField("device", "deviceModel");
+    if (modelField && appDeviceInfo.models?.size) {
+        modelField.options = getRokuModelArray();
     }
 });
 
@@ -2026,16 +2039,7 @@ function updatePeerRokuFieldOptions() {
 }
 
 function applyPeerRokuFieldOptions() {
-    if (!settings?.options?.sections) {
-        return;
-    }
-    const peerSection = settings.options.sections.find((section) => section.id === "peerRoku");
-    if (!peerSection?.form?.groups) {
-        return;
-    }
-    const targetField = peerSection.form.groups
-        .flatMap((group) => group.fields || [])
-        .find((field) => field.key === "ip");
+    const targetField = findSettingsField("peerRoku", "ip");
     if (targetField) {
         const newOptions = getRokuDeviceOptions();
         const previousOptions = targetField.options || [];
