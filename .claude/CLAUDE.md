@@ -115,24 +115,34 @@ The `overrides` block in `package.json` is what keeps it that way; verify empiri
 `package-lock-only` install with an override stripped, then `npm audit`) before touching it rather
 than assuming from the package name alone:
 
-- `dompurify: ^3.4.12` is load-bearing — `monaco-editor@0.56.0` pins `dompurify@3.4.8`, which trips two
-  DOMPurify advisories (1 moderate, 1 low). Removing it reintroduces both.
-- `@electron/asar: ^4.2.1`, `@electron/universal: ^3.0.6`, `filelist: ^2.0.2` mirror what
-  `electron-builder@27-alpha` uses upstream and require Node >=22.12 — forward-compat, not a current
-  audit fix. `electron-builder@26.15.3` (currently pinned) naturally resolves older versions of these
-  three with no audit findings either way; keep them for the eventual `27` upgrade, or drop them,
-  without affecting the audit result today.
-- Never override `brace-expansion` to 5.x or `minimatch` to 10.x **globally** — their CJS entries
+- `dompurify: ^3.4.17` is load-bearing — `monaco-editor@0.56.0` pins an older `dompurify`, and 3.4.16
+  and below trip three DOMPurify advisories (1 critical, 1 high, 1 low). Monaco is a devDependency but
+  is bundled into `app/editor.js`, so this one ships even though `--omit=dev` can't see it.
+- `"minimatch@^10": "^11.0.1"` is load-bearing — minimatch below 11.0.1 trips GHSA-g3hv-75wg-m249, and
+  `app-builder-lib`, `eslint-plugin-sonarjs` and `filelist` all still ask for `^10` upstream. It is
+  **version-scoped** on purpose, so the `minimatch@3`/`glob@7` subtree stays untouched (see the trap
+  below). Major 11 dropped `makeRe`/`regexp` from the public API, but those consumers only use
+  `new Minimatch()`, `.set`, `.negate`, `.match()` and the top-level `match()`, which are unchanged.
+  It was verified on 2026-11-15 by packaging with `electron-builder --dir` under minimatch 10 and 11
+  and diffing `asar list`: both produced the same 7757 entries. Drop it once all three ship `^11`.
+- `@electron/universal: ^3.0.6` is load-bearing — without it `app-builder-lib@26` resolves
+  `universal@2.0.3`, whose `minimatch` is in the vulnerable range (6 moderate findings).
+- `@electron/asar: ^4.3.2` and `filelist: ^2.0.2` are not needed for the audit today. Without the asar
+  override, `app-builder-lib` falls back to its pinned `3.4.1`, which uses `glob@7`/`minimatch@3`; neither
+  is flagged. They mirror what `electron-builder@27-alpha` uses upstream (Node >=22.12) and keep the
+  packaging verified above unchanged, so leave them in place. If the asar override stays, keep it at
+  `>=4.3.2`: 4.0.0–4.3.1 depend on vulnerable `glob` (<=14.0.1, GHSA-3g3m-2fjr-6pw4).
+- Never override `brace-expansion` to 5.x or `minimatch` to 10.x/11.x **globally** — their CJS entries
   export objects, while `minimatch@3/5` and `glob@7` call them as functions. That breaks the build at
-  runtime even though it resolves the audit. A version-scoped override (`"minimatch@10.2.5": {...}`)
-  avoids that trap, but goes stale fast: minimatch@10's own `package.json` has required
-  `brace-expansion ^5.x` natively since at least 10.2.6, so npm already keeps the minimatch@10 and
-  minimatch@3/glob@7 subtrees on the correct, non-vulnerable `brace-expansion` line without any
-  override — a removed scoped override on 2026-08-19 confirmed this (see history for
+  runtime even though it resolves the audit. Use a version-scoped key such as `"minimatch@^10"`. A
+  scoped override goes stale as upstream catches up, though. minimatch@10's own `package.json` has
+  required `brace-expansion ^5.x` natively since at least 10.2.6, so the old
+  `"minimatch@10.2.5": {...}` override was removed on 2026-08-19 (see history for
   `fix(deps): resolve npm audit findings without breaking minimatch@3 chain`, 2026-08-09).
 - `npm audit fix --force` wants to *downgrade* dependencies. Don't run it.
 
-Re-verify after bumping `electron-builder`, `monaco-editor`, `vitest`, or `@vitest/coverage-v8` —
+Re-verify after bumping `electron-builder`, `eslint-plugin-sonarjs`, `monaco-editor`, `vitest`, or
+`@vitest/coverage-v8` —
 any of them can shift what a transitive dep naturally resolves to and make an override redundant or
 newly necessary.
 
