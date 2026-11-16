@@ -133,20 +133,7 @@ export function createWindow(name, options) {
             globalThis.sharedObject.deviceInfo.registry = data;
         }
     });
-    ipcMain.on("showEditor", () => {
-        const allWindows = BrowserWindow.getAllWindows();
-        allWindows.some((window) => {
-            if (window.getURL().endsWith("editor.html")) {
-                if (window.isMinimized()) {
-                    window.restore();
-                } else if (!window.isVisible()) {
-                    window.show();
-                }
-                window.focus({ steal: true });
-                return true;
-            }
-        });
-    });
+    ipcMain.on("showEditor", showEditorWindow);
     ipcMain.on("reset", () => {
         win.reload();
     });
@@ -247,6 +234,25 @@ export function openCodeEditor() {
     if (window) {
         window.webContents.send("openEditor");
     }
+}
+
+/**
+ * Restores and focuses the code editor window, if one is open
+ * @returns {boolean} - Whether an editor window was found
+ */
+export function showEditorWindow() {
+    // The URL lives on webContents: BrowserWindow itself has no getURL().
+    const editor = BrowserWindow.getAllWindows().find((window) => window.webContents.getURL().endsWith("editor.html"));
+    if (!editor) {
+        return false;
+    }
+    if (editor.isMinimized()) {
+        editor.restore();
+    } else if (!editor.isVisible()) {
+        editor.show();
+    }
+    editor.focus({ steal: true });
+    return true;
 }
 
 export function saveWindowState(stateStoreFile, state, win) {

@@ -54,6 +54,7 @@ export function createFakeWindow(id = 1) {
         setMinimumSize: vi.fn(),
         setAspectRatio: vi.fn(),
         setAlwaysOnTop: vi.fn(),
+        setTitleBarOverlay: vi.fn(),
         isAlwaysOnTop: vi.fn(() => false),
         setFullScreen: vi.fn(),
         isFullScreen: vi.fn(() => false),

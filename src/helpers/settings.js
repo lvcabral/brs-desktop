@@ -1456,7 +1456,7 @@ export function setThemeSource(userTheme, notifyApp) {
             settingsWindow?.setTitleBarOverlay(titleTheme);
             const allWindows = BrowserWindow.getAllWindows();
             allWindows.some((window) => {
-                if (window.getURL().endsWith("editor.html")) {
+                if (window.webContents.getURL().endsWith("editor.html")) {
                     window.setTitleBarOverlay(titleTheme);
                     return true;
                 }
