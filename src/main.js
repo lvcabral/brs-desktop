@@ -40,6 +40,7 @@ import {
 } from "./menu/menuService";
 import { loadFile, migrateIconCache, migrateLocalStorage } from "./helpers/files";
 import {
+    getDisplayOption,
     getPeerRoku,
     getRemoteAccessLocalOnly,
     getSettings,
@@ -76,6 +77,7 @@ const deviceInfo = {
     RIDA: randomUUID(), // Unique identifier for advertisement tracking
     customerId: randomUUID().replaceAll("-", ""), // Roku customer account id (32-digit hex string)
     autoPlayEnabled: true,
+    uiTransitions: true, // SceneGraph intrinsic UI motion (PanelSet slides, list/grid focus scrolling)
     countryCode: "US",
     timeZone: dt.zoneName,
     timeZoneIANA: dt.zoneName,
@@ -318,6 +320,7 @@ function loadSettings(mainWindow, startup) {
         const overscanMode = settings.value("display.overscanMode");
         checkMenuItem(overscanMode, true);
         setDeviceInfo("display", "maxFps");
+        globalThis.sharedObject.deviceInfo.uiTransitions = !getDisplayOption("disableUiTransitions");
     }
     if (settings.preferences.audio) {
         setDeviceInfo("audio", "maxSimulStreams");

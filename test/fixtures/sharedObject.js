@@ -30,6 +30,7 @@ export function makeDeviceInfo(overrides = {}) {
         RIDA: "66666666-7777-8888-9999-000000000000",
         customerId: "0123456789abcdef0123456789abcdef",
         autoPlayEnabled: true,
+        uiTransitions: true,
         countryCode: "US",
         timeZone: "America/New_York",
         timeZoneIANA: "America/New_York",
