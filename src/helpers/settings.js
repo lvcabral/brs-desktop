@@ -748,6 +748,12 @@ export function getSettings(window) {
                                             label: "Show Performance Statistics Overlay",
                                             value: "perfStats",
                                         },
+                                        {
+                                            // Disable-by-presence, so transitions stay on for existing
+                                            // installs: their persisted options array replaces the default.
+                                            label: "Disable UI Transitions (applies on next app launch)",
+                                            value: "disableUiTransitions",
+                                        },
                                     ],
                                 },
                             ],
@@ -1450,7 +1456,7 @@ export function setThemeSource(userTheme, notifyApp) {
             settingsWindow?.setTitleBarOverlay(titleTheme);
             const allWindows = BrowserWindow.getAllWindows();
             allWindows.some((window) => {
-                if (window.getURL().endsWith("editor.html")) {
+                if (window.webContents.getURL().endsWith("editor.html")) {
                     window.setTitleBarOverlay(titleTheme);
                     return true;
                 }
@@ -1763,6 +1769,11 @@ function saveDisplaySettings(window) {
     checkMenuItem(overscanMode, true);
     window.webContents.send("setOverscan", overscanMode);
     setDeviceInfo("display", "maxFps", true);
+    const uiTransitions = !getDisplayOption("disableUiTransitions");
+    if (globalThis.sharedObject.deviceInfo.uiTransitions !== uiTransitions) {
+        globalThis.sharedObject.deviceInfo.uiTransitions = uiTransitions;
+        window.webContents.send("setDeviceInfo", "uiTransitions", uiTransitions);
+    }
 
     // Handle display options (perfStats, keepDisplayOnExit)
     const displayOptions = settings.value("display.options");
